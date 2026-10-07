@@ -1832,11 +1832,22 @@ Do not force unnecessary restructuring.
 
 ## P08 — UI
 
-- [ ] primitives.
-- [ ] PublicLayout.
-- [ ] AdminLayout.
-- [ ] responsive shell.
-- [ ] accessibility foundation.
+- [x] primitives. — 11 dari §15 sudah ada dari starter; `textarea`, `table`, dan
+  `pagination` diinstal dari registry (0 dependency baru). `ConfirmDialog` dan
+  `EmptyState` tidak ada di registry dan dibuat custom.
+- [x] PublicLayout. — shell saja: `ParishNavbar` + `<Main>` + `ParishFooter`.
+  Seluruh data paroki berupa placeholder `[ISI: ...]`.
+- [x] AdminLayout. — sidebar 12 item §17; hanya Dashboard/Pengaturan/Akun yang
+  punya route, sisanya nonaktif dan diberi label "belum".
+- [x] responsive shell. — Sheet untuk nav publik < lg, sidebar collapsible,
+  token tipografi dan spacing responsif sesuai DESIGN.md.
+- [x] accessibility foundation. — target sentuh 44px, focus ring terpusat,
+  `aria-label` pada trigger, skip-link ke konten utama.
+
+> **Catatan cakupan.** Yang dikerjakan adalah *fondasi* visual, bukan tampilan
+> final. DESIGN.md §15 menyatakan Phase 01 tidak mengimplementasikan visual final
+> website HSPMTB; komposisi finalnya milik phase UI/public website berikutnya.
+> Penyimpangan terhadap DESIGN.md tercatat di `docs/DECISIONS.md` D-22.
 
 ## P09 — Settings
 

@@ -601,6 +601,100 @@ Inertia v3: `errors` oleh `parent::share()`, `flash` sebagai event DOM
 `flash` (bukan prop, dan sengaja tidak ikut history state). Hook
 `useFlashToast` sudah benar sejak awal.
 
+---
+
+## D-22 — Palet, token, dan penyimpangan dari DESIGN.md
+
+**Status:** Accepted · berlaku sejak P08 · branch `feat/phase-01-ui-foundation`
+
+P08 menerapkan `docs/DESIGN.md` ke `resources/`. Dokumen itu tidak selalu bisa
+diikuti persis; semua penyimpangan dicatat di sini beserta alasannya.
+
+### 1. `--all` shadcn tidak dipakai, hanya 3 primitive
+
+`npx shadcn@latest add --all` diuji dan **ditolak**, dengan bukti:
+
+- Menarik paket `radix-ui` terpadu padahal repo memakai 13 paket
+  `@radix-ui/react-*` terpisah.
+- Menambahkan paket `cn` dan menulis ulang import menjadi `from "cn"`, padahal
+  repo punya `cn` sendiri di `@/lib/utils`.
+- Menjalankan `pnpm install` di proyek npm dan meninggalkan `pnpm-lock.yaml`.
+- **Registry `sonner` mengimpor `next-themes`,** library khusus Next.js. Repo ini
+  Vite + Inertia. Overwrite akan mematikan `useFlashToast` dan flash toast P07.
+- Menarik ±22 dependency untuk komponen yang tidak dipakai Phase 01
+  (`recharts` 150KB, `react-day-picker` + `date-fns`, `embla-carousel-react`,
+  `vaul`, `react-resizable-panels`, `react-hook-form` + `zod`).
+
+Hanya `textarea`, `table`, dan `pagination` yang diinstal — ketiganya **0
+dependency baru**. `package.json` dan `package-lock.json` tidak berubah sama
+sekali. `ConfirmDialog` dibangun di atas `dialog.tsx` yang sudah ada, bukan
+`AlertDialog`, agar daftar dependency tidak bertambah.
+
+### 2. `accent-foreground` bukan `gold-dark`
+
+DESIGN.md memetakan `accent-foreground: gold-dark (#D99400)`. Pasangan itu
+terhadap `accent: gold-light (#FFF4D6)` hanya **2.34:1** — gagal WCAG AA bahkan
+untuk teks besar. Button variant `outline` dan `ghost` menaruh teks persis di
+pasangan itu, jadi mengikuti dokumen secara literal akan mengirim teks hover
+yang tidak terbaca. Diganti `navy-dark (#001A4D)` yang **14.62:1**, dan nilainya
+sudah ada di dokumen.
+
+`--color-gold-dark` tetap tersedia untuk penggunaan dekoratif, bukan teks di
+latar terang.
+
+### 3. Dark mode diturunkan, bukan dari dokumen
+
+DESIGN.md §905 menyatakan *"Dark-mode requirements have not been established"*.
+Keputusan: dark mode **dipertahankan** (switcher light/dark/system di halaman
+Akun tetap berfungsi) dan paletnya diturunkan dari ramp navy yang sudah
+dokumentasi, memakai `color-mix()` terhadap `navy-dark` sehingga setiap nilai
+masih bisa ditelusuri ke warna di DESIGN.md.
+
+Interaktif memakai `primary-on-dark (#FF6670)` karena merah primary tidak
+terbaca di atas navy. Hasil: body 16.73:1, muted 6.50:1, on-primary 6.59:1.
+
+**Palet ini di luar DESIGN.md dan perlu konfirmasi paroki.**
+
+### 4. `red-light` tidak ada di DESIGN.md
+
+Dokumen memakai `{colors.red-light}` untuk `components.profile-sidebar`
+(activeBackgroundColor) tapi **tidak pernah mendefinisikannya** di blok
+`colors`. Diturunkan dari `primary` dengan `color-mix(in oklab, #ab020e 8%,
+#ffffff)` → `#F8EBEC`, rasio teks 6.58:1. Dipakai juga untuk permukaan Alert
+destructive.
+
+### 5. Tidak ada warna sukses di palet
+
+Tiga pesan sukses (`text-green-600`) diganti `text-navy` / `text-navy-light`.
+Hijau tidak ada di palet DESIGN.md, dan menambahkan satu berarti melanggar
+*"Do not use arbitrary brand colors outside the documented palette"*. Navy
+struktural lebih tepat secara merek, tapi **kurang ideal secara semantik**.
+Kalau paroki ingin hijau konfirmasi, nilainya harus masuk DESIGN.md lebih dulu.
+
+### 6. Tanpa paket font baru
+
+DESIGN.md meminta SF Pro Display / SF Pro Text dengan fallback `system-ui`, dan
+§444 melarang menambah dependency font tanpa keputusan eksplisit. SF Pro tidak
+berlisensi untuk distribusi web, jadi yang dipakai adalah stack system — **tanpa
+paket font baru**.
+
+Deklarasi lama `'Instrument Sans'` dihapus: tidak ada `@font-face` maupun
+`@import` yang memuatnya, jadi browser diam-diam jatuh ke `system-ui` selama ini.
+
+### 7. Spacing tidak perlu token baru
+
+DESIGN.md meminta skala 4/8/12/16/24/32/48/80/112. Tailwind v4 sudah
+menghasilkan angka persis itu sebagai `p-1`, `p-2`, `p-3`, `p-4`, `p-6`, `p-8`,
+`p-12`, `p-20`, `p-28`. Dicatat di komentar CSS, bukan diduplikasi.
+
+### 8. `shadcn` CLI kadang merusak `node_modules`
+
+CLI menjalankan `pnpm install` di proyek npm. Dalam keadaan itu `tsc`
+melaporkan `auth` sebagai `unknown` di enam file — gejalanya persis seperti
+regresi tipe shared prop, padahal kodenya tidak salah. `npm install` dari
+`package-lock.json` menyelesaikannya. Kalau `tsc` tiba-tiba gagal dengan
+`unknown` pada shared props, cek struktur `node_modules` lebih dulu.
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
@@ -621,13 +715,13 @@ Inertia v3: `errors` oleh `parent::share()`, `flash` sebagai event DOM
 
 ## Yang masih diperlukan (Phase 01)
 
-P08a primitive UI · P08b layout (`PublicLayout`/`AdminLayout` belum ada sama
-sekali) · P09 site settings · P10 media · P11 sanitasi ·
-P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+P09 site settings · P10 media · P11 sanitasi · P12 error/SEO/infrastruktur ·
+P13 quality · P14 Git · P15 docs.
 
 Test matrix yang belum ada: T16–T28 dan T34.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, dan **P07**. P04 (Docker) dibatalkan
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, dan **P08**. P04 (Docker)
+dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
 Autentikasi sudah pindah ke `/admin/*`, registrasi publik sudah dihapus,
@@ -642,6 +736,11 @@ parameter `{user}` sehingga hanya bisa menghapus pemanggilnya.
 Fondasi Inertia sudah beres: `auth.user` hanya mengirim `id`, `name`, `email`,
 `email_verified_at`, ditambah shared prop `locale` dan `displayTimezone`. Lihat
 D-21.
+
+**Fondasi UI sudah menerapkan DESIGN.md:** palet merah/navy/gold HSPMTB,
+tipografi, skala radius, `PublicLayout` dan `AdminLayout`. Semua penyimpangan
+terhadap dokumen — termasuk dark mode yang diturunkan dari ramp navy — tercatat
+di D-22.
 
 Fondasi RBAC sudah aktif: `spatie/laravel-permission` **8.3.0** terpasang,
 `HasRoles` pada `User`, role `super_admin` + 12 permission ter-seed, dan
