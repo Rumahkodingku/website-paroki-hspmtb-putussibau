@@ -555,18 +555,64 @@ Lapis middleware tetap yang menentukan keamanan; pesan hanya soal UX.
 
 ---
 
+## D-21 — Bentuk `auth.user` ditulis eksplisit, bukan model mentah
+
+**Status:** Accepted · berlaku sejak P07
+
+`HandleInertiaRequests::share()` dulu mengirim `$request->user()` apa adanya.
+Sekarang `auth.user` hanya berisi `id`, `name`, `email`, dan
+`email_verified_at`, ditulis eksplisit di middleware tersebut.
+
+**Yang sebenarnya bocor, dan yang tidak.** Pernyataan "model User mentah dikirim
+seluruhnya" benar, tapi lengkapnya perlu diluruskan: `User` memakai atribut
+`#[Hidden]` (`app/Models/User.php`), jadi `password`, `remember_token`, dan
+dua kolom 2FA **tidak pernah** masuk ke payload. Yang benar-benar bocor hanya
+`is_active`, `created_at`, `updated_at`, dan `email_verified_at` — tidak ada
+secret di antaranya. Jadi ini **bukan lubang keamanan**, melainkan pelanggaran
+kontrak: ARCHITECTURE.md Part C aturan 1 melarang model mentah, dan aturan 5
+menyuruh shared props tetap kecil.
+
+**Mengapa tetap dikerjakan.** Atribut `#[Hidden]` adalah jaring pengaman, bukan
+kontrak. begitu ada `$user->load('roles')` di suatu tempat, atau ada kolom baru
+yang lupa didaftarkan, data itu bocor tanpa ada yang menyadar. Kontrak eksplisit
+lebih tahan.
+
+**Sisi TypeScript.** `types/auth.ts` sebelumnya punya
+`User = { ...; [key: string]: unknown }` dan `Auth = { user: User }`. Dua
+pembohongan tipe:
+
+- `user` dideklarasikan non-null, padahal backend mengirim `null` untuk tamu.
+  `nav-user.tsx` sudah `if (!auth.user) return null` — kodenya benar, tipenya
+  salah.
+- Index signature membuat `user.avatar` terbaca tanpa error padahal kolom itu
+  tidak pernah ada. Setelah `avatar` dihapus (commit `2c33154`), tipe ketat
+  membuat `tsc` langsung menolak, dan tiga pembacaan `auth.user.*` di
+  `profile.tsx` yang tanpa null-check ikut tertangkap.
+
+Jadi tipe ketat ini sudah membayar ongkos dengan menemukan tiga bug nyata.
+
+**Ditambah:** shared prop `locale` (`id`) dan `displayTimezone`
+(`Asia/Pontianak`), keduanya diwajibkan PRD §14. `types/index.ts` sekarang
+memiliki `SharedProps`, dan `global.d.ts` memakainya supaya `usePage()` tanpa
+generic ikut benar.
+
+**`errors` dan `flash` tidak disentuh** karena keduanya sudah disediakan
+Inertia v3: `errors` oleh `parent::share()`, `flash` sebagai event DOM
+`flash` (bukan prop, dan sengaja tidak ikut history state). Hook
+`useFlashToast` sudah benar sejak awal.
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
 | --- | --- | --- | --- |
-| 1 | `HandleInertiaRequests::share()` mengirim **seluruh model User** (`'user' => $request->user()`), padahal ARCHITECTURE.md Part C §2/§5 dan PRD §11 melarangnya. | Yang benar-benar bocor ke browser hanya `email_verified_at` dan `two_factor_confirmed_at` — keduanya metadata tidak sensitif. **Bukan** kebocoran secret: `password`, `two_factor_secret`, `two_factor_recovery_codes`, dan `remember_token` sudah ada di `#[Hidden]` (`app/Models/User.php`), jadi tidak ikut ter-serialize. Tetap perlu diperbaiki karena mengirim objek model mentah bertentangan dengan ARCHITECTURE.md. | P07 — kirim hanya `id`, `name`, `email`, plus ringkasan role/permission |
-| 2 | Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash` seperti ARCHITECTURE.md Part C §6. | Kontrak berbeda dari dokumen; perlu diputuskan sebelum layout publik dibangun. | P07 |
-| 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
+| 1 | ~~`HandleInertiaRequests::share()` mengirim **seluruh model User**.~~ **Ditutup di P07** (D-21). Sekarang hanya `id`, `name`, `email`, `email_verified_at`. Catatan koreksi: yang bocor hanya metadata tidak sensitif — `#[Hidden]` sudah melindungi semua secret, jadi ini pelanggaran kontrak, bukan kebocoran. | — | Selesai |
+| 2 | ~~Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash`.~~ **Ditutup di P07** (D-21): ini memang mekanisme **Inertia v3** — flash dikirim sebagai event DOM `flash` dan sengaja tidak masuk history state. Hook yang sudah ada benar; tidak ada yang perlu diubah. | — | Selesai |
+| 3 | ~~`display_timezone` belum dikirim ke frontend.~~ **Ditutup di P07** (D-21): sudah jadi shared prop `displayTimezone`, bersanding dengan `locale`. | — | Selesai |
 | 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
 | 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
 | 6 | ~~`Features::registration()` masih aktif sehingga `/register` publik hidup.~~ **Ditutup di P06** (D-19). | — | Selesai |
 | 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
-| 8 | ~~`is_active` ada di skema tapi belum ditegakkan.~~ **Ditutup di P06** (D-20). Middleware `EnsureAccountIsActive` menutup jalur password, 2FA, dan passkey sekaligus. | — | Selesai |
+| 8 | ~~`is_active` ada di skema tapi belum ditegakkan.~~ **Ditutup di P06** (D-20). | — | Selesai |
 | 9 | ~~PHP extensions `gd` / `imagick` tidak terpasang.~~ **Ditutup** — `gd` 2.3.3 dengan WebP support sudah terpasang. | — | Selesai |
 | 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
 | 11 | `super_admin` mendapat akses ke **semua** ability lewat `Gate::before`, termasuk ability yang di masa depan mungkin tidak boleh dimiliki siapa pun. | Otorisasi implisit: tidak ada daftar permission yang bisa dibaca untuk audit. Ini trade-off yang disepakati di D-16, bukan kelalaian. | P06 — kalau muncul ability yang harus dikecualikan, pakai `Gate::after` atau `deny` eksplisit |
