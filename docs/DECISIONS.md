@@ -914,11 +914,11 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ## Yang masih diperlukan (Phase 01)
 
-P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+P13 quality · P14 Git · P15 docs.
 
-Test matrix yang belum ada: T26–T28 dan T34.
+Test matrix yang belum ada: T34.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, dan **P11**.
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, dan **P12**.
 P04 (Docker) dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
@@ -1103,3 +1103,158 @@ sanitasi HTML untuk memvalidasi host.
 
 `isClean()` ada untuk membuktikan idempotensi di test. Tidak ada kode aplikasi
 yang mempercayai hasilnya.
+---
+
+## D-26 — Infrastruktur: scheduler, halaman error, dan SEO tanpa SSR
+
+**Status:** Accepted · berlaku sejak P12 · branch `feat/phase-01-infrastructure`
+
+Roadmap section 33 P12 punya enam checkbox. Empat di antaranya sudah benar
+sebelum P12 dimulai (`QUEUE_CONNECTION=database`, `CACHE_STORE=database`,
+`QUEUE_FAILED_DRIVER=database-uuids`, dan ketiga tabelnya sudah ada), dan tiga
+tidak sama sekali ada: `withSchedule()`, halaman error berbahasa Indonesia, dan
+komponen SEO.
+
+### 1. Scheduler: satu task, dan cara menjalankannya bukan bagian dari schedule
+
+Satu task: `queue:prune-failed --hours=168` harian. Tabel `failed_jobs` tumbuh
+selamanya tanpa pruning, dan tujuh hari adalah waktu yang cukup untuk dibaca dan
+didelegasikan lewat `queue:retry` sebelum hilang.
+
+`model:prune` **sengaja tidak** dijadwalkan. Tidak ada model `Prunable` di repo,
+jadi perintahnya no-op. Mendaftarkan perintah yang tidak melakukan apa-apa hanya
+membuat checklist terlihat terpenuhi.
+
+Dua hal yang tidak dijadwalkan, dan alasannya:
+
+- **`schedule:run`.** Dokumentasi Laravel untuk production memakai cron
+  `* * * * * php artisan schedule:run`; development memakai `schedule:work`.
+  Menjadwalkan `schedule:run` dari dalam schedule membuatnya memanggil dirinya
+  sendiri.
+- **`PublishScheduledPosts`.** Roadmap section 25 melarangnya secara eksplisit.
+
+Rencana awal P12 menjadwalkan `schedule:run`. Itu keliru, dan dikoreksi ketika
+dokumentasi Laravel dibaca.
+
+### 2. `composer dev` tidak menjalankan scheduler
+
+`Illuminate\Foundation\DevCommands::registerDefaults()` mendaftarkan `serve`,
+`queue:listen`, `pail`, dan `vite`. Tidak ada scheduler. Itu default yang benar
+untuk aplikasi tanpa task terjadwal, dan aplikasi ini sekarang punya satu.
+
+`AppServiceProvider::registerSchedulerProcess()` mendaftarkan
+`schedule:work` sebagai proses kelima, dijaga oleh `runningInConsole()`.
+
+Gejalanya kalau tidak dikerjakan adalah jenis yang mahal untuk dicari: kode benar,
+schedule terdaftar, dan tidak terjadi apa-apa selama pengembangan.
+
+### 3. Halaman error: satu komponen, gate `app.debug`
+
+PRD XC-E2 mewajibkan 404 dan 500 berbahasa Indonesia dengan layout publik.
+**403 dan 419 juga ditangani** karena aplikasi ini benar-benar menghasilkan
+keduanya: user signed-in tanpa role mendapat 403 di `/admin`, dan sesi
+kedaluwarsa mendapat 419. Tanpa itu, administrator Indonesia bertemu halaman
+bahasa Inggris untuk kasus yang benar-benar akan ia temui.
+
+Gate-nya `config('app.debug')`, **bukan** daftar environment seperti pada contoh
+dokumentasi Inertia. Keduanya ada untuk mempertahankan halaman framework, tapi
+berdasar environment juga mematikan halaman kita selama test berjalan — dan
+halaman yang satu-satunya test-nya adalah "assertion bahwa tidak terpakai"
+adalah halaman yang tidak pernah diverifikasi. `phpunit.xml` juga tidak menyetel
+`APP_DEBUG`, jadi test suite mewarisi `true` dari `.env`, dan setiap test di
+`ErrorPageTest` menyetelnya secara eksplisit.
+
+Syarat kedua adalah content negotiation. Dua gerbang sengaja meniru
+`shouldRenderJsonWhen`: request yang menerima JSON sekaligus HTML harus
+diperlakukan sebagai JSON, karena itulah yang dilakukan framework, dan dua
+gerbang yang saling berbeda akan membuat halaman error bergantung pada urutan
+registrasi. `expectsHtml()` sudah dihapus di Laravel 13, jadi `acceptsHtml()`
+membawa separuh browser.
+
+Hanya `status` yang menyeberang ke response. Exception-nya tidak pernah sampai,
+sehingga tidak ada yang perlu disensor dan tidak ada stack trace yang bisa bocor.
+
+### 4. PublicLayout untuk semua error, termasuk error admin
+
+Roadmap section 26 mengizinkan admin shell untuk error admin "jika konteksnya
+sesuai". Konteksnya tidak sesuai: `AdminLayout` punya dua belas item sidebar dan
+sepuluh di antaranya adalah tautan placeholder ke route yang belum ada.
+Menampilkannya di halaman error berarti navigasi ke mana-mana pada satu-satunya
+halaman di mana pengunjung paling butuh satu jalan keluar yang jelas.
+
+### 5. SSR ditunda — keputusan terbuka
+
+PRD NFR-SEO (baris 934): *"pertimbangkan Inertia SSR agar crawler dan pratinjau
+tautan membaca konten (bila SSR tidak diaktifkan, pastikan meta tag OG tetap
+dirender di server pada respons HTML awal untuk halaman Beranda, Berita, Agenda,
+Pelayanan)"*.
+
+SSR **tidak** diaktifkan di Phase 01. Alasannya:
+
+1. Kata kuncinya "pertimbangkan", bukan `MUST`. Bandingkan XC-S1 yang ditulis
+   `MUST`.
+2. Butir fallback itu berlaku untuk empat halaman yang **belum ada satu pun** di
+   Phase 01, jadi tidak ada yang bisa diuji sekarang.
+3. SSR adalah keputusan deployment: daemon Node di produksi, Supervisor,
+   `inertia:start-ssr`, dan artefak build kedua.
+4. Roadmap section 27 menyatakan Phase 01 hanya menyediakan fondasi SEO yang
+   dapat dipakai ulang.
+
+Yang dikerjakan sebagai gantinya adalah **klaus fallback itu**, dan itu
+memerlukan mekanisme yang tidak banyak orang anticipate: React merender setelah
+hydration, jadi tag `<Head>` saja **tidak ada** di respons HTML awal. Crawler dan
+pratinjau WhatsApp hanya membaca body respons.
+
+Jadi tag OG dan Twitter Card dirender **dua kali**:
+
+- `resources/views/app.blade.php`, di slot `<x-inertia::head>`, dibaca dari
+  `SiteSettingsService`. Ini yang sampai ke crawler.
+- `resources/js/components/seo.tsx`, untuk nilai per halaman.
+
+Keduanya dihubungkan oleh `data-inertia`, bukan oleh harapan. Inertia hanya
+mengelola head element yang membawa atribut itu, dan mencocokkan tag server
+dengan tag klien **berdasarkan nilai atributnya**. Maka string `data-inertia` di
+Blade dan nilai `head-key` di `seo.tsx` adalah string yang sama: halaman yang
+merender `<Seo>` akan **mengganti** default, dan halaman yang tidak merender apa
+pun mempertahankannya. Menambah key di satu tempat berarti menambahkannya di
+tempat lain, dan `InfrastructureFoundationTest` mengunci daftar itu sebagai
+kontrak.
+
+### 6. `seo_default_*` akhirnya punya konsumen
+
+Tiga kunci itu bisa diubah di `/admin/pengaturan` dan **tidak dibaca siapa pun**,
+sehingga mengubahnya tidak mengubah halaman apa pun. Sekarang dibaca lewat shared
+prop `seo` dari `HandleInertiaRequests::share()`, yang memakai
+`SiteSettingsService` sesuai D-23.
+
+`appUrl` ikut dikirim. `og:image` harus berupa URL absolut atau pratinjau tautan
+menampilkan tanpa gambar, dan nilainya masih path relatif karena widget
+unggahnya tidak pernah dibangun (D-24). Komponen **tidak pernah menyentuh
+`window.location`**, sehingga tetap aman untuk server-render nanti, dan itulah
+perubahan yang akan dibutuhkan SSR.
+
+Tag yang nilainya kosong **tidak** dirender. Deskripsi meta kosong lebih buruk
+daripada tidak ada sama sekali: crawler dan unfurler sama-sama memperlakukannya
+sebagai deskripsi dan menampilkan pratinjau kosong.
+
+### 7. Kesenjangan yang dicatat, bukan disembunyikan
+
+**Copy Bahasa Indonesia pada halaman error tidak diuji otomatis.** React merender
+setelah hydration dan proyek ini tidak punya frontend test runner, jadi string-nya
+hanya ada di browser. Mengujinya dari PHP berarti melakukan grep pada berkas
+`.tsx`, dan itu test yang gagal ketika seseorang mengedit komponen sekaligus
+lulus ketika tidak ada yang menyentuh test-nya.
+
+Yang diuji adalah kontrak backend: status code, komponen Inertia, dan prop
+`status`. Persyaratan kebahasan dijamin oleh konstruksi dan ditinjau secara
+visual. Ini kesenjangan nyata, dan dicatat sebagai such.
+
+### 8. T26 ternyata tidak pernah ter-cover
+
+Test matrix menyebut T26 "Queue failed job → Recorded". `MediaTest` punya test
+bernama "a failure marks the row failed and keeps the original" yang memanggil
+`->failed()` secara manual. Itu menjalankan handler tanpa pernah melewati queue.
+
+Penyebabnya: `phpunit.xml` menyetel `QUEUE_CONNECTION=sync`, jadi `dispatch()`
+menjalankan job inline dan exception-nya masuk langsung ke test.
+`FailedJobTest` memaksa koneksi `database` dan menjalankan worker sungguhan.
