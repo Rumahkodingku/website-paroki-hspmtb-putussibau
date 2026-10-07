@@ -59,13 +59,32 @@ return [
     | Application Timezone
     |--------------------------------------------------------------------------
     |
-    | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | This value determines the default timezone for your application, which
+    | will be used by the PHP date and date-time functions.
+    |
+    | Per PRD decision D-01 this MUST stay "UTC": every datetime written to the
+    | database is UTC. Never change it to Asia/Pontianak. For anything the
+    | user sees, read the "display_timezone" value below instead.
     |
     */
 
     'timezone' => 'UTC',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Display Timezone
+    |--------------------------------------------------------------------------
+    |
+    | Every datetime sent to the frontend must be an ISO 8601 string rendered in
+    | this timezone, and "today" / "next mass" / "upcoming agenda" must be
+    | evaluated against this timezone.
+    |
+    | See PRD decision D-01 and XC-T1 / XC-T3. Note that recurring weekly mass
+    | times are stored as a wall-clock value in WIB (D-02), not converted.
+    |
+    */
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Asia/Pontianak'),
 
     /*
     |--------------------------------------------------------------------------
@@ -76,13 +95,16 @@ return [
     | by Laravel's translation / localization methods. This option can be
     | set to any locale for which you plan to have translation strings.
     |
+    | Per PRD NFR-I18N this is "id". Because fallback_locale is also "id",
+    | lang/id/validation.php is translated in full - see docs/DECISIONS.md D-02.
+    |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'id'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'id'),
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'id_ID'),
 
     /*
     |--------------------------------------------------------------------------

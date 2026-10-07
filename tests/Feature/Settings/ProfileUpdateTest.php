@@ -83,3 +83,25 @@ test('correct password must be provided to delete account', function () {
 
     expect($user->fresh())->not->toBeNull();
 });
+
+test('validation errors surfaced by a real request are in Indonesian', function () {
+    // Bukti end-to-end AC-04 / PRD ADM-02: pesan yang benar-benar sampai ke
+    // browser, bukan hanya hasil Validator::make di isolation.
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->from(route('profile.edit'))
+        ->patch(route('profile.update'), [
+            'name' => '',
+            'email' => 'bukan-email',
+        ]);
+
+    $response
+        ->assertSessionHasErrors(['name', 'email'])
+        ->assertSessionHasErrors([
+            'name' => 'Nama wajib diisi.',
+            'email' => 'Email harus berupa alamat email yang valid.',
+        ])
+        ->assertRedirect(route('profile.edit'));
+});
