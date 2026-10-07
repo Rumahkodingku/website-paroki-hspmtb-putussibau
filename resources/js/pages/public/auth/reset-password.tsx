@@ -16,7 +16,7 @@ type Props = {
 export default function ResetPassword({ token, email, passwordRules }: Props) {
     return (
         <>
-            <Head title="Reset password" />
+            <Head title="Atur Ulang Kata Sandi" />
 
             <Form
                 {...update.form()}
@@ -91,6 +91,6 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
 }
 
 ResetPassword.layout = {
-    title: 'Reset password',
+    title: 'Atur Ulang Kata Sandi',
     description: 'Please enter your new password below',
 };
