@@ -93,6 +93,16 @@
 
             <meta data-inertia="og-type" property="og:type" content="website">
 
+            {{--
+                og:url and canonical are rendered here as well as in the Seo
+                component, for the same reason: an unfurler reads og:url as the
+                identity of the link and a relative value is routinely discarded.
+                request()->url() is the path without the query string, which is
+                what a canonical URL should be.
+            --}}
+            <meta data-inertia="og-url" property="og:url" content="{{ rtrim(config('app.url'), '/') }}{{ request()->getRequestUri() }}">
+            <link data-inertia="canonical" rel="canonical" href="{{ rtrim(config('app.url'), '/') }}{{ request()->getRequestUri() }}">
+
             @if($seoOgImage)
                 <meta data-inertia="og-image" property="og:image" content="{{ $seoOgImage }}">
                 <meta data-inertia="twitter-image" name="twitter:image" content="{{ $seoOgImage }}">
