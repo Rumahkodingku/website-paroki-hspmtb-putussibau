@@ -10,6 +10,7 @@ use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -28,6 +29,20 @@ use Inertia\Inertia;
 class MediaController extends Controller
 {
     /**
+     * Detected MIME type to stored extension.
+     *
+     * The list is exactly config('media.mime_types'). Anything else can only
+     * reach here after the upload rule passed, so 'bin' is a backstop rather than
+     * a reachable branch.
+     *
+     * @var array<string, string>
+     */
+    private const EXTENSION_BY_MIME = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+    ];
+
+    /**
      * Accept an upload and hand it to the queue.
      *
      * XC-M1: processing happens in a job, not here. Decoding and resizing three
@@ -40,7 +55,7 @@ class MediaController extends Controller
 
         $path = $upload->storeAs(
             (string) config('media.paths.original'),
-            $this->filenameFor($upload->getClientOriginalName()),
+            $this->filenameFor($upload),
             (string) config('media.original_disk'),
         );
 
@@ -140,13 +155,18 @@ class MediaController extends Controller
     /**
      * A stored filename that cannot be guessed and cannot execute.
      *
-     * The client name is never used as a path. It keeps its extension for
-     * convenience, but that extension is only ever read from bytes that already
-     * passed the MIME rule, so it cannot be used to smuggle a .php onto the
-     * private disk.
+     * The extension comes from the detected MIME type, never from the client.
+     * The original name is kept on the row for display, but using it for the path
+     * would let a crafted upload land as something.php on disk, and there is no
+     * reason for the extension to be the only part of that decision we do not
+     * take from the bytes.
      */
-    private function filenameFor(string $clientName): string
+    private function filenameFor(UploadedFile $upload): string
     {
-        return Str::uuid()->toString().'.'.strtolower(pathinfo($clientName, PATHINFO_EXTENSION));
+        $detected = $upload->getMimeType();
+
+        $extension = self::EXTENSION_BY_MIME[$detected] ?? 'bin';
+
+        return Str::uuid()->toString().'.'.$extension;
     }
 }
