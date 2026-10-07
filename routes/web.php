@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureAdminAccess;
@@ -42,6 +43,13 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         // /admin/akun, which stays per-account. See docs/DECISIONS.md D-23.
         Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
+
+        // Media endpoints, no page. The pipeline is a foundation in Phase 01 and
+        // the interface arrives with the first module that needs it.
+        // See docs/DECISIONS.md D-24.
+        Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+        Route::get('/media/{media}', [MediaController::class, 'show'])->name('media.show');
+        Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     });
 
 require __DIR__.'/settings.php';
