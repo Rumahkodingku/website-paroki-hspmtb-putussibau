@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Settings;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 /**
  * Validates a site settings save.
@@ -60,9 +59,31 @@ class UpdateSettingsRequest extends FormRequest
      */
     public function rules(): array
     {
+        $known = $this->knownKeys();
+
         $rules = [
-            'settings' => ['required', 'array'],
-            'settings.*' => ['string', 'max:2048', Rule::in($this->knownKeys())],
+            'settings' => [
+                'required',
+                'array',
+                /*
+                 * Rejects keys the configuration does not know about.
+                 *
+                 * This has to be a closure on the array rather than Rule::in on
+                 * settings.*, because Rule::in checks the value of each field
+                 * against the list, and here the list is of field names.
+                 */
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $unknown = array_diff(array_keys((array) $value), $this->knownKeys());
+
+                    if ($unknown !== []) {
+                        // Built inline rather than via a placeholder: the second
+                        // argument of fail() is a set of translation
+                        // replacements, not validator message parameters.
+                        $fail('Bagian ini memuat pengaturan yang tidak dikenal: '.implode(', ', $unknown));
+                    }
+                },
+            ],
+            'settings.*' => ['string', 'max:2048'],
         ];
 
         // Per-key rules from the configuration override the generic ones above.
@@ -83,7 +104,6 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'settings.required' => 'Bagian pengaturan wajib diisi.',
             'settings.array' => 'Format pengaturan tidak valid.',
-            'settings.*.in' => 'Pengaturan :attribute tidak dikenal.',
         ];
     }
 

@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
 
         // PRD 5.2: site settings and contact details live here, not under
         // /admin/akun, which stays per-account. See docs/DECISIONS.md D-23.
-        Route::inertia('/pengaturan', 'admin/pengaturan')->name('settings.edit');
+        Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
     });
 
