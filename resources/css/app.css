@@ -364,3 +364,81 @@
      * keep the browser default, which is visible on its own.
      */
 }
+
+/*
+ * Prose styling for stored rich text.
+ *
+ * Two consumers: the Tiptap editing surface, and the public component that
+ * renders the stored HTML. They share one class so the administrator sees the
+ * paragraph spacing they will get and the visitor sees the same thing.
+ *
+ * Written here rather than pulled from @tailwindcss/typography because DESIGN.md
+ * asks that typography map to the documented tokens instead of introducing
+ * sizes of its own, and a plugin brings its own scale. Every value below is a
+ * token from the @theme block above.
+ *
+ * The elements matched here are exactly config/html.php's allowlist, so nothing
+ * needs styling for a tag the sanitizer would have removed anyway.
+ */
+@layer components {
+    .rich-text {
+        @apply text-body text-foreground;
+    }
+
+    .rich-text > * + * {
+        @apply mt-4;
+    }
+
+    .rich-text h2 {
+        @apply mt-8 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+    }
+
+    .rich-text h3 {
+        @apply mt-6 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+    }
+
+    .rich-text h4 {
+        @apply mt-6 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+    }
+
+    .rich-text ul {
+        @apply list-disc space-y-1 ps-6;
+    }
+
+    .rich-text ol {
+        @apply list-decimal space-y-1 ps-6;
+    }
+
+    .rich-text blockquote {
+        @apply border-s-4 border-primary ps-4 text-navy italic;
+    }
+
+    .rich-text a {
+        @apply text-primary underline underline-offset-4 hover:text-primary-hover;
+    }
+
+    .rich-text img {
+        @apply h-auto max-w-full rounded-md;
+    }
+
+    .rich-text figure {
+        @apply my-6;
+    }
+
+    .rich-text figcaption {
+        @apply mt-2 text-caption text-muted-foreground;
+    }
+
+    .rich-text table {
+        @apply w-full border-collapse text-body;
+    }
+
+    .rich-text th,
+    .rich-text td {
+        @apply border border-hairline px-3 py-2 text-left align-top;
+    }
+
+    .rich-text th {
+        @apply bg-muted text-body-strong font-semibold;
+    }
+}

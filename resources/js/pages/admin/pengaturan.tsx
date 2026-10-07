@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Suspense, lazy } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,33 @@ import { Textarea } from '@/components/ui/textarea';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import { edit } from '@/routes/settings';
 import type { SettingValue, SettingsMeta } from '@/types';
+
+/*
+ * Tiptap and ProseMirror together are a few hundred kilobytes, and this page is
+ * mostly text inputs. Loaded eagerly they would land in the settings chunk and be
+ * downloaded on every visit to a form where only one tab uses them.
+ *
+ * Radix unmounts an inactive tab by default, so making the import lazy is enough:
+ * the editor chunk is fetched when the tab that contains it is first opened, and
+ * not before. That also keeps it out of the way of the two tabs an administrator
+ * actually visits.
+ */
+const RichTextEditor = lazy(() =>
+    import('@/components/rich-text-editor').then((module) => ({
+        default: module.RichTextEditor,
+    })),
+);
+
+/** Keeps the tab panel from collapsing while the editor chunk is in flight. */
+function EditorFallback() {
+    return (
+        <div
+            aria-busy="true"
+            aria-label="Memuat penyunting teks"
+            className="min-h-40 rounded-md border border-input bg-muted/30"
+        />
+    );
+}
 
 /*
  * Site settings form, PRD 5.2 "Pengaturan situs dan kontak".
@@ -37,9 +65,16 @@ const GROUP_ORDER = [
     'sosial',
     'seo',
     'beranda',
+    'privasi',
 ] as const;
 
-type FieldKind = 'text' | 'multiline' | 'url' | 'number' | 'switch';
+type FieldKind =
+    | 'text'
+    | 'multiline'
+    | 'richtext'
+    | 'url'
+    | 'number'
+    | 'switch';
 
 function fieldKind(
     key: string,
@@ -48,6 +83,11 @@ function fieldKind(
 ): FieldKind {
     if (typeof value === 'boolean') {
         return 'switch';
+    }
+    // Checked before `multiline` because a rich text field is also long, and a
+    // textarea for it would silently discard every tag on save.
+    if (meta.richtext.includes(key)) {
+        return 'richtext';
     }
     if (meta.multiline.includes(key)) {
         return 'multiline';
@@ -97,11 +137,11 @@ export default function Settings({ groups, meta }: Props) {
 
             <h1 className="sr-only">Pengaturan Situs</h1>
 
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
                 <Heading
                     variant="small"
                     title="Pengaturan Situs"
-                    description="Identitas paroki, kontak, media sosial, SEO dasar, dan blok beranda"
+                    description="Identitas paroki, kontak, media sosial, SEO dasar, beranda, dan kebijakan privasi"
                 />
 
                 <form onSubmit={submit} className="space-y-6">
@@ -177,8 +217,31 @@ export default function Settings({ groups, meta }: Props) {
                                                             {label}
                                                         </Label>
 
-                                                        {kind ===
-                                                        'multiline' ? (
+                                                        {kind === 'richtext' ? (
+                                                            <Suspense
+                                                                fallback={
+                                                                    <EditorFallback />
+                                                                }
+                                                            >
+                                                                <RichTextEditor
+                                                                    id={inputId}
+                                                                    value={
+                                                                        data
+                                                                            .settings[
+                                                                            key
+                                                                        ] ?? ''
+                                                                    }
+                                                                    onChange={(
+                                                                        next,
+                                                                    ) =>
+                                                                        set(
+                                                                            next,
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </Suspense>
+                                                        ) : kind ===
+                                                          'multiline' ? (
                                                             <Textarea
                                                                 id={inputId}
                                                                 value={
@@ -230,6 +293,12 @@ export default function Settings({ groups, meta }: Props) {
                                                         )}
                                                     </>
                                                 )}
+
+                                                {meta.hints[key] ? (
+                                                    <p className="text-caption text-muted-foreground">
+                                                        {meta.hints[key]}
+                                                    </p>
+                                                ) : null}
 
                                                 <InputError message={message} />
                                             </div>
