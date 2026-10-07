@@ -14,9 +14,11 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome':
                 return null;
-            case name.startsWith('auth/'):
+            // Authentication pages live under public/auth (see docs/DECISIONS.md
+            // D-08) but are rendered by Fortify, not by our routes.
+            case name.startsWith('public/auth/'):
                 return AuthLayout;
-            case name.startsWith('settings/'):
+            case name.startsWith('admin/akun/'):
                 return [AppLayout, SettingsLayout];
             default:
                 return AppLayout;

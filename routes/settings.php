@@ -2,29 +2,54 @@
 
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureAdminAccess;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', '/settings/profile');
+/*
+|--------------------------------------------------------------------------
+| Account Routes (/admin/akun)
+|--------------------------------------------------------------------------
+|
+| PRD 5.2 puts profile, password and Super Admin account management under
+| /admin/akun. Everything here sits under the same three middleware layers as
+| the rest of /admin/* - authenticated, active account, authorized - because
+| these are admin pages, not public settings.
+|
+| See docs/DECISIONS.md D-19.
+|
+*/
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-});
+Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdminAccess::class])
+    ->prefix('admin/akun')
+    ->group(function () {
+        Route::redirect('/', 'profile');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('settings/security', [SecurityController::class, 'edit'])
-        ->middleware(RequirePassword::class)
-        ->name('security.edit');
+        Route::get('security', [SecurityController::class, 'edit'])
+            ->middleware(RequirePassword::class)
+            ->name('security.edit');
 
-    Route::put('settings/password', [SecurityController::class, 'update'])
-        ->middleware('throttle:6,1')
-        ->name('user-password.update');
+        Route::put('password', [SecurityController::class, 'update'])
+            ->middleware('throttle:6,1')
+            ->name('user-password.update');
 
-    Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
-});
+        Route::inertia('appearance', 'admin/akun/appearance')->name('appearance.edit');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Well-Known
+|--------------------------------------------------------------------------
+|
+| .well-known is a fixed path defined by the WebAuthn spec, so this one stays at
+| the root even though the pages it points at now live under /admin/akun.
+|
+*/
 
 Route::get('.well-known/passkey-endpoints', function () {
     return response()->json([

@@ -446,6 +446,8 @@ menjalankan seeder berkali-kali tidak menghasilkan akun duplikat.
 `PermissionSeeder` membuat **11 permission, persis contoh Phase 01 §10.4**:
 
 ```text
+admin.access        <- ditambahkan pada P06, lihat D-19
+
 dashboard.view
 
 settings.view
@@ -462,8 +464,9 @@ posts.update
 posts.delete
 ```
 
-Tidak ada permission yang dikarang. Penamaan mengikuti PRD AUTH-R6
-(`resource.action`), dijaga test.
+Sebelas permission pertama diambil persis dari contoh §10.4 tanpa dikarang.
+Penamaan mengikuti PRD AUTH-R6 (`resource.action`), dijaga test. Dua belas
+permission di-seed setelah P06 menambah `admin.access`.
 
 **Permission modul lain sengaja tidak dibuat** (agenda, galeri, komunitas,
 jadwal-misa, profile, pelayanan, download, dan seterusnya).
@@ -471,6 +474,74 @@ Setiap modul butuh set permission yang berbeda, jadi dibuatnya saat modulnya
 dibangun daripada membuat permission yang belum dibaca apa pun — persis
 kaidah "jangan abstraksi prematur" di ARCHITECTURE.md, dan menghindari
 perlu migration tambahan.
+
+---
+
+## D-19 — Autentikasi dan area admin pindah ke prefix `/admin`
+
+**Status:** Accepted · Phase 01 Workstream 07
+
+Semua autentikasi Fortify dipindah ke `/admin/*` lewat
+`config('fortify.php')`: `prefix` menjadi `admin`, `home` menjadi `/admin`.
+Dashboard pindah ke `/admin`, dan halaman akun sesuai PRD §5.2 menjadi
+`/admin/akun/{profile,security,appearance}`. Nama route tidak berubah
+(`dashboard`, `profile.edit`, `security.edit`), jadi pemanggilan `route()` di
+seluruh test tetap bekerja tanpa perubahan.
+
+**Registrasi publik dihapus** (AUTH-R2, Phase 01 §F). `Features::registration()`
+dicabut dari `config/fortify.php`, `Fortify::registerView()` dan
+`Fortify::createUsersUsing()` dihapus dari provider, `CreateNewUser`, halaman
+`register.tsx`, dan `RegistrationTest` dihapus. Tautan "Register" juga dibuang
+dari halaman login dan landing page.
+
+**Gerbang `/admin/*` adalah permission `admin.access`**, bukan nama role.
+`EnsureAdminAccess` memanggil `Gate::authorize('admin.access')`, jadi Spatie tetap
+menjadi sumber kebenaran otorisasi seperti AUTH-R3, bukan closure Gate
+atau `if ($user->role === ...)`. inilah yang membuat grant `Gate::before` untuk
+`super_admin` berlaku di sini, dan satu-satunya role pada MVP adalah
+`super_admin` (AUTH-R5). Ada test struktural yang memverifikasi ketujuh halaman
+admin memakai ketiga lapisan middleware.
+
+**Urutan middleware itu penting:** `auth` → `verified` →
+`EnsureAccountIsActive` → `EnsureAdminAccess`. Akun nonaktif harus mendapat
+pesan "akun dinonaktifkan", bukan error izin — jadi pemeriksaan aktif lebih dulu.
+
+**`.well-known/passkey-endpoints` tetap di root**, karena path itu ditentukan
+spesifikasi WebAuthn, bukan pilihan kita.
+
+---
+
+## D-20 — `is_active` ditegakkan di dua lapis
+
+**Status:** Accepted · Phase 01 Workstream 07
+
+PRD D-08 mensyaratkan akun nonaktif tidak dapat login. Karena 2FA dan Passkeys
+dipertahankan (D-09), ada tiga pintu masuk: password, two-factor-challenge, dan
+passkey. Satu titik pengecekan tidak cukup.
+
+| Lapis | Kelas | Tugas |
+| --- | --- | --- |
+| Login | `EnsureAccountCanLogIn` | pipe di pipeline Fortify, menolak sebelum sesi dibuat |
+| Area admin | `EnsureAccountIsActive` | middleware `/admin/*`, yang benar-benar menegakkan |
+
+Pipe-nya disisipkan **setelah `CanonicalizeUsername` dan sebelum
+`RedirectsIfTwoFactorAuthenticatable`**, sehingga akun nonaktif ditolak sebelum
+sesi dua faktor sempat disimpan.
+
+Override `config('fortify.pipelines.login')` **mengganti** pipeline default
+Fortify sepenuhnya, jadi daftar default ditulis ulang secara eksplisit di
+config. Salah satu namespace di therein mudah terbalik: pipe Fortify ada di
+`Laravel\Fortify\Actions`, bukan `Http\Middleware`.
+
+**Middleware adalah lapisan otoritatif.** Kalau akun dinonaktifkan selagi
+seseorang sudah login, hanya middleware yang bisa menangkapnya — inilah yang
+menutup jalur passkey dan 2FA.
+
+**Pesan memakai `auth.inactive` yang spesifik**, bukan `auth.failed` generik.
+Panel admin tidak diindeks dan tidak ada registrasi publik, jadi risiko
+membocorkan "akun ini ada tapi dinonaktifkan" sangat kecil, sementara
+penghobi paroki tidak perlu bingung kenapa kata sandinya benar tapi ditolak.
+Lapis middleware tetap yang menentukan keamanan; pesan hanya soal UX.
 
 ---
 
@@ -483,9 +554,9 @@ perlu migration tambahan.
 | 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
 | 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
 | 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
-| 6 | `Features::registration()` masih aktif sehingga `/register` publik hidup. | Melanggar AUTH-R2 dan Phase 01 §F. | P06 |
+| 6 | ~~`Features::registration()` masih aktif sehingga `/register` publik hidup.~~ **Ditutup di P06** (D-19). | — | Selesai |
 | 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
-| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. Perlu diperhatikan bersama 2FA: pengecekan juga harus berlaku setelah two-factor-challenge (D-09). | P06 |
+| 8 | ~~`is_active` ada di skema tapi belum ditegakkan.~~ **Ditutup di P06** (D-20). Middleware `EnsureAccountIsActive` menutup jalur password, 2FA, dan passkey sekaligus. | — | Selesai |
 | 9 | ~~PHP extensions `gd` / `imagick` tidak terpasang.~~ **Ditutup** — `gd` 2.3.3 dengan WebP support sudah terpasang. | — | Selesai |
 | 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
 | 11 | `super_admin` mendapat akses ke **semua** ability lewat `Gate::before`, termasuk ability yang di masa depan mungkin tidak boleh dimiliki siapa pun. | Otorisasi implisit: tidak ada daftar permission yang bisa dibaca untuk audit. Ini trade-off yang disepakati di D-16, bukan kelalaian. | P06 — kalau muncul ability yang harus dikecualikan, pakai `Gate::after` atau `deny` eksplisit |
@@ -494,17 +565,20 @@ perlu migration tambahan.
 
 ## Yang masih diperlukan (Phase 01)
 
-P06 authentication · P07 Inertia foundation · P08 UI & layout ·
-P09 site settings · P10 media · P11 sanitasi · P12 error/SEO/infrastruktur ·
-P13 quality · P14 Git · P15 docs.
+P07 Inertia foundation · P08 UI & layout · P09 site settings · P10 media ·
+P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
 
-P01, P02, P03, dan P05 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
+P01, P02, P03, P05, dan P06 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
+
+Autentikasi sudah pindah ke `/admin/*`, registrasi publik sudah dihapus,
+`is_active` sudah ditegakkan, dan gerbang `/admin/*` memakai permission
+`admin.access`. Lihat D-19 dan D-20.
 
 Fondasi RBAC sudah aktif: `spatie/laravel-permission` **8.3.0** terpasang,
-`HasRoles` pada `User`, role `super_admin` + 11 permission ter-seed, dan
+`HasRoles` pada `User`, role `super_admin` + 12 permission ter-seed, dan
 `Gate::before` di `AppServiceProvider`. Lihat D-16, D-17, D-18.
 
-Daftar 11 permission yang sudah di-seed pada P05 tercatat di D-18.
+Daftar 12 permission yang sudah di-seed (11 dari §10.4 + `admin.access`) tercatat di D-18 dan D-19.
 
 Permission per modul lain (agenda, galeri, komunitas, jadwal-misa, dst.)
 dibuat saat modulnya dibangun, supaya tidak perlu migration tambahan sekarang.

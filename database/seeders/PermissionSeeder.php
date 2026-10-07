@@ -15,11 +15,13 @@ use Spatie\Permission\PermissionRegistrar;
  * in SuperAdminSeeder: it must exist even on a machine where ADMIN_EMAIL is
  * empty and no account was seeded.
  *
- * The permission list is taken verbatim from Phase 01 10.4 — no permission here
- * was invented. Naming follows PRD AUTH-R6: resource.action.
+ * The permission list is taken verbatim from Phase 01 10.4, plus one addition:
+ * admin.access. That gate is what middleware checks to decide whether a
+ * request may enter /admin/* at all (Phase 01 13). Without it the only thing
+ * available to gate on would be the role name, which AUTH-R3 rules out.
+ * See docs/DECISIONS.md D-18 and D-19.
  *
- * Permissions for the other modules (agenda, gallery, communities, mass
- * schedules, and so on) are deliberately absent. Each module will need a
+ * Permissions for the other modules (agenda, gallery, communities, mass * schedules, and so on) are deliberately absent. Each module will need a
  * different set, so they are added when the module is built rather than
  * creating permissions nothing reads yet.
  *
@@ -31,6 +33,8 @@ class PermissionSeeder extends Seeder
      * @var list<string>
      */
     private const PERMISSIONS = [
+        'admin.access',
+
         'dashboard.view',
 
         'settings.view',
