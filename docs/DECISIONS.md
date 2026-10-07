@@ -203,6 +203,89 @@ dipakai:
 
 ---
 
+## D-11 — `site_settings` memakai kolom `key` dan `group`
+
+**Status:** Accepted · Phase 01 Workstream 03
+
+PRD §9.2 dan Phase 01 §8.2 sama-sama menyebut kolom `key` dan `group`, dan
+skema itu diikuti apa adanya.
+
+**Masalah:** keduanya adalah reserved word MySQL
+(`information_schema.KEYWORDS` → `RESERVED = 1` untuk `KEY` dan `GROUP`).
+
+**Mengapa aman:** Laravel membungkus seluruh identifier dengan backtick di
+`MySqlGrammar`, baik pada schema builder maupun query builder, sehingga
+`CREATE TABLE`, `insert`, dan `where` semuanya aman. Sudah diverifikasi dengan
+`SHOW CREATE TABLE` dan sebuah smoke test insert/select.
+
+**Batasnya:** hanya berlaku pada SQL yang lewat query builder atau Eloquent.
+Raw SQL manual harus tetap menulis backtick.
+
+**Tanpa index `group`:** tabel ini ±30 baris konfigurasi, sehingga full scan
+lebih murah daripada menyimpan index. `unique` pada `key` sudah menutup jalur
+lookup yang dibutuhkan.
+
+---
+
+## D-12 — Seeder `site_settings` ditunda ke P09
+
+**Status:** Accepted · Phase 01 Workstream 03 · eksekusi di P09
+
+P03 hanya membuat skema; baris data dan model `SiteSetting` adalah bagian dari
+`SiteSettingsService` (P09) yang menjadi single access point.
+
+Nilai awal yang disepakati saat P09 berjalan:
+
+- `parish_name` = `"Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau"`
+- `parish_short_name` = `"HSPMTB"`
+- seluruh kunci Lampiran B lainnya bernilai kosong
+
+Kedua nilai tersebut diambil dari PRD Lampiran D, bukan dikarang, dan PRD
+menandainya `[CONFIRM]` — belum dikonfirmasi pihak paroki. Karena itu
+`AGENTS.md` melarang cheesy data paroki nyata: nilai yang belum dikonfirmasi
+harus tetap kosong sampai diisi Super Admin lewat `/admin/pengaturan`.
+
+---
+
+## D-13 — `is_active` tidak masuk `$fillable`
+
+**Status:** Accepted · Phase 01 Workstream 03
+
+Kolom `is_active` dicast ke `boolean` dan punya scope `active()`, tetapi
+sengaja **tidak** ditambahkan ke `#[Fillable]`.
+
+**Alasan:** NFR-SEC mewajibkan controlled mass assignment, dan tidak ada form
+pada P03 yang boleh menogol status akun. Menambahkannya sekarang berarti
+`_fillable` menerima `is_active` dari input apa pun yang tidak kita awasi.
+
+P06 akan menambahkannya ke `$fillable` **secara sadar**, bersamaan dengan
+form manajemen akun yang memang butuh kemampuan itu. Sampai saat itu, status
+akun hanya berubah lewat kode.
+
+---
+
+## D-14 — `DatabaseSeeder` dikosongkan pada P03
+
+**Status:** Accepted · Phase 01 Workstream 03
+
+Seeder bawaan starter membuat `test@example.com`. Itu adalah data fiktif dan
+melanggar `AGENTS.md` ("Never invent real parish data"), jadi dihapus.
+
+**Konsekuensi yang perlu diketahui:** setelah `php artisan migrate:fresh --seed`
+**tidak ada akun yang bisa login**. Ini memang benar untuk Phase 01 — role
+`super_admin` belum ada sampai P05 Workstream 06. Jangan mengira ini bug.
+
+Pemanggilan seeder akan ditambahkan saat masing-masing seeder ada:
+
+| Seeder | Phase | Isi |
+| --- | --- | --- |
+| `SuperAdminSeeder` | P05 | akun Super Admin dari `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` |
+| `SiteSettingsSeeder` | P09 | kunci kanonik PRD Lampiran B |
+
+Dijaga oleh test `the seeder creates no fabricated parish or admin data`.
+
+---
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
@@ -211,8 +294,10 @@ dipakai:
 | 2 | Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash` seperti ARCHITECTURE.md Part C §6. | Kontrak berbeda dari dokumen; perlu diputuskan sebelum layout publik dibangun. | P07 |
 | 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
 | 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
-| 5 | `DatabaseSeeder` masih membuat `test@example.com`. | Artefak starter, tidak sesuai aturan "jangan mengarang data". | P03/P06 — ganti dengan `SuperAdminSeeder` dari `.env` |
+| 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
 | 6 | `Features::registration()` masih aktif sehingga `/register` publik hidup. | Melanggar AUTH-R2 dan Phase 01 §F. | P06 |
+| 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
+| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. | P06 |
 
 ---
 
