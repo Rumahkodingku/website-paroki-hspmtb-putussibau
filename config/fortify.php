@@ -122,8 +122,6 @@ return [
 
     'limiters' => [
         'login' => 'login',
-        'two-factor' => 'two-factor',
-        'passkeys' => 'passkeys',
     ],
 
     /*
@@ -197,6 +195,12 @@ return [
     | section F forbid public registration; accounts are created by a Super
     | Admin. Removing the feature also removes the /register routes entirely.
     |
+    | Features::twoFactorAuthentication() and Features::passkeys() are absent on
+    | purpose too. Phase 01 section 4 lists two-factor authentication as out of
+    | scope, and on the MVP the single Super Admin account has no use for a
+    | second factor. Removing the features also removes every two-factor and
+    | passkey route. See docs/DECISIONS.md D-09.
+    |
     | See docs/DECISIONS.md D-19.
     |
     */
@@ -204,14 +208,6 @@ return [
     'features' => [
         Features::resetPasswords(),
         Features::emailVerification(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0
-        ]),
-        Features::passkeys([
-            'confirmPassword' => true,
-        ]),
     ],
 
 ];

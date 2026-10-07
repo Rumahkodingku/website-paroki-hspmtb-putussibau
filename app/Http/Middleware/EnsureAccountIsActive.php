@@ -11,9 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Rejects a deactivated account from the admin area.
  *
  * This is the authoritative layer of the is_active check (PRD D-08). It guards
- * the whole /admin/* prefix, so it closes every way in: password login,
- * completing a two-factor challenge, and passkey login all end up here before
- * any admin page renders.
+ * the whole /admin/* prefix, so a deactivated account cannot render any admin
+ * page, whichever way it got its session.
  *
  * Login itself is also blocked earlier by EnsureAccountCanLogIn, but that is
  * only for a clear error message. If an account is deactivated while somebody is

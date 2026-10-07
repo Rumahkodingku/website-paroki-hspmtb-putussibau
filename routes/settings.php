@@ -40,20 +40,3 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
 
         Route::inertia('appearance', 'admin/akun/appearance')->name('appearance.edit');
     });
-
-/*
-|--------------------------------------------------------------------------
-| Well-Known
-|--------------------------------------------------------------------------
-|
-| .well-known is a fixed path defined by the WebAuthn spec, so this one stays at
-| the root even though the pages it points at now live under /admin/akun.
-|
-*/
-
-Route::get('.well-known/passkey-endpoints', function () {
-    return response()->json([
-        'enroll' => route('security.edit'),
-        'manage' => route('security.edit'),
-    ]);
-})->name('well-known.passkeys');

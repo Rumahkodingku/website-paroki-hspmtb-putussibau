@@ -13,14 +13,13 @@ use Symfony\Component\HttpFoundation\Response;
  * Refuses to start a session for a deactivated account.
  *
  * Runs as a pipe inside Fortify's login pipeline, positioned after the username
- * is canonicalized and before the two-factor redirect. That position matters:
- * a deactivated account is refused before any session is created and before
- * a pending two-factor login is stored, so there is never a window where the
- * account is partly authenticated.
+ * is canonicalized and before the credentials are checked. That position
+ * matters: a deactivated account is refused before any session is created, so
+ * there is never a window where the account is partly authenticated.
  *
  * This layer exists for a clear error message. EnsureAccountIsActive is what
- * actually enforces the rule, because that one also covers passkey logins and
- * sessions that were opened before the account was deactivated.
+ * actually enforces the rule, because that one also covers sessions that were
+ * opened before the account was deactivated.
  *
  * @see docs/DECISIONS.md D-20
  */
