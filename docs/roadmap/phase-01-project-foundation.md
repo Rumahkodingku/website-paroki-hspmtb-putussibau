@@ -1936,12 +1936,54 @@ Do not force unnecessary restructuring.
 
 ## P12 — Infrastructure
 
-- [ ] queue.
-- [ ] cache.
-- [ ] scheduler.
-- [ ] failed jobs.
-- [ ] error pages.
-- [ ] SEO component.
+- [x] queue. — `database` sudah jadi default sejak starter dan tabel `jobs` sudah
+  ada, jadi P12 tidak mengubah apa pun. Yang ditambahkan adalah `FailedJobTest`:
+  T26 ternyata **tidak pernah** ter-cover karena `MediaTest` memanggil `->failed()`
+  manual dan `phpunit.xml` menyetel `QUEUE_CONNECTION=sync`. Test itu memaksa
+  koneksi `database` dan menjalankan worker sungguhan.
+- [x] cache. — `database` sudah jadi default, tabel `cache` sudah ada, dan P09
+  sudah memakainya lewat `SiteSettingsService`. Tidak ada perubahan.
+- [x] scheduler. — `withSchedule()` di `bootstrap/app.php` dengan satu task:
+  `queue:prune-failed --hours=168` harian. `model:prune` sengaja tidak
+  dijadwalkan karena tidak ada model `Prunable`.
+- [x] failed jobs. — `failed_jobs` dengan `database-uuids`. Enam test di
+  `FailedJobTest` membuktikan job gagal mendarat di sana dengan payload yang
+  bisa dibaca `queue:retry`, dan baris `media` tetap utuh (§21).
+- [x] error pages. — `$exceptions->respond()` + `resources/js/pages/public/error.tsx`
+  untuk 403, 404, 419, 500, 503, berbahasa Indonesia, di `PublicLayout`, dengan
+  tautan ke Beranda.
+- [x] SEO component. — `resources/js/components/seo.tsx` plus baseline OG di
+  `resources/views/app.blade.php`, dihubungkan oleh `data-inertia`.
+
+> **Scheduler di development.** `composer dev` menjalankan lima proses
+> (server, queue, logs, vite, **scheduler**). `DevCommands` bawa Laravel hanya
+> mendaftarkan empat; `schedule:work` didaftarkan sendiri di
+> `AppServiceProvider`.
+
+> **`schedule:run` tidak dijadwalkan.** Production memakai cron
+> `* * * * * php artisan schedule:run`; development memakai `schedule:work`.
+> Menjadwalkannya di dalam schedule akan membuatnya memanggil dirinya sendiri.
+> Command starter `inspire` juga dihapus.
+
+> **Halaman error di-serve saat `config('app.debug')` false.** Gate-nya debug,
+> bukan daftar environment seperti contoh dokumentasi Inertia: berbasis
+> environment akan mematikan halaman ini selama test suite berjalan. Hanya
+> `status` yang menyeberang ke response, jadi tidak ada stack trace yang bisa
+> bocor dan tidak ada yang perlu disensor.
+
+> **SSR ditunda, klaus fallback-nya yang dikerjakan.** PRD NFR-SEO meminta tag OG
+> ada di respons HTML awal bila SSR nonaktif. React merender setelah hydration,
+> jadi `<Head>` saja tidak sampai ke crawler — karena itu tag-nya juga dirender di
+> Blade. Keduanya dihubungkan `data-inertia`, nilai yang sama dengan `head-key` di
+> komponen React. **Keputusan SSR masih terbuka** untuk phase UI/public website.
+
+> **Catatan cakupan.** `Seo` dan halaman error **belum dipakai halaman mana
+> pun** yang sukses dirender untuk pengunjung: `welcome.tsx` masih placeholder,
+> dan modul publiknya milik Fase 2. Copy Bahasa Indonesia pada halaman error
+> tidak diuji otomatis karena tidak ada frontend test runner — dicatat sebagai
+> kesenjangan di D-26, bukan ditutupi. `sitemap.xml`, `robots.txt`, dan
+> structured data tetap di luar cakupan (§4 "sitemap final"). Detail di
+> `docs/DECISIONS.md` D-26.
 
 ## P13 — Quality
 
