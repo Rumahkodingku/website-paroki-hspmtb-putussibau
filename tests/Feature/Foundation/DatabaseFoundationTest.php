@@ -118,7 +118,7 @@ test('the active scope excludes deactivated accounts', function () {
 });
 
 test('is_active is cast to a boolean', function () {
-    expect(User::factory()->create()->is_active)->toBeTrue()
+    expect(superAdmin()->is_active)->toBeTrue()
         ->and(User::factory()->inactive()->create()->is_active)->toBeFalse();
 });
 

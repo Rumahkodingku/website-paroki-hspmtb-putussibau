@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\PermissionRegistrar;
@@ -59,4 +61,24 @@ function seedRolesAndPermissions(): void
     test()->seed(PermissionSeeder::class);
 
     app(PermissionRegistrar::class)->forgetCachedPermissions();
+}
+
+/**
+ * Create a user that may enter /admin/*.
+ *
+ * Every route under the admin prefix requires the admin.access permission
+ * (PRD AUTH-R1), so a plain factory user gets a 403 there. Tests that exercise
+ * admin pages need this instead.
+ */
+function superAdmin(array $attributes = []): User
+{
+    seedRolesAndPermissions();
+
+    $user = User::factory()->create($attributes);
+
+    $user->assignRole(AppServiceProvider::SUPER_ADMIN);
+
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    return $user->fresh();
 }

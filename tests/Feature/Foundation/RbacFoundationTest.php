@@ -46,11 +46,14 @@ test('the system role is seeded even when no admin credentials are configured', 
     expect(Role::query()->where('name', 'super_admin')->exists())->toBeTrue();
 });
 
-test('the eleven foundation permissions are seeded with resource.action names', function () {
+test('the twelve foundation permissions are seeded with resource.action names', function () {
     seedRolesAndPermissions();
 
-    // Verbatim from Phase 01 10.4. Nothing invented, nothing extra.
+    // Verbatim from Phase 01 10.4, plus admin.access added in P06 as the gate
+    // for /admin/*. See docs/DECISIONS.md D-19.
     $expected = [
+        'admin.access',
+
         'dashboard.view',
         'settings.view',
         'settings.update',
@@ -99,15 +102,17 @@ test('the super_admin role passes every gate check', function () {
 test('a user without the super_admin role is denied', function () {
     seedRolesAndPermissions();
 
-    // T12 at the Gate level: the /admin routes that turn this into a 403 are
-    // P06, but the authorization decision itself belongs here.
+    // T12. Since P06 the admin area exists, so this is no longer just a Gate
+    // level check: a signed-in user without the role is turned away with a 403.
     $user = User::factory()->create();
 
     expect($user->can('posts.create'))->toBeFalse()
-        ->and($user->can('settings.update'))->toBeFalse();
+        ->and($user->can('settings.update'))->toBeFalse()
+        ->and($user->can('permission.yang.tidak.ada'))->toBeFalse();
 
-    $this->actingAs($user)->getJson(route('dashboard'))->assertOk(); // logged in
-    expect($user->can('permission.yang.tidak.ada'))->toBeFalse();
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertForbidden();
 });
 
 test('an inactive super admin is still a super admin but cannot be filtered as active', function () {
@@ -158,7 +163,7 @@ test('seeding twice does not duplicate anything', function () {
     $this->seed(PermissionSeeder::class);
 
     expect(Role::query()->count())->toBe(1)
-        ->and(Permission::query()->count())->toBe(11);
+        ->and(Permission::query()->count())->toBe(12);
 });
 
 test('the super admin seeder creates an active account with the role', function () {
