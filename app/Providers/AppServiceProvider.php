@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use App\Services\HtmlSanitizer;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -113,5 +114,30 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+
+        $this->configureStrictModels();
+    }
+
+    /**
+     * Make Eloquent strict about three classes of mistake outside production.
+     *
+     * shouldBeStrict() turns on exactly three things: it throws when a relation
+     * is lazy loaded, when an attribute is silently discarded during mass
+     * assignment, and when an attribute that was never selected is read. Each
+     * one is a bug that is invisible until it is not: an N+1 that is fast in
+     * development, a fillable list that quietly drops a column, a column rename
+     * that returns null instead of failing.
+     *
+     * ARCHITECTURE.md Part A section 6 requires it and PRD 3.3 says "aktifkan
+     * pada non-produksi", so that is the scope. The reason is not only
+     * obedience to the document: preventLazyLoading() *throws*, so a single
+     * forgotten with() in production becomes a 500 in front of a visitor
+     * rather than a page that is merely slow.
+     *
+     * @see docs/DECISIONS.md D-27
+     */
+    protected function configureStrictModels(): void
+    {
+        Model::shouldBeStrict(! $this->app->isProduction());
     }
 }
