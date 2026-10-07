@@ -621,14 +621,27 @@ Inertia v3: `errors` oleh `parent::share()`, `flash` sebagai event DOM
 
 ## Yang masih diperlukan (Phase 01)
 
-P07 Inertia foundation · P08 UI & layout · P09 site settings · P10 media ·
-P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+P08a primitive UI · P08b layout (`PublicLayout`/`AdminLayout` belum ada sama
+sekali) · P09 site settings · P10 media · P11 sanitasi ·
+P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
 
-P01, P02, P03, P05, dan P06 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
+Test matrix yang belum ada: T16–T28 dan T34.
+
+**Sudah selesai:** P01, P02, P03, P05, P06, dan **P07**. P04 (Docker) dibatalkan
+— lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
 Autentikasi sudah pindah ke `/admin/*`, registrasi publik sudah dihapus,
 `is_active` sudah ditegakkan, dan gerbang `/admin/*` memakai permission
 `admin.access`. Lihat D-19 dan D-20.
+
+**2FA dan passkey sudah dihapus** (D-09), jadi login kini satu lapis: password
+dengan rate limit 5 percobaan/menit. Endpoint hapus akun juga dihapus karena
+PRD §8 melarang penghapusan akun diri sendiri dan route lama tidak punya
+parameter `{user}` sehingga hanya bisa menghapus pemanggilnya.
+
+Fondasi Inertia sudah beres: `auth.user` hanya mengirim `id`, `name`, `email`,
+`email_verified_at`, ditambah shared prop `locale` dan `displayTimezone`. Lihat
+D-21.
 
 Fondasi RBAC sudah aktif: `spatie/laravel-permission` **8.3.0** terpasang,
 `HasRoles` pada `User`, role `super_admin` + 12 permission ter-seed, dan

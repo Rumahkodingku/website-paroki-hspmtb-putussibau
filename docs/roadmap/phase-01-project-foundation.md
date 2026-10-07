@@ -1767,65 +1767,68 @@ Do not force unnecessary restructuring.
 
 ## P01 — Baseline
 
-- [ ] Inspect repository.
-- [ ] Verify versions.
-- [ ] Verify Composer.
-- [ ] Verify frontend.
-- [ ] Verify existing tests.
-- [ ] Remove unnecessary starter artifacts.
+- [x] Inspect repository.
+- [x] Verify versions.
+- [x] Verify Composer.
+- [x] Verify frontend.
+- [x] Verify existing tests.
+- [ ] Remove unnecessary starter artifacts. — *belum*: `.codex/config.toml` (membocorkan path absolut mesin) dan `pnpm-workspace.yaml` (proyek memakai npm) masih ikut ter-track. Keduanya sudah ada di `main` sejak initial commit.
 
 ## P02 — Laravel Config
 
-- [ ] UTC timezone.
-- [ ] display timezone.
-- [ ] locale.
-- [ ] Indonesian translations.
-- [ ] environment configuration.
+- [x] UTC timezone.
+- [x] display timezone.
+- [x] locale.
+- [x] Indonesian translations.
+- [x] environment configuration.
 
 ## P03 — Database
 
-- [ ] users.
-- [ ] is_active.
-- [ ] site_settings.
-- [ ] system tables.
-- [ ] migration verification.
+- [x] users.
+- [x] is_active.
+- [x] site_settings.
+- [x] system tables.
+- [x] migration verification.
 
 ## P04 — Docker
 
-- [ ] MySQL.
-- [ ] volume.
-- [ ] healthcheck.
-- [ ] UTF-8.
-- [ ] `.env` configuration.
+> **Dibatalkan.** Docker tidak dipakai; MySQL 8 berjalan native di host. Semua
+> butir di bawah tidak dikerjakan. Lihat `docs/DECISIONS.md` D-15.
+
+- [~] MySQL. — dibatalkan (D-15)
+- [~] volume. — dibatalkan (D-15)
+- [~] healthcheck. — digantikan CI: service MySQL + `--health-cmd` di `.github/workflows/tests.yml`
+- [~] UTF-8. — dijamin level driver (`utf8mb4_0900_ai_ci`), diuji di `DatabaseFoundationTest`
+- [~] `.env` configuration. — `DB_HOST=127.0.0.1`, tanpa container
 
 ## P05 — RBAC
 
-- [ ] Install Spatie.
-- [ ] publish migration/config.
-- [ ] User HasRoles.
-- [ ] PermissionSeeder.
-- [ ] SuperAdminSeeder.
-- [ ] guard consistency.
-- [ ] authorization tests.
+- [x] Install Spatie.
+- [x] publish migration/config.
+- [x] User HasRoles.
+- [x] PermissionSeeder.
+- [x] SuperAdminSeeder.
+- [x] guard consistency.
+- [x] authorization tests.
 
 ## P06 — Authentication
 
-- [ ] login.
-- [ ] logout.
-- [ ] forgot password.
-- [ ] reset password.
-- [ ] rate limiting.
-- [ ] inactive account protection.
-- [ ] remove registration.
+- [x] login.
+- [x] logout.
+- [x] forgot password.
+- [x] reset password.
+- [x] rate limiting.
+- [x] inactive account protection.
+- [x] remove registration.
 
 ## P07 — Inertia Foundation
 
-- [ ] shared props.
-- [ ] auth props.
-- [ ] flash props.
-- [ ] errors.
-- [ ] TypeScript types.
-- [ ] page structure.
+- [x] shared props.
+- [x] auth props.
+- [x] flash props.
+- [x] errors.
+- [x] TypeScript types.
+- [x] page structure. — pemisahan `pages/{public,admin}` sudah ada; `PublicLayout`/`AdminLayout` sendiri adalah P08b.
 
 ## P08 — UI
 
