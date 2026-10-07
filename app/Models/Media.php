@@ -79,15 +79,23 @@ class Media extends Model
      */
     public function url(?string $variant = null): ?string
     {
-        $disk = $variant === null ? $this->disk : $this->variants->firstWhere('name', $variant)?->disk;
+        $target = $variant === null
+            ? ['disk' => $this->disk, 'path' => $this->path]
+            : $this->variants->firstWhere('name', $variant)?->only(['disk', 'path']);
 
-        $path = $variant === null ? $this->path : $this->variants->firstWhere('name', $variant)?->path;
-
-        if ($disk === null || $path === null) {
+        if ($target === null) {
             return null;
         }
 
-        return Storage::disk($disk)->url($path);
+        // Storage::disk()->url() happily builds a /storage path for a disk that
+        // is not actually served, so the visibility setting has to be consulted
+        // directly. Without this the original, which lives on a private disk, gets
+        // a URL that renders as a broken image instead of nothing at all.
+        if (config("filesystems.disks.{$target['disk']}.visibility") !== 'public') {
+            return null;
+        }
+
+        return Storage::disk($target['disk'])->url($target['path']);
     }
 
     /**
