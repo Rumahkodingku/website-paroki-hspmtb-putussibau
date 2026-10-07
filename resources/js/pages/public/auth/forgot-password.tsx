@@ -12,7 +12,7 @@ import { email } from '@/routes/password';
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <>
-            <Head title="Forgot password" />
+            <Head title="Lupa Kata Sandi" />
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
@@ -64,6 +64,6 @@ export default function ForgotPassword({ status }: { status?: string }) {
 }
 
 ForgotPassword.layout = {
-    title: 'Forgot password',
+    title: 'Lupa Kata Sandi',
     description: 'Enter your email to receive a password reset link',
 };

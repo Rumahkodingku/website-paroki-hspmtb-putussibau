@@ -18,9 +18,9 @@ export default function Security(props: Props) {
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title="Pengaturan Keamanan" />
 
-            <h1 className="sr-only">Security settings</h1>
+            <h1 className="sr-only">Pengaturan Keamanan</h1>
 
             <div className="space-y-6">
                 <Heading
@@ -124,7 +124,7 @@ export default function Security(props: Props) {
 Security.layout = {
     breadcrumbs: [
         {
-            title: 'Security settings',
+            title: 'Pengaturan Keamanan',
             href: edit(),
         },
     ],

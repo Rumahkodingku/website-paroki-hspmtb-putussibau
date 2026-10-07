@@ -26,9 +26,9 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
 
     return (
         <>
-            <Head title="Profile settings" />
+            <Head title="Pengaturan Profil" />
 
-            <h1 className="sr-only">Profile settings</h1>
+            <h1 className="sr-only">Pengaturan Profil</h1>
 
             <div className="space-y-6">
                 <Heading
@@ -129,7 +129,7 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
 Profile.layout = {
     breadcrumbs: [
         {
-            title: 'Profile settings',
+            title: 'Pengaturan Profil',
             href: edit(),
         },
     ],
