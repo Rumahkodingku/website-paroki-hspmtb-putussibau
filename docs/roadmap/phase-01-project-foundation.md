@@ -1867,10 +1867,13 @@ Do not force unnecessary restructuring.
 > sengaja tidak punya baris agar "belum diatur" berbeda dari "sengaja
 > dikosongkan"; `get()` mengembalikan default dari `config/site-settings.php`.
 
-> **Catatan cakupan.** Grup `privasi` (`privacy_policy_content`) ditunda ke P11
-> karena isinya rich text dan D-14 mewajibkan sanitasi server-side. Field gambar
-> (`logo`, `favicon`, `seo_default_og_image`) berupa teks path/URL; widget unggah
-> menyusul di P10. Detail dan alasannya di `docs/DECISIONS.md` D-23.
+> **Catatan cakupan.** Saat P09 selesai, grup `privasi`
+> (`privacy_policy_content`) masih ditunda karena isinya rich text dan D-14
+> mewajibkan sanitasi server-side. **P11 mengaktifkannya** dengan
+> `HtmlSanitizer` (D-25). Field gambar (`logo`, `favicon`,
+> `seo_default_og_image`) tetap berupa teks path/URL; widget unggah yang
+> sempat dijanjikan P10 tidak pernah dibangun (D-24 §1). Detail dan alasannya
+> di `docs/DECISIONS.md` D-23.
 
 ## P10 — Media
 
@@ -1897,10 +1900,39 @@ Do not force unnecessary restructuring.
 
 ## P11 — Sanitization
 
-- [ ] sanitizer.
-- [ ] Tiptap.
-- [ ] allowlist.
-- [ ] XSS tests.
+- [x] sanitizer. — `app/Services/HtmlSanitizer.php` di atas
+  `symfony/html-sanitizer` (satu dependency baru, disetujui eksplisit), di-bind
+  sebagai singleton karena allowlist-nya di-parse sekali per instance.
+- [x] Tiptap. — `RichTextEditor` di `resources/js/components/rich-text-editor.tsx`.
+  Paragraf, heading, bold, italic, underline, lists, blockquote, link. Dimuat
+  lewat `React.lazy` sehingga Tiptap tidak masuk chunk halaman pengaturan.
+- [x] allowlist. — `config/html.php` sebagai satu sumber kebenaran: tag
+  persis §22 (+ turunan tabel), atribut per tag, `drop_elements`, skema URL,
+  dan `rel="noopener noreferrer"` yang dipaksakan ke setiap `<a>`.
+- [x] XSS tests. — T24 dan T25 plus 56 test lain di
+  `tests/Unit/HtmlSanitizerTest.php`, dan 10 feature test di
+  `SiteSettingsTest.php` yang memeriksa **kolom** tersimpan, bukan respons.
+
+> **Tiga default Symfony tidak dibiarkan begitu**, dan ketiganya punya test:
+> `default_action` di-override ke `block` supaya tag tak dikenal tidak
+> menghapus paragrafnya; skema media diketatkan ke `http`/`https` karena
+> Symfony mengizinkan `data:`; dan konten elemen raw-text (`<style>`,
+> `<title>`) dibuang bersama tagnya, karena drop tag ternyata tidak drop isi
+> dan stylesheet hasil paste akan muncul sebagai teks di halaman.
+
+> **Normalisasi sebelum parsing:** `<h1>` → `<h2>` (h1 milik judul halaman),
+> `<b>` → `<strong>`, `<i>` → `<em>` (konten hasil paste).
+
+> **Catatan cakupan.** Editor dipakai oleh satu field saja,
+> `privacy_policy_content`, yang sekaligus melunasi utang D-23. **Belum ada
+> halaman publik yang merender rich text** — `RichText` sudah ada tapi belum
+> ada call site. Image dan table sengaja tidak ada di editor: image butuh image
+> picker yang tidak pernah dibangun (D-24 §1), dan roadmap §23 memang
+> menundanya dengan "bila dibutuhkan". Sanitasi `maps_embed_url` (XC-S2) dan
+> `form_url` (XC-S3) belum dikerjakan karena keduanya butuh validasi host yang
+> lebih ketat daripada allowlist skema URL.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-25.
 
 ## P12 — Infrastructure
 
