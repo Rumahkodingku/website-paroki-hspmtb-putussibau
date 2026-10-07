@@ -1,14 +1,14 @@
 # PRD — Website Paroki HSPMTB Putussibau (MVP P0)
 
-| Atribut             | Nilai                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| Produk              | Website resmi Paroki Hati Santa Perawan Maria Tak Bernoda (HSPMTB) Putussibau                      |
-| Versi PRD           | 1.1 (Approved Baseline — 6 Oktober 2026)                                                           |
-| Status              | **APPROVED — Baseline untuk Phase 01**; item bertanda `[CONFIRM]` menunggu konfirmasi pihak paroki |
-| Stack               | Laravel 13, Inertia.js, React, MySQL                                                               |
-| Bahasa antarmuka    | Bahasa Indonesia                                                                                   |
-| Zona waktu tampilan | Asia/Pontianak (WIB, UTC+7)                                                                        |
-| Audiens dokumen     | AI coding agents dan pengembang                                                                    |
+| Atribut | Nilai |
+| --- | --- |
+| Produk | Website resmi Paroki Hati Santa Perawan Maria Tak Bernoda (HSPMTB) Putussibau |
+| Versi PRD | 1.1 (RBAC Foundation — 6 Oktober 2026) |
+| Status | Siap diimplementasikan; item bertanda `[CONFIRM]` menunggu konfirmasi pihak paroki |
+| Stack | Laravel 13, Inertia.js, React, MySQL |
+| Bahasa antarmuka | Bahasa Indonesia |
+| Zona waktu tampilan | Asia/Pontianak (WIB, UTC+7) |
+| Audiens dokumen | AI coding agents dan pengembang |
 
 ---
 
@@ -22,7 +22,6 @@
 6. **Jangan membangun apa pun dari bagian 12 (Di Luar Cakupan).**
 7. Verifikasi versi paket (Laravel 13, Inertia, React, Tiptap, dsb.) dengan dokumentasi resmi saat setup proyek. Nama paket dan API di dokumen ini bersifat panduan, bukan jaminan.
 8. Urutan pengerjaan ada di bagian 13. Kerjakan per fase; jangan loncat ke modul yang bergantung pada fondasi yang belum selesai.
-9. **Visi dan Misi Paroki:** untuk MVP P0, Visi & Misi tidak dibangun, tidak ditampilkan, tidak diminta sebagai konten wajib, dan tidak boleh diisi dengan placeholder yang seolah-olah merupakan visi/misi resmi. Fitur ini dapat ditambahkan pada fase/P1 setelah paroki memiliki dan mengonfirmasi konten resmi.
 
 ---
 
@@ -41,13 +40,13 @@ Paroki membutuhkan website resmi agar umat dan masyarakat umum dapat mengakses j
 
 ### 1.3 Pengguna
 
-| Pengguna                             | Kebutuhan utama                         | Perangkat                        |
-| ------------------------------------ | --------------------------------------- | -------------------------------- |
-| Umat (semua usia)                    | Jadwal misa, berita, agenda             | Dominan ponsel, jaringan beragam |
-| Calon umat/pendatang                 | Jadwal misa, alamat gereja              | Ponsel                           |
-| Calon penerima sakramen dan keluarga | Syarat dan prosedur, tautan pendaftaran | Ponsel                           |
-| Pengurus/admin paroki                | Mengelola konten rutin                  | Ponsel dan komputer              |
-| Masyarakat umum                      | Mengenal paroki                         | Semua                            |
+| Pengguna | Kebutuhan utama | Perangkat |
+| --- | --- | --- |
+| Umat (semua usia) | Jadwal misa, berita, agenda | Dominan ponsel, jaringan beragam |
+| Calon umat/pendatang | Jadwal misa, alamat gereja | Ponsel |
+| Calon penerima sakramen dan keluarga | Syarat dan prosedur, tautan pendaftaran | Ponsel |
+| Pengurus/admin paroki | Mengelola konten rutin | Ponsel dan komputer |
+| Masyarakat umum | Mengenal paroki | Semua |
 
 ### 1.4 Prinsip Perancangan
 
@@ -64,19 +63,19 @@ Paroki membutuhkan website resmi agar umat dan masyarakat umum dapat mengakses j
 
 10 fitur publik P0 + komponen pendukung wajib (Panel Admin dan Pengaturan Situs):
 
-| No  | Fitur                          | Rute dasar     |
-| --- | ------------------------------ | -------------- |
-| 1   | Beranda                        | `/`            |
-| 2   | Profil Paroki                  | `/profil`      |
-| 3   | Jadwal Misa                    | `/jadwal-misa` |
-| 4   | Berita dan Artikel             | `/berita`      |
-| 5   | Agenda                         | `/agenda`      |
-| 6   | Pelayanan                      | `/pelayanan`   |
-| 7   | Komunitas                      | `/komunitas`   |
-| 8   | Galeri                         | `/galeri`      |
-| 9   | Kontak                         | `/kontak`      |
-| 10  | Download                       | `/download`    |
-| —   | Panel Admin + Pengaturan Situs | `/admin`       |
+| No | Fitur | Rute dasar |
+| --- | --- | --- |
+| 1 | Beranda | `/` |
+| 2 | Profil Paroki | `/profil` |
+| 3 | Jadwal Misa | `/jadwal-misa` |
+| 4 | Berita dan Artikel | `/berita` |
+| 5 | Agenda | `/agenda` |
+| 6 | Pelayanan | `/pelayanan` |
+| 7 | Komunitas | `/komunitas` |
+| 8 | Galeri | `/galeri` |
+| 9 | Kontak | `/kontak` |
+| 10 | Download | `/download` |
+| — | Panel Admin + Pengaturan Situs | `/admin` |
 
 ---
 
@@ -84,25 +83,24 @@ Paroki membutuhkan website resmi agar umat dan masyarakat umum dapat mengakses j
 
 Bagian ini menutup celah/ketidakkonsistenan pada spesifikasi sumber. Agent MUST mengikuti keputusan ini.
 
-| ID   | Masalah di spesifikasi                                                                          | Keputusan                                                                                                                                                                                                                                                                      |
-| ---- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| D-01 | Waktu "disimpan UTC" tetapi "zona waktu aplikasi Asia/Pontianak" (bertentangan di Laravel)      | `config('app.timezone')` = `UTC` (penyimpanan). Tambahkan `config('app.display_timezone')` = `Asia/Pontianak`. Semua datetime dikirim ke frontend sebagai ISO 8601 dan dirender di WIB. Kalkulasi "hari ini", "misa berikutnya", "agenda mendatang" dilakukan berdasarkan WIB. |
-| D-02 | `mass_schedules.start_time` adalah jadwal berulang mingguan                                     | Simpan sebagai **jam dinding WIB** (tipe `time`, tanpa konversi UTC), karena tidak terikat tanggal. Hanya kolom `datetime` yang disimpan UTC.                                                                                                                                  |
-| D-03 | Komunitas detail harus menampilkan "berita terkait" tetapi `posts` tidak punya relasi komunitas | Tambah `posts.community_id` (nullable FK).                                                                                                                                                                                                                                     |
-| D-04 | Komunitas detail menampilkan "galeri singkat"; Galeri "menautkan album dengan berita/agenda"    | Tambah `gallery_albums.post_id`, `event_id`, `community_id` (semua nullable FK, `ON DELETE SET NULL`).                                                                                                                                                                         |
-| D-05 | Filter agenda "penyelenggara (komunitas/seksi)" tetapi hanya ada `community_id`                 | Penyelenggara = komunitas saja (`events.community_id`). Seksi tidak dimodelkan pada MVP.                                                                                                                                                                                       |
-| D-06 | Kategori berita "Pengumuman" vs tabel `announcements` (banner)                                  | Dua hal berbeda. `posts` kategori Pengumuman = artikel pengumuman resmi. `announcements` = banner singkat di Beranda. Tidak saling terhubung otomatis.                                                                                                                         |
-| D-07 | Rute `.ics` tidak tercantum                                                                     | Tambah rute publik `GET /agenda/{slug}/ics` untuk unduhan `.ics`; tautan Google Calendar dibangun di sisi klien dari data event.                                                                                                                                               |
-| D-08 | Akun Super Admin bisa "dinonaktifkan" tetapi `users` tidak punya kolom status                   | Tambah `users.is_active` (bool, default true). Akun nonaktif tidak dapat login.                                                                                                                                                                                                |
-| D-09 | Pencegahan duplikasi jadwal misa                                                                | Unique index `(location_id, day_of_week, start_time)` + validasi Form Request dengan pesan Indonesia yang jelas.                                                                                                                                                               |
-| D-10 | Seeder konten layanan                                                                           | Seed isi Lampiran A (Bagian 17) sebagai contoh dengan `is_active = false`. Layanan baru terbit setelah Super Admin memvalidasi. Pengecualian: kerangka enam layanan wajib ada.                                                                                                 |
-| D-11 | Pencarian berita "judul dan isi"                                                                | MVP memakai `LIKE`/FULLTEXT MySQL pada `title`, `excerpt`, `content` (teks tanpa HTML). Tidak perlu Scout/Meilisearch.                                                                                                                                                         |
-| D-12 | `view_count` rawan inflasi oleh bot                                                             | Increment maksimal 1 kali per sesi per artikel dan abaikan user-agent bot umum.                                                                                                                                                                                                |
-| D-13 | Pembatalan kegiatan                                                                             | Kegiatan `cancelled` tetap tampil dengan label; kegiatan `postponed` tampil dengan label "Ditunda". Keduanya tetap muncul di daftar mendatang.                                                                                                                                 |
-| D-14 | Rich text editor                                                                                | Tiptap (React). Output HTML disanitasi di server (mis. `mews/purifier` atau HTMLPurifier) dengan allowlist tag. Sanitasi di server wajib, sanitasi klien saja tidak cukup.                                                                                                     |
-| D-15 | Autentikasi                                                                                     | Gunakan starter kit/Fortify Laravel yang kompatibel Inertia + React, lalu **hapus rute registrasi**. Login `/admin/login`, reset kata sandi via email.                                                                                                                         |
-| D-16 | Cakupan role                                                                                    | Hanya `super_admin`. Kolom `users.role` ada agar P1 mudah. Jangan pasang Spatie Permission. Otorisasi lewat middleware + Policy sederhana yang kelak bisa diperluas.                                                                                                           |
-| D-17 | Visi & Misi Paroki belum tersedia                                                               | Jangan membuat halaman `/profil/visi-misi`, menu, field, seed, placeholder, atau requirement Visi & Misi pada MVP. Fitur dapat ditambahkan setelah paroki menetapkan dan menyetujui konten resminya.                                                                           |
+| ID | Masalah di spesifikasi | Keputusan |
+| --- | --- | --- |
+| D-01 | Waktu "disimpan UTC" tetapi "zona waktu aplikasi Asia/Pontianak" (bertentangan di Laravel) | `config('app.timezone')` = `UTC` (penyimpanan). Tambahkan `config('app.display_timezone')` = `Asia/Pontianak`. Semua datetime dikirim ke frontend sebagai ISO 8601 dan dirender di WIB. Kalkulasi "hari ini", "misa berikutnya", "agenda mendatang" dilakukan berdasarkan WIB. |
+| D-02 | `mass_schedules.start_time` adalah jadwal berulang mingguan | Simpan sebagai **jam dinding WIB** (tipe `time`, tanpa konversi UTC), karena tidak terikat tanggal. Hanya kolom `datetime` yang disimpan UTC. |
+| D-03 | Komunitas detail harus menampilkan "berita terkait" tetapi `posts` tidak punya relasi komunitas | Tambah `posts.community_id` (nullable FK). |
+| D-04 | Komunitas detail menampilkan "galeri singkat"; Galeri "menautkan album dengan berita/agenda" | Tambah `gallery_albums.post_id`, `event_id`, `community_id` (semua nullable FK, `ON DELETE SET NULL`). |
+| D-05 | Filter agenda "penyelenggara (komunitas/seksi)" tetapi hanya ada `community_id` | Penyelenggara = komunitas saja (`events.community_id`). Seksi tidak dimodelkan pada MVP. |
+| D-06 | Kategori berita "Pengumuman" vs tabel `announcements` (banner) | Dua hal berbeda. `posts` kategori Pengumuman = artikel pengumuman resmi. `announcements` = banner singkat di Beranda. Tidak saling terhubung otomatis. |
+| D-07 | Rute `.ics` tidak tercantum | Tambah rute publik `GET /agenda/{slug}/ics` untuk unduhan `.ics`; tautan Google Calendar dibangun di sisi klien dari data event. |
+| D-08 | Akun Super Admin bisa "dinonaktifkan" tetapi `users` tidak punya kolom status | Tambah `users.is_active` (bool, default true). Akun nonaktif tidak dapat login. |
+| D-09 | Pencegahan duplikasi jadwal misa | Unique index `(location_id, day_of_week, start_time)` + validasi Form Request dengan pesan Indonesia yang jelas. |
+| D-10 | Seeder konten layanan | Seed isi Lampiran A (Bagian 16) sebagai contoh dengan `is_active = false`. Layanan baru terbit setelah Super Admin memvalidasi. Pengecualian: kerangka enam layanan wajib ada. |
+| D-11 | Pencarian berita "judul dan isi" | MVP memakai `LIKE`/FULLTEXT MySQL pada `title`, `excerpt`, `content` (teks tanpa HTML). Tidak perlu Scout/Meilisearch. |
+| D-12 | `view_count` rawan inflasi oleh bot | Increment maksimal 1 kali per sesi per artikel dan abaikan user-agent bot umum. |
+| D-13 | Pembatalan kegiatan | Kegiatan `cancelled` tetap tampil dengan label; kegiatan `postponed` tampil dengan label "Ditunda". Keduanya tetap muncul di daftar mendatang. |
+| D-14 | Rich text editor | Tiptap (React). Output HTML disanitasi di server (mis. `mews/purifier` atau HTMLPurifier) dengan allowlist tag. Sanitasi di server wajib, sanitasi klien saja tidak cukup. |
+| D-15 | Autentikasi | Gunakan starter kit/Fortify Laravel yang kompatibel Inertia + React, lalu **hapus rute registrasi**. Login `/admin/login`, reset kata sandi via email. |
+| D-16 | Fondasi role dan permission | Gunakan **Spatie Laravel Permission** sebagai fondasi RBAC sejak MVP agar penambahan role/peran dan permission di masa depan tidak memerlukan migrasi dari custom `users.role`. MVP hanya mengaktifkan role `super_admin`; Role/Permission Management UI belum termasuk MVP. Otorisasi backend menggunakan Spatie Permission + Policy/Gate Laravel. |
 
 ---
 
@@ -110,21 +108,21 @@ Bagian ini menutup celah/ketidakkonsistenan pada spesifikasi sumber. Agent MUST 
 
 ### 3.1 Stack
 
-| Lapisan    | Teknologi                                               | Catatan                                                                                              |
-| ---------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Backend    | Laravel 13 (PHP)                                        | Routing, Form Request, Policy/Gate, Scheduler, Queue                                                 |
-| Penghubung | Inertia.js                                              | Monolit; **tidak ada REST API terpisah**. SSR dipertimbangkan untuk SEO (lihat NFR-SEO)              |
-| Frontend   | React                                                   | Halaman publik dan admin                                                                             |
-| Basis data | MySQL                                                   | Migrasi Laravel; `utf8mb4`                                                                           |
-| Berkas     | Filesystem Laravel                                      | Disk `public` untuk gambar, disk `private` (`local`) untuk dokumen; dapat dialihkan ke S3-compatible |
-| Gaya       | Tailwind CSS + shadcn/ui (disarankan)                   | Konsistensi dan kecepatan                                                                            |
-| Gambar     | Intervention Image atau Spatie Media Library (opsional) | Thumbnail, WebP, strip EXIF                                                                          |
-| Rich text  | Tiptap                                                  | Output HTML disanitasi                                                                               |
-| Build      | Vite                                                    |                                                                                                      |
+| Lapisan | Teknologi | Catatan |
+| --- | --- | --- |
+| Backend | Laravel 13 (PHP) | Routing, Form Request, Policy/Gate, Scheduler, Queue |
+| Penghubung | Inertia.js | Monolit; **tidak ada REST API terpisah**. SSR dipertimbangkan untuk SEO (lihat NFR-SEO) |
+| Frontend | React | Halaman publik dan admin |
+| Basis data | MySQL | Migrasi Laravel; `utf8mb4` |
+| Berkas | Filesystem Laravel | Disk `public` untuk gambar, disk `private` (`local`) untuk dokumen; dapat dialihkan ke S3-compatible |
+| Gaya | Tailwind CSS + shadcn/ui (disarankan) | Konsistensi dan kecepatan |
+| Gambar | Intervention Image atau Spatie Media Library (opsional) | Thumbnail, WebP, strip EXIF |
+| Rich text | Tiptap | Output HTML disanitasi |
+| Build | Vite | |
 
 ### 3.2 Struktur Direktori
 
-```txt
+```
 app/
   Http/Controllers/Public/*      # controller tipis, return Inertia::render
   Http/Controllers/Admin/*
@@ -159,31 +157,34 @@ docs/{DECISIONS.md,ADMIN_GUIDE.md}
 
 ## 4. Peran dan Hak Akses
 
-| Peran       | Deskripsi                                                                     | Akses                                                                   |
-| ----------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Pengunjung  | Siapa pun tanpa login                                                         | Baca konten terbit, unduh dokumen, buka tautan Google Form, cari/filter |
+| Peran | Deskripsi | Akses |
+| --- | --- | --- |
+| Pengunjung | Siapa pun tanpa login | Baca konten terbit, unduh dokumen, buka tautan Google Form, cari/filter |
 | Super Admin | Satu-satunya role pengelola; dapat dipegang >1 orang (disarankan min. 2 akun) | Penuh atas seluruh modul, pengaturan situs, media, dan akun Super Admin |
 
-- AUTH-R1 (MUST): seluruh rute `/admin/*` (kecuali login/reset kata sandi) dilindungi `auth` + cek `is_active` + cek `role = super_admin`.
+- AUTH-R1 (MUST): seluruh rute `/admin/*` (kecuali login/reset kata sandi) dilindungi `auth` + cek `is_active` + authorization berbasis Spatie Permission; pada MVP role yang memiliki akses admin penuh adalah `super_admin`.
 - AUTH-R2 (MUST): tidak ada pendaftaran publik.
-- AUTH-R3 (SHOULD): rancang Policy per modul walau sekarang semua `true` untuk Super Admin, agar role P1 (Admin Konten, Editor) bisa ditambahkan tanpa refaktor besar.
-- Istilah "admin" di seluruh dokumen = Super Admin.
+- AUTH-R3 (MUST): model `User` menggunakan `Spatie\Permission\Traits\HasRoles` dan role/permission menjadi sumber kebenaran otorisasi; jangan membuat kolom `users.role` sebagai sumber otorisasi kedua.
+- AUTH-R4 (MUST): Policy/Gate Laravel tetap digunakan untuk aturan akses berbasis resource/domain. Spatie Permission menyediakan role/permission assignment, sedangkan Policy menentukan otorisasi kontekstual bila diperlukan.
+- AUTH-R5 (MUST): `super_admin` adalah system role awal. Role/permission management UI belum dibangun pada MVP.
+- AUTH-R6 (SHOULD): desain permission naming menggunakan pola berbasis aksi-resource (mis. `posts.view`, `posts.create`, `posts.update`, `posts.delete`) agar role baru dapat ditambahkan tanpa refaktor struktur otorisasi.
+- Istilah "admin" di seluruh dokumen = Super Admin pada MVP.
 
 Matriks akses:
 
-| Modul                                   | Super Admin | Pengunjung                 |
-| --------------------------------------- | ----------- | -------------------------- |
-| Akun dan pengaturan situs               | Penuh       | —                          |
-| Beranda (hero, pengumuman)              | Penuh       | Lihat                      |
-| Profil                                  | Penuh       | Lihat                      |
-| Jadwal Misa                             | Penuh       | Lihat                      |
-| Berita (termasuk terbit dan hapus)      | Penuh       | Lihat                      |
-| Agenda                                  | Penuh       | Lihat                      |
-| Pelayanan (termasuk tautan Google Form) | Penuh       | Lihat dan buka Google Form |
-| Komunitas                               | Penuh       | Lihat                      |
-| Galeri                                  | Penuh       | Lihat                      |
-| Kontak                                  | Penuh       | Lihat                      |
-| Download                                | Penuh       | Lihat dan unduh            |
+| Modul | Super Admin | Pengunjung |
+| --- | --- | --- |
+| Akun dan pengaturan situs | Penuh | — |
+| Beranda (hero, pengumuman) | Penuh | Lihat |
+| Profil | Penuh | Lihat |
+| Jadwal Misa | Penuh | Lihat |
+| Berita (termasuk terbit dan hapus) | Penuh | Lihat |
+| Agenda | Penuh | Lihat |
+| Pelayanan (termasuk tautan Google Form) | Penuh | Lihat dan buka Google Form |
+| Komunitas | Penuh | Lihat |
+| Galeri | Penuh | Lihat |
+| Kontak | Penuh | Lihat |
+| Download | Penuh | Lihat dan unduh |
 
 ---
 
@@ -191,38 +192,38 @@ Matriks akses:
 
 ### 5.1 Rute Publik
 
-| URL                                                                                   | Halaman     | Catatan                                                                         |
-| ------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------- |
-| `/`                                                                                   | Beranda     | Agregasi data banyak modul                                                      |
-| `/profil`, `/profil/sejarah`, `/profil/wilayah`, `/profil/pastor`, `/profil/struktur` | Profil      | `/profil` redirect atau menampilkan ringkasan; sub-halaman via tab/menu samping |
-| `/jadwal-misa`                                                                        | Jadwal Misa | Tab Mingguan dan Misa Khusus                                                    |
-| `/berita`, `/berita/{slug}`                                                           | Berita      | Daftar (filter, pencarian) dan detail                                           |
-| `/agenda`, `/agenda/{slug}`                                                           | Agenda      | Kalender, daftar, detail                                                        |
-| `/agenda/{slug}/ics`                                                                  | Unduh .ics  | Tambahan (D-07)                                                                 |
-| `/pelayanan`, `/pelayanan/{slug}`                                                     | Pelayanan   | Indeks dan detail                                                               |
-| `/komunitas`, `/komunitas/{slug}`                                                     | Komunitas   | Indeks, detail, bagian Wilayah dan Lingkungan                                   |
-| `/galeri`, `/galeri/{slug}`                                                           | Galeri      | Daftar album, detail album                                                      |
-| `/kontak`                                                                             | Kontak      |                                                                                 |
-| `/download`, `/download/{id}/unduh`                                                   | Download    | Unduhan lewat controller                                                        |
-| `/sitemap.xml`, `/robots.txt`                                                         | SEO         | Dihasilkan otomatis                                                             |
+| URL | Halaman | Catatan |
+| --- | --- | --- |
+| `/` | Beranda | Agregasi data banyak modul |
+| `/profil`, `/profil/sejarah`, `/profil/visi-misi`, `/profil/wilayah`, `/profil/pastor`, `/profil/struktur` | Profil | `/profil` redirect atau menampilkan ringkasan; sub-halaman via tab/menu samping |
+| `/jadwal-misa` | Jadwal Misa | Tab Mingguan dan Misa Khusus |
+| `/berita`, `/berita/{slug}` | Berita | Daftar (filter, pencarian) dan detail |
+| `/agenda`, `/agenda/{slug}` | Agenda | Kalender, daftar, detail |
+| `/agenda/{slug}/ics` | Unduh .ics | Tambahan (D-07) |
+| `/pelayanan`, `/pelayanan/{slug}` | Pelayanan | Indeks dan detail |
+| `/komunitas`, `/komunitas/{slug}` | Komunitas | Indeks, detail, bagian Wilayah dan Lingkungan |
+| `/galeri`, `/galeri/{slug}` | Galeri | Daftar album, detail album |
+| `/kontak` | Kontak | |
+| `/download`, `/download/{id}/unduh` | Download | Unduhan lewat controller |
+| `/sitemap.xml`, `/robots.txt` | SEO | Dihasilkan otomatis |
 
 ### 5.2 Rute Admin
 
-| URL                                                                                        | Fungsi                                                            |
-| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `/admin/login`, `/admin/logout`                                                            | Autentikasi (plus alur lupa/reset kata sandi)                     |
-| `/admin`                                                                                   | Dasbor                                                            |
-| `/admin/hero`, `/admin/pengumuman`                                                         | Hero dan pengumuman Beranda                                       |
-| `/admin/profil/*`                                                                          | Sejarah, pastor, periode dan anggota pengurus                     |
+| URL | Fungsi |
+| --- | --- |
+| `/admin/login`, `/admin/logout` | Autentikasi (plus alur lupa/reset kata sandi) |
+| `/admin` | Dasbor |
+| `/admin/hero`, `/admin/pengumuman` | Hero dan pengumuman Beranda |
+| `/admin/profil/*` | Sejarah, visi/misi, pastor, periode dan anggota pengurus |
 | `/admin/lokasi`, `/admin/jadwal-misa`, `/admin/misa-khusus`, `/admin/pemberitahuan-jadwal` | Master lokasi, jadwal rutin, misa khusus, pemberitahuan perubahan |
-| `/admin/berita`, `/admin/kategori-berita`                                                  | Artikel dan kategori                                              |
-| `/admin/agenda`, `/admin/kategori-agenda`                                                  | Kegiatan dan kategori                                             |
-| `/admin/pelayanan`                                                                         | Layanan, syarat, langkah, FAQ                                     |
-| `/admin/komunitas`, `/admin/jenis-komunitas`, `/admin/wilayah`                             | Komunitas, jenis, wilayah/lingkungan                              |
-| `/admin/galeri`                                                                            | Album dan foto                                                    |
-| `/admin/download`, `/admin/kategori-download`                                              | Dokumen dan kategori                                              |
-| `/admin/pengaturan`                                                                        | Pengaturan situs dan kontak                                       |
-| `/admin/akun`                                                                              | Profil, kata sandi, kelola akun Super Admin                       |
+| `/admin/berita`, `/admin/kategori-berita` | Artikel dan kategori |
+| `/admin/agenda`, `/admin/kategori-agenda` | Kegiatan dan kategori |
+| `/admin/pelayanan` | Layanan, syarat, langkah, FAQ |
+| `/admin/komunitas`, `/admin/jenis-komunitas`, `/admin/wilayah` | Komunitas, jenis, wilayah/lingkungan |
+| `/admin/galeri` | Album dan foto |
+| `/admin/download`, `/admin/kategori-download` | Dokumen dan kategori |
+| `/admin/pengaturan` | Pengaturan situs dan kontak |
+| `/admin/akun` | Profil, kata sandi, kelola akun Super Admin |
 
 ### 5.3 Navigasi Utama (header publik)
 
@@ -240,13 +241,13 @@ Logo paroki; menu: Profil, Jadwal Misa, Berita, Agenda, Pelayanan, Komunitas, Ga
 
 ### 6.2 Gambar dan Media
 
-| Jenis                                        | Format       | Maks. | Aturan                                                                   |
-| -------------------------------------------- | ------------ | ----- | ------------------------------------------------------------------------ |
-| Hero Beranda                                 | JPG/PNG/WebP | 3 MB  | Rasio disarankan 16:9, lebar min. 1600 px, `alt_text` wajib              |
-| Gambar utama berita                          | JPG/PNG/WebP | 3 MB  | Varian: thumbnail, medium, besar; konversi WebP; `image_alt` wajib       |
-| Foto profil pastor/pengurus                  | JPG/PNG/WebP | 2 MB  | Rasio 3:4 atau 1:1                                                       |
-| Foto galeri                                  | JPG/PNG/WebP | 5 MB  | Thumbnail + medium + WebP; file asli disimpan terpisah; EXIF GPS dihapus |
-| Poster agenda, logo komunitas, foto linimasa | JPG/PNG/WebP | 3 MB  | Dioptimalkan sama seperti di atas                                        |
+| Jenis | Format | Maks. | Aturan |
+| --- | --- | --- | --- |
+| Hero Beranda | JPG/PNG/WebP | 3 MB | Rasio disarankan 16:9, lebar min. 1600 px, `alt_text` wajib |
+| Gambar utama berita | JPG/PNG/WebP | 3 MB | Varian: thumbnail, medium, besar; konversi WebP; `image_alt` wajib |
+| Foto profil pastor/pengurus | JPG/PNG/WebP | 2 MB | Rasio 3:4 atau 1:1 |
+| Foto galeri | JPG/PNG/WebP | 5 MB | Thumbnail + medium + WebP; file asli disimpan terpisah; EXIF GPS dihapus |
+| Poster agenda, logo komunitas, foto linimasa | JPG/PNG/WebP | 3 MB | Dioptimalkan sama seperti di atas |
 
 - XC-M1 (MUST): pemrosesan varian lewat **queue job**; UI admin menampilkan status pemrosesan.
 - XC-M2 (MUST): strip EXIF (termasuk GPS) dari semua gambar yang dipublikasikan.
@@ -302,20 +303,20 @@ Skema tabel lengkap ada di **Bagian 9**. Pada tiap fitur, "Data" hanya merujuk n
 
 **Blok (urutan atas ke bawah):**
 
-| #   | Blok                  | Isi                                                                                           | Sumber                                      |
-| --- | --------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1   | Header                | Logo, menu, tombol pintasan Jadwal Misa; hamburger di ponsel                                  | `site_settings`                             |
-| 2   | Hero                  | Slider maks. 5 slide: gambar, judul, tagline/ayat, 2 tombol (Lihat Jadwal Misa, Hubungi Kami) | `hero_slides` aktif, urut `sort_order`      |
-| 3   | Bar pengumuman        | Banner dengan warna sesuai `level`; dapat ditutup                                             | `announcements` aktif dalam rentang tanggal |
-| 4   | Identitas paroki      | Nama lengkap, logo, pelindung/pesta pelindung, ringkasan, tautan ke Profil                    | `site_settings`                             |
-| 5   | Ringkasan Jadwal Misa | Misa terdekat berikutnya + jadwal mingguan ringkas + lokasi + tautan ke halaman lengkap       | Resolver "misa berikutnya"                  |
-| 6   | Berita terbaru        | 3–6 kartu (gambar, kategori, judul, tanggal, cuplikan)                                        | `posts` terbit                              |
-| 7   | Agenda mendatang      | 3–5 kegiatan terdekat (tanggal, judul, jam, lokasi)                                           | `events`                                    |
-| 8   | Renungan              | 1 kartu renungan terbaru                                                                      | `posts` kategori Renungan                   |
-| 9   | Pintasan layanan      | Ikon ke Baptis, Komuni Pertama, Krisma, Pernikahan, Perminyakan Orang Sakit                   | `services` aktif                            |
-| 10  | Cuplikan galeri       | 6 foto terbaru + tautan galeri                                                                | `gallery_photos` dari album terbit          |
-| 11  | Kontak singkat + peta | Alamat, telepon/WA, tautan ke Kontak                                                          | `site_settings` (sumber tunggal)            |
-| 12  | Footer                | Identitas, tautan cepat, kontak, media sosial, hak cipta                                      | `site_settings`                             |
+| # | Blok | Isi | Sumber |
+| --- | --- | --- | --- |
+| 1 | Header | Logo, menu, tombol pintasan Jadwal Misa; hamburger di ponsel | `site_settings` |
+| 2 | Hero | Slider maks. 5 slide: gambar, judul, tagline/ayat, 2 tombol (Lihat Jadwal Misa, Hubungi Kami) | `hero_slides` aktif, urut `sort_order` |
+| 3 | Bar pengumuman | Banner dengan warna sesuai `level`; dapat ditutup | `announcements` aktif dalam rentang tanggal |
+| 4 | Identitas paroki | Nama lengkap, logo, pelindung/pesta pelindung, ringkasan, tautan ke Profil | `site_settings` |
+| 5 | Ringkasan Jadwal Misa | Misa terdekat berikutnya + jadwal mingguan ringkas + lokasi + tautan ke halaman lengkap | Resolver "misa berikutnya" |
+| 6 | Berita terbaru | 3–6 kartu (gambar, kategori, judul, tanggal, cuplikan) | `posts` terbit |
+| 7 | Agenda mendatang | 3–5 kegiatan terdekat (tanggal, judul, jam, lokasi) | `events` |
+| 8 | Renungan | 1 kartu renungan terbaru | `posts` kategori Renungan |
+| 9 | Pintasan layanan | Ikon ke Baptis, Komuni Pertama, Krisma, Pernikahan, Perminyakan Orang Sakit | `services` aktif |
+| 10 | Cuplikan galeri | 6 foto terbaru + tautan galeri | `gallery_photos` dari album terbit |
+| 11 | Kontak singkat + peta | Alamat, telepon/WA, tautan ke Kontak | `site_settings` (sumber tunggal) |
+| 12 | Footer | Identitas, tautan cepat, kontak, media sosial, hak cipta | `site_settings` |
 
 **Fungsi publik:** melihat ringkasan tanpa login; pindah ke halaman detail lewat kartu/tombol; menutup banner pengumuman (status disimpan di browser agar tidak muncul terus; kunci berdasarkan `announcement.id` + `updated_at` sehingga pengumuman yang diedit muncul lagi).
 
@@ -348,26 +349,25 @@ Skema tabel lengkap ada di **Bagian 9**. Pada tiap fitur, "Data" hanya merujuk n
 
 ### 7.2 Profil Paroki — `/profil/*`
 
-**Tujuan:** memperkenalkan paroki: sejarah, arah pelayanan yang tersedia, wilayah, pastor, pengurus. Konten relatif statis namun mudah diperbarui saat pergantian pastor atau periode.
+**Tujuan:** memperkenalkan paroki: sejarah, arah pelayanan, wilayah, pastor, pengurus. Konten relatif statis namun mudah diperbarui saat pergantian pastor atau periode.
 
 **Data:** `parish_profile_sections`, `history_timeline`, `clergy`, `board_periods`, `board_members`, `areas` (dikelola di Komunitas).
 
-**Batasan MVP:** Visi & Misi tidak termasuk Profil Paroki sampai tersedia keputusan dan konten resmi dari paroki. Jangan menampilkan sub-halaman kosong atau placeholder untuk Visi & Misi.
-
 **Sub-halaman:**
 
-| Sub-halaman           | Isi                                                                                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sejarah               | Narasi + linimasa (tahun, judul peristiwa, uraian, foto)                                                                                        |
-| Wilayah Pelayanan     | Daftar wilayah, stasi, lingkungan; ringkasan jumlah; tautan ke detail di Komunitas; peta opsional                                               |
-| Pastor Paroki         | Kartu imam bertugas (foto, nama, jabatan, masa tugas, riwayat singkat, kutipan sambutan); bagian "Riwayat Pastor Paroki" untuk yang purna tugas |
-| Struktur Kepengurusan | Bagan/kartu DPP per periode: Ketua, Wakil Ketua, Sekretaris, Bendahara, koordinator seksi/bidang; pemilih periode jika arsip diaktifkan         |
+| Sub-halaman | Isi |
+| --- | --- |
+| Sejarah | Narasi + linimasa (tahun, judul peristiwa, uraian, foto) |
+| Visi dan Misi | Visi, daftar misi, motto/arah pastoral periode berjalan |
+| Wilayah Pelayanan | Daftar wilayah, stasi, lingkungan; ringkasan jumlah; tautan ke detail di Komunitas; peta opsional |
+| Pastor Paroki | Kartu imam bertugas (foto, nama, jabatan, masa tugas, riwayat singkat, kutipan sambutan); bagian "Riwayat Pastor Paroki" untuk yang purna tugas |
+| Struktur Kepengurusan | Bagan/kartu DPP per periode: Ketua, Wakil Ketua, Sekretaris, Bendahara, koordinator seksi/bidang; pemilih periode jika arsip diaktifkan |
 
 Navigasi sub-halaman memakai tab atau menu samping.
 
 **Fungsi admin:**
 
-- Edit teks sejarah dan konten profil lain yang sudah dikonfirmasi paroki (mis. motto/pelindung bila tersedia).
+- Edit teks sejarah, visi, misi, motto (rich text).
 - CRUD linimasa sejarah + atur urutan.
 - CRUD pastor; tandai Bertugas Saat Ini / Purna Tugas; ubah masa tugas.
 - Buat periode baru, tambah anggota, atur seksi dan urutan, arsipkan periode lama.
@@ -532,14 +532,14 @@ Navigasi sub-halaman memakai tab atau menu samping.
 
 **Enam layanan wajib (MVP):**
 
-| #   | Layanan                           | Slug                      | Kategori      | Tombol Daftar (Google Form)     |
-| --- | --------------------------------- | ------------------------- | ------------- | ------------------------------- |
-| 1   | Baptis Bayi                       | `baptis-bayi`             | `inisiasi`    | Ya                              |
-| 2   | Baptis Dewasa                     | `baptis-dewasa`           | `inisiasi`    | Ya                              |
-| 3   | Komuni Pertama                    | `komuni-pertama`          | `inisiasi`    | Ya                              |
-| 4   | Krisma                            | `krisma`                  | `inisiasi`    | Ya                              |
-| 5   | Pernikahan                        | `pernikahan`              | `perkawinan`  | Ya                              |
-| 6   | Pelayanan Perminyakan Orang Sakit | `perminyakan-orang-sakit` | `orang_sakit` | **Tidak**; kotak kontak darurat |
+| # | Layanan | Slug | Kategori | Tombol Daftar (Google Form) |
+| --- | --- | --- | --- | --- |
+| 1 | Baptis Bayi | `baptis-bayi` | `inisiasi` | Ya |
+| 2 | Baptis Dewasa | `baptis-dewasa` | `inisiasi` | Ya |
+| 3 | Komuni Pertama | `komuni-pertama` | `inisiasi` | Ya |
+| 4 | Krisma | `krisma` | `inisiasi` | Ya |
+| 5 | Pernikahan | `pernikahan` | `perkawinan` | Ya |
+| 6 | Pelayanan Perminyakan Orang Sakit | `perminyakan-orang-sakit` | `orang_sakit` | **Tidak**; kotak kontak darurat |
 
 Pengelompokan indeks: Sakramen Inisiasi, Perkawinan, Pelayanan Orang Sakit.
 
@@ -565,12 +565,12 @@ Pengelompokan indeks: Sakramen Inisiasi, Perkawinan, Pelayanan Orang Sakit.
 
 **Logika tombol Daftar (MUST, tabel keputusan):**
 
-| Kondisi                                      | Tampilan                                                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `is_emergency = true`                        | Tidak ada tombol Daftar; tampil kotak kontak cepat + tombol **"Hubungi Sekarang"** (telepon/WhatsApp)                                      |
-| `form_url` terisi dan `is_form_open = true`  | Tombol menonjol (label `form_button_label`, bawaan "Daftar Sekarang") yang membuka `form_url` di **tab baru**, `rel="noopener noreferrer"` |
-| `form_url` terisi dan `is_form_open = false` | Tombol nonaktif (tidak dapat diklik) berlabel **"Pendaftaran Ditutup"** + `form_closed_message`                                            |
-| `form_url` kosong (bukan darurat)            | Pesan "Silakan hubungi sekretariat" + kontak sekretariat                                                                                   |
+| Kondisi | Tampilan |
+| --- | --- |
+| `is_emergency = true` | Tidak ada tombol Daftar; tampil kotak kontak cepat + tombol **"Hubungi Sekarang"** (telepon/WhatsApp) |
+| `form_url` terisi dan `is_form_open = true` | Tombol menonjol (label `form_button_label`, bawaan "Daftar Sekarang") yang membuka `form_url` di **tab baru**, `rel="noopener noreferrer"` |
+| `form_url` terisi dan `is_form_open = false` | Tombol nonaktif (tidak dapat diklik) berlabel **"Pendaftaran Ditutup"** + `form_closed_message` |
+| `form_url` kosong (bukan darurat) | Pesan "Silakan hubungi sekretariat" + kontak sekretariat |
 
 **Fungsi admin:**
 
@@ -749,16 +749,16 @@ Pengelompokan indeks: Sakramen Inisiasi, Perkawinan, Pelayanan Orang Sakit.
 
 Dibangun dengan stack yang sama (Laravel + Inertia + React), di `/admin`, dengan `AdminLayout` terpisah.
 
-| Komponen                | Persyaratan                                                                                                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Autentikasi             | Login email+kata sandi; logout; lupa/reset kata sandi; **rate limiting** login (mis. 5 percobaan/menit per email+IP); tanpa registrasi publik; akun dibuat oleh Super Admin |
-| Manajemen akun          | Ubah profil dan kata sandi sendiri; tambah/nonaktifkan Super Admin lain; **tidak boleh menonaktifkan/menghapus diri sendiri atau akun aktif terakhir**                      |
-| Dasbor                  | Jumlah berita, agenda mendatang, dokumen, aktivitas terbaru; pintasan "Tulis Berita" dan "Tambah Agenda"                                                                    |
-| CRUD modul              | Form tambah/ubah/hapus untuk seluruh modul Bab 7; tabel daftar dengan pencarian, filter, paginasi                                                                           |
-| Manajemen media         | Unggah, validasi, kompresi, varian otomatis; alt text wajib untuk gambar kunci                                                                                              |
-| Editor teks kaya        | Tiptap; keluaran HTML disanitasi di server                                                                                                                                  |
-| Pengaturan situs        | Nama paroki, logo, favicon, kontak, media sosial, SEO dasar, blok Beranda                                                                                                   |
-| Notifikasi dan validasi | Pesan sukses/gagal jelas dalam Bahasa Indonesia; dialog konfirmasi sebelum hapus                                                                                            |
+| Komponen | Persyaratan |
+| --- | --- |
+| Autentikasi | Login email+kata sandi; logout; lupa/reset kata sandi; **rate limiting** login (mis. 5 percobaan/menit per email+IP); tanpa registrasi publik; akun dibuat oleh Super Admin |
+| Manajemen akun | Ubah profil dan kata sandi sendiri; tambah/nonaktifkan Super Admin lain; **tidak boleh menonaktifkan/menghapus diri sendiri atau akun aktif terakhir** |
+| Dasbor | Jumlah berita, agenda mendatang, dokumen, aktivitas terbaru; pintasan "Tulis Berita" dan "Tambah Agenda" |
+| CRUD modul | Form tambah/ubah/hapus untuk seluruh modul Bab 7; tabel daftar dengan pencarian, filter, paginasi |
+| Manajemen media | Unggah, validasi, kompresi, varian otomatis; alt text wajib untuk gambar kunci |
+| Editor teks kaya | Tiptap; keluaran HTML disanitasi di server |
+| Pengaturan situs | Nama paroki, logo, favicon, kontak, media sosial, SEO dasar, blok Beranda |
+| Notifikasi dan validasi | Pesan sukses/gagal jelas dalam Bahasa Indonesia; dialog konfirmasi sebelum hapus |
 
 Persyaratan UX admin:
 
@@ -791,7 +791,7 @@ Aturan umum: semua tabel punya `id` (bigint unsigned PK), `created_at`, `updated
 
 **users**
 
-- `name string`, `email string unique`, `password string` (hash bcrypt/argon2), `role enum('super_admin') default 'super_admin'`, `is_active bool default true` (D-08), `email_verified_at datetime null`, `remember_token`.
+- `name string`, `email string unique`, `password string` (hash bcrypt/argon2), `is_active bool default true` (D-08), `email_verified_at datetime null`, `remember_token`. Role/permission dikelola oleh Spatie Permission; tidak ada kolom `role` pada `users`.
 
 **site_settings**
 
@@ -814,8 +814,7 @@ Tabel standar Laravel: `password_reset_tokens`, `sessions`, `jobs`, `failed_jobs
 
 **parish_profile_sections**
 
-- `key string unique` (`sejarah`, `motto`, `pelindung`, `ringkasan`, dll.), `title string`, `content longText` (HTML tersanitasi).
-- **Catatan:** `visi` dan `misi` tidak termasuk data MVP karena Paroki HSPMTB Putussibau belum memiliki visi dan misi yang ditetapkan untuk dipublikasikan. Jangan membuat placeholder atau data fiktif untuk keduanya.
+- `key string unique` (`sejarah`, `visi`, `misi`, `motto`, `pelindung`, `ringkasan`, dll.), `title string`, `content longText` (HTML tersanitasi).
 
 **history_timeline**
 
@@ -928,19 +927,19 @@ Tabel standar Laravel: `password_reset_tokens`, `sessions`, `jobs`, `failed_jobs
 
 ## 10. Persyaratan Non-Fungsional
 
-| ID         | Aspek          | Persyaratan                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ---------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NFR-RESP   | Responsif      | Optimal 360 px hingga desktop; area sentuh ≥ 44 px; tanpa scroll horizontal                                                                                                                                                                                                                                                                                                                                                                           |
-| NFR-PERF   | Kinerja        | LCP < 2,5 s pada 4G; gambar WebP + responsif + lazy; cache data jarang berubah; eager loading (tanpa N+1); jaga ukuran bundel JS (code splitting per halaman via Inertia/Vite); uji dengan throttling 3G/4G                                                                                                                                                                                                                                           |
-| NFR-SEO    | SEO            | Judul + meta description per halaman (Inertia `Head`); Open Graph + Twitter Card; URL bersih bergaris slug; `sitemap.xml` + `robots.txt` otomatis; structured data `Organization` dan `Event`; **pertimbangkan Inertia SSR** agar crawler dan pratinjau tautan membaca konten (bila SSR tidak diaktifkan, pastikan meta tag OG tetap dirender di server pada respons HTML awal untuk halaman Beranda, Berita, Agenda, Pelayanan)                      |
-| NFR-SEC    | Keamanan       | HTTPS wajib; CSRF; validasi input server; sanitasi HTML; anti-XSS, SQL injection (Eloquent/binding), mass assignment (`$fillable`); rate limit login; validasi MIME unggahan; validasi domain tautan eksternal (Google Form, peta); dokumen non-publik; hash kata sandi; header keamanan (CSP bila memungkinkan, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`); `APP_DEBUG=false` di produksi; peninjauan 2FA untuk fase berikutnya |
-| NFR-PRIV   | Privasi        | Tidak menampilkan data pribadi tanpa persetujuan; hapus EXIF; kebijakan privasi singkat di footer; website tidak menyimpan data pendaftar layanan                                                                                                                                                                                                                                                                                                     |
-| NFR-A11Y   | Aksesibilitas  | Kontras WCAG AA; alt text; navigasi keyboard; label form; font dasar ≥ 16 px; lightbox dan menu hamburger aksesibel (fokus, ARIA, `Esc`)                                                                                                                                                                                                                                                                                                              |
-| NFR-COMPAT | Kompatibilitas | Dua versi terbaru Chrome, Edge, Firefox, Safari (iOS/macOS), dan browser bawaan Android                                                                                                                                                                                                                                                                                                                                                               |
-| NFR-AVAIL  | Ketersediaan   | Backup otomatis harian basis data + berkas, retensi ≥ 14 hari, uji pemulihan berkala, pemantauan uptime dasar                                                                                                                                                                                                                                                                                                                                         |
-| NFR-SCALE  | Skalabilitas   | Ratusan–ribuan kunjungan/hari pada satu VPS sederhana; dapat ditingkatkan nanti                                                                                                                                                                                                                                                                                                                                                                       |
-| NFR-I18N   | Lokalisasi     | Bahasa Indonesia, WIB, format tanggal/jam lokal; `app.locale = id`                                                                                                                                                                                                                                                                                                                                                                                    |
-| NFR-MAINT  | Pemeliharaan   | Kode terstruktur; migrasi + seeder; test otomatis alur kritis; dokumentasi pengelolaan untuk pengurus                                                                                                                                                                                                                                                                                                                                                 |
+| ID | Aspek | Persyaratan |
+| --- | --- | --- |
+| NFR-RESP | Responsif | Optimal 360 px hingga desktop; area sentuh ≥ 44 px; tanpa scroll horizontal |
+| NFR-PERF | Kinerja | LCP < 2,5 s pada 4G; gambar WebP + responsif + lazy; cache data jarang berubah; eager loading (tanpa N+1); jaga ukuran bundel JS (code splitting per halaman via Inertia/Vite); uji dengan throttling 3G/4G |
+| NFR-SEO | SEO | Judul + meta description per halaman (Inertia `Head`); Open Graph + Twitter Card; URL bersih bergaris slug; `sitemap.xml` + `robots.txt` otomatis; structured data `Organization` dan `Event`; **pertimbangkan Inertia SSR** agar crawler dan pratinjau tautan membaca konten (bila SSR tidak diaktifkan, pastikan meta tag OG tetap dirender di server pada respons HTML awal untuk halaman Beranda, Berita, Agenda, Pelayanan) |
+| NFR-SEC | Keamanan | HTTPS wajib; CSRF; validasi input server; sanitasi HTML; anti-XSS, SQL injection (Eloquent/binding), mass assignment (`$fillable`); rate limit login; validasi MIME unggahan; validasi domain tautan eksternal (Google Form, peta); dokumen non-publik; hash kata sandi; header keamanan (CSP bila memungkinkan, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`); `APP_DEBUG=false` di produksi; peninjauan 2FA untuk fase berikutnya |
+| NFR-PRIV | Privasi | Tidak menampilkan data pribadi tanpa persetujuan; hapus EXIF; kebijakan privasi singkat di footer; website tidak menyimpan data pendaftar layanan |
+| NFR-A11Y | Aksesibilitas | Kontras WCAG AA; alt text; navigasi keyboard; label form; font dasar ≥ 16 px; lightbox dan menu hamburger aksesibel (fokus, ARIA, `Esc`) |
+| NFR-COMPAT | Kompatibilitas | Dua versi terbaru Chrome, Edge, Firefox, Safari (iOS/macOS), dan browser bawaan Android |
+| NFR-AVAIL | Ketersediaan | Backup otomatis harian basis data + berkas, retensi ≥ 14 hari, uji pemulihan berkala, pemantauan uptime dasar |
+| NFR-SCALE | Skalabilitas | Ratusan–ribuan kunjungan/hari pada satu VPS sederhana; dapat ditingkatkan nanti |
+| NFR-I18N | Lokalisasi | Bahasa Indonesia, WIB, format tanggal/jam lokal; `app.locale = id` |
+| NFR-MAINT | Pemeliharaan | Kode terstruktur; migrasi + seeder; test otomatis alur kritis; dokumentasi pengelolaan untuk pengurus |
 
 ---
 
@@ -954,31 +953,34 @@ Tabel standar Laravel: `password_reset_tokens`, `sessions`, `jobs`, `failed_jobs
   - harian: pembersihan data kedaluwarsa (mis. token reset, sesi lama, berkas sementara unggahan gagal);
   - harian: backup (via paket/ skrip server).
 - **Penyimpanan berkas:** disk `public` untuk gambar (varian, WebP), disk `private` untuk dokumen dan file asli galeri. Konfigurasi dapat dialihkan ke S3-compatible via `.env`.
-- **Opsional:** Spatie Media Library/Intervention Image; paket sanitasi HTML. **Jangan** pasang Spatie Permission pada MVP (D-16).
+- **Media:** Spatie Media Library/Intervention Image MAY digunakan sesuai kebutuhan pemrosesan gambar.
+- **RBAC:** Spatie Laravel Permission **MUST** digunakan sebagai fondasi role dan permission (D-16).
 
 ---
 
 ## 12. Di Luar Cakupan MVP (JANGAN DIBANGUN)
 
-| Fitur                                                   | Prioritas nanti | Catatan                                      |
-| ------------------------------------------------------- | --------------- | -------------------------------------------- |
-| Formulir kontak / kirim pesan                           | P1              | Perlu anti-spam dan inbox admin              |
-| Pendaftaran sakramen native di website                  | P1              | MVP memakai tautan Google Form saja          |
-| Role tambahan (Admin Konten, Editor) + alur persetujuan | P1              | Perlu matriks hak akses dan Policy per modul |
-| Pencarian global lintas modul                           | P1              | MVP: pencarian per modul                     |
-| Warta paroki digital (arsip mingguan)                   | P1              | Sementara via kategori Download              |
-| Bacaan harian + kalender liturgi otomatis               | P1              | Perlu sumber data berizin                    |
-| Siaran langsung misa                                    | P1              | Cukup sisipkan tautan pada artikel           |
-| Autentikasi dua faktor admin                            | P1              | Sangat disarankan                            |
-| Log aktivitas admin (audit trail)                       | P1              |                                              |
-| Galeri video                                            | P2              | Gunakan YouTube/Vimeo                        |
-| Newsletter / notifikasi (email/WhatsApp)                | P2              |                                              |
-| Donasi / persembahan online                             | P2              |                                              |
-| Login umat, data keluarga/lingkungan                    | P2              | Data pribadi sensitif                        |
-| Kegiatan berulang otomatis dan RSVP agenda              | P2              |                                              |
-| Multi-bahasa                                            | P2              |                                              |
+| Fitur | Prioritas nanti | Catatan |
+| --- | --- | --- |
+| Formulir kontak / kirim pesan | P1 | Perlu anti-spam dan inbox admin |
+| Pendaftaran sakramen native di website | P1 | MVP memakai tautan Google Form saja |
+| UI manajemen Role/Permission + role tambahan (Admin Konten, Editor) + alur persetujuan | P1 | Fondasi RBAC sudah tersedia pada MVP melalui Spatie Permission; penambahan role, permission, UI management, dan workflow approval dilakukan pada fase lanjutan |
+| Pencarian global lintas modul | P1 | MVP: pencarian per modul |
+| Warta paroki digital (arsip mingguan) | P1 | Sementara via kategori Download |
+| Bacaan harian + kalender liturgi otomatis | P1 | Perlu sumber data berizin |
+| Siaran langsung misa | P1 | Cukup sisipkan tautan pada artikel |
+| Autentikasi dua faktor admin | P1 | Sangat disarankan |
+| Log aktivitas admin (audit trail) | P1 | |
+| Galeri video | P2 | Gunakan YouTube/Vimeo |
+| Newsletter / notifikasi (email/WhatsApp) | P2 | |
+| Donasi / persembahan online | P2 | |
+| Login umat, data keluarga/lingkungan | P2 | Data pribadi sensitif |
+| Kegiatan berulang otomatis dan RSVP agenda | P2 | |
+| Multi-bahasa | P2 | |
 
-Agent MUST NOT menambahkan: tabel `roles/permissions`, akun umat, modul komentar, form kontak, RSVP, pembayaran, atau integrasi pihak ketiga selain Google Maps embed dan tautan Google Form/Calendar.
+Agent MUST NOT menambahkan: UI manajemen Role/Permission, role tambahan selain `super_admin`, akun umat, modul komentar, form kontak, RSVP, pembayaran, atau integrasi pihak ketiga selain Google Maps embed dan tautan Google Form/Calendar.
+
+**Catatan RBAC:** tabel dan struktur role/permission dari Spatie **memang harus ada** sebagai fondasi teknis MVP. Yang berada di luar cakupan MVP adalah UI untuk membuat/mengubah/menghapus role dan permission serta penggunaan role tambahan. `super_admin` adalah role sistem awal yang di-seed dan tidak boleh dihapus melalui UI pada MVP.
 
 ---
 
@@ -986,23 +988,19 @@ Agent MUST NOT menambahkan: tabel `roles/permissions`, akun umat, modul komentar
 
 Estimasi manusia 8–13 minggu (1–2 pengembang). Untuk agent, ikuti **urutan dependensi** berikut. Tiap fase selesai bila semua tugas tercentang dan test fase itu hijau.
 
-### Fase 0 — Product Scope & Initial Preparation
+### Fase 0 — Persiapan (non-kode, dikerjakan pihak paroki)
 
-> Fase ini **bukan blocker development**. Fitur dan struktur data dapat dibangun terlebih dahulu menggunakan placeholder/seed contoh yang jelas. Konten nyata dapat dimasukkan secara bertahap melalui Admin Panel setelah modul terkait tersedia.
-
-- [ ] Konfirmasi scope MVP dan dokumen produk.
-- [ ] Identifikasi data/aset paroki yang sudah tersedia.
-- [ ] Tandai data yang belum tersedia dengan placeholder `[ISI: ...]`.
-- [ ] Siapkan aset visual yang sudah tersedia.
-- [ ] Catat item `[CONFIRM]` untuk dikonfirmasi kemudian oleh pihak paroki.
-- [ ] **Jangan menunggu seluruh konten nyata sebelum Phase 01 dimulai.**
+- [ ] Konfirmasi dokumen; kumpulkan konten awal (bagian 17.1); identitas visual; wireframe halaman utama; siapkan Google Form per layanan.
 
 ### Fase 1 — Fondasi
 
 - [ ] Inisialisasi Laravel 13 + Inertia + React + Vite + Tailwind (+ shadcn/ui); MySQL `utf8mb4`.
 - [ ] `config/app.php`: `timezone=UTC`, `display_timezone=Asia/Pontianak`, `locale=id`; paket bahasa `lang/id`.
-- [ ] Migrasi `users` (+`role`,`is_active`), `site_settings`, tabel sistem. Seeder Super Admin dari variabel `.env` (**jangan hard-code kata sandi**).
+- [ ] Migrasi `users` (+`is_active`), `site_settings`, tabel sistem.
+- [ ] Instal dan konfigurasi **Spatie Laravel Permission**; publish migration/config; tambahkan `HasRoles` pada `User`; seed role sistem `super_admin` dan permission dasar; pastikan guard yang digunakan konsisten dengan autentikasi admin.
+- [ ] Seeder Super Admin dari variabel `.env` (**jangan hard-code kata sandi**) dan assign role `super_admin` melalui Spatie.
 - [ ] Autentikasi `/admin/login`, logout, reset kata sandi, rate limiting; hapus rute registrasi (D-15).
+- [ ] Terapkan authorization admin menggunakan `role`/`permission` dari Spatie + Policy/Gate Laravel; jangan gunakan `users.role`.
 - [ ] `PublicLayout` (header, footer, hamburger) dan `AdminLayout`; komponen UI dasar (Button, Card, Modal konfirmasi, Toast, Pagination, EmptyState).
 - [ ] Service pengaturan situs (+cache) dan halaman `/admin/pengaturan`.
 - [ ] Pipeline media: `ImageProcessor` (validasi MIME, strip EXIF, varian, WebP) + queue job + komponen unggah admin dengan progres.
@@ -1045,20 +1043,20 @@ Estimasi manusia 8–13 minggu (1–2 pengembang). Untuk agent, ikuti **urutan d
 
 Gunakan Pest atau PHPUnit untuk backend (Feature + Unit) dan pengujian komponen/E2E ringan (mis. Playwright) untuk alur kritis frontend. **Alur kritis yang MUST punya test otomatis:**
 
-| Area            | Kasus uji minimum                                                                                                                                                                                                                                                                                |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Misa berikutnya | Batas hari/jam (Sabtu 23.59, Minggu 07.29 vs 07.31); misa khusus lebih awal dari rutin; lokasi nonaktif diabaikan; tidak ada kandidat → `null`; filter lokasi                                                                                                                                    |
-| Jadwal          | Duplikasi `(lokasi, hari, jam)` ditolak; misa khusus lampau tidak tampil; notice kedaluwarsa tidak tampil                                                                                                                                                                                        |
-| Berita          | Draf/terjadwal/arsip → 404 publik; command terjadwal menerbitkan tepat waktu; slug unik dan stabil; sanitasi XSS; pinned maks. 2                                                                                                                                                                 |
-| Agenda          | `end_at < start_at` ditolak; kegiatan lintas tengah malam tampil di tanggal benar; `.ics` valid; label dibatalkan                                                                                                                                                                                |
-| Pelayanan       | Validator `form_url` (valid: `https://docs.google.com/forms/...`, `https://forms.gle/...`; invalid: `http://`, domain lain, `docs.google.com.evil.com`, path bukan `/forms/`, ada kredensial); logika tombol 4 kondisi; layanan darurat wajib telepon sebelum aktif; seed Lampiran A tidak aktif |
-| Profil          | Hanya satu periode aktif; `show_contact=false` menyembunyikan `phone` dari props                                                                                                                                                                                                                 |
-| Komunitas       | Lingkungan wajib wilayah induk; kontak tersembunyi tanpa persetujuan                                                                                                                                                                                                                             |
-| Galeri          | Unggah batch 20 foto; EXIF hilang; file non-gambar/oversize ditolak; album draf 404                                                                                                                                                                                                              |
-| Kontak          | Normalisasi WhatsApp; embed non-Google ditolak                                                                                                                                                                                                                                                   |
-| Download        | MIME palsu ditolak; unduh menambah counter; file draf 404; path storage tidak dapat diakses langsung; ganti berkas mempertahankan URL                                                                                                                                                            |
-| Auth            | Rate limit login; akun nonaktif tidak bisa login; rute admin menolak tamu; registrasi tidak ada; tidak bisa menonaktifkan akun aktif terakhir                                                                                                                                                    |
-| Privasi         | Props publik tidak memuat kolom `phone` kecuali `show_contact` benar                                                                                                                                                                                                                             |
+| Area | Kasus uji minimum |
+| --- | --- |
+| Misa berikutnya | Batas hari/jam (Sabtu 23.59, Minggu 07.29 vs 07.31); misa khusus lebih awal dari rutin; lokasi nonaktif diabaikan; tidak ada kandidat → `null`; filter lokasi |
+| Jadwal | Duplikasi `(lokasi, hari, jam)` ditolak; misa khusus lampau tidak tampil; notice kedaluwarsa tidak tampil |
+| Berita | Draf/terjadwal/arsip → 404 publik; command terjadwal menerbitkan tepat waktu; slug unik dan stabil; sanitasi XSS; pinned maks. 2 |
+| Agenda | `end_at < start_at` ditolak; kegiatan lintas tengah malam tampil di tanggal benar; `.ics` valid; label dibatalkan |
+| Pelayanan | Validator `form_url` (valid: `https://docs.google.com/forms/...`, `https://forms.gle/...`; invalid: `http://`, domain lain, `docs.google.com.evil.com`, path bukan `/forms/`, ada kredensial); logika tombol 4 kondisi; layanan darurat wajib telepon sebelum aktif; seed Lampiran A tidak aktif |
+| Profil | Hanya satu periode aktif; `show_contact=false` menyembunyikan `phone` dari props |
+| Komunitas | Lingkungan wajib wilayah induk; kontak tersembunyi tanpa persetujuan |
+| Galeri | Unggah batch 20 foto; EXIF hilang; file non-gambar/oversize ditolak; album draf 404 |
+| Kontak | Normalisasi WhatsApp; embed non-Google ditolak |
+| Download | MIME palsu ditolak; unduh menambah counter; file draf 404; path storage tidak dapat diakses langsung; ganti berkas mempertahankan URL |
+| Auth & RBAC | Rate limit login; akun nonaktif tidak bisa login; rute admin menolak tamu; registrasi tidak ada; user tanpa role `super_admin` ditolak dari area admin MVP; role `super_admin` terpasang melalui Spatie; tidak bisa menonaktifkan akun aktif terakhir |
+| Privasi | Props publik tidak memuat kolom `phone` kecuali `show_contact` benar |
 
 Test harus memakai factory dan `Carbon::setTestNow` untuk waktu deterministik.
 
@@ -1068,7 +1066,7 @@ Test harus memakai factory dan `Carbon::setTestNow` untuk waktu deterministik.
 
 - [ ] Seluruh 10 fitur P0 memenuhi semua `AC-*` masing-masing.
 - [ ] Seluruh konten dinamis dapat dikelola lewat panel admin oleh pengurus non-teknis.
-- [ ] Konten awal (sejarah/profil yang tersedia, jadwal misa, syarat layanan, kontak, ≥ 5 berita, agenda 3 bulan ke depan) terisi dan disetujui paroki.
+- [ ] Konten awal (profil, jadwal misa, syarat layanan, kontak, ≥ 5 berita, agenda 3 bulan ke depan) terisi dan disetujui paroki.
 - [ ] Tautan Google Form untuk lima layanan terpasang dan diuji; jawaban masuk ke Google Sheets milik akun resmi paroki.
 - [ ] Uji pada 360, 768, 1280 px dan browser utama berhasil.
 - [ ] Lighthouse mobile: Performance > 80, Accessibility > 90, SEO > 90.
@@ -1076,30 +1074,11 @@ Test harus memakai factory dan `Carbon::setTestNow` untuk waktu deterministik.
 - [ ] Panduan admin (PDF/video) dan pelatihan singkat diserahkan.
 - [ ] Tidak ada bug kritis atau mayor yang terbuka; seluruh test hijau.
 - [ ] Tidak ada fitur dari bagian 12 yang ikut terbangun.
+- [ ] Spatie Permission aktif sebagai fondasi RBAC; role `super_admin` berjalan; tidak ada custom `users.role` sebagai sumber otorisasi; UI manajemen Role/Permission belum dibangun pada MVP.
 
 ---
 
-## 16. Catatan Revisi PRD
-
-### v1.1 — 6 Oktober 2026
-
-- Menghapus Visi & Misi Paroki dari scope MVP karena Paroki HSPMTB Putussibau belum memiliki visi dan misi yang ditetapkan untuk dipublikasikan.
-- Menghapus rute publik `/profil/visi-misi` dari arsitektur informasi.
-- Menghapus pengelolaan Visi & Misi dari panel admin.
-- Menghapus key `visi` dan `misi` dari seed `parish_profile_sections`.
-- Menghapus kebutuhan konten Visi & Misi dari checklist kesiapan konten dan Definition of Done.
-- Menambahkan keputusan D-17 sebagai guardrail agar AI agent tidak membuat konten Visi & Misi secara asumtif.
-- Menegaskan bahwa Visi & Misi dapat ditambahkan kemudian setelah paroki memiliki dan menyetujui konten resminya.
-
-
-### v1.1 — Approved Baseline — 6 Oktober 2026
-
-- PRD v1.1 disetujui sebagai baseline implementasi MVP P0.
-- Development dapat masuk ke **Phase 01 — Project Foundation** tanpa menunggu seluruh konten nyata paroki.
-- Konten yang belum tersedia menggunakan placeholder/seed contoh yang jelas dan akan dipopulasikan setelah fitur Admin Panel tersedia.
-- Phase 01 menjadi titik awal implementasi teknis berdasarkan PRD ini.
-
-## 17. Lampiran
+## 16. Lampiran
 
 ### Lampiran A — Data Seed Layanan (CONTOH; wajib divalidasi Pastor Paroki dan ketentuan Keuskupan Sintang)
 
@@ -1138,27 +1117,27 @@ Test harus memakai factory dan `Carbon::setTestNow` untuk waktu deterministik.
 
 ### Lampiran B — Kunci `site_settings` Baku
 
-| Grup      | Kunci                                                                                                                                                              |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| identitas | `parish_name`, `parish_short_name`, `tagline`, `short_description`, `motto_verse`, `patron_saint`, `logo`, `favicon`                                               |
-| kontak    | `contact_address`, `contact_phone`, `contact_whatsapp`, `contact_email`, `office_hours`, `maps_embed_url`, `maps_link`                                             |
-| sosial    | `social_facebook`, `social_instagram`, `social_youtube`, `social_whatsapp_channel`                                                                                 |
-| seo       | `seo_default_title`, `seo_default_description`, `seo_default_og_image`                                                                                             |
-| beranda   | `home_news_limit` (3–6), `home_events_limit` (3–5), `home_gallery_limit` (6), `home_show_devotion`, `home_show_gallery`, `home_show_services`, `home_show_contact` |
-| privasi   | `privacy_policy_content` (rich text, `[CONFIRM]`)                                                                                                                  |
+| Grup | Kunci |
+| --- | --- |
+| identitas | `parish_name`, `parish_short_name`, `tagline`, `short_description`, `motto_verse`, `patron_saint`, `logo`, `favicon` |
+| kontak | `contact_address`, `contact_phone`, `contact_whatsapp`, `contact_email`, `office_hours`, `maps_embed_url`, `maps_link` |
+| sosial | `social_facebook`, `social_instagram`, `social_youtube`, `social_whatsapp_channel` |
+| seo | `seo_default_title`, `seo_default_description`, `seo_default_og_image` |
+| beranda | `home_news_limit` (3–6), `home_events_limit` (3–5), `home_gallery_limit` (6), `home_show_devotion`, `home_show_gallery`, `home_show_services`, `home_show_contact` |
+| privasi | `privacy_policy_content` (rich text, `[CONFIRM]`) |
 
 ### Lampiran C — Enum Baku
 
-| Enum                  | Nilai                                                          |
-| --------------------- | -------------------------------------------------------------- |
-| `locations.type`      | `gereja_paroki`, `stasi`, `kapel`, `lainnya`                   |
-| `announcements.level` | `info`, `penting`, `mendesak`                                  |
-| `posts.status`        | `draft`, `scheduled`, `published`, `archived`                  |
-| `events.status`       | `scheduled`, `cancelled`, `postponed`                          |
-| `services.category`   | `inisiasi`, `perkawinan`, `orang_sakit`                        |
-| `areas.type`          | `wilayah`, `lingkungan`, `stasi`                               |
-| `users.role`          | `super_admin`                                                  |
-| `day_of_week`         | 0 Minggu, 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu |
+| Enum | Nilai |
+| --- | --- |
+| `locations.type` | `gereja_paroki`, `stasi`, `kapel`, `lainnya` |
+| `announcements.level` | `info`, `penting`, `mendesak` |
+| `posts.status` | `draft`, `scheduled`, `published`, `archived` |
+| `events.status` | `scheduled`, `cancelled`, `postponed` |
+| `services.category` | `inisiasi`, `perkawinan`, `orang_sakit` |
+| `areas.type` | `wilayah`, `lingkungan`, `stasi` |
+| Role sistem | `super_admin` (dikelola Spatie Permission) |
+| `day_of_week` | 0 Minggu, 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu |
 
 ### Lampiran D — Seed Master Data
 
@@ -1166,62 +1145,63 @@ Test harus memakai factory dan `Carbon::setTestNow` untuk waktu deterministik.
 - `event_categories`: Liturgi, Pembinaan, Sosial, Rapat, Lainnya (warna berbeda, kontras cukup).
 - `community_types`: OMK, WKRI, BIA/BIR, Kategorial, Kelompok Doa, Koor.
 - `document_categories`: Formulir Pelayanan, Pedoman, Warta Paroki, Liturgi, Lainnya.
-- `parish_profile_sections`: kerangka kosong untuk `sejarah`, `motto`, `pelindung`, `ringkasan`. **Jangan membuat key `visi` atau `misi` pada MVP.**
+- `parish_profile_sections`: kerangka kosong untuk `sejarah`, `visi`, `misi`, `motto`.
 - `services`: enam layanan (Lampiran A, tidak aktif).
 - `site_settings`: nilai awal `parish_name = "Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau"` dan `parish_short_name = "HSPMTB"` (`[CONFIRM]`); sisanya kosong/placeholder.
 
 ---
 
-## 18. Kesiapan Konten, Risiko, dan Pertanyaan Terbuka
+## 17. Kesiapan Konten, Risiko, dan Pertanyaan Terbuka
 
 ### 17.1 Konten yang Harus Disiapkan Paroki
 
-| Konten                                                   | Penanggung jawab (usulan)      | Dibutuhkan untuk               |
-| -------------------------------------------------------- | ------------------------------ | ------------------------------ |
-| Logo resmi, foto gereja, foto kegiatan beresolusi baik   | Sekretariat / Seksi Komsos     | Beranda, Galeri, semua halaman |
-| Teks sejarah paroki dan foto lama                        | Pastor / pengurus senior       | Profil                         |
-| Data pastor (foto, riwayat, masa tugas) dan pengurus DPP | Sekretariat                    | Profil                         |
-| Daftar wilayah, stasi, lingkungan, ketua                 | Sekretariat / pengurus wilayah | Profil, Komunitas              |
-| Jadwal misa rutin dan lokasi (koordinat/tautan peta)     | Sekretariat / Pastor           | Jadwal Misa                    |
-| Syarat dan prosedur tiap sakramen, kontak, formulir      | Pastor Paroki / Sekretariat    | Pelayanan, Download            |
-| Tautan Google Form per layanan                           | Sekretariat                    | Pelayanan                      |
-| Profil komunitas dan logo                                | Ketua tiap komunitas           | Komunitas                      |
-| Alamat, telepon, WhatsApp, email, jam sekretariat        | Sekretariat                    | Kontak                         |
-| Dokumen dan formulir PDF/DOCX                            | Sekretariat                    | Download                       |
+| Konten | Penanggung jawab (usulan) | Dibutuhkan untuk |
+| --- | --- | --- |
+| Logo resmi, foto gereja, foto kegiatan beresolusi baik | Sekretariat / Seksi Komsos | Beranda, Galeri, semua halaman |
+| Teks sejarah paroki dan foto lama | Pastor / pengurus senior | Profil |
+| Visi, misi, arah pastoral | Dewan Pastoral Paroki | Profil |
+| Data pastor (foto, riwayat, masa tugas) dan pengurus DPP | Sekretariat | Profil |
+| Daftar wilayah, stasi, lingkungan, ketua | Sekretariat / pengurus wilayah | Profil, Komunitas |
+| Jadwal misa rutin dan lokasi (koordinat/tautan peta) | Sekretariat / Pastor | Jadwal Misa |
+| Syarat dan prosedur tiap sakramen, kontak, formulir | Pastor Paroki / Sekretariat | Pelayanan, Download |
+| Tautan Google Form per layanan | Sekretariat | Pelayanan |
+| Profil komunitas dan logo | Ketua tiap komunitas | Komunitas |
+| Alamat, telepon, WhatsApp, email, jam sekretariat | Sekretariat | Kontak |
+| Dokumen dan formulir PDF/DOCX | Sekretariat | Download |
 
 ### 17.2 Risiko dan Mitigasi
 
-| Risiko                                    | Mitigasi                                                                                |
-| ----------------------------------------- | --------------------------------------------------------------------------------------- |
-| Konten tidak siap tepat waktu             | Mulai kumpulkan sejak Fase 0, satu koordinator konten, seed contoh                      |
-| Admin kesulitan memakai panel             | UI sederhana, pelatihan, panduan admin                                                  |
-| Jaringan lambat                           | Optimasi gambar, lazy loading, batasi bundel, uji throttling                            |
-| Informasi sakramen tidak akurat           | Validasi Pastor Paroki sebelum terbit; tampilkan "Terakhir diperbarui"                  |
-| Privasi data/foto umat                    | Izin foto, kontak dengan persetujuan, tanpa data anak, hapus EXIF                       |
-| Ketergantungan pada satu pengembang/admin | Dokumentasi, repo terkelola, minimal 2 akun Super Admin                                 |
-| Serangan/kehilangan data                  | HTTPS, update rutin, rate limit, backup + uji pemulihan                                 |
-| Ketergantungan pada Google Form           | Akun Google resmi paroki, editor terbatas, uji tautan berkala, ganti tautan lewat admin |
-| Seluruh akses di satu role                | Kata sandi kuat, soft delete, backup, min. 2 akun; 2FA dan audit log di P1              |
+| Risiko | Mitigasi |
+| --- | --- |
+| Konten tidak siap tepat waktu | Mulai kumpulkan sejak Fase 0, satu koordinator konten, seed contoh |
+| Admin kesulitan memakai panel | UI sederhana, pelatihan, panduan admin |
+| Jaringan lambat | Optimasi gambar, lazy loading, batasi bundel, uji throttling |
+| Informasi sakramen tidak akurat | Validasi Pastor Paroki sebelum terbit; tampilkan "Terakhir diperbarui" |
+| Privasi data/foto umat | Izin foto, kontak dengan persetujuan, tanpa data anak, hapus EXIF |
+| Ketergantungan pada satu pengembang/admin | Dokumentasi, repo terkelola, minimal 2 akun Super Admin |
+| Serangan/kehilangan data | HTTPS, update rutin, rate limit, backup + uji pemulihan |
+| Ketergantungan pada Google Form | Akun Google resmi paroki, editor terbatas, uji tautan berkala, ganti tautan lewat admin |
+| Seluruh akses di satu role | Kata sandi kuat, soft delete, backup, min. 2 akun; 2FA dan audit log di P1 |
 
 ### 17.3 Pertanyaan Terbuka (dengan Asumsi Bawaan Agar Pengembangan Tidak Terblokir)
 
-| #   | Pertanyaan untuk paroki                                                                                 | Asumsi bawaan sementara                                                                        |
-| --- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Q1  | Nama resmi dan singkatan sudah tepat (Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau / HSPMTB)? | Pakai seperti tertulis; mudah diubah di `site_settings`                                        |
-| Q2  | Jumlah dan nama stasi, wilayah, lingkungan; apakah pembagian sering berubah?                            | Data kosong dengan struktur hierarkis siap diisi admin                                         |
-| Q3  | Siapa pemegang akun Super Admin dan siapa penyetuju konten?                                             | Seed 1 akun dari `.env`; admin menambah akun kedua                                             |
-| Q4  | Satu Google Form per layanan atau satu untuk semua? Akun pemilik?                                       | Satu form per layanan (field `form_url` per layanan)                                           |
-| Q5  | Siapa memantau jawaban Google Form dan target waktu tanggapan?                                          | Tidak mempengaruhi kode; tampilkan teks umum "tunggu konfirmasi dari sekretariat"              |
-| Q6  | Sudah ada domain dan hosting?                                                                           | Konfigurasi via `.env`; siapkan panduan deploy generik (VPS + Nginx + PHP-FPM + MySQL)         |
-| Q7  | Identitas visual (logo, warna, font)?                                                                   | Tema netral dengan token warna terpusat                                                        |
-| Q8  | Perlu mencantumkan biaya/persembahan di Pelayanan?                                                      | Kolom `fee_info` ada; bila kosong tampilkan "Hubungi sekretariat untuk informasi lebih lanjut" |
-| Q9  | Tampilkan kontak pribadi pastor/pengurus atau hanya sekretariat?                                        | Hanya sekretariat; kontak pribadi hanya bila `show_contact = true`                             |
-| Q10 | Perlu bahasa selain Indonesia?                                                                          | Tidak; hanya Bahasa Indonesia                                                                  |
-| Q11 | Akun media sosial resmi yang perlu ditautkan?                                                           | Kosong; tautan disembunyikan bila tidak diisi                                                  |
+| # | Pertanyaan untuk paroki | Asumsi bawaan sementara |
+| --- | --- | --- |
+| Q1 | Nama resmi dan singkatan sudah tepat (Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau / HSPMTB)? | Pakai seperti tertulis; mudah diubah di `site_settings` |
+| Q2 | Jumlah dan nama stasi, wilayah, lingkungan; apakah pembagian sering berubah? | Data kosong dengan struktur hierarkis siap diisi admin |
+| Q3 | Siapa pemegang akun Super Admin dan siapa penyetuju konten? | Seed 1 akun dari `.env`; admin menambah akun kedua |
+| Q4 | Satu Google Form per layanan atau satu untuk semua? Akun pemilik? | Satu form per layanan (field `form_url` per layanan) |
+| Q5 | Siapa memantau jawaban Google Form dan target waktu tanggapan? | Tidak mempengaruhi kode; tampilkan teks umum "tunggu konfirmasi dari sekretariat" |
+| Q6 | Sudah ada domain dan hosting? | Konfigurasi via `.env`; siapkan panduan deploy generik (VPS + Nginx + PHP-FPM + MySQL) |
+| Q7 | Identitas visual (logo, warna, font)? | Tema netral dengan token warna terpusat |
+| Q8 | Perlu mencantumkan biaya/persembahan di Pelayanan? | Kolom `fee_info` ada; bila kosong tampilkan "Hubungi sekretariat untuk informasi lebih lanjut" |
+| Q9 | Tampilkan kontak pribadi pastor/pengurus atau hanya sekretariat? | Hanya sekretariat; kontak pribadi hanya bila `show_contact = true` |
+| Q10 | Perlu bahasa selain Indonesia? | Tidak; hanya Bahasa Indonesia |
+| Q11 | Akun media sosial resmi yang perlu ditautkan? | Kosong; tautan disembunyikan bila tidak diisi |
 
 ---
 
-## 19. Ringkasan Guardrail untuk Agent (Baca Sebelum Setiap Tugas)
+## 18. Ringkasan Guardrail untuk Agent (Baca Sebelum Setiap Tugas)
 
 1. Draf, nonaktif, belum terbit, atau di luar rentang aktif → **404/tersembunyi** untuk publik; selalu lewat scope Eloquent.
 2. Semua HTML rich text → sanitasi **di server**.
