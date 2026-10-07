@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use App\Services\HtmlSanitizer;
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -40,6 +41,31 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureAuthorization();
+        $this->registerSchedulerProcess();
+    }
+
+    /**
+     * Run the scheduler as part of `composer dev`.
+     *
+     * Laravel's dev command starts serve, queue:listen, pail and vite, and
+     * leaves the scheduler out. That is the right default for an application
+     * with nothing scheduled, and this application now has something scheduled,
+     * so a scheduled task would simply never run during development without
+     * this line. The symptom is the expensive kind to debug: the code is right,
+     * the schedule is registered, and nothing happens.
+     *
+     * Guarded by runningInConsole() because DevCommands::artisan() would
+     * otherwise register a process for a web request.
+     *
+     * @see docs/DECISIONS.md D-26
+     */
+    protected function registerSchedulerProcess(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        DevCommands::artisan('schedule:work', 'scheduler');
     }
 
     /**
