@@ -11,9 +11,11 @@
 | It lives in one file on purpose. The service, the form request and the React
 | form all need this list, and three hand-maintained copies of it would drift.
 |
-| Keys come from PRD Lampiran B. Group names come from PRD 9.2, except that the
-| privacy group is deferred to P11: privacy_policy_content is rich text, so it
-| cannot be stored until HtmlSanitizer exists. See docs/DECISIONS.md D-23.
+| Keys come from PRD Lampiran B. Group names come from PRD 9.2.
+|
+| The privacy group was deferred to P11 because privacy_policy_content is rich
+| text and PRD D-14 does not allow storing unsanitized HTML. It is enabled now
+| that HtmlSanitizer exists. See docs/DECISIONS.md D-23 and D-25.
 |
 */
 
@@ -93,6 +95,9 @@ return [
             'home_show_services',
             'home_show_contact',
         ],
+        'privasi' => [
+            'privacy_policy_content',
+        ],
     ],
 
     /*
@@ -107,9 +112,15 @@ return [
     |
     | Anything not listed here is a string.
     |
+    | html is the exception that is not a cast: the value stays a string because
+    | that is what it is. It is declared so the form knows to render an editor
+    | instead of a textarea, and so a reader can see that this column is expected
+    | to hold markup and has been through HtmlSanitizer. PRD D-14, XC-S1.
+    |
     */
 
     'types' => [
+        'privacy_policy_content' => 'html',
         'home_news_limit' => 'integer',
         'home_events_limit' => 'integer',
         'home_gallery_limit' => 'integer',
@@ -153,9 +164,17 @@ return [
     | validated as such by UpdateSettingsRequest, which refuses any key that is
     | not in the groups list above.
     |
+    | privacy_policy_content needs its own rule because the generic one caps every
+    | settings.* field at 2048 characters, and a privacy policy is a page of prose
+    | in HTML. 50000 is generous for a policy that a parish actually publishes,
+    | and it is still far below config('html.max_input_length') so the sanitizer
+    | is never the thing that refuses the payload. The length is checked after
+    | sanitization, so it measures what is actually stored.
+    |
     */
 
     'rules' => [
+        'privacy_policy_content' => 'nullable|string|max:50000',
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',
         'home_gallery_limit' => 'integer|between:1,12',

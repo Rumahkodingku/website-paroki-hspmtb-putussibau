@@ -20,6 +20,7 @@ return [
         'sosial' => 'Media Sosial',
         'seo' => 'SEO Dasar',
         'beranda' => 'Beranda',
+        'privasi' => 'Privasi',
     ],
 
     'labels' => [
@@ -56,6 +57,8 @@ return [
         'home_show_gallery' => 'Tampilkan galeri',
         'home_show_services' => 'Tampilkan pelayanan',
         'home_show_contact' => 'Tampilkan kontak',
+
+        'privacy_policy_content' => 'Kebijakan privasi',
     ],
 
     /*
@@ -68,6 +71,24 @@ return [
         'office_hours',
         'motto_verse',
         'seo_default_description',
+    ],
+
+    /*
+     | Keys holding HTML rather than prose. The React form renders these with the
+     | Tiptap editor, and UpdateSettingsRequest passes them through
+     | HtmlSanitizer before validation, because PRD D-14 does not allow storing
+     | unsanitized HTML.
+     |
+     | The list itself is not here. SettingsController reads it from
+     | config('site-settings.types'), so the type declaration that triggers
+     | sanitization is the same one that triggers the editor. Adding a key below
+     | as well would be a second thing to forget.
+     |
+     | Helper text shown under a field, where the field needs more explanation
+     | than its label can carry.
+     */
+    'hints' => [
+        'privacy_policy_content' => 'Isi kebijakan privasi. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
     ],
 
     /*

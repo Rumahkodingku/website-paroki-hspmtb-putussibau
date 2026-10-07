@@ -61,7 +61,12 @@ class SettingsController extends Controller
 
     /**
      * Presentation hints for the form, so the React side does not have to carry a
-     * second copy of which field is a textarea, a URL or a bounded number.
+     * second copy of which field is a textarea, a URL, a bounded number or a rich
+     * text editor.
+     *
+     * richtext is derived from config('site-settings.types') rather than listed
+     * separately, so a key declared as html gets an editor by being declared and
+     * not by being remembered in two places.
      *
      * @return array<string, mixed>
      */
@@ -70,6 +75,8 @@ class SettingsController extends Controller
         return [
             'labels' => (array) __('site-settings.labels'),
             'multiline' => (array) __('site-settings.multiline'),
+            'richtext' => $this->richTextKeys(),
+            'hints' => (array) __('site-settings.hints'),
             'urls' => (array) __('site-settings.urls'),
             'groupLabels' => (array) __('site-settings.groups'),
             'numericRanges' => [
@@ -94,5 +101,26 @@ class SettingsController extends Controller
         }
 
         return $result;
+    }
+
+    /**
+     * The keys whose declared type is html.
+     *
+     * Read from the configuration instead of a list in the language file, so the
+     * type declaration that makes UpdateSettingsRequest sanitize a field is the
+     * same declaration that makes the form render an editor. Two lists would be
+     * two chances to render a textarea for a field that is about to be
+     * sanitized, or worse, an editor for one that is not.
+     *
+     * @return list<string>
+     */
+    private function richTextKeys(): array
+    {
+        $types = (array) config('site-settings.types');
+
+        return array_map(strval(...), array_keys(array_filter(
+            $types,
+            fn (mixed $type): bool => $type === 'html',
+        )));
     }
 }
