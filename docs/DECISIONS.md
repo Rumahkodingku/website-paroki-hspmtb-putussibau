@@ -386,7 +386,7 @@ Spatie" tanpa menyebut mekanismenya. Dipilih `Gate::before()` di
 menempelkan permission ke role.
 
 **Alasan:** permission baru di phase berikutnya otomatis ter-given tanpa perlu
-diingat menempelkannya ke role. KalauFgayaempel permission-permission
+diingat menempelkannya ke role. Kalau setiap permission-permission
 eksplisit, Super Admin diam-diam kehilangan akses begitu ada permission baru.
 
 **Dua hal yang mudah salah dan harus diingat:**
@@ -735,17 +735,20 @@ konfigurasi bila baris belum ada, sehingga **"belum diatur"** tetap terbedakan
 dari **"sengaja dikosongkan"**, dan `home_news_limit` yang belum diatur tetap
 punya nilai yang bisa dipakai halaman publik tanpa perlu baris database.
 
-### 3. 29 dari 30 kunci; grup `privasi` ditunda ke P11
+### 3. 30 kunci dari 6 grup; `privasi` aktif sejak P11
 
 Roadmap §18 menyebut lima grup (identity, contact, social, seo, homepage).
 PRD Lampiran B punya enam — tambahan `privasi` dengan
 `privacy_policy_content`.
 
-Grup itu **ditunda ke P11**, karena isinya rich text dan PRD D-14 mewajibkan
-sanitasi server-side. `HtmlSanitizer` baru ada di P11. Menyimpan HTML mentah
-sekarang akan melanggar D-14, dan PRD sendiri menandai kunci itu `[CONFIRM]`.
+Grup itu **ditunda di P09** karena isinya rich text dan PRD D-14 mewajibkan
+sanitasi server-side, sementara `HtmlSanitizer` belum ada. **P11 melunaskannya**
+dan kunci itu sekarang aktif: tipenya `html` di `config/site-settings.php`, dan
+`UpdateSettingsRequest` menyanitasinya sebelum validasi. Satu-satunya field rich
+text di aplikasi pada saat ini.
 
-Sisa 29 kunci: identitas 8, kontak 7, sosial 4, seo 3, beranda 7.
+Sisa 29 kunci tanpa grup `privasi`: identitas 8, kontak 7, sosial 4, seo 3,
+beranda 7.
 
 ### 4. Field gambar = teks path/URL, dan janji P10 tidak ditepati
 
@@ -854,7 +857,7 @@ shadcn dengan alasan serupa).
 
 XC-M2 mewajibkan EXIF (termasuk GPS) hilang dari setiap gambar yang
 dipublikasikan. **GD tidak menulis blok EXIF sama sekali**, jadi apa pun yang
-melewati pipeline ini keluarTanpa EXIF. Tidak ada langkah penghapusan terpisah
+melewati pipeline ini keluar tanpa EXIF. Tidak ada langkah penghapusan terpisah
 yang bisa terlupa dan tidak ada cabang kode yang bisa melewatinya.
 
 Orientasi **tetap** dibaca. Foto ponsel sering tersimpan menyamping dengan tag
@@ -911,11 +914,11 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ## Yang masih diperlukan (Phase 01)
 
-P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
 
-Test matrix yang belum ada: T24–T28 dan T34.
+Test matrix yang belum ada: T26–T28 dan T34.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, dan **P10**.
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, dan **P11**.
 P04 (Docker) dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
@@ -937,8 +940,14 @@ job `GenerateImageVariants`, dan endpoint di `/admin/media`. **Tanpa antarmuka**
 tabel `media` kosong dalam pemakaian normal. Lihat D-24.
 
 **Pengaturan situs sudah aktif:** `SiteSettingsService` + cache, halaman
-`/admin/pengaturan` dengan 29 kunci dari 5 grup. Tidak ada seeding, jadi
+`/admin/pengaturan` dengan 30 kunci dari 6 grup. Tidak ada seeding, jadi
 "belum diatur" tetap berbeda dari "sengaja dikosongkan". Lihat D-23.
+
+**Sanitasi HTML sudah aktif:** `HtmlSanitizer` di allowlist
+`config/html.php`, dipasang pada `UpdateSettingsRequest` sebelum validasi.
+Satu field rich text memakainya sekarang (`privacy_policy_content`), dan
+Tiptap sudah tersedia untuk field berikutnya. Belum ada halaman publik yang
+merender rich text. Lihat D-25.
 
 **Fondasi UI sudah menerapkan DESIGN.md:** palet merah/navy/gold HSPMTB,
 tipografi, skala radius, `PublicLayout` dan `AdminLayout`. Semua penyimpangan
@@ -953,3 +962,144 @@ Daftar 12 permission yang sudah di-seed (11 dari §10.4 + `admin.access`) tercat
 
 Permission per modul lain (agenda, galeri, komunitas, jadwal-misa, dst.)
 dibuat saat modulnya dibangun, supaya tidak perlu migration tambahan sekarang.
+
+---
+
+## D-25 — Sanitasi HTML: `symfony/html-sanitizer` di allowlist sendiri
+
+**Status:** Accepted · berlaku sejak P11 · branch `feat/phase-01-sanitization`
+
+PRD D-14 mewajibkan sanitasi server-side untuk setiap HTML yang disimpan, dan
+menyatakan sanitasi klien saja tidak cukup. P11 membangunnya.
+
+### 1. Pustaka, dan kenapa bukan yang lain
+
+PRD D-14 menyebut *"`mews/purifier` atau HTMLPurifier"* — **sebagai contoh, bukan
+syarat**. Tiga opsi, dipertimbangkan dengan saksama:
+
+| Opsi | Verdict |
+| --- | --- |
+| `symfony/html-sanitizer` ^7.4 | **Dipakai.** Vendor resmi, API `allowlist()` persis kebutuhan PRD, satu dependency kecil, repo sudah 33 paket Symfony 7.4 di vendor |
+| Tulis sendiri di atas `DOMDocument` | Ditolak. Sanitasi HTML adalah salah satu area XSS paling rawan; allowlist sendiri harus diaudit, bukan diasumsikan benar |
+| `mews/purifier` | Ditolak. Menarik `ezyang/htmlpurifier` yang relatif lama, dan kompatibilitas Laravel 13 belum diverifikasi |
+
+Ini **tidak** mencerminkan keputusan P10 menolak `intervention/image` demi GD.
+P10 menolak library karena masalahnya terisolasi dan GD cukup untuk itu. Sanitasi
+HTML bukan masalah terisolasi, dan konsekuensi dari allowlist yang salah jauh
+lebih serius daripada baris kode yang dihemat. Konsistensi alasan lebih penting
+daripada konsistensi hasil.
+
+Satu dependency baru, dan hanya satu, disetujui eksplisit.
+
+### 2. Allowlist ada di `config/html.php`
+
+Bukan di konstruktor service, untuk alasan yang sama seperti `config/media.php`:
+service membangun konfigurasi Symfony dari file itu, dan salinan kedua dari
+daftar tag akan perlahan berbeda dari yang dibaca test.
+
+Tag persis roadmap §22, plus `thead`/`tbody`/`tr`/`th`/`td` yang tidak disebut
+PRD tetapi wajib ada — `<table>` tanpa mereka tidak merender apa pun.
+
+**`class`, `id`, dan `style` tidak diizinkan di mana pun.** Menempel konten dari
+Word atau Google Docs tidak boleh bisa menyuntikkan layout atau CSS. Catatan:
+Filament mengizinkan `style` lewat sanitizer-nya, tapi karena CSS di dalamnya
+tidak diparsing — itu alasan menelantarkannya di sini.
+
+`img` hanya boleh `src` dan `alt`. `width`/`height` memang cara menghindari
+layout shift, tapi juga cara markup mengklaim ukuran yang tidak dimiliki, dan
+modul media sudah tahu dimensi asli setiap gambar yang diterbitkan.
+
+### 3. Tiga default yang tidak boleh dibiarkan begitu
+
+Default Symfony tidak cocok untuk CMS, dan ketiganya diketatkan di
+`config/html.php`:
+
+- **`default_action` = `block`, bukan `drop`.** Default Symfony menghapus
+  *isi* setiap tag yang tidak dikenal. Itu artinya satu `<div>` nyasar dari
+  hasil paste akan menghapus seluruh paragrafnya. Dengan `block`, tag tak
+  dikenal kehilangan tagnya tapi teksnya selamat. Elemen berbahaya tetap
+  *drop* eksplisit lewat `drop_elements`, jadi setelan ini tidak pernah
+  memutuskan nasib sebuah script.
+- **Skema media diketatkan ke `['http', 'https']`.** Symfony mengizinkan
+  `data:` secara default. Tidak ada kebutuhan di sini, dan `data:` URL di
+  `img src` adalah dokumen yang menyamar.
+- **Konten elemen raw-text dibuang, bukan hanya tagnya.** `<style>` dan
+  `<title>` tidak punya content model markup; parser membaca isinya sebagai
+  satu run teks. Drop tag ternyata tidak drop isi — stylesheet hasil paste
+  berakhir sebagai teks terlihat `p{color:red}` di tengah artikel. Untuk
+  `<title>` itu kebocoran informasi, bukan sekadar kosmetik.
+
+### 4. Normalisasi `<h1>`, `<b>`, `<i>`
+
+Tiga hal tidak bisa diselesaikan oleh allowlist saja, karena kelakuannya
+adalah menghapus tag dan menyimpan teks:
+
+- **`<h1>` → `<h2>`.** Allowlist punya h2/h3/h4 dan tidak punya h1, karena h1
+  milik judul halaman dan dipegang layout, bukan field yang diisi admin.
+  Memblock h1 akan meninggalkan kalimatnya sebagai body text dan menghapus
+  struktur dokumen penulis. Dipromosikan, bukan dibuang.
+- **`<b>` → `<strong>`, `<i>` → `<em>`.** Konten yang di-paste penuh dengan
+  keduanya; kehilangan emphasis setiap kali paste adalah regresi, bukan
+  sanitasi.
+
+Pola regex mensyaratkan `>` atau whitespace langsung setelah huruf, supaya `<b>`
+tidak ikut mencocoki `<blockquote>`, `<br>`, atau `<body>`. Ada test untuk itu.
+
+### 5. Sanitasi di `prepareForValidation`, bukan setelah rules
+
+Urutan itu disengaja, dua alasan:
+
+1. Aturan panjang harus mengukur **apa yang akan disimpan**, bukan apa yang
+   diposting. Kalau tidak, admin diberi tahu kebijakannya kelewat panjang
+   padahal yang membuatnya panjang adalah markup yang memang tidak boleh
+   disimpan.
+2. Aturan validasi hanya bisa menolak; tidak ada cara membuatnya menulis ulang
+   nilai yang divalidasinya.
+
+Kunci mana yang rich text dibaca dari `config('site-settings.types')`, dan
+`SettingsController` menurunkan daftar editor dari peta yang **sama**. Satu
+deklarasi, dua tempat yang tidak bisa menyimpang.
+
+### 6. P11 memakai Tiptap, dan Tiptap belum dipakai halaman publik
+
+`@tiptap/react` + `@tiptap/pm` + `@tiptap/starter-kit`. StarterKit v3 sudah
+membawa `Link` dan `Underline`, jadi tidak perlu paket tambahan.
+
+Konfigurasi yang lebih penting dari toolbar-nya:
+
+- Level heading berhenti di 4, mengikuti allowlist.
+- `code`, `codeBlock`, `strike`, `horizontalRule` **dimatikan** — StarterKit
+  mengaktifkan keempatnya secara default dan tidak satupun ada di allowlist.
+  Editor yang bisa menghasilkan konten yang server hapus diam-diam lebih buruk
+  daripada tidak ada editor.
+
+**Image dan table sengaja tidak ada.** Image butuh image picker dari P10 yang
+tidak pernah dibangun (D-24 §1); roadmap §23 memang mengatakan "bila
+dibutuhkan". Tabel tidak dibutuhkan modul Fase 2 mana pun.
+
+Editor dimuat lewat `React.lazy`. Radix tidak mount tab yang tidak aktif, jadi
+import lazy cukup untuk mengeluarkan Tiptap dari chunk pengaturan: **438 kB
+menjadi 35 kB**, dan chunk editor 404 kB hanya diambil saat tab yang memakainya
+dibuka.
+
+Styling prose adalah kelas `.rich-text` di `app.css`, dipakai bersama oleh
+permukaan edit dan renderer, memakai token `@theme` yang sudah ada —
+**bukan** `@tailwindcss/typography`, karena DESIGN.md meminta tipografi memetakan
+token terdokumentasi dan plugin membawa skala sendiri.
+
+`resources/js/components/rich-text.tsx` adalah satu-satunya
+`dangerouslySetInnerHTML` di repo. Alasannya ditulis sebagai komentar blok,
+**bukan** suppressing lint: `react/no-danger` bukan rule yang aktif di
+`vite.config.ts`, jadi disable directive hanya memberi rasa aman yang salah.
+
+### 7. Yang dikecualikan
+
+Sanitasi ini juga berlaku untuk field non-rich-text nanti — `maps_embed_url`
+(XC-S2, hanya domain Google Maps) dan `form_url` (XC-S3, hanya Google Form).
+Keduanya **belum** dikerjakan: keduanya punya aturan host yang lebih ketat dari
+allowlist skema URL, dan tidak ada field-nya di Phase 01. Saat itu menyebut
+`HtmlSanitizer::toPlainText()` untuk mengekstrak teks polos, bukan mengandalkan
+sanitasi HTML untuk memvalidasi host.
+
+`isClean()` ada untuk membuktikan idempotensi di test. Tidak ada kode aplikasi
+yang mempercayai hasilnya.
