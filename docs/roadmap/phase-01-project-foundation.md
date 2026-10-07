@@ -1874,14 +1874,26 @@ Do not force unnecessary restructuring.
 
 ## P10 — Media
 
-- [ ] storage.
-- [ ] MIME validation.
-- [ ] image processor.
-- [ ] WebP.
-- [ ] variants.
-- [ ] EXIF stripping.
-- [ ] queue job.
-- [ ] tests.
+- [x] storage. — disk privat untuk asli, disk publik untuk varian (§19), semua
+  nama disk/batas/varian di `config/media.php`. Tabel `media` + `media_variants`.
+- [x] MIME validation. — `IsProcessableImage` membaca **isi file** (`finfo` +
+  `getimagesize`), bukan ekstensi (XC-M3).
+- [x] image processor. — `app/Services/ImageProcessor.php` dengan GD 2.3.3, nol
+  dependency baru.
+- [x] WebP. — `imagewebp` kualitas 82.
+- [x] variants. — thumb 400 / medium 960 / large 1600, lebar saja, **tanpa upscale**.
+- [x] EXIF stripping. — GD tidak menulis blok EXIF, jadi hilang saat re-encode;
+  orientasi tetap dibaca agar foto ponsel tidak terbit terbalik (XC-M2).
+- [x] queue job. — `app/Jobs/GenerateImageVariants.php`, idempoten, `failed()`
+  menandai `failed` tanpa menghapus asli (§21, XC-M1).
+- [x] tests. — 23 test: T19–T23, otorisasi, status, penghapusan.
+
+> **Catatan cakupan — P10 adalah fondasi, bukan fitur.** Tidak ada halaman media
+> library dan tidak ada pemilih gambar di antarmuka mana pun. Endpoint
+> `POST/GET/DELETE /admin/media` hanya bisa dipanggil manual, sehingga **tabel
+> `media` kosong dalam pemakaian normal**. Antarmuka browse menyusul bersama modul
+> pertama yang membutuhkannya. Three permission `media.*` ditambahkan (total 15).
+> Detail dan alasannya di `docs/DECISIONS.md` D-24.
 
 ## P11 — Sanitization
 

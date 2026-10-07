@@ -747,12 +747,19 @@ sekarang akan melanggar D-14, dan PRD sendiri menandai kunci itu `[CONFIRM]`.
 
 Sisa 29 kunci: identitas 8, kontak 7, sosial 4, seo 3, beranda 7.
 
-### 4. Field gambar = teks path/URL
+### 4. Field gambar = teks path/URL, dan janji P10 tidak ditepati
 
-`logo`, `favicon`, dan `seo_default_og_image` ada sebagai kolom teks, bukan
-widget unggah. Unggah file adalah P10 (media) beserta validasi MIME-nya
-(XC-M3). Memasang input file sekarang berarti membangun separuh P10 tanpa
-prosesannya.
+D-23 §4 yang pertama pernah menulis: *"widget unggah menyusul di P10"*.
+
+**P10 selesai dan widget itu TIDAK ada.** P10 hanya membangun pipeline dan
+endpoint (D-24 §1), tanpa antarmuka. Jadi `logo`, `favicon`, dan
+`seo_default_og_image` **tetap input teks** di `/admin/pengaturan`.
+
+Cara memperbaikinya ada di tangan: pipeline P10 siap, yang kurang hanya satu
+kolom `media_id` dan tombol unggah di form pengaturan. Itu pekerjaan **phase
+modul**, bukan fondasi.
+
+Ini bukan keputusan sementara yang menunggu; fitur ini memang belum dibangun.
 
 ### 5. Default `home_show_*` = `true` — asumsi, bukan dari dokumen
 
@@ -797,6 +804,93 @@ P08 membuktikan `npx shadcn@latest add` merusak lingkungan proyek ini (paket
 `switch` dan `tabs` diambil langsung dari registry, lalu dua paket Radix-nya
 dipasang dengan `npm install`. `package.json` hanya dapat dua baris.
 
+---
+
+## D-24 — Fondasi media: GD, tabel `media`, tanpa UI
+
+**Status:** Accepted · berlaku sejak P10 · branch `feat/phase-01-media`
+
+### 1. P10 adalah fondasi, bukan fitur
+
+Tidak ada halaman media library, tidak ada galeri, tidak ada pemilih gambar di
+halaman mana pun. Endpoint-nya (`POST /admin/media`, `GET /admin/media/{media}`,
+`DELETE /admin/media/{media}`) **hanya bisa dipanggil manual**.
+
+Konsekuensi yang harus terus diingat: **tabel `media` kosong dalam pemakaian
+normal**, karena tidak ada kode aplikasi yang membuat baris media.
+
+Alasannya disepakati: PRD Fase 1 meminta pipeline dan job; antarmuka browse
+menyusul bersama modul pertama yang membutuhkannya (Beranda, Berita, atau
+Galeri). Roadmap §34 mewajibkan urutan P01→P15 tanpa lompatan.
+
+Yang bisa diverifikasi sekarang: test suite membuktikan transformasinya benar.
+Yang belum: tidak ada playthrough.
+
+### 2. Tabel `media` dan `media_variants` dibuat di P10
+
+PRD §9 **tidak punya** tabel media — semua gambar disimpan sebagai kolom
+`image_path` di tabel masing-masing (`hero_slides`, `clergy`, `gallery_photos`).
+ Roadmap §20 tetap meminta `width`, `height`, `file_size`, `mime_type`, `path`
+di-persist, dan XC-M1 meminta UI menampilkan status pemrosesan. Keduanya butuh
+tempat.
+
+Roadmap §9 menyatakan "nama dan tipe bersifat usulan; boleh disesuaikan selama
+perilaku dalam dokumen ini terpenuhi", jadi menambah tabel ini tidak melanggar
+PRD.
+
+Asli disimpan di disk privat, varian di disk publik (§19).
+
+### 3. GD langsung, tanpa `intervention/image`
+
+Yang tersedia: **GD 2.3.3** (WebP ✅, JPEG ✅, PNG ✅) + `exif`. Yang ditambahkan:
+**nol dependency**.
+
+Pipeline-nya hanya: validasi → decode → baca orientasi → resize → re-encode →
+simpan. Semuanya beberapa baris terhadap GD. Konsisten dengan sikap repo yang
+menolak menambah pustaka untuk satu masalah terisolasi (D-22 melarang `--all`
+shadcn dengan alasan serupa).
+
+### 4. Penghapusan EXIF adalah konsekuensi, bukan langkah
+
+XC-M2 mewajibkan EXIF (termasuk GPS) hilang dari setiap gambar yang
+dipublikasikan. **GD tidak menulis blok EXIF sama sekali**, jadi apa pun yang
+melewati pipeline ini keluarTanpa EXIF. Tidak ada langkah penghapusan terpisah
+yang bisa terlupa dan tidak ada cabang kode yang bisa melewatinya.
+
+Orientasi **tetap** dibaca. Foto ponsel sering tersimpan menyamping dengan tag
+Orientation; pipeline yang hanya resize akan menerbitkan setiap foto itu
+terbalik 90°.
+
+### 5. Ekstensi file berasal dari MIME terdeteksi
+
+Nama berkas di disk memakai ekstensi dari **MIME yang terdeteksi**, bukan dari
+nama kiriman. Versi pertama memakai nama kiriman, sehingga unggahancrafted bisa
+berakhir sebagai `something.php` di disk. Nama asli tetap disimpan di
+`Media.original_name` untuk ditampilkan.
+
+`Media::url()` mengembalikan `null` untuk disk non-publik. `Storage::disk()->url()`
+tetap membuat path `/storage/...` walau tidak ada yang disajikan di sana, sehingga
+file asli privat akan mendapat URL yang tampil sebagai gambar rusak.
+
+### 6. Tiga permission `media.*`
+
+Ditambahkan `media.view`, `media.create`, `media.delete`; total jadi **15**.
+Docblock `PermissionSeeder` sendiri menyatakan permission tidak boleh ada untuk
+kode yang belum membacanya — ketiganya **dibaca seketika** oleh endpoint unggah.
+
+### 7. Batas unggah 3 MB butuh penyesuaian php.ini
+
+PRD POST-04 menyebut 3 MB. Nilai `upload_max_filesize` di mesin ini **2M**.
+PHP_INI_PERDIR tidak bisa diubah dari `.env`, jadi PHP akan menolak request
+**sebelum** Laravel melihatnya. Validasi aplikasi tetap 3 MB; menaikkan limit
+host menjadi catatan deployment untuk `DEVELOPMENT.md` (P15).
+
+### 8. SVG ditolak
+
+Bukan karena GD tidak bisa membacanya, tapi karena SVG adalah dokumen yang bisa
+memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
+(P11).
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
@@ -817,13 +911,12 @@ dipasang dengan `npm install`. `package.json` hanya dapat dua baris.
 
 ## Yang masih diperlukan (Phase 01)
 
-P10 media · P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality ·
-P14 Git · P15 docs.
+P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
 
-Test matrix yang belum ada: T19–T28 dan T34.
+Test matrix yang belum ada: T24–T28 dan T34.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, dan **P09**. P04 (Docker)
-dibatalkan
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, dan **P10**.
+P04 (Docker) dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
 Autentikasi sudah pindah ke `/admin/*`, registrasi publik sudah dihapus,
@@ -838,6 +931,10 @@ parameter `{user}` sehingga hanya bisa menghapus pemanggilnya.
 Fondasi Inertia sudah beres: `auth.user` hanya mengirim `id`, `name`, `email`,
 `email_verified_at`, ditambah shared prop `locale` dan `displayTimezone`. Lihat
 D-21.
+
+**Fondasi media sudah aktif:** pipeline GD (MIME, orientasi, WebP, varian, EXIF),
+job `GenerateImageVariants`, dan endpoint di `/admin/media`. **Tanpa antarmuka** —
+tabel `media` kosong dalam pemakaian normal. Lihat D-24.
 
 **Pengaturan situs sudah aktif:** `SiteSettingsService` + cache, halaman
 `/admin/pengaturan` dengan 29 kunci dari 5 grup. Tidak ada seeding, jadi
