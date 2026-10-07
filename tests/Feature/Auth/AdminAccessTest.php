@@ -154,11 +154,13 @@ test('every admin page is protected by the three layers', function () {
     // Scoped to the CMS routes rather than everything under the admin prefix,
     // because Fortify's own authentication routes also live there and must stay
     // reachable by guests (/admin/login, /admin/forgot-password, and so on).
+    //
+    // profile.destroy is absent on purpose: PRD section 8 forbids deleting the
+    // signed-in account, so the route is gone rather than merely guarded.
     $adminPages = [
         'dashboard',
         'profile.edit',
         'profile.update',
-        'profile.destroy',
         'security.edit',
         'user-password.update',
         'appearance.edit',
