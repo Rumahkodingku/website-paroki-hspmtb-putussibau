@@ -5,7 +5,8 @@ export type SettingsGroupName =
     | 'kontak'
     | 'sosial'
     | 'seo'
-    | 'beranda';
+    | 'beranda'
+    | 'privasi';
 
 /** Values arrive already converted by SiteSettingsService. */
 export type SettingValue = string | number | boolean | null;
@@ -25,12 +26,18 @@ export type SettingsGroups = Record<
 
 /**
  * Presentation hints so the form does not need its own copy of which field is a
- * textarea, a URL, or a bounded number.
+ * textarea, a URL, a bounded number or rich text.
+ *
+ * `richtext` is derived server-side from config('site-settings.types'), so a key
+ * declared as html gets an editor by being declared. That is deliberate: the
+ * same declaration is what makes UpdateSettingsRequest sanitize it.
  */
 export type SettingsMeta = {
     labels: Record<string, string>;
     groupLabels: Record<SettingsGroupName, string>;
     multiline: string[];
+    richtext: string[];
+    hints: Record<string, string>;
     urls: string[];
     numericRanges: Record<string, [number, number]>;
 };
