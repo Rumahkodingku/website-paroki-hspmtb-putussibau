@@ -23,7 +23,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { edit as editAppearance } from '@/routes/appearance';
+import { edit as editSettings } from '@/routes/settings';
 import { dashboard } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
 
@@ -61,7 +61,7 @@ const CONTENT_ENTRIES: Entry[] = [
 ];
 
 const ACCOUNT_ENTRIES: Entry[] = [
-    { title: 'Pengaturan', href: editAppearance(), icon: Settings },
+    { title: 'Pengaturan', href: editSettings(), icon: Settings },
     { title: 'Akun', href: editProfile(), icon: UserCog },
 ];
 
