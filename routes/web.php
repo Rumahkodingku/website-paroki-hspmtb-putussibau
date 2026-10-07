@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureAdminAccess;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,11 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
     ->group(function () {
         // Path is relative to the 'admin' prefix, so this is /admin.
         Route::inertia('/', 'admin/dashboard')->name('dashboard');
+
+        // PRD 5.2: site settings and contact details live here, not under
+        // /admin/akun, which stays per-account. See docs/DECISIONS.md D-23.
+        Route::inertia('/pengaturan', 'admin/pengaturan')->name('settings.edit');
+        Route::put('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
     });
 
 require __DIR__.'/settings.php';
