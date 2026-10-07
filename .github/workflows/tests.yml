@@ -13,6 +13,34 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    # Tests run against MySQL so they match the production engine (utf8mb4,
+    # strict mode). MYSQL_DATABASE makes the service container create the test
+    # database, so no separate CREATE DATABASE step is needed.
+    # See docs/DECISIONS.md (D-03).
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: website_paroki_hspmtb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      # DB_HOST must be 127.0.0.1: the job itself runs on the runner, not in a
+      # container, so the service port mapping is reached over localhost.
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: website_paroki_hspmtb_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
