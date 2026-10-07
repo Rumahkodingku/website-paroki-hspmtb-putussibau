@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\HtmlSanitizer;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        /**
+         * The HTML sanitizer parses its allowlist on construction, and the
+         * allowlist is the same on every field, so one instance per request is
+         * enough and building one per field is wasted work.
+         *
+         * @see docs/DECISIONS.md D-25
+         */
+        $this->app->singleton(HtmlSanitizer::class);
     }
 
     /**

@@ -18,9 +18,20 @@ use Tests\TestCase;
 |
 */
 
-pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class)
-    ->in('Feature');
+pest()->extend(TestCase::class)->in('Feature', 'Unit');
+
+/*
+|--------------------------------------------------------------------------
+| Refresh database
+|--------------------------------------------------------------------------
+|
+| Only the feature tests need a clean database. Unit tests are scoped to one
+| class and are not allowed to touch storage, so booting a transaction they
+| never use is a cost paid by every one of them.
+|
+*/
+
+pest()->use(RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
