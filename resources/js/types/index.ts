@@ -6,6 +6,24 @@ export type * from './ui';
 import type { Auth } from './auth';
 
 /**
+ * Site-wide SEO fallbacks, read server-side from `site_settings`.
+ *
+ * Every field is nullable and null means "never configured", which is what the
+ * Seo component needs in order to omit a tag rather than emit an empty one.
+ * An empty meta description is worse than none: crawlers and link previews
+ * both treat it as a description.
+ */
+export type SeoDefaults = {
+    /** From APP_URL. Lets Seo absolutise paths without touching `window`. */
+    appUrl: string;
+    siteName: string | null;
+    title: string | null;
+    description: string | null;
+    /** Relative or absolute path; Seo makes it absolute. */
+    ogImage: string | null;
+};
+
+/**
  * Props HandleInertiaRequests shares with every page.
  *
  * Kept in one place so a page that needs a shared prop reaches for the same
@@ -25,4 +43,5 @@ export type SharedProps = {
     /** Storage stays UTC; only this is used to render dates. */
     displayTimezone: string;
     sidebarOpen: boolean;
+    seo: SeoDefaults;
 };

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -43,6 +44,7 @@ class HandleInertiaRequests extends Middleware
      *   locale: string
      *   displayTimezone: string
      *   sidebarOpen: bool
+     *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
      *
      * ARCHITECTURE.md Part C rule 1 forbids handing a raw Eloquent model to the
      * browser, and rule 5 requires shared props to stay small. Everything sent
@@ -54,7 +56,13 @@ class HandleInertiaRequests extends Middleware
      * anything a future relation load decides to attach. The attribute exists as
      * a safety net, not as a contract, so the contract is written out here.
      *
-     * @see docs/DECISIONS.md D-21
+     * `seo` exists because the three seo_default_* settings had no consumer at
+     * all: they were configurable in /admin/pengaturan and read by nothing, so
+     * editing them changed no page. One shared prop is the shortest path to
+     * giving them an effect, and it keeps the reads inside SiteSettingsService
+     * per D-23 rather than reaching for the table from a component.
+     *
+     * @see docs/DECISIONS.md D-21, D-26
      *
      * @return array<string, mixed>
      */
@@ -74,6 +82,43 @@ class HandleInertiaRequests extends Middleware
             'locale' => fn () => app()->getLocale(),
             'displayTimezone' => fn () => config('app.display_timezone'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'seo' => fn (): array => $this->seoDefaults(),
+        ];
+    }
+
+    /**
+     * The site-wide SEO fallbacks, read through the settings service.
+     *
+     * Returned as null when a setting has never been configured rather than as
+     * an empty string, because "no description" and "an empty description" are
+     * different things to the Seo component and only the first one should make
+     * it omit the tag entirely.
+     *
+     * appUrl is here so the Seo component never has to read window.location.
+     * An Open Graph image has to be an absolute URL or link previews silently
+     * show nothing, and seo_default_og_image is a path because the upload widget
+     * for it does not exist yet (D-24). Reading window would make the component
+     * unsafe to server-render later, which is exactly the change SSR would
+     * require.
+     *
+     * @return array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
+     */
+    private function seoDefaults(): array
+    {
+        $settings = app(SiteSettingsService::class);
+
+        $read = static function (string $key) use ($settings): ?string {
+            $value = $settings->get($key);
+
+            return is_string($value) && trim($value) !== '' ? $value : null;
+        };
+
+        return [
+            'appUrl' => rtrim((string) config('app.url'), '/'),
+            'siteName' => $read('parish_name'),
+            'title' => $read('seo_default_title'),
+            'description' => $read('seo_default_description'),
+            'ogImage' => $read('seo_default_og_image'),
         ];
     }
 }

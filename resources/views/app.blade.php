@@ -38,8 +38,67 @@
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @php
+            /*
+             * Baseline head, rendered on the server into the initial HTML.
+             *
+             * PRD NFR-SEO asks for Open Graph tags in the first response when
+             * server-side rendering is not enabled, and SSR is not enabled here
+             * (D-26). A React <Head> cannot do that: it renders after hydration,
+             * so a crawler or a link unfurl that reads only the response body
+             * sees nothing. These tags are what it sees.
+             *
+             * The data-inertia attributes are the load-bearing part. Inertia only
+             * manages head elements that carry that attribute, and it matches a
+             * server tag to a client tag by its value. Using the same strings as
+             * head-key in resources/js/components/seo.tsx means a page that
+             * renders <Seo> replaces these defaults instead of stacking a second
+             * copy underneath them. A page that renders nothing keeps them.
+             *
+             * Every value is optional. A tag with no value is worse than no tag,
+             * because both crawlers and WhatsApp read an empty description as a
+             * description.
+             */
+            $seo = app(\App\Services\SiteSettingsService::class);
+            $seoRead = static function (string $key) use ($seo): ?string {
+                $value = $seo->get($key);
+
+                return is_string($value) && trim($value) !== '' ? $value : null;
+            };
+            $seoSiteName = $seoRead('parish_name');
+            $seoTitle = $seoRead('seo_default_title');
+            $seoDescription = $seoRead('seo_default_description');
+            $seoOgImage = $seoRead('seo_default_og_image');
+            $seoOgImage = $seoOgImage && ! str_starts_with($seoOgImage, 'http')
+                ? rtrim(config('app.url'), '/').'/'.ltrim($seoOgImage, '/')
+                : $seoOgImage;
+        @endphp
+
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ $seoTitle ?? config('app.name', 'Laravel') }}</title>
+
+            @if($seoSiteName)
+                <meta data-inertia="og-site-name" property="og:site_name" content="{{ $seoSiteName }}">
+            @endif
+
+            @if($seoTitle)
+                <meta data-inertia="og-title" property="og:title" content="{{ $seoTitle }}">
+            @endif
+
+            @if($seoDescription)
+                <meta data-inertia="description" name="description" content="{{ $seoDescription }}">
+                <meta data-inertia="og-description" property="og:description" content="{{ $seoDescription }}">
+                <meta data-inertia="twitter-description" name="twitter:description" content="{{ $seoDescription }}">
+            @endif
+
+            <meta data-inertia="og-type" property="og:type" content="website">
+
+            @if($seoOgImage)
+                <meta data-inertia="og-image" property="og:image" content="{{ $seoOgImage }}">
+                <meta data-inertia="twitter-image" name="twitter:image" content="{{ $seoOgImage }}">
+            @endif
+
+            <meta data-inertia="twitter-card" name="twitter:card" content="summary_large_image">
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
