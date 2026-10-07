@@ -147,8 +147,8 @@ menjadi gate yang bermakna.
 di `AGENTS.md` ("SQLite locally", "No Docker") sudah tidak akurat dan telah
 diperbarui.
 
-**Konsekuensi:** Docker untuk MySQL menyusul pada Phase 01 Workstream 04 (P04).
-Sampai saat itu, developer memerlukan MySQL yang sudah berjalan di host.
+**Konsekuensi:** MySQL dijalankan langsung di host pengembangan, bukan lewat
+container. Lihat D-15 untuk keputusan menghapus Docker.
 
 ---
 
@@ -171,17 +171,49 @@ Layout baru: `layouts/public-layout.tsx` (PublicLayout) dan
 
 ---
 
-## D-09 — 2FA dan Passkeys akan dihapus
+## D-09 — 2FA dan Passkeys dipertahankan (deviasi dari Phase 01 §4)
 
-**Status:** Accepted · **belum dieksekusi** · blok terpisah setelah P03
+**Status:** Accepted · berlaku sejak P03 selesai
 
 Starter kit menyalakan `Features::twoFactorAuthentication()` dan
-`@laravel/passkeys`. Keduanya akan dinonaktifkan dan berkasnya dihapus karena
-Phase 01 §4 memasukkan "2FA" ke Out of Scope dan PRD §12 menundanya ke P1.
+`@laravel/passkeys`. Keduanya **dipertahankan** di Phase 01.
 
-**Kenapa blok terpisah:** penghapusan menyentuh ~12 file React, 3 file test,
-`config/fortify.php`, dan kolom `two_factor_*`. Mencampungkannya dengan P02
-akan membuat verifikasi satu blok terlalu berat.
+**Deviasi ini disengaja.** Phase 01 §4 memang memuat bullet "2FA" pada daftar
+Out of Scope, dan ini menyimpang dari bullet tersebut.
+
+**Alasan:**
+
+- **PRD §12 tidak melarang 2FA.** Ia placing di P1 dengan label *"Sangat
+  disarankan"*, dan enumerasi MUST NOT di §12 **tidak** memuat 2FA.
+- **PRD §17.2 menyebut 2FA sebagai mitigasi risiko**, bukan beban: *"Seluruh
+  akses di satu role → Kata sandi kuat, soft delete, backup, min. 2 akun; 2FA
+  dan audit log di P1"*.
+- **Phase 01 §39 (daftar MUST NOT yang mengikat agent) tidak memuat 2FA.**
+  Hanya §3.1 dan §4 yang menyebutnya.
+- **Phase 01 §1 melarang "refactor fondasi besar".** Menghapus lalu menambah
+  ulang 2FA justru persis yang dilarang.
+- **MVP ini punya ±2 akun Super Admin** dengan akses penuh ke seluruh sistem.
+  2FA lebih bernilai pada panel dua-orang daripada pada aplikasi besar.
+
+Aturan Phase 01 §1 berbunyi: *"Jika dokumen Phase 01 ini berbeda dengan PRD, PRD
+harus diprioritaskan."* Di sini PRD tidak melarang 2FA, sehingga mempertahankan
+2FA adalah posisi yang konsisten dengan PRD.
+
+**Dampak ke Phase 01 §37 (DoD):** checklist tidak memuat 2FA, jadi tidak ada
+item yang gagal.
+
+**Yang harus diingat saat P06** (bukan pekerjaan sekarang):
+
+- Pengecekan `users.is_active` **wajib berlaku juga setelah** completing
+  two-factor-challenge. Kalau tidak, akun nonaktif bisa lolos dengan
+  menyelesaikan 2FA.
+- Memindahkan auth ke prefix `/admin` akan menggeser `two-factor-challenge`.
+  Redirect dan `Fortify::home` harus konsisten.
+
+**Catatan teknis:** `laravel/passkeys` dan `pragmarx/google2fa` adalah
+dependency wajib `laravel/fortify`, jadi tidak bisa di-uninstall. "Tidak
+menghapus" di sini selalu berarti **tidak menonaktifkan feature-nya**, bukan
+membuang paketnya.
 
 ---
 
@@ -286,26 +318,102 @@ Dijaga oleh test `the seeder creates no fabricated parish or admin data`.
 
 ---
 
+## D-15 — Docker tidak dipakai; MySQL dijalankan langsung di host
+
+**Status:** Accepted · Phase 01 · P04 dibatalkan
+
+Phase 01 Workstream 04 (Docker Development Environment), item `P04` pada §33, dan
+bagian §3.1.D **tidak dijalankan**. MySQL 8 dijalankan langsung di host
+pengembangan.
+
+**Mengapa ini tidak menyimpang dari PRD.** Aturan Phase 01 §1: *"Jika dokumen
+Phase 01 ini berbeda dengan PRD, PRD harus diprioritaskan dan perbedaan harus
+dicatat di docs/DECISIONS.md."* PRD **tidak pernah menyebut Docker sama sekali**
+(`grep -i docker docs/PRD.md` → nol hasil). Yang PRD lakukan justru mengarahkan
+arsitektur deployment lain:
+
+> PRD §17.3 Q6 — *"Konfigurasi via `.env`; siapkan panduan deploy generik
+> (**VPS + Nginx + PHP-FPM + MySQL**)"*
+
+Jadi Docker adalah temuan Phase 01 saja, dan menghapuskannya justru lebih
+cocok dengan PRD.
+
+**AC-01 tetap terpenuhi.** AC-01 hanya menuntut
+`install → configure .env → migrate → seed → build → serve` tanpa menyebut
+Docker. Checkbox §37 "MySQL dapat dijalankan" juga tetap terpenuhi lewat
+MySQL native.
+
+**Dampak ke dokumen Phase 01** — dicatat di sini, dokumen spec-nya sendiri
+**tidak** diedit supaya bukti divergensinya tetap ada:
+
+| Lokasi | Efek |
+| --- | --- |
+| §3.1.D | tidak dijalankan |
+| §9 Workstream 04 | tidak dijalankan |
+| §33 P04 | dihapus dari urutan |
+| §31 DEVELOPMENT.md | bullet "Docker" diganti bagian setup MySQL native |
+
+**Yang berubah secara praktis:**
+
+- Developer wajib memasang MySQL 8 sendiri. `docs/DEVELOPMENT.md` (P15) akan
+  mendokumentasikannya.
+- `docs/DEVELOPMENT.md` tidak akan punya bagian `docker compose up`.
+- Ekstensi PHP untuk image processing tetap harus dipasang manual —
+  lihat bagian Known divergences nomor 9.
+
+CI tidak terpengaruh: `.github/workflows/tests.yml` memakai MySQL **service
+container** milik GitHub Actions, yang merupakan hal berbeda dari Docker
+sebagai alat pengembangan lokal.
+
+---
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
 | --- | --- | --- | --- |
-| 1 | `HandleInertiaRequests::share()` mengirim **seluruh model User** (`'user' => $request->user()`), padahal ARCHITECTURE.md Part C §2/§5 dan PRD §11 melarangnya. | Risiko kebocoran kolom (`email_verified_at`, `two_factor_*`) ke browser. | P07 — kirim hanya `id`, `name`, `email`, plus ringkasan role/permission |
+| 1 | `HandleInertiaRequests::share()` mengirim **seluruh model User** (`'user' => $request->user()`), padahal ARCHITECTURE.md Part C §2/§5 dan PRD §11 melarangnya. | Yang benar-benar bocor ke browser hanya `email_verified_at` dan `two_factor_confirmed_at` — keduanya metadata tidak sensitif. **Bukan** kebocoran secret: `password`, `two_factor_secret`, `two_factor_recovery_codes`, dan `remember_token` sudah ada di `#[Hidden]` (`app/Models/User.php`), jadi tidak ikut ter-serialize. Tetap perlu diperbaiki karena mengirim objek model mentah bertentangan dengan ARCHITECTURE.md. | P07 — kirim hanya `id`, `name`, `email`, plus ringkasan role/permission |
 | 2 | Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash` seperti ARCHITECTURE.md Part C §6. | Kontrak berbeda dari dokumen; perlu diputuskan sebelum layout publik dibangun. | P07 |
 | 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
 | 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
 | 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
 | 6 | `Features::registration()` masih aktif sehingga `/register` publik hidup. | Melanggar AUTH-R2 dan Phase 01 §F. | P06 |
 | 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
-| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. | P06 |
+| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. Perlu diperhatikan bersama 2FA: pengecekan juga harus berlaku setelah two-factor-challenge (D-09). | P06 |
+| 9 | 🔴 Ekstensi PHP `gd` **dan** `imagick` tidak terpasang di host pengembangan. | **Blocker P10.** Intervention Image butuh salah satunya untuk WebP, varian, dan EXIF stripping (XC-M1/M2/M3). Perintah: `sudo apt install php8.3-gd`. | Sebelum P10 |
+| 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
 
 ---
 
 ## Yang masih diperlukan (Phase 01)
 
-P03 database · P04 Docker · P05 Spatie Permission · P06 authentication ·
-P07 Inertia foundation · P08 UI & layout · P09 site settings · P10 media ·
-P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+P05 Spatie Permission · P06 authentication · P07 Inertia foundation ·
+P08 UI & layout · P09 site settings · P10 media · P11 sanitasi ·
+P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+
+P01, P02, dan P03 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
 
 Referensi versi untuk langkah berikutnya: `spatie/laravel-permission` **8.3.0**
 sudah kompatibel (`php ^8.3`, `illuminate/* ^12.0|^13.0`).
+
+Daftar permission yang akan di-seed pada P05 — **11 permission, persis contoh
+Phase 01 §10.4**, tanpa tambahan:
+
+```text
+dashboard.view
+
+settings.view
+settings.update
+
+users.view
+users.create
+users.update
+users.disable
+
+posts.view
+posts.create
+posts.update
+posts.delete
+```
+
+Permission per modul lain (agenda, galeri, komunitas, jadwal-misa, dst.)
+dibuat saat modulnya dibangun, supaya tidak perlu migration tambahan sekarang.
