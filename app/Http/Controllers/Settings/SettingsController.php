@@ -37,6 +37,7 @@ class SettingsController extends Controller
 
         return Inertia::render('admin/pengaturan', [
             'groups' => $this->groupsWithValues(),
+            'meta' => $this->formMeta(),
         ]);
     }
 
@@ -56,6 +57,27 @@ class SettingsController extends Controller
         ]);
 
         return to_route('settings.edit');
+    }
+
+    /**
+     * Presentation hints for the form, so the React side does not have to carry a
+     * second copy of which field is a textarea, a URL or a bounded number.
+     *
+     * @return array<string, mixed>
+     */
+    private function formMeta(): array
+    {
+        return [
+            'labels' => (array) __('site-settings.labels'),
+            'multiline' => (array) __('site-settings.multiline'),
+            'urls' => (array) __('site-settings.urls'),
+            'groupLabels' => (array) __('site-settings.groups'),
+            'numericRanges' => [
+                'home_news_limit' => [3, 6],
+                'home_events_limit' => [3, 5],
+                'home_gallery_limit' => [1, 12],
+            ],
+        ];
     }
 
     /**
