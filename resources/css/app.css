@@ -187,11 +187,20 @@
     --color-ink: #111827;
     --color-canvas-soft: #f8f9fb;
     --color-surface-pearl: #fcfcfd;
+    --color-surface-chip: #e5e7eb;
     --color-hairline: #e4e7ec;
     --color-divider-soft: #f2f4f7;
     --color-ink-muted: #667085;
     --color-ink-muted-strong: #475467;
     --color-ink-muted-soft: #98a2b3;
+    /*
+     * DESIGN.md refers to {colors.red-light} for the active profile sidebar
+     * state but never defines it in the colors block. Derived from primary so
+     * the value still traces to the palette. Recorded in D-22.
+     */
+    --color-primary-light: color-mix(in oklab, #ab020e 8%, #ffffff);
+    --color-primary-hover: #8f010b;
+    --color-primary-focus: #c51624;
     --color-red-on-dark: #ff6670;
 
     /* Charts are not specified in DESIGN.md, so they reuse documented hues. */
@@ -338,8 +347,9 @@
     }
 
     /*
-     * DESIGN.md requires at least 44x44px touch targets. Setting this on the
-     * element rather than per component means an icon button gets it for free.
+     * Removes the 300ms tap delay on touch devices. It does not by itself
+     * provide the 44x44px minimum DESIGN.md asks for; that is handled by the
+     * size variants of the interactive primitives.
      */
     button,
     [role='button'],
@@ -347,9 +357,10 @@
         touch-action: manipulation;
     }
 
-    /* DESIGN.md: visible keyboard focus. Never remove the ring outright. */
-    :focus-visible {
-        outline: 2px solid var(--ring);
-        outline-offset: 2px;
-    }
+    /*
+     * Deliberately no global :focus-visible override. The shadcn primitives
+     * already carry focus-visible ring utilities, and a global outline would
+     * draw a second indicator on top of those. Elements without a primitive
+     * keep the browser default, which is visible on its own.
+     */
 }
