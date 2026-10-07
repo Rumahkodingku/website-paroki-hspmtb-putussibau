@@ -367,36 +367,83 @@ sebagai alat pengembangan lokal.
 
 ---
 
-## Known divergences (belum diselesaikan)
+## D-16 — Akses penuh `super_admin` lewat `Gate::before`
 
-| # | Deviasi | Risiko / alasan | Rencana |
-| --- | --- | --- | --- |
-| 1 | `HandleInertiaRequests::share()` mengirim **seluruh model User** (`'user' => $request->user()`), padahal ARCHITECTURE.md Part C §2/§5 dan PRD §11 melarangnya. | Yang benar-benar bocor ke browser hanya `email_verified_at` dan `two_factor_confirmed_at` — keduanya metadata tidak sensitif. **Bukan** kebocoran secret: `password`, `two_factor_secret`, `two_factor_recovery_codes`, dan `remember_token` sudah ada di `#[Hidden]` (`app/Models/User.php`), jadi tidak ikut ter-serialize. Tetap perlu diperbaiki karena mengirim objek model mentah bertentangan dengan ARCHITECTURE.md. | P07 — kirim hanya `id`, `name`, `email`, plus ringkasan role/permission |
-| 2 | Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash` seperti ARCHITECTURE.md Part C §6. | Kontrak berbeda dari dokumen; perlu diputuskan sebelum layout publik dibangun. | P07 |
-| 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
-| 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
-| 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
-| 6 | `Features::registration()` masih aktif sehingga `/register` publik hidup. | Melanggar AUTH-R2 dan Phase 01 §F. | P06 |
-| 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
-| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. Perlu diperhatikan bersama 2FA: pengecekan juga harus berlaku setelah two-factor-challenge (D-09). | P06 |
-| 9 | 🔴 Ekstensi PHP `gd` **dan** `imagick` tidak terpasang di host pengembangan. | **Blocker P10.** Intervention Image butuh salah satunya untuk WebP, varian, dan EXIF stripping (XC-M1/M2/M3). Perintah: `sudo apt install php8.3-gd`. | Sebelum P10 |
-| 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
+**Status:** Accepted · Phase 01 Workstream 05
+
+Phase 01 §10.6 hanya menulis "`super_admin` harus memiliki akses penuh melalui
+Spatie" tanpa menyebut mekanismenya. Dipilih `Gate::before()` di
+`AppServiceProvider::boot()`, sesuai rekomendasi resmi Spatie, **bukan**
+menempelkan permission ke role.
+
+**Alasan:** permission baru di phase berikutnya otomatis ter-given tanpa perlu
+diingat menempelkannya ke role. KalauFgayaempel permission-permission
+eksplisit, Super Admin diam-diam kehilangan akses begitu ada permission baru.
+
+**Dua hal yang mudah salah dan harus diingat:**
+
+1. Closure **wajib mengembalikan `null`, bukan `false`**. Mengembalikan `false`
+   akan memotong seluruh policy di aplikasi. Dijaga oleh test
+   `a user without the super_admin role is denied`.
+2. Berlaku **hanya pada pemeriksaan Gate** — `can()`, `Gate::authorize()`, dan
+   method Policy. Panggilan langsung `$user->hasPermissionTo()` melewati Gate dan
+   **tidak** ikut ter-cover. Kode otorisasi karena itu harus memakai `can()`.
+
+**Pola yang dipakai aplikasi** (ARCHITECTURE.md Part A §8 "jangan hand-roll
+gate"):
+
+```php
+Gate::before(fn (User $user, string $ability): ?bool
+    => $user->hasRole(AppServiceProvider::SUPER_ADMIN) ?: null);
+```
+
+Nama role disimpan sebagai konstanta `AppServiceProvider::SUPER_ADMIN` agar
+seeder dan provider tidak mengulang string-nya.
 
 ---
 
-## Yang masih diperlukan (Phase 01)
+## D-17 — `SuperAdminSeeder`: dilewati bila env kosong, divalidasi bila terisi
 
-P05 Spatie Permission · P06 authentication · P07 Inertia foundation ·
-P08 UI & layout · P09 site settings · P10 media · P11 sanitasi ·
-P12 error/SEO/infrastruktur · P13 quality · P14 Git · P15 docs.
+**Status:** Accepted · Phase 01 Workstream 05
 
-P01, P02, dan P03 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
+`SuperAdminSeeder` membaca `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-Referensi versi untuk langkah berikutnya: `spatie/laravel-permission` **8.3.0**
-sudah kompatibel (`php ^8.3`, `illuminate/* ^12.0|^13.0`).
+**Bila email atau password kosong → seeder dilewati**, bukan error. Diperlukan
+karena `php artisan migrate:fresh --seed` dijalankan di mesin yang belum
+dikonfigurasi `.env` dan di CI, keduanya tidak punya kredensial admin.
 
-Daftar permission yang akan di-seed pada P05 — **11 permission, persis contoh
-Phase 01 §10.4**, tanpa tambahan:
+**Bila terisi → password divalidasi terhadap `Password::defaults()`** dan seeder
+menolak dengan pesan jelas kalau lemah.
+
+**Konsekuensi `Password::defaults()`:** di production aturan ini berisi
+`uncompromised()`, yang memanggil `https://api.pwnedpasswords.com`. Jadi
+seeding di production punya ketergantungan jaringan — disengaja, karena itu
+memakai kebijakan password yang sama dengan form ganti kata sandi, bukan aturan
+ terpisah yang bisa melenceng. Di luar production, `AppServiceProvider`
+ mengembalikan `null`, dan `Password::default()` jatuh ke `min(8)` — sehingga
+ tidak ada panggilan jaringan sama sekali saat test atau development.
+
+**`forceFill()`, bukan `updateOrCreate()`.** `is_active` sengaja tidak ada di
+`$fillable` (D-13), jadi mass assignment akan membuangnya diam-diam dan akun
+Super Admin berakhir **nonaktif** — kebalikan dari yang diminta Workstream 06.
+Seeder adalah kode tepercaya, jadi melewati guard fillable di sini benar. Ini
+sudah ketahuan karena test gagal saat `updateOrCreate` dipakai.
+
+**Role `super_admin` di-seed oleh `PermissionSeeder`, bukan
+`SuperAdminSeeder`.** Phase 01 §10.3 menyebutnya *system role*, jadi harus ada
+bahkan di mesin yang tidak punya `ADMIN_EMAIL` — tanpa akun pun. Ini juga
+ketahuan lewat pemeriksaan manual, bukan lewat test.
+
+**Idempoten** lewat `firstOrNew(['email' => ...])` + `syncRoles()`, sehingga
+menjalankan seeder berkali-kali tidak menghasilkan akun duplikat.
+
+---
+
+## D-18 — Daftar permission fondasi
+
+**Status:** Accepted · Phase 01 Workstream 05
+
+`PermissionSeeder` membuat **11 permission, persis contoh Phase 01 §10.4**:
 
 ```text
 dashboard.view
@@ -414,6 +461,50 @@ posts.create
 posts.update
 posts.delete
 ```
+
+Tidak ada permission yang dikarang. Penamaan mengikuti PRD AUTH-R6
+(`resource.action`), dijaga test.
+
+**Permission modul lain sengaja tidak dibuat** (agenda, galeri, komunitas,
+jadwal-misa, profile, pelayanan, download, dan seterusnya).
+Setiap modul butuh set permission yang berbeda, jadi dibuatnya saat modulnya
+dibangun daripada membuat permission yang belum dibaca apa pun — persis
+kaidah "jangan abstraksi prematur" di ARCHITECTURE.md, dan menghindari
+perlu migration tambahan.
+
+---
+
+## Known divergences (belum diselesaikan)
+
+| # | Deviasi | Risiko / alasan | Rencana |
+| --- | --- | --- | --- |
+| 1 | `HandleInertiaRequests::share()` mengirim **seluruh model User** (`'user' => $request->user()`), padahal ARCHITECTURE.md Part C §2/§5 dan PRD §11 melarangnya. | Yang benar-benar bocor ke browser hanya `email_verified_at` dan `two_factor_confirmed_at` — keduanya metadata tidak sensitif. **Bukan** kebocoran secret: `password`, `two_factor_secret`, `two_factor_recovery_codes`, dan `remember_token` sudah ada di `#[Hidden]` (`app/Models/User.php`), jadi tidak ikut ter-serialize. Tetap perlu diperbaiki karena mengirim objek model mentah bertentangan dengan ARCHITECTURE.md. | P07 — kirim hanya `id`, `name`, `email`, plus ringkasan role/permission |
+| 2 | Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash` seperti ARCHITECTURE.md Part C §6. | Kontrak berbeda dari dokumen; perlu diputuskan sebelum layout publik dibangun. | P07 |
+| 3 | `display_timezone` belum dikirim ke frontend. | UI belum bisa merender WIB. | P07 (shared prop `displayTimezone`) |
+| 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
+| 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
+| 6 | `Features::registration()` masih aktif sehingga `/register` publik hidup. | Melanggar AUTH-R2 dan Phase 01 §F. | P06 |
+| 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
+| 8 | `is_active` sudah ada di skema, tetapi belum ada yang menegakkan aturan "akun nonaktif tidak dapat login". | PRD D-08 belum berlaku penuh. Perlu diperhatikan bersama 2FA: pengecekan juga harus berlaku setelah two-factor-challenge (D-09). | P06 |
+| 9 | ~~PHP extensions `gd` / `imagick` tidak terpasang.~~ **Ditutup** — `gd` 2.3.3 dengan WebP support sudah terpasang. | — | Selesai |
+| 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
+| 11 | `super_admin` mendapat akses ke **semua** ability lewat `Gate::before`, termasuk ability yang di masa depan mungkin tidak boleh dimiliki siapa pun. | Otorisasi implisit: tidak ada daftar permission yang bisa dibaca untuk audit. Ini trade-off yang disepakati di D-16, bukan kelalaian. | P06 — kalau muncul ability yang harus dikecualikan, pakai `Gate::after` atau `deny` eksplisit |
+
+---
+
+## Yang masih diperlukan (Phase 01)
+
+P06 authentication · P07 Inertia foundation · P08 UI & layout ·
+P09 site settings · P10 media · P11 sanitasi · P12 error/SEO/infrastruktur ·
+P13 quality · P14 Git · P15 docs.
+
+P01, P02, P03, dan P05 sudah selesai. P04 (Docker) dibatalkan — lihat D-15.
+
+Fondasi RBAC sudah aktif: `spatie/laravel-permission` **8.3.0** terpasang,
+`HasRoles` pada `User`, role `super_admin` + 11 permission ter-seed, dan
+`Gate::before` di `AppServiceProvider`. Lihat D-16, D-17, D-18.
+
+Daftar 11 permission yang sudah di-seed pada P05 tercatat di D-18.
 
 Permission per modul lain (agenda, galeri, komunitas, jadwal-misa, dst.)
 dibuat saat modulnya dibangun, supaya tidak perlu migration tambahan sekarang.

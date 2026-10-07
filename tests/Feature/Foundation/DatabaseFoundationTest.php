@@ -124,9 +124,16 @@ test('is_active is cast to a boolean', function () {
 
 test('the seeder creates no fabricated parish or admin data', function () {
     // AGENTS.md: never invent real parish data. The starter kit seeded a
-    // "Test User"; that must not come back. SuperAdminSeeder arrives in P05.
+    // "Test User", which must not come back.
+    //
+    // This asserts the absence of fabricated rows rather than an empty users
+    // table, because P05 legitimately seeds a Super Admin when ADMIN_EMAIL is
+    // configured. Asserting a row count would fail for the right reason but the
+    // wrong one.
     $this->seed(DatabaseSeeder::class);
 
-    expect(User::query()->count())->toBe(0)
+    expect(User::query()->where('email', 'test@example.com')->exists())->toBeFalse()
+        ->and(User::query()->where('email', 'test@example.org')->exists())->toBeFalse()
+        ->and(User::query()->where('name', 'Test User')->exists())->toBeFalse()
         ->and(DB::table('site_settings')->count())->toBe(0);
 });

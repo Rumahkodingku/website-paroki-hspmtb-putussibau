@@ -1,6 +1,8 @@
 <?php
 
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -24,8 +26,8 @@ pest()->extend(TestCase::class)
 |--------------------------------------------------------------------------
 |
 | When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
+| "expect()" function gives you access to "expectations" methods that you can use to assert
+| different things. Of course, you may extend the Expectation API at any time.
 |
 */
 
@@ -38,13 +40,23 @@ expect()->extend('toBeOne', function () {
 | Functions
 |--------------------------------------------------------------------------
 |
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
+| While Pest is very powerful out-of-the-box, you may always add your own helper functions to
+| this file. By default, we're exposing some global helper functions.
 |
 */
 
-function something()
+/**
+ * Seed the system role and permissions, then drop Spatie's cache.
+ *
+ * Spatie registers permissions with the Gate when the application boots and
+ * caches the result. phpunit.xml sets CACHE_STORE=array, which lives for the
+ * whole test process, so a permission seeded inside a test is invisible unless
+ * the cache is dropped afterwards. Without this, authorization tests would
+ * silently pass or fail against a stale permission set.
+ */
+function seedRolesAndPermissions(): void
 {
-    // ..
+    test()->seed(PermissionSeeder::class);
+
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
 }
