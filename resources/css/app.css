@@ -7,16 +7,143 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+|--------------------------------------------------------------------------
+| Design tokens
+|--------------------------------------------------------------------------
+|
+| Every colour here comes from docs/DESIGN.md. The `semantic:` block of that
+| document maps the shadcn variable names onto the HSPMTB palette, which is
+| why the values are literal hex rather than the OKLCH values the shadcn
+| default ships. DESIGN.md records that the brand colours were approximated
+| from the supplied logo, so keeping the documented value verbatim matters more
+| than matching a colour space.
+|
+| Two rules govern how this file may be extended:
+|
+|   1. Application components use the semantic utilities (bg-primary,
+|      text-muted-foreground, border-border). Brand utilities (bg-navy,
+|      text-gold) exist for surfaces DESIGN.md names explicitly. DESIGN.md
+|      forbids arbitrary values such as bg-[#AB020E] in components.
+|
+|   2. Spacing needs no custom tokens. DESIGN.md asks for a 4/8/12/16/24/32/
+|      48/80/112 scale and Tailwind's default already produces exactly those
+|      values as p-1, p-2, p-3, p-4, p-6, p-8, p-12, p-20 and p-28.
+|
+| Dark mode is derived from the navy ramp using color-mix() against the
+| documented surfaces, so every dark value still traces back to a colour in
+| DESIGN.md rather than being picked by eye.
+|
+| @see docs/DESIGN.md
+| @see docs/DECISIONS.md D-22
+|
+*/
+
 @theme {
+    /*
+     * Typography. SF Pro is not licensed for web distribution, so per
+     * DESIGN.md the stack falls back to the platform UI font. --font-display
+     * exists so headings can prefer SF Pro Display when the OS has it.
+     */
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
-    --radius-lg: var(--radius);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-sm: calc(var(--radius) - 4px);
+    --font-display:
+        'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', sans-serif;
 
+    /* DESIGN.md typography.* — size, line height, letter spacing, weight. */
+    --text-hero-display: 56px;
+    --text-hero-display--line-height: 1.07;
+    --text-hero-display--letter-spacing: -0.28px;
+    --text-hero-display--font-weight: 600;
+
+    --text-display-lg: 40px;
+    --text-display-lg--line-height: 1.1;
+    --text-display-lg--letter-spacing: -0.4px;
+    --text-display-lg--font-weight: 600;
+
+    --text-display-md: 34px;
+    --text-display-md--line-height: 1.18;
+    --text-display-md--letter-spacing: -0.374px;
+    --text-display-md--font-weight: 600;
+
+    --text-lead: 28px;
+    --text-lead--line-height: 1.14;
+    --text-lead--letter-spacing: 0.196px;
+    --text-lead--font-weight: 400;
+
+    --text-lead-airy: 24px;
+    --text-lead-airy--line-height: 1.5;
+    --text-lead-airy--letter-spacing: 0;
+    --text-lead-airy--font-weight: 300;
+
+    --text-tagline: 21px;
+    --text-tagline--line-height: 1.19;
+    --text-tagline--letter-spacing: 0.231px;
+    --text-tagline--font-weight: 600;
+
+    --text-body-strong: 17px;
+    --text-body-strong--line-height: 1.24;
+    --text-body-strong--letter-spacing: -0.374px;
+    --text-body-strong--font-weight: 600;
+
+    --text-body: 17px;
+    --text-body--line-height: 1.47;
+    --text-body--letter-spacing: -0.2px;
+    --text-body--font-weight: 400;
+
+    --text-dense-link: 17px;
+    --text-dense-link--line-height: 2;
+    --text-dense-link--letter-spacing: 0;
+    --text-dense-link--font-weight: 400;
+
+    --text-caption: 14px;
+    --text-caption--line-height: 1.43;
+    --text-caption--letter-spacing: -0.224px;
+    --text-caption--font-weight: 400;
+
+    --text-caption-strong: 14px;
+    --text-caption-strong--line-height: 1.29;
+    --text-caption-strong--letter-spacing: -0.224px;
+    --text-caption-strong--font-weight: 600;
+
+    --text-button-large: 18px;
+    --text-button-large--line-height: 1;
+    --text-button-large--letter-spacing: 0;
+    --text-button-large--font-weight: 500;
+
+    --text-button-utility: 14px;
+    --text-button-utility--line-height: 1.29;
+    --text-button-utility--letter-spacing: -0.224px;
+    --text-button-utility--font-weight: 400;
+
+    --text-fine-print: 12px;
+    --text-fine-print--line-height: 1.3;
+    --text-fine-print--letter-spacing: -0.12px;
+    --text-fine-print--font-weight: 400;
+
+    --text-micro-legal: 10px;
+    --text-micro-legal--line-height: 1.3;
+    --text-micro-legal--letter-spacing: -0.08px;
+    --text-micro-legal--font-weight: 400;
+
+    --text-nav-link: 13px;
+    --text-nav-link--line-height: 1;
+    --text-nav-link--letter-spacing: -0.12px;
+    --text-nav-link--font-weight: 400;
+
+    /* DESIGN.md rounded.* */
+    --radius-xs: 5px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-pill: 9999px;
+
+    /* shadcn semantic tokens, backed by the CSS variables below. */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
 
@@ -45,6 +172,29 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
+    /*
+     * Brand palette from DESIGN.md colors.*. Named so components can reach for
+     * a documented surface directly: bg-navy, text-gold, bg-gold-light.
+     * Deliberately no --color-body, because a body colour would collide with
+     * the --text-body typography token above.
+     */
+    --color-navy: #01266d;
+    --color-navy-dark: #001a4d;
+    --color-navy-light: #eaf0fa;
+    --color-gold: #fcb027;
+    --color-gold-dark: #d99400;
+    --color-gold-light: #fff4d6;
+    --color-ink: #111827;
+    --color-canvas-soft: #f8f9fb;
+    --color-surface-pearl: #fcfcfd;
+    --color-hairline: #e4e7ec;
+    --color-divider-soft: #f2f4f7;
+    --color-ink-muted: #667085;
+    --color-ink-muted-strong: #475467;
+    --color-ink-muted-soft: #98a2b3;
+    --color-red-on-dark: #ff6670;
+
+    /* Charts are not specified in DESIGN.md, so they reuse documented hues. */
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
     --color-chart-3: var(--chart-3);
@@ -61,75 +211,120 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/*
+| Light theme — DESIGN.md semantic: block.
+*/
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --background: #ffffff; /* canvas */
+    --foreground: #111827; /* ink */
+
+    --card: #ffffff; /* canvas */
+    --card-foreground: #111827; /* ink */
+
+    --popover: #ffffff; /* canvas */
+    --popover-foreground: #111827; /* ink */
+
+    --primary: #ab020e;
+    --primary-foreground: #ffffff; /* on-primary */
+
+    --secondary: #eaf0fa; /* navy-light */
+    --secondary-foreground: #001a4d; /* navy-dark */
+
+    --muted: #f8f9fb; /* canvas-soft */
+    --muted-foreground: #667085; /* body-muted */
+
+    --accent: #fff4d6; /* gold-light */
+    /*
+     * DESIGN.md maps accent-foreground to gold-dark (#D99400), but that pair
+     * measures 2.34:1 against the gold-light accent surface, which fails WCAG
+     * AA even for large text. Button's outline and ghost variants render text
+     * on exactly this pair, so following the document literally would ship
+     * unreadable hover text.
+     *
+     * navy-dark is the alternative the document already supplies for dark text
+     * on a soft surface and measures 14.62:1. Divergence recorded in D-22.
+     * gold-dark stays available as --color-gold-dark for decorative use, just
+     * not as text on a light background.
+     */
+    --accent-foreground: #001a4d; /* navy-dark, not gold-dark - see D-22 */
+
+    /* DESIGN.md maps destructive onto primary, so a delete action looks like
+       the primary red rather than a generic warning colour. */
+    --destructive: #ab020e;
+    --destructive-foreground: #ffffff;
+
+    --border: #e4e7ec; /* hairline */
+    --input: #e4e7ec; /* hairline */
+    --ring: #c51624; /* primary-focus */
+
+    --chart-1: #01266d; /* navy */
+    --chart-2: #ab020e; /* primary */
+    --chart-3: #fcb027; /* gold */
+    --chart-4: #667085; /* body-muted */
+    --chart-5: #475467; /* ink-muted-80 */
+
+    --sidebar: #f8f9fb; /* canvas-soft */
+    --sidebar-foreground: #111827; /* ink */
+    --sidebar-primary: #ab020e;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #eaf0fa; /* navy-light */
+    --sidebar-accent-foreground: #001a4d; /* navy-dark */
+    --sidebar-border: #e4e7ec; /* hairline */
+    --sidebar-ring: #c51624; /* primary-focus */
 }
 
+/*
+| Dark theme — derived from the navy ramp.
+|
+| DESIGN.md section "Known Gaps" states dark mode has not been established, so
+| this palette is not from the document. It is built only from colours the
+| document does specify: navy-dark as the canvas, navy for raised surfaces,
+| and primary-on-dark for anything interactive, because the primary red is not
+| legible on navy. See docs/DECISIONS.md D-22.
+*/
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    --background: #001a4d; /* navy-dark */
+    --foreground: #ffffff; /* body-on-dark */
+
+    --card: #01266d; /* navy */
+    --card-foreground: #ffffff;
+
+    --popover: #01266d;
+    --popover-foreground: #ffffff;
+
+    --primary: #ff6670; /* primary-on-dark */
+    --primary-foreground: #0b1220; /* surface-black */
+
+    --secondary: color-mix(in oklab, #eaf0fa 12%, #001a4d);
+    --secondary-foreground: #eaf0fa; /* navy-light */
+
+    --muted: color-mix(in oklab, #eaf0fa 12%, #001a4d);
+    --muted-foreground: #98a2b3; /* ink-muted-48 */
+
+    --accent: color-mix(in oklab, #fcb027 18%, #001a4d);
+    --accent-foreground: #fcb027; /* gold */
+
+    --destructive: #ff6670;
+    --destructive-foreground: #0b1220;
+
+    --border: color-mix(in oklab, #eaf0fa 16%, #001a4d);
+    --input: color-mix(in oklab, #eaf0fa 16%, #001a4d);
+    --ring: #ff6670;
+
+    --chart-1: #eaf0fa; /* navy-light */
+    --chart-2: #ff6670; /* primary-on-dark */
+    --chart-3: #fcb027; /* gold */
+    --chart-4: #98a2b3; /* ink-muted-48 */
+    --chart-5: #c9d6ee;
+
+    --sidebar: #001a4d;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ff6670;
+    --sidebar-primary-foreground: #0b1220;
+    --sidebar-accent: color-mix(in oklab, #eaf0fa 12%, #001a4d);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: color-mix(in oklab, #eaf0fa 16%, #01266d);
+    --sidebar-ring: #ff6670;
 }
 
 @layer base {
@@ -139,5 +334,22 @@
 
     body {
         @apply bg-background text-foreground;
+        font-family: var(--font-sans);
+    }
+
+    /*
+     * DESIGN.md requires at least 44x44px touch targets. Setting this on the
+     * element rather than per component means an icon button gets it for free.
+     */
+    button,
+    [role='button'],
+    a[href] {
+        touch-action: manipulation;
+    }
+
+    /* DESIGN.md: visible keyboard focus. Never remove the ring outright. */
+    :focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
     }
 }
