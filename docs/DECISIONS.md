@@ -171,49 +171,58 @@ Layout baru: `layouts/public-layout.tsx` (PublicLayout) dan
 
 ---
 
-## D-09 — 2FA dan Passkeys dipertahankan (deviasi dari Phase 01 §4)
+## D-09 — 2FA dan Passkeys dihapus dari MVP
 
-**Status:** Accepted · berlaku sejak P03 selesai
+**Status:** Accepted · berlaku sejak branch `feat/phase-01-foundation-refine`
+· **membalik** versi pertama keputusan ini (2FA dipertahankan)
 
-Starter kit menyalakan `Features::twoFactorAuthentication()` dan
-`@laravel/passkeys`. Keduanya **dipertahankan** di Phase 01.
-
-**Deviasi ini disengaja.** Phase 01 §4 memang memuat bullet "2FA" pada daftar
-Out of Scope, dan ini menyimpang dari bullet tersebut.
+`Features::twoFactorAuthentication()` dan `Features::passkeys()` **dihapus**,
+serta seluruh kode, route, halaman, dan kolom database miliknya. D-09 yang
+pertama justru mempertahankan keduanya sebagai deviasi sadar dari Phase 01 §4;
+keputusan itu dibalik karena satu-satunya akun admin MVP tidak memerlukannya dan
+karena Phase 01 §4 sendiri sudah mencantumkan 2FA sebagai Out of Scope.
 
 **Alasan:**
 
-- **PRD §12 tidak melarang 2FA.** Ia placing di P1 dengan label *"Sangat
-  disarankan"*, dan enumerasi MUST NOT di §12 **tidak** memuat 2FA.
-- **PRD §17.2 menyebut 2FA sebagai mitigasi risiko**, bukan beban: *"Seluruh
-  akses di satu role → Kata sandi kuat, soft delete, backup, min. 2 akun; 2FA
-  dan audit log di P1"*.
-- **Phase 01 §39 (daftar MUST NOT yang mengikat agent) tidak memuat 2FA.**
-  Hanya §3.1 dan §4 yang menyebutnya.
-- **Phase 01 §1 melarang "refactor fondasi besar".** Menghapus lalu menambah
-  ulang 2FA justru persis yang dilarang.
-- **MVP ini punya ±2 akun Super Admin** dengan akses penuh ke seluruh sistem.
-  2FA lebih bernilai pada panel dua-orang daripada pada aplikasi besar.
+- **Phase 01 §4 mencantumkan "2FA" sebagai Out of Scope.** Menghapusnya
+  mengembalikan keselarasan dengan roadmap, bukan menyimpang darinya.
+- **MVP ini satu role dan satu akun.** `super_admin` adalah satu-satunya role
+  dan Phase 01 tidak membangun Role Management UI, sehingga tidak ada akun
+  kedua yang perlu dilindungi dari session hijacking milik akun pertama.
+- **Kode 2FA yang ada tidak pernah dipakai.** Tidak ada akun yang pernah
+  mengaktifkan `two_factor_confirmed_at`, jadi ini menghapus kode mati, bukan
+ crippled produk.
+- **Akun dibuat dari `.env`.** Kredensial Super Admin berasal dari environment,
+  bukan dari UI publik, sehingga tidak ada alur pendaftaran yang perlu dilindungi.
 
-Aturan Phase 01 §1 berbunyi: *"Jika dokumen Phase 01 ini berbeda dengan PRD, PRD
-harus diprioritaskan."* Di sini PRD tidak melarang 2FA, sehingga mempertahankan
-2FA adalah posisi yang konsisten dengan PRD.
+**Konsekuensi yang harus disadari:** login kini hanya punya **satu** lapisan —
+password, dengan rate limit 5 percobaan/menit per kombinasi email+IP. Sebelumnya
+ada tiga pintu masuk (password, two-factor challenge, passkey); sekarang hanya
+satu. Jadi D-09 ini adalah **pengurangan** defense-in-depth dan bukan netral.
+Wajar untuk ukuran MVP ini, dan harus ditinjau ulang begitu role kedua atau
+session hijacking jadi ancaman nyata.
 
-**Dampak ke Phase 01 §37 (DoD):** checklist tidak memuat 2FA, jadi tidak ada
-item yang gagal.
+**Tidak boleh dilupakan kalau 2FA dibutuhkan lagi** (phase berikutnya):
 
-**Yang harus diingat saat P06** (bukan pekerjaan sekarang):
+- `config('fortify.features')` harus menyalakan `Features::twoFactorAuthentication()`
+  kembali, dan `config('fortify.limiters')` harus punya entri `'two-factor'`
+  yang dipetakan ke rate limiter bernama sama.
+- Kolom `two_factor_secret`, `two_factor_recovery_codes`, dan
+  `two_factor_confirmed_at` **sudah tidak ada** di tabel `users`. Perlu
+  migration baru, bukan menghidupkan kembali migration lama.
+- Tabel `passkeys` juga sudah tidak ada, dengan konsekuensi yang sama.
+- `EnsureAccountIsActive` dan `EnsureAccountCanLogIn` sengaja ditulis tanpa
+  historis ini sehingga tidak perlu diubah saat 2FA kembali, tapi saat itu
+  argumen posisi pipe di `EnsureAccountCanLogIn` perlu ditulis ulang lagi.
 
-- Pengecekan `users.is_active` **wajib berlaku juga setelah** completing
-  two-factor-challenge. Kalau tidak, akun nonaktif bisa lolos dengan
-  menyelesaikan 2FA.
-- Memindahkan auth ke prefix `/admin` akan menggeser `two-factor-challenge`.
-  Redirect dan `Fortify::home` harus konsisten.
-
-**Catatan teknis:** `laravel/passkeys` dan `pragmarx/google2fa` adalah
-dependency wajib `laravel/fortify`, jadi tidak bisa di-uninstall. "Tidak
-menghapus" di sini selalu berarti **tidak menonaktifkan feature-nya**, bukan
-membuang paketnya.
+**Catatan teknis:** `laravel/passkeys` **tidak bisa** di-uninstall karena
+`laravel/fortify` v1.40.0 mensyaratkannya sebagai dependency. Yang dihapus
+adalah feature-nya, kode aplikasi kita, dan dependency npm
+(`input-otp`, `@laravel/passkeys`). File
+`resources/js/components/ui/input-otp.tsx` ikut terhapus: tanpa dependency
+`input-otp` file itu tidak bisa dikompilasi, dan setelah semua pengimpornya
+dihapus tidak ada satu pun importer yang tersisa, sehingga `npm run types:check`
+akan gagal selama file itu ada.
 
 ---
 
@@ -515,9 +524,9 @@ spesifikasi WebAuthn, bukan pilihan kita.
 
 **Status:** Accepted · Phase 01 Workstream 07
 
-PRD D-08 mensyaratkan akun nonaktif tidak dapat login. Karena 2FA dan Passkeys
-dipertahankan (D-09), ada tiga pintu masuk: password, two-factor-challenge, dan
-passkey. Satu titik pengecekan tidak cukup.
+PRD D-08 mensyaratkan akun nonaktif tidak dapat login. Satu titik pengecekan
+tidak cukup, karena ada dua cara berbeda untuk membuat sesi: saat login, dan
+pada setiap request berikutnya.
 
 | Lapis | Kelas | Tugas |
 | --- | --- | --- |
@@ -525,8 +534,9 @@ passkey. Satu titik pengecekan tidak cukup.
 | Area admin | `EnsureAccountIsActive` | middleware `/admin/*`, yang benar-benar menegakkan |
 
 Pipe-nya disisipkan **setelah `CanonicalizeUsername` dan sebelum
-`RedirectsIfTwoFactorAuthenticatable`**, sehingga akun nonaktif ditolak sebelum
-sesi dua faktor sempat disimpan.
+`Authenticate`**, sehingga akun nonaktif ditolak sebelum kredensial dicek dan
+sebelum sesi sempat dibuat. 2FA dan passkey sudah tidak ada (D-09), jadi posisi
+ini kini satu-satunya yang relevan.
 
 Override `config('fortify.pipelines.login')` **mengganti** pipeline default
 Fortify sepenuhnya, jadi daftar default ditulis ulang secara eksplisit di
@@ -534,8 +544,8 @@ config. Salah satu namespace di therein mudah terbalik: pipe Fortify ada di
 `Laravel\Fortify\Actions`, bukan `Http\Middleware`.
 
 **Middleware adalah lapisan otoritatif.** Kalau akun dinonaktifkan selagi
-seseorang sudah login, hanya middleware yang bisa menangkapnya — inilah yang
-menutup jalur passkey dan 2FA.
+seseorang sudah login, hanya middleware yang bisa menangkapnya, karena pipe login
+tidak dijalankan lagi pada request berikutnya.
 
 **Pesan memakai `auth.inactive` yang spesifik**, bukan `auth.failed` generik.
 Panel admin tidak diindeks dan tidak ada registrasi publik, jadi risiko
