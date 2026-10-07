@@ -12,19 +12,20 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      *
-     * Deliberately empty for now. The starter kit seeded a "Test User", which
-     * is fabricated data and therefore not allowed in this project.
+     * No fabricated data. The starter kit seeded a "Test User", which is
+     * invented data and therefore not allowed in this project.
      *
-     * Seeder calls are added as each one exists:
+     * The Super Admin account is only created when ADMIN_NAME, ADMIN_EMAIL and
+     * ADMIN_PASSWORD are present in the environment, so `migrate:fresh --seed`
+     * works on a machine that has not been configured yet.
      *
-     *   - P05  SuperAdminSeeder   - creates the Super Admin account from
-     *                              ADMIN_NAME / ADMIN_EMAIL / ADMIN_PASSWORD
-     *   - P09  SiteSettingsSeeder - seeds the canonical keys from PRD Lampiran B
-     *
-     * Until P05 there is deliberately no account that can log in.
+     * @see docs/DECISIONS.md D-14, D-17
      */
     public function run(): void
     {
-        //
+        $this->call([
+            PermissionSeeder::class,
+            SuperAdminSeeder::class,
+        ]);
     }
 }
