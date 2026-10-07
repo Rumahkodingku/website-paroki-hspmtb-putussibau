@@ -46,17 +46,21 @@ test('the system role is seeded even when no admin credentials are configured', 
     expect(Role::query()->where('name', 'super_admin')->exists())->toBeTrue();
 });
 
-test('the twelve foundation permissions are seeded with resource.action names', function () {
+test('the foundation permissions are seeded with resource.action names', function () {
     seedRolesAndPermissions();
 
-    // Verbatim from Phase 01 10.4, plus admin.access added in P06 as the gate
-    // for /admin/*. See docs/DECISIONS.md D-19.
+    // Verbatim from Phase 01 10.4, plus admin.access added in P06 as the gate for
+    // /admin/* (D-19), plus the media trio added in P10 for the upload
+    // endpoints (D-24).
     $expected = [
         'admin.access',
 
         'dashboard.view',
         'settings.view',
         'settings.update',
+        'media.view',
+        'media.create',
+        'media.delete',
         'users.view',
         'users.create',
         'users.update',
@@ -163,7 +167,9 @@ test('seeding twice does not duplicate anything', function () {
     $this->seed(PermissionSeeder::class);
 
     expect(Role::query()->count())->toBe(1)
-        ->and(Permission::query()->count())->toBe(12);
+        // Counted rather than hardcoded, so adding a permission does not make
+        // this test look like a duplicate bug.
+        ->and(Permission::query()->count())->toBe(app(PermissionSeeder::class)->expectedCount());
 });
 
 test('the super admin seeder creates an active account with the role', function () {

@@ -21,9 +21,15 @@ use Spatie\Permission\PermissionRegistrar;
  * available to gate on would be the role name, which AUTH-R3 rules out.
  * See docs/DECISIONS.md D-18 and D-19.
  *
- * Permissions for the other modules (agenda, gallery, communities, mass * schedules, and so on) are deliberately absent. Each module will need a
+ * Permissions for the other modules (agenda, gallery, communities, mass
+ * schedules, and so on) are deliberately absent. Each module will need a
  * different set, so they are added when the module is built rather than
  * creating permissions nothing reads yet.
+ *
+ * The media trio is the exception that proves the rule: P10 added
+ * media.view, media.create and media.delete, and they are read immediately by
+ * the upload endpoints. Nothing exists here for a module that has no code to
+ * guard yet.
  *
  * @see docs/DECISIONS.md D-17, D-18
  */
@@ -40,6 +46,10 @@ class PermissionSeeder extends Seeder
         'settings.view',
         'settings.update',
 
+        'media.view',
+        'media.create',
+        'media.delete',
+
         'users.view',
         'users.create',
         'users.update',
@@ -54,6 +64,17 @@ class PermissionSeeder extends Seeder
     /**
      * Seed the system role and the application's permissions.
      */
+    /**
+     * How many permissions this seeder defines.
+     *
+     * Exposed so tests can assert idempotency without hardcoding a number that
+     * has to be edited every time a module adds one.
+     */
+    public function expectedCount(): int
+    {
+        return count(self::PERMISSIONS);
+    }
+
     public function run(): void
     {
         Role::findOrCreate(AppServiceProvider::SUPER_ADMIN, $this->guard());
