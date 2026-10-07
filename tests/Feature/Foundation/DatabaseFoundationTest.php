@@ -134,6 +134,11 @@ test('the seeder creates no fabricated parish or admin data', function () {
 
     expect(User::query()->where('email', 'test@example.com')->exists())->toBeFalse()
         ->and(User::query()->where('email', 'test@example.org')->exists())->toBeFalse()
-        ->and(User::query()->where('name', 'Test User')->exists())->toBeFalse()
-        ->and(DB::table('site_settings')->count())->toBe(0);
+        ->and(User::query()->where('name', 'Test User')->exists())->toBeFalse();
+
+    // site_settings was asserted empty while seeding was still undecided. PRD
+    // Lampiran D settles it: exactly two keys may exist, both quoted from the
+    // document. Anything beyond that pair would be fabricated parish data.
+    expect(DB::table('site_settings')->pluck('key')->sort()->values()->all())
+        ->toBe(['parish_name', 'parish_short_name']);
 });

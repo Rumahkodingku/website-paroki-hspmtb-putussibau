@@ -3,6 +3,7 @@
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\SiteSettingsService;
+use Database\Seeders\SiteSettingsSeeder;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -290,4 +291,53 @@ test('the configured key list matches PRD Lampiran B minus the deferred group', 
         ->and($keys)->toContain('parish_name', 'maps_link', 'seo_default_og_image', 'home_show_contact')
         // Deferred to P11, which is where HtmlSanitizer lives.
         ->and($keys)->not->toContain('privacy_policy_content');
+});
+
+/*
+|--------------------------------------------------------------------------
+| The seeder
+|--------------------------------------------------------------------------
+*/
+
+test('the seeder writes only the two values PRD Lampiran D names', function () {
+    $this->seed(SiteSettingsSeeder::class);
+
+    expect(SiteSetting::query()->pluck('value', 'key')->all())->toBe([
+        'parish_name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
+        'parish_short_name' => 'HSPMTB',
+    ]);
+});
+
+test('the seeder files both values under identitas', function () {
+    $this->seed(SiteSettingsSeeder::class);
+
+    expect(SiteSetting::query()->pluck('group', 'key')->all())
+        ->toBe(['parish_name' => 'identitas', 'parish_short_name' => 'identitas']);
+});
+
+test('re-running the seeder does not undo an admin edit', function () {
+    $this->seed(SiteSettingsSeeder::class);
+
+    settingsService()->setMany(['parish_short_name' => 'HSPTB-U']);
+
+    $this->seed(SiteSettingsSeeder::class);
+
+    expect(settingsService()->get('parish_short_name'))->toBe('HSPTB-U');
+});
+
+test('only those two keys get a row, and unset keys stay unset', function () {
+    $this->seed(SiteSettingsSeeder::class);
+
+    $service = settingsService();
+
+    expect(SiteSetting::query()->count())->toBe(2);
+
+    // A key with a configured default is usable even with no row behind it.
+    expect($service->get('home_news_limit'))->toBe(3)
+        ->and($service->get('home_show_devotion'))->toBeTrue();
+
+    // A text key with no default is genuinely unconfigured, and says so with
+    // null rather than pretending to be blank.
+    expect($service->get('contact_phone'))->toBeNull()
+        ->and($service->get('maps_link'))->toBeNull();
 });

@@ -19,12 +19,13 @@ class DatabaseSeeder extends Seeder
      * ADMIN_PASSWORD are present in the environment, so `migrate:fresh --seed`
      * works on a machine that has not been configured yet.
      *
-     * @see docs/DECISIONS.md D-14, D-17
+     * @see docs/DECISIONS.md D-12, D-14, D-17
      */
     public function run(): void
     {
         $this->call([
             PermissionSeeder::class,
+            SiteSettingsSeeder::class,
             SuperAdminSeeder::class,
         ]);
     }

@@ -1851,11 +1851,26 @@ Do not force unnecessary restructuring.
 
 ## P09 — Settings
 
-- [ ] SiteSettings model.
-- [ ] service.
-- [ ] cache.
-- [ ] admin page.
-- [ ] tests.
+- [x] SiteSettings model. — `app/Models/SiteSetting.php` + factory. Skema tidak
+  diubah; sudah benar sejak P03 (PRD §9.2).
+- [x] service. — `SiteSettingsService` dengan `all`/`get`/`getGroup`/`set`/
+  `setMany`/`forget`. Kunci, tipe, dan default berasal dari
+  `config/site-settings.php`.
+- [x] cache. — satu kunci untuk seluruh peta, TTL 24 jam sebagai jaring
+  pengaman, `forget()` setiap kali admin menyimpan (XC-C1).
+- [x] admin page. — `/admin/pengaturan`, 5 grup, 29 kunci. Otorisasi `settings.view`
+  di controller dan `settings.update` di FormRequest.
+- [x] tests. — 23 test: T16, T17, T18, otorisasi, render halaman, dan seeder.
+
+> **`SiteSettingsSeeder`** menyemai tepat dua kunci sesuai PRD Lampiran D
+> (`parish_name`, `parish_short_name`) memakai `firstOrCreate`. Kunci lainnya
+> sengaja tidak punya baris agar "belum diatur" berbeda dari "sengaja
+> dikosongkan"; `get()` mengembalikan default dari `config/site-settings.php`.
+
+> **Catatan cakupan.** Grup `privasi` (`privacy_policy_content`) ditunda ke P11
+> karena isinya rich text dan D-14 mewajibkan sanitasi server-side. Field gambar
+> (`logo`, `favicon`, `seo_default_og_image`) berupa teks path/URL; widget unggah
+> menyusul di P10. Detail dan alasannya di `docs/DECISIONS.md` D-23.
 
 ## P10 — Media
 

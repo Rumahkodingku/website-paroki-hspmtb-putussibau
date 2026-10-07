@@ -695,6 +695,108 @@ regresi tipe shared prop, padahal kodenya tidak salah. `npm install` dari
 `package-lock.json` menyelesaikannya. Kalau `tsc` tiba-tiba gagal dengan
 `unknown` pada shared props, cek struktur `node_modules` lebih dulu.
 
+---
+
+## D-23 — Site settings: konfigurasi tunggal, tanpa seeding
+
+**Status:** Accepted · berlaku sejak P09 · branch `feat/phase-01-settings`
+
+P09 membangun service, cache, dan halaman `/admin/pengaturan` untuk `site_settings`.
+Schema-nya sudah benar sejak P03 (PRD §9.2) dan **tidak diubah** — P09 murni
+model, service, dan UI.
+
+### 1. `config/site-settings.php` adalah sumber kebenaran tunggal
+
+Daftar kunci, tipe, default, aturan validasi, dan konfigurasi cache semuanya di
+satu file. Service, FormRequest, dan form React sama-sama membacanya.
+
+Alternatifnya adalah menggandakan daftar itu di PHP dan TypeScript. Tiga
+salinan akan cepat berbeda satu sama lain, lalu tidak ada yang tahu mana yang
+benar.
+
+Menambah kunci baru cukup: tambah di `config/site-settings.php`, tambah label di
+`lang/id/site-settings.php`. Field-nya otomatis muncul di form.
+
+### 2. Hanya dua nilai yang di-seed, sesuai PRD Lampiran D
+
+PRD Lampiran D menyebut `site_settings` bernilai awal
+`parish_name = "Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau"` dan
+`parish_short_name = "HSPMTB"` (`[CONFIRM]`), sisanya kosong. **D-12 sudah
+menyepakati ini di P03**, dengan alasan kedua nilai itu dikutip dari PRD dan
+bukan dikarang — jadi tidak melanggar larangan data paroki karangan.
+
+Keputusan awal P09 justru "tidak ada seeding sama sekali". Itu **bertentangan
+dengan PRD dan D-12**, dan sudah dikoreksi: `SiteSettingsSeeder` sekarang
+menyemai tepat dua kunci itu saja, memakai `firstOrCreate` supaya menjalankannya
+dua kali tidak menimpa nilai yang sudah diubah Super Admin.
+
+**Kunci lainnya tetap tidak punya baris.** `get()` mengembalikan default dari
+konfigurasi bila baris belum ada, sehingga **"belum diatur"** tetap terbedakan
+dari **"sengaja dikosongkan"**, dan `home_news_limit` yang belum diatur tetap
+punya nilai yang bisa dipakai halaman publik tanpa perlu baris database.
+
+### 3. 29 dari 30 kunci; grup `privasi` ditunda ke P11
+
+Roadmap §18 menyebut lima grup (identity, contact, social, seo, homepage).
+PRD Lampiran B punya enam — tambahan `privasi` dengan
+`privacy_policy_content`.
+
+Grup itu **ditunda ke P11**, karena isinya rich text dan PRD D-14 mewajibkan
+sanitasi server-side. `HtmlSanitizer` baru ada di P11. Menyimpan HTML mentah
+sekarang akan melanggar D-14, dan PRD sendiri menandai kunci itu `[CONFIRM]`.
+
+Sisa 29 kunci: identitas 8, kontak 7, sosial 4, seo 3, beranda 7.
+
+### 4. Field gambar = teks path/URL
+
+`logo`, `favicon`, dan `seo_default_og_image` ada sebagai kolom teks, bukan
+widget unggah. Unggah file adalah P10 (media) beserta validasi MIME-nya
+(XC-M3). Memasang input file sekarang berarti membangun separuh P10 tanpa
+prosesannya.
+
+### 5. Default `home_show_*` = `true` — asumsi, bukan dari dokumen
+
+Lampiran B hanya menyebut rentang untuk tiga `*_limit` (3–6, 3–5, 6) dan
+menyebut `home_show_*` sebagai toggle tanpa nilai awal. **Asumsi: semua blok
+muncul secara default**, dengan asumsi paroki menyembunyikan blok yang tidak
+dipakai, bukan sebaliknya.
+
+Kalau paroki lebih suka situs started kosong, ubah `defaults` di
+`config/site-settings.php`. Tidak ada kode yang perlu disentuh.
+
+### 6. Satu kunci cache untuk seluruh peta
+
+Roadmap §24 memberi contoh `site_settings` dan `site_settings:{group}`. Yang
+dipakai hanya yang pertama.
+
+Tiga puluh baris terlalu sedikit untuk membenarkan banyak kunci, dan kunci
+terpisah adalah tempat bug invalidasi tinggal. TTL 24 jam hanya **jaring
+pengaman**; yang benar adalah `forget()` setiap kali admin menyimpan
+(XC-C1).
+
+Service sengaja **tidak** di-binding sebagai singleton dan **tidak** melakukan
+memoization: ia tanpa state, dan memo akan bertahan meski `forget()` sudah
+dijalankan — persis basi yang seharusnya dicegah cache.
+
+### 7. Otorisasi di dua tempat, sesuai aturan single-place
+
+ARCHITECTURE.md Part C §8: FormRequest adalah satu-satunya tempat untuk
+`store`/`update`. Maka `settings.update` dicek di
+`UpdateSettingsRequest::authorize()`, sedangkan `settings.view` dicek dengan
+`Gate::authorize()` di controller karena GET tidak punya request untuk
+diotorisasi.
+
+Kunci yang tidak dikenal **ditolak**, bukan diabaikan. Tanpa itu, siapa pun yang
+memiliki `settings.update` bisa menulis baris sembarang ke tabel — dan baris itu
+nanti dibaca kembali sebagai konfigurasi.
+
+### 8. Pintasan CLI shadcn
+
+P08 membuktikan `npx shadcn@latest add` merusak lingkungan proyek ini (paket
+`radix-ui` terpadu, paket `cn`, `pnpm install` di proyek npm). Karena itu
+`switch` dan `tabs` diambil langsung dari registry, lalu dua paket Radix-nya
+dipasang dengan `npm install`. `package.json` hanya dapat dua baris.
+
 ## Known divergences (belum diselesaikan)
 
 | # | Deviasi | Risiko / alasan | Rencana |
@@ -715,12 +817,12 @@ regresi tipe shared prop, padahal kodenya tidak salah. `npm install` dari
 
 ## Yang masih diperlukan (Phase 01)
 
-P09 site settings · P10 media · P11 sanitasi · P12 error/SEO/infrastruktur ·
-P13 quality · P14 Git · P15 docs.
+P10 media · P11 sanitasi · P12 error/SEO/infrastruktur · P13 quality ·
+P14 Git · P15 docs.
 
-Test matrix yang belum ada: T16–T28 dan T34.
+Test matrix yang belum ada: T19–T28 dan T34.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, dan **P08**. P04 (Docker)
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, dan **P09**. P04 (Docker)
 dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
@@ -736,6 +838,10 @@ parameter `{user}` sehingga hanya bisa menghapus pemanggilnya.
 Fondasi Inertia sudah beres: `auth.user` hanya mengirim `id`, `name`, `email`,
 `email_verified_at`, ditambah shared prop `locale` dan `displayTimezone`. Lihat
 D-21.
+
+**Pengaturan situs sudah aktif:** `SiteSettingsService` + cache, halaman
+`/admin/pengaturan` dengan 29 kunci dari 5 grup. Tidak ada seeding, jadi
+"belum diatur" tetap berbeda dari "sengaja dikosongkan". Lihat D-23.
 
 **Fondasi UI sudah menerapkan DESIGN.md:** palet merah/navy/gold HSPMTB,
 tipografi, skala radius, `PublicLayout` dan `AdminLayout`. Semua penyimpangan
