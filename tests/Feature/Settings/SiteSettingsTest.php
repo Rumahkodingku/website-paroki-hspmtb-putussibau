@@ -284,13 +284,169 @@ test('every key belongs to exactly one group', function () {
     }
 });
 
-test('the configured key list matches PRD Lampiran B minus the deferred group', function () {
+test('the configured key list matches PRD Lampiran B', function () {
     $keys = app(SiteSettingsService::class)->knownKeys();
 
-    expect($keys)->toHaveCount(29)
-        ->and($keys)->toContain('parish_name', 'maps_link', 'seo_default_og_image', 'home_show_contact')
-        // Deferred to P11, which is where HtmlSanitizer lives.
-        ->and($keys)->not->toContain('privacy_policy_content');
+    // privacy_policy_content joined the list in P11, which is where
+    // HtmlSanitizer lives. It was the one key D-23 held back.
+    expect($keys)->toHaveCount(30)
+        ->and($keys)->toContain(
+            'parish_name',
+            'maps_link',
+            'seo_default_og_image',
+            'home_show_contact',
+            'privacy_policy_content',
+        );
+});
+
+/*
+|--------------------------------------------------------------------------
+| The privacy policy, which is the first field in the application to store HTML
+|--------------------------------------------------------------------------
+|
+| D-23 deferred this field to P11 because storing HTML without a sanitizer
+| would violate PRD D-14. These tests are the reason P11 is more than a service
+| with no caller: they assert that what lands in the column is the sanitized
+| text and not merely that the response looks clean.
+|
+| @see docs/DECISIONS.md D-25
+|
+*/
+
+test('the privacy policy field is configured as html', function () {
+    expect(config('site-settings.types.privacy_policy_content'))->toBe('html')
+        ->and(config('site-settings.groups.privasi'))->toContain('privacy_policy_content');
+});
+
+test('saving the privacy policy strips a script element before it reaches the database', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [
+            'privacy_policy_content' => '<p>Kami menghormati privasi Anda.</p><script>alert(1)</script>',
+        ],
+    ])->assertRedirect(route('settings.edit'));
+
+    // Asserted against the column, not the response. A redirect that looks fine
+    // while the payload is still in the database is exactly the failure this
+    // test exists to catch.
+    $stored = SiteSetting::query()->where('key', 'privacy_policy_content')->value('value');
+
+    expect($stored)->toBe('<p>Kami menghormati privasi Anda.</p>')
+        ->and($stored)->not->toContain('script')
+        ->and($stored)->not->toContain('alert');
+});
+
+test('saving the privacy policy strips event handler attributes', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [
+            'privacy_policy_content' => '<p onclick="alert(1)">Teks</p>',
+        ],
+    ]);
+
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->value('value'))
+        ->toBe('<p>Teks</p>');
+});
+
+test('a hostile payload cannot be stored even by someone with settings.update', function () {
+    // The editor lives in the browser; the request body is whatever the client
+    // sent. Authorization is not a substitute for sanitization, and neither is
+    // the fact that only a Super Admin can reach this form.
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [
+            'privacy_policy_content' => '<img src="x" onerror="alert(1)"><a href="javascript:alert(1)">j</a>',
+        ],
+    ]);
+
+    $stored = SiteSetting::query()->where('key', 'privacy_policy_content')->value('value');
+
+    expect($stored)->not->toContain('onerror')
+        ->and($stored)->not->toContain('javascript:');
+});
+
+test('safe markup in the privacy policy is stored intact', function () {
+    $admin = superAdmin();
+
+    $html = '<h2>Purpose</h2><p>Kami <strong>menghormati</strong> data Anda.</p>';
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => $html],
+    ]);
+
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->value('value'))
+        ->toBe($html);
+});
+
+test('clearing the privacy policy stores null rather than leaving the row alone', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => '<p>Isi lama</p>'],
+    ]);
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => ''],
+    ]);
+
+    // null and not an empty string because Laravel's ConvertEmptyStringsToNull
+    // runs before the request is ever built, so the field arrives here as null
+    // and normaliseValue() leaves it alone. That is the behaviour the service
+    // documents: a setting that was never set is distinguishable from one that
+    // was deliberately emptied.
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->value('value'))
+        ->toBeNull()
+        ->and(settingsService()->get('privacy_policy_content'))->toBeNull();
+});
+
+test('a policy past the length limit is rejected in Indonesian', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => str_repeat('a', 50001)],
+    ])->assertSessionHasErrors('settings.privacy_policy_content');
+
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->exists())->toBeFalse();
+});
+
+test('the length limit measures the sanitized text, not the submitted payload', function () {
+    // A payload that is only long because of markup it is not allowed to keep
+    // has to fit once the markup is gone. Measuring the input instead would
+    // reject it, which reads to the admin as a bug rather than as a limit.
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [
+            'privacy_policy_content' => str_repeat('<script>alert(1)</script>', 5000).'<p>Akhir</p>',
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->value('value'))
+        ->toBe('<p>Akhir</p>');
+});
+
+test('the settings page renders the privacy group with the field marked as rich text', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->get(route('settings.edit'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/pengaturan')
+            ->has('groups.privasi')
+            ->where('meta.richtext', ['privacy_policy_content'])
+            ->where('meta.groupLabels.privasi', 'Privasi')
+        );
+});
+
+test('a guest cannot write a privacy policy', function () {
+    $this->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => '<p>nakal</p>'],
+    ])->assertRedirect(route('login'));
+
+    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->exists())->toBeFalse();
 });
 
 /*
