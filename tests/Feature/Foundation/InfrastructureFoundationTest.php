@@ -4,6 +4,7 @@ use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Ssr\SsrState;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -219,6 +220,21 @@ test('open graph tags are present in the initial html response', function () {
         ->toContain('property="og:url"')
         ->toContain('rel="canonical"')
         ->toContain('name="twitter:card"');
+});
+
+test('server side rendering stays off so blade owns the head', function () {
+    // The scaffolded default was enabled, which looked harmless because
+    // production never has a hot Vite file and therefore fails the bundle
+    // check. In development it is not harmless: the gateway posts to the dev
+    // server's /__inertia_ssr, gets a response whose head is empty, and
+    // <x-inertia::head> renders that instead of its own slot. Every Open
+    // Graph, canonical and title tag then vanishes from the first response,
+    // which is how this suite failed for anyone running composer dev.
+    expect(config('inertia.ssr.enabled'))->toBeFalse();
+
+    // Behavioral half of the same guarantee: dispatching produces no SSR
+    // response, so the Blade slot is always what reaches the browser.
+    expect(app(SsrState::class)->dispatch())->toBeNull();
 });
 
 test('the baseline head tags carry the attribute inertia manages them by', function () {

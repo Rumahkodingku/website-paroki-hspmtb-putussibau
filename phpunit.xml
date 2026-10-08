@@ -39,6 +39,13 @@
         -->
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="website_paroki_hspmtb_test"/>
+        <!--
+            D-26: SSR is deferred to the UI phase. Pinned so that the
+            Open Graph / canonical assertions can never be flipped by a
+            developer's local .env, and so the suite behaves the same whether
+            or not a hot Vite dev server happens to be running.
+        -->
+        <env name="INERTIA_SSR_ENABLED" value="false"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
