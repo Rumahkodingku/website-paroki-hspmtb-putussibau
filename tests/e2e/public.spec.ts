@@ -47,6 +47,26 @@ test.describe('situs publik', () => {
         await expect(page.getByText('404')).toBeVisible();
     });
 
+    /**
+     * PRD XC-E2 asks for 404 and 500 in Bahasa Indonesia inside the public
+     * layout, and until the browser suite existed that copy was only ever checked
+     * as a prop reaching React — which says nothing about whether it reached the
+     * screen. Asserting the wording here is what closes the gap recorded in
+     * docs/DECISIONS.md D-26 §7.
+     */
+    test('halaman 404 menampilkan copywriting Bahasa Indonesia', async ({
+        page,
+    }) => {
+        await page.goto('/halaman-yang-tidak-ada');
+
+        await expect(page.getByText('Halaman Tidak Ditemukan')).toBeVisible();
+        await expect(
+            page.getByText(
+                'Alamat yang Anda buka tidak tersedia. Mungkin halaman tersebut dipindahkan, atau memang tidak pernah ada.',
+            ),
+        ).toBeVisible();
+    });
+
     test('tidak ada pendaftaran publik', async ({ page }) => {
         const response = await page.goto('/register');
 
