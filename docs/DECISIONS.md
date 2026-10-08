@@ -912,15 +912,17 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ---
 
-## Yang masih diperlukan (Phase 01)
+## Status
 
-P15 docs.
+Phase 01 selesai; **P04 (Docker) tetap dibatalkan** atas permintaan PRD (D-15).
 
-Test matrix: **semua 34 baris ter-cover**.
+**Sudah selesai:** seluruh Phase 01 (P01–P17), kecuali **P04 (Docker) yang
+dibatalkan** — lihat D-15. Status per butir tercatat di
+`docs/roadmap/phase-01-project-foundation.md` §33, dan cara setiap item
+Definition of Done diverifikasi tercatat di §37.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, P12, P13, dan **P14**.
-P04 (Docker) dibatalkan
-— lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
+Test matrix: **semua 34 baris ter-cover**, ditambah 11 test frontend (`tests/js/`)
+dan 13 spec E2E (`tests/e2e/`).
 
 Autentikasi sudah pindah ke `/admin/*`, registrasi publik sudah dihapus,
 `is_active` sudah ditegakkan, dan gerbang `/admin/*` memakai permission

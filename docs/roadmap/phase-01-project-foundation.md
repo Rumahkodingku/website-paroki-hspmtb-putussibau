@@ -2084,9 +2084,9 @@ Do not force unnecessary restructuring.
 
 ## P15 — Documentation
 
-- [ ] DEVELOPMENT.md.
-- [ ] RBAC.md.
-- [ ] DECISIONS.md.
+- [x] `docs/DEVELOPMENT.md`. — Prasyarat, instalasi, `.env`, database test, migrasi, seeder, tanpa Docker, frontend, test, queue, scheduler. Termasuk harga yang akan ditemui: commit butuh MySQL dan sekitar 25 detik.
+- [x] `docs/RBAC.md`. — Spatie role, penamaan `resource.action`, `super_admin` dan `Gate::before`, konvensi Policy/Gate, larangan `users.role`, dan strategi perluasan role.
+- [x] `docs/DECISIONS.md`.
 
 ## P16 — Frontend Testing
 
@@ -2338,45 +2338,45 @@ Tidak ada modul bisnis Phase 02+ yang dianggap selesai atau dibangun secara penu
 
 Phase 01 DONE jika:
 
-- [ ] Laravel 13 project dapat boot.
-- [ ] MySQL dapat dijalankan.
-- [ ] Migration berhasil.
-- [ ] Seed berhasil.
-- [ ] timezone UTC diterapkan.
-- [ ] display timezone Asia/Pontianak tersedia.
-- [ ] locale `id` tersedia.
-- [ ] `users.is_active` tersedia.
-- [ ] tidak ada `users.role`.
-- [ ] Spatie Permission aktif.
-- [ ] `super_admin` aktif.
-- [ ] permission foundation tersedia.
-- [ ] authentication admin bekerja.
-- [ ] public registration disabled.
-- [ ] inactive account ditolak.
-- [ ] admin authorization bekerja.
-- [ ] Inertia React foundation bekerja.
-- [ ] PublicLayout tersedia.
-- [ ] AdminLayout tersedia.
-- [ ] basic UI primitives tersedia.
-- [ ] site settings service bekerja.
-- [ ] site settings cache bekerja.
-- [ ] media validation bekerja.
-- [ ] EXIF stripping bekerja.
-- [ ] WebP conversion bekerja.
-- [ ] image variants bekerja.
-- [ ] queue job bekerja.
-- [ ] HTML sanitizer bekerja.
-- [ ] Tiptap foundation tersedia.
-- [ ] 404 tersedia.
-- [ ] 500 tersedia.
-- [ ] SEO foundation tersedia.
-- [ ] tests hijau.
-- [ ] static analysis hijau.
-- [ ] frontend checks hijau.
-- [ ] production build berhasil.
-- [ ] Husky aktif.
-- [ ] Commitlint aktif.
-- [ ] documentation foundation tersedia.
+- [x] Laravel 13 project dapat boot.
+- [x] MySQL dapat dijalankan.
+- [x] Migration berhasil.
+- [x] Seed berhasil.
+- [x] timezone UTC diterapkan.
+- [x] display timezone Asia/Pontianak tersedia.
+- [x] locale `id` tersedia.
+- [x] `users.is_active` tersedia.
+- [x] tidak ada `users.role`.
+- [x] Spatie Permission aktif.
+- [x] `super_admin` aktif.
+- [x] permission foundation tersedia.
+- [x] authentication admin bekerja.
+- [x] public registration disabled.
+- [x] inactive account ditolak.
+- [x] admin authorization bekerja.
+- [x] Inertia React foundation bekerja.
+- [x] PublicLayout tersedia.
+- [x] AdminLayout tersedia.
+- [x] basic UI primitives tersedia.
+- [x] site settings service bekerja.
+- [x] site settings cache bekerja.
+- [x] media validation bekerja.
+- [x] EXIF stripping bekerja.
+- [x] WebP conversion bekerja.
+- [x] image variants bekerja.
+- [x] queue job bekerja.
+- [x] HTML sanitizer bekerja.
+- [x] Tiptap foundation tersedia.
+- [x] 404 tersedia.
+- [x] 500 tersedia.
+- [x] SEO foundation tersedia.
+- [x] tests hijau.
+- [x] static analysis hijau.
+- [x] frontend checks hijau.
+- [x] production build berhasil.
+- [x] Husky aktif.
+- [x] Commitlint aktif.
+- [x] documentation foundation tersedia.
 
 ---
 
@@ -2384,23 +2384,23 @@ Phase 01 DONE jika:
 
 Sebelum menutup Phase 01, agent harus memeriksa:
 
-- [ ] `.env` tidak tracked.
-- [ ] password tidak hard-coded.
-- [ ] password tidak masuk log.
-- [ ] authentication menggunakan Laravel mechanism.
-- [ ] rate limit login aktif.
-- [ ] inactive users ditolak.
-- [ ] authorization tidak menggunakan custom `users.role`.
-- [ ] Spatie guard konsisten.
-- [ ] mass assignment dikontrol.
-- [ ] CSRF aktif.
-- [ ] validation dilakukan server-side.
-- [ ] uploaded MIME divalidasi server-side.
-- [ ] dangerous HTML disanitasi.
-- [ ] EXIF/GPS dihapus.
-- [ ] private files tidak public.
-- [ ] production debug tidak expose stack trace.
-- [ ] security headers foundation tidak merusak aplikasi.
+- [x] `.env` tidak tracked.
+- [x] password tidak hard-coded.
+- [x] password tidak masuk log.
+- [x] authentication menggunakan Laravel mechanism.
+- [x] rate limit login aktif.
+- [x] inactive users ditolak.
+- [x] authorization tidak menggunakan custom `users.role`.
+- [x] Spatie guard konsisten.
+- [x] mass assignment dikontrol.
+- [x] CSRF aktif.
+- [x] validation dilakukan server-side.
+- [x] uploaded MIME divalidasi server-side.
+- [x] dangerous HTML disanitasi.
+- [x] EXIF/GPS dihapus.
+- [x] private files tidak public.
+- [x] production debug tidak expose stack trace.
+- [x] security headers foundation tidak merusak aplikasi.
 
 ---
 
@@ -2546,3 +2546,48 @@ Kemudian verifikasi manual:
 14. jalankan seluruh test suite.
 
 **Phase 01 hanya boleh diberi status `DONE` jika seluruh gate di atas terpenuhi dan tidak ada requirement MUST yang belum selesai.**
+
+### Cara setiap item diverifikasi
+
+Mencentang 56 butir tanpa cara yang jelas hanya memindahkan masalah ke pembaca
+berikutnya. Setiap item di atas punya bukti, dan tidak semuanya berupa test Pest:
+
+| Cara | Item |
+| --- | --- |
+| **Test Pest** — boot, migrasi, seed, timezone, locale, `is_active`, permission, `super_admin`, auth, registration, otorisasi admin, Inertia, layout, primitive UI, site settings + cache, media, MIME, EXIF, WebP, variant, queue, sanitizer, Tiptap, 403/404/419/500/503, flash, Wayfinder, security |
+| **Test arsitektur** (`tests/Unit/ArchitectureTest.php`) | repository layer, services tanpa HTTP, tanpa role/permission controller, `$fillable`, `HasRoles`, tanpa `$user->role`, sanitasi, directionality frontend |
+| **Playwright** (`tests/e2e/`) | alur masuk/keluar nyata, halaman publik, halaman error 404 + copy Indonesia, halaman pengaturan + lazy chunk, middleware |
+| **Job CI** | Husky + commitlint + judul PR (`commitlint`), build produksi (`composer setup`), gate penuh (`ci`) |
+| **`tsc` / PHPStan** | `Paginated<T>`, arah import frontend, absence Docker |
+| **Keberadaan** | tidak ada `docker-compose.yml`/`Dockerfile`, `.env` di `.gitignore` |
+
+Empat butir **tidak** punya test khusus dan itu disengaja:
+
+- **Commitlint** — diverifikasi CI. hook bisa dilewati `--no-verify`, jadi hanya
+  job `commitlint` yang benar-benar menegakkan; ia yang menolak judul PR 101
+  karakter (D-28).
+- **CSRF** — default framework. Tidak ada kode di repo ini yang menyalakannya
+  dan tidak ada yang mematikannya; `VerifyCsrfToken` aktif di group `web`
+  tanpa pengecualian yang dikonfigurasi.
+- **Halaman 503 saat maintenance** — lihat `tests/Feature/Foundation/ErrorPageTest.php`.
+  Branch 503 di komponen **tidak** dapat dicapai lewat `artisan down`:
+  `PreventRequestsDuringMaintenance` mengembalikan view `errors::503` bawaan
+  Laravel sebelum handler exception dipanggil. Itu perilaku framework dan
+  PRD XC-E2 hanya menuntut 404 dan 500 dalam Bahasa Indonesia.
+- **Tidak ada Docker** — dibuktikan dengan tidak adanya berkas, bukan test.
+
+### Yang dicentang pada perubahan ini
+
+Butir yang selesai pada P16 dan P17:
+
+| Butir | Test |
+| --- | --- |
+| Frontend test runner | `tests/js/` (11 test) dan `tests/e2e/` (13 spec) |
+| Arah dependensi frontend | enam aturan baru di `ArchitectureTest.php`, masing-masing diuji dengan sengaja dilanggar |
+| Dokumentasi | `docs/DEVELOPMENT.md`, `docs/RBAC.md`, `docs/ARCHITECTURE.md` (6 `⚠ CONFIRM` ditutup) |
+
+### Yang tetap menjadi kesenjangan
+
+Halaman error publik belum pernah dirender di browser **sebelum P16**; sekarang
+`tests/e2e/public.spec.ts` asserts copy Bahasa Indonesia untuk 404. Kesenjangan
+D-26 §7 ditutup.
