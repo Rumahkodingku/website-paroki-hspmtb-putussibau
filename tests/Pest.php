@@ -81,6 +81,36 @@ function seedRolesAndPermissions(): void
  * (PRD AUTH-R1), so a plain factory user gets a 403 there. Tests that exercise
  * admin pages need this instead.
  */
+/**
+ * Allocate a colour on a truecolor image.
+ *
+ * GD declares imagecolorallocate() as returning int|false, the false case
+ * being palette images running out of colours. On a truecolor image it cannot
+ * happen, and these fixtures only ever use truecolor, so the check exists to
+ * turn a silently wrong fixture into a loud one rather than to cast a cast away.
+ *
+ * Lives here rather than in a test file because MediaTest and FailedJobTest
+ * both need it and a helper defined in one test file is not loaded when the
+ * other runs on its own.
+ *
+ * @param  int<0, 255>  $r
+ * @param  int<0, 255>  $g
+ * @param  int<0, 255>  $b
+ */
+function truecolor(GdImage $image, int $r, int $g, int $b): int
+{
+    $colour = imagecolorallocate($image, $r, $g, $b);
+
+    if ($colour === false) {
+        throw new RuntimeException('imagecolorallocate gagal pada truecolor image.');
+    }
+
+    return $colour;
+}
+
+/**
+ * @param  array<string, mixed>  $attributes
+ */
 function superAdmin(array $attributes = []): User
 {
     seedRolesAndPermissions();

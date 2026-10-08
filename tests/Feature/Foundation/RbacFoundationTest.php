@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,7 +145,11 @@ test('roles and permissions use the same guard as authentication', function () {
     $user = User::factory()->create();
     $user->assignRole(AppServiceProvider::SUPER_ADMIN);
 
-    expect($user->fresh()->roles->first()->guard_name)->toBe($expected);
+    // Through the pivot rather than through a hydrated model: Spatie's Role is
+    // a Model, so every attribute read on it is an undefined property as far
+    // as a static analyser is concerned, and query->value() says the same thing
+    // without pretending to know more.
+    expect($user->fresh()->roles()->value('guard_name'))->toBe($expected);
 });
 
 test('the user model has no role column or roles method of its own', function () {
@@ -158,7 +163,19 @@ test('the user model has no role column or roles method of its own', function ()
 
     // The relation is provided by the trait, so it resolves to a morph relation
     // over the Spatie pivot rather than anything defined here.
-    expect(method_exists(User::class, 'roles'))->toBeTrue()
+    // Not method_exists(): the trait supplies roles(), so that call is true by
+    // construction and says nothing about whether User declares its own. Not
+    // getDeclaringClass() either: for a method that arrives through a trait,
+    // reflection reports the class that *uses* the trait, so it names User.
+    // getTraitName() would be the obvious check and no longer exists in PHP 8.
+    //
+    // What is left is the file the method body actually lives in. If User
+    // overrode it, that file would be User.php.
+    $roles = new ReflectionMethod(User::class, 'roles');
+    $hasRoles = new ReflectionClass(HasRoles::class);
+
+    expect(class_uses_recursive(User::class))->toHaveKey(HasRoles::class)
+        ->and(realpath((string) $roles->getFileName()))->toBe(realpath((string) $hasRoles->getFileName()))
         ->and((new User)->roles())->toBeInstanceOf(MorphToMany::class);
 });
 

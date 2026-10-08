@@ -38,8 +38,11 @@ use Illuminate\Support\Str;
  */
 function jpegUpload(int $width = 1200, int $height = 600, string $name = 'foto.jpg'): UploadedFile
 {
-    $image = imagecreatetruecolor($width, $height);
-    imagefilledrectangle($image, 0, 0, $width, $height, imagecolorallocate($image, 200, 30, 40));
+    // max(1, ...) because imagecreatetruecolor declares int<1, max>. A fixture
+    // asking for a zero-pixel image is a mistake in the test, not something to
+    // hand to GD and let it fail on.
+    $image = imagecreatetruecolor(max(1, $width), max(1, $height));
+    imagefilledrectangle($image, 0, 0, $width, $height, truecolor($image, 200, 30, 40));
 
     $path = tempnam(sys_get_temp_dir(), 'media').'.jpg';
     imagejpeg($image, $path, 90);
@@ -100,6 +103,8 @@ function textUpload(string $contents, string $name): UploadedFile
 
 /**
  * Store an upload as a media row, the way the controller does.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function storeMedia(UploadedFile $upload, array $attributes = []): Media
 {

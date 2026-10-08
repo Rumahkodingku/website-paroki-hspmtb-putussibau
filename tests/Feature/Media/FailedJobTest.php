@@ -165,11 +165,18 @@ test('a failed job leaves the database intact', function () {
 
     drainQueue();
 
-    $after = Media::query()->find($media->getKey());
-
-    expect($after)->not->toBeNull()
-        ->and($after->status)->toBe(MediaStatus::Failed)
-        ->and($after->original_name)->toBe('hilang.jpg');
+    /*
+     * Read through value() rather than through find().
+     *
+     * find() is typed Model|Collection, so every property access on it is an
+     * error even though a primary-key lookup can only ever return one model.
+     * Asking the query for the column sidesteps the union instead of casting
+     * around it.
+     */
+    expect(Media::query()->whereKey($media->getKey())->value('status'))
+        ->toBe(MediaStatus::Failed)
+        ->and(Media::query()->whereKey($media->getKey())->value('original_name'))
+        ->toBe('hilang.jpg');
 });
 
 test('a failed job is not left behind in the queue', function () {
@@ -203,7 +210,8 @@ test('a successful job leaves failed_jobs empty', function () {
     drainQueue();
 
     expect(DB::table('failed_jobs')->count())->toBe(0)
-        ->and(Media::query()->find($media->getKey())?->status)->toBe(MediaStatus::Ready);
+        ->and(Media::query()->whereKey($media->getKey())->value('status'))
+        ->toBe(MediaStatus::Ready);
 });
 
 test('the worker really is the thing under test', function () {
@@ -225,7 +233,7 @@ test('the worker really is the thing under test', function () {
 function jpegBytes(): string
 {
     $image = imagecreatetruecolor(80, 40);
-    imagefilledrectangle($image, 0, 0, 80, 40, imagecolorallocate($image, 10, 90, 200));
+    imagefilledrectangle($image, 0, 0, 80, 40, truecolor($image, 10, 90, 200));
 
     ob_start();
     imagejpeg($image, null, 90);
