@@ -1,6 +1,13 @@
+/*
+ * Site-wide types only.
+ *
+ * A type belongs here when more than one feature needs it. Anything used by a
+ * single feature lives next to that feature's components in
+ * `features/<name>/types.ts`, so that deleting the feature deletes its contract
+ * with it — settings.ts moved out for exactly that reason.
+ */
 export type * from './auth';
 export type * from './navigation';
-export type * from './settings';
 export type * from './ui';
 
 import type { Auth } from './auth';
