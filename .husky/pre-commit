@@ -1,0 +1,19 @@
+# Phase 01 roadmap section 30: pre-commit runs the same gate CI runs.
+#
+# The exit propagation is deliberate and not decoration. Husky does not run the
+# hook under `set -e`, so without `|| exit 1` a lint-staged failure would be
+# followed by a successful composer ci:check, and the hook would exit 0 on a
+# repository it had just failed to format.
+#
+# lint-staged comes first so the fixes it applies are inside the commit rather
+# than sitting in the working tree waiting for the next attempt.
+#
+# The full gate costs about 22 seconds locally, and most of that is the 265
+# test suite. That is a deliberate trade: a commit is rejected on a red test
+# rather than being pushed and found red afterwards. It also means committing
+# requires the MySQL test database to be up. Use --no-verify when that is not
+# the situation.
+#
+# @see docs/DECISIONS.md D-28
+npx lint-staged || exit 1
+composer ci:check
