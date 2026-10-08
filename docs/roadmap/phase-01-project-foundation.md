@@ -1980,14 +1980,15 @@ Do not force unnecessary restructuring.
 > **Catatan cakupan.** `Seo` dan halaman error **belum dipakai halaman mana
 > pun** yang sukses dirender untuk pengunjung: `welcome.tsx` masih placeholder,
 > dan modul publiknya milik Fase 2. Copy Bahasa Indonesia pada halaman error
-> tidak diuji otomatis karena tidak ada frontend test runner — dicatat sebagai
-> kesenjangan di D-26, bukan ditutupi. `sitemap.xml`, `robots.txt`, dan
-> structured data tetap di luar cakupan (§4 "sitemap final"). Detail di
-> `docs/DECISIONS.md` D-26.
+> **sudah** diuji di browser sejak P16, jadi kesenjangan D-26 §7 ditutup — dengan
+> satu syarat, yaitu web server E2E dipaksa `APP_DEBUG=false`, karena kalau tidak
+> yang tampil adalah halaman debug Laravel dan spec-nya hijau tanpa menguji apa pun.
+> `sitemap.xml`, `robots.txt`, dan structured data tetap di luar cakupan
+> (§4 "sitemap final"). Detail di `docs/DECISIONS.md` D-26.
 
 ## P13 — Quality
 
-- [x] Pest/PHPUnit. — 265 test, 22 file. `pestphp/pest` 4.7.8 + plugin Laravel.
+- [x] Pest/PHPUnit. — 271 test, 25 file. `pestphp/pest` 4.7.8 + plugin Laravel.
   T34 (`FreshInstallTest`) ditutup di sini.
 - [x] Pint. — `laravel/pint` ^1.27, `composer lint:check`.
 - [x] Larastan. — `larastan/larastan` ^3.9 level 7, `composer types:check`.
@@ -2032,13 +2033,12 @@ Do not force unnecessary restructuring.
 > mulai melempar, semua test yang ada tetap hijau sementara
 > `migrate:fresh --seed` rusak di mana-mana.
 
-> **Catatan cakupan.** **Frontend test runner tetap tidak ada** — roadmap §29
-> hanya menyebut TypeScript, ESLint, dan build, dan AGENTS.md melarang
-> menambahnya tanpa persetujuan. Kesenjangan copy Bahasa Indonesia pada
-> halaman error (D-26 §7) karena itu **tetap tercatat**. Code coverage
-> threshold juga tidak ditambahkan: tidak diminta roadmap maupun PRD.
+> **Catatan cakupan.** ~~Frontend test runner tetap tidak ada.~~ **Dibalik oleh
+> P16** atas permintaan eksplisit — lihat P16 dan D-29. Code coverage threshold
+> **tetap** tidak ditambahkan: tidak diminta roadmap maupun PRD, dan menambahnya
+> berarti gate baru yang harus dijaga.
 >
-> Detail dan alasannya di `docs/DECISIONS.md` D-27.
+> Detail dan alasannya di `docs/DECISIONS.md` D-27 dan D-29.
 
 ## P14 — Git
 
@@ -2088,6 +2088,38 @@ Do not force unnecessary restructuring.
 - [ ] RBAC.md.
 - [ ] DECISIONS.md.
 
+## P16 — Frontend Testing
+
+Workstream tambahan, **di luar PRD §33**. Diminta eksplisit setelah Phase 01
+sepenuhnyaaik, dan membalikkan gap yang tercatat di D-26 §7 dan D-27 §6.
+
+- [x] Unit/component test (Vitest). — Dijalankan lewat `vp test`, yang **adalah**
+  Vitest 4.1.11 dan sudah terpasang transitif, jadi tidak ada dependensi test
+  runner baru. API dari `vite-plus/test`, konfigurasi di blok `test`
+  `vite.config.ts`. `happy-dom` + Testing Library. **11 test di `tests/js/`**.
+- [x] E2E test (Playwright). — **10 spec di `tests/e2e/`**: proteksi route admin,
+  alur masuk/keluar, penolakan kata sandi, halaman publik, 404 beserta copy
+  Bahasa Indonesia-nya, dan tidak adanya pendaftaran publik.
+- [x] Gate. — `npm run test:unit` masuk `composer ci:check` (1,4 detik) dan ikut
+  pre-commit. Playwright **tidak** masuk gate; gate-nya job `e2e` di CI.
+- [x] Database E2E terisolasi. — `php artisan app:e2e:prepare` me-*rebuild*
+  `website_paroki_hspmtb_test`, memindahkan koneksinya ke sana **sebelum** langkah
+  destruktif apa pun, dan **tidak pernah membaca** database dari `.env`.
+
+> **Semua test ada di `tests/`.** `tests/` sudah milik Pest, jadi frontend masuk
+> ke dalamnya sebagai subfolder: `tests/js/` untuk Vitest, `tests/e2e/` untuk
+> Playwright. `tsconfig.json` gaining ketiga path itu, karena `include`-nya hanya
+> `resources/js/**`.
+
+> **Dua jebakan yang ditutup dan diuji.** (1) Globe bawaan Vitest adalah
+> `**/*.spec.*` yang akan mengumpulkan spec Playwright, jadi `tests/e2e/**` ada di
+> `exclude`. (2) Mesin development punya `APP_DEBUG=true`, yang membuat callback
+> `respond()` keluar lebih awal sehingga halaman **debug** Laravel yang tampil —
+> spec 404 sempat hijau karena alasan yang salah.
+
+> **Menutup gap D-26 §7.** Copy Bahasa Indonesia pada halaman error akhirnya
+> diuji di browser, bukan hanya sebagai prop yang sampai ke React.
+
 ---
 
 # 34. Dependency Order
@@ -2124,6 +2156,8 @@ P13 Quality
 P14 Git
   ↓
 P15 Documentation
+  ↓
+P16 Frontend Testing (added after the fact, see D-29)
 ```
 
 Some independent tasks may be executed in parallel if dependency safety is maintained.
