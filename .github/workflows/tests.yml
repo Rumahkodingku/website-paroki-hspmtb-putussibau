@@ -64,3 +64,47 @@ jobs:
 
       - name: Run CI Checks
         run: composer ci:check
+
+  # The commit-msg hook is local, so it can be skipped with --no-verify and it
+  # does not run at all on a push. This closes both gaps for pull requests.
+  #
+  # It is a separate job rather than another step in `ci` on purpose: that script
+  # is the code gate, and mixing a commit history check into it would mean a
+  # mistyped subject fails the same job that reports failing tests.
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The range needs both ends, and merge depth is enough to reach the
+          # merge commit GitHub synthesises for a pull request.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Setup Application
+        run: npm ci
+
+      - name: Validate commit messages
+        run: >-
+          npx --no-install commitlint
+          --from "${{ github.event.pull_request.base.sha }}"
+          --to "${{ github.event.pull_request.head.sha }}"
+
+      - name: Validate the pull request title
+        # A squash merge takes its message from the pull request title, so a
+        # conforming history can still squash into a non-conforming commit. This
+        # step keeps that from being the way a subject enters main.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: >-
+          echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint
