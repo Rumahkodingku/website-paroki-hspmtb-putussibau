@@ -39,6 +39,25 @@ export default defineConfig({
             ],
         },
     },
+    test: {
+        // All frontend tests live under tests/, mirroring the Pest suites:
+        // tests/js for Vitest, tests/e2e for Playwright.
+        include: ['tests/js/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+        // Vitest's own default glob is **/*.spec.*, which would happily collect
+        // the Playwright specs sitting in the same tests/ tree and try to run
+        // them as unit tests. The include above already cannot match them; this
+        // keeps that true if someone ever widens it.
+        exclude: ['**/node_modules/**', '**/vendor/**', 'tests/e2e/**'],
+        // happy-dom over jsdom: it is the default for this toolchain and is
+        // markedly faster, which matters because `composer ci:check` runs this
+        // on every commit via pre-commit.
+        environment: 'happy-dom',
+        // Deliberately off. Explicit imports make it obvious that test APIs come
+        // from vite-plus/test rather than from a global, and explicit
+        // afterEach(cleanup) below is what keeps React state from leaking.
+        globals: false,
+        setupFiles: ['./tests/js/setup.ts'],
+    },
     lint: {
         ignorePatterns: [
             'vendor/**',
