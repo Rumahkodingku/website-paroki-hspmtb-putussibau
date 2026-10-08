@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Symfony\Component\Finder\SplFileInfo;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,6 +134,262 @@ test('models do not bypass eloquent with the query builder facade', function () 
     // Eloquent is the persistence layer. A DB:: call inside a model is the
     // first step toward a model that is only a bag of static helpers.
     expect('App\Models')->not->toUse(['Illuminate\Support\Facades\DB']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Frontend dependency direction
+|--------------------------------------------------------------------------
+|
+| ARCHITECTURE.md Part B section 4 draws one arrow:
+|
+|     pages -> features -> components / hooks / lib / types
+|
+| and adds that `features/a` must not reach into `features/b`, and that
+| `components/ui` and `components/shared` must not import from `features/*` or
+| `pages/*`. Nothing was enforcing any of it, so the whole structure rested on
+| nobody happening to write the wrong import.
+|
+| Import specifiers are resolved to a path under resources/js before the rules
+| are applied, and that is the part worth reading. Matching on the `@/` alias
+| alone would pass a file that reaches a forbidden directory with
+| `../../features/...`, which is both a real bypass and something a codebase
+| that mixes both styles will eventually produce.
+|
+| What is deliberately NOT a rule, because the document does not say it:
+| `components/ui` importing from `hooks/`. sonner.tsx does exactly that, and
+| AGENTS.md records it as a deliberate deviation. The documented rule forbids
+| features and pages, so ui stays free of hooks and the deviation stays legal
+| instead of being quietly grandfathered in here.
+|
+| @see docs/ARCHITECTURE.md Part B section 4
+|
+*/
+
+/**
+ * Every import in a frontend file, resolved to a path under resources/js.
+ *
+ * Bare package specifiers (react, lucide-react, @inertiajs/react) resolve to
+ * an empty string so callers can ignore them. Relative specifiers are
+ * normalised against the importing file's directory, collapsing `.` and `..`,
+ * so the result is comparable no matter how the import was written.
+ *
+ * @return list<string>
+ */
+function frontendImports(SplFileInfo $file): array
+{
+    preg_match_all(
+        '/(?:from\s*|import\s*\(\s*)[\'"]([^\'"]+)[\'"]/',
+        (string) $file->getContents(),
+        $matches,
+    );
+
+    /** @var list<string> $specifiers */
+    $specifiers = $matches[1];
+
+    // Relative to resources/js, not to the project root: an `@/lib/utils` target
+    // comes back as `lib/utils`, and a `./auth` target has to come back the same
+    // way or every rule below compares two different shapes.
+    /** @var list<string> $segments */
+    $segments = explode('/', (string) Str::beforeLast(
+        Str::after($file->getRealPath(), base_path().'/resources/js/'),
+        '/',
+    ));
+
+    return array_values(array_filter(array_map(
+        static function (string $specifier) use ($segments): string {
+            if (Str::startsWith($specifier, '@/')) {
+                return Str::after($specifier, '@/');
+            }
+
+            if (! Str::startsWith($specifier, '.')) {
+                return '';
+            }
+
+            $resolved = $segments;
+
+            foreach (explode('/', $specifier) as $segment) {
+                if ($segment === '.') {
+                    continue;
+                }
+
+                if ($segment === '..') {
+                    array_pop($resolved);
+
+                    continue;
+                }
+
+                $resolved[] = $segment;
+            }
+
+            return implode('/', $resolved);
+        },
+        $specifiers,
+    )));
+}
+
+/**
+ * Files under a frontend directory that import a forbidden target.
+ *
+ * The generated Wayfinder output is skipped: it is written by a plugin, its
+ * import style is not ours to change, and it is not covered by tsc.
+ *
+ * @param  Closure(string): bool  $forbidden  Receives a path under resources/js.
+ * @return list<string>
+ */
+function frontendViolations(string $directory, Closure $forbidden): array
+{
+    $generated = ['actions/', 'routes/', 'wayfinder/'];
+    $violations = [];
+
+    foreach (File::allFiles(resource_path('js/'.$directory)) as $file) {
+        if (! in_array($file->getExtension(), ['ts', 'tsx'], true)) {
+            continue;
+        }
+
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+
+        if (Str::startsWith(Str::after($relative, 'resources/js/'), $generated)) {
+            continue;
+        }
+
+        foreach (frontendImports($file) as $target) {
+            if ($forbidden($target)) {
+                $violations[] = "{$relative} imports {$target}";
+            }
+        }
+    }
+
+    return $violations;
+}
+
+test('frontend components do not import pages', function () {
+    // Part B section 4: components sit below pages in the arrow. A component
+    // that imports a page is how a page stops being thin and starts being a
+    // component with a hard dependency on its own caller.
+    expect(frontendViolations('components', fn (string $t): bool => Str::startsWith($t, 'pages/')))
+        ->toBe([]);
+});
+
+test('shadcn primitives do not import features or pages', function () {
+    // Part B section 4 names components/ui explicitly. ui/ is regenerated by
+    // `shadcn add`, so anything it knows about our features is knowledge that a
+    // regeneration would delete.
+    expect(frontendViolations('components/ui', fn (string $t): bool => Str::startsWith($t, 'features/') || Str::startsWith($t, 'pages/')))
+        ->toBe([]);
+});
+
+test('layouts do not import pages or features', function () {
+    // The arrow does not mention layouts/, so this rule is derived rather than
+    // quoted: app.tsx wires a layout to a page by component name, which means a
+    // layout importing that page is a cycle. It is stated here so it is a
+    // decision instead of an accident waiting to happen.
+    expect(frontendViolations('layouts', fn (string $t): bool => Str::startsWith($t, 'pages/') || Str::startsWith($t, 'features/')))
+        ->toBe([]);
+});
+
+test('a feature does not import another feature', function () {
+    // Part B section 4: "features/a MUST NOT import from features/b. If both
+    // need it, move it to components/shared, hooks, lib, or types." Checked per
+    // importing feature, so the message names which way the dependency points.
+    $violations = [];
+
+    foreach (File::allFiles(resource_path('js/features')) as $file) {
+        if (! in_array($file->getExtension(), ['ts', 'tsx'], true)) {
+            continue;
+        }
+
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+        // The feature itself, from the first path segment after features/ and
+        // not from a components/ ancestor: features/<name>/types.ts and
+        // features/<name>/hooks/* have no components/ in their path, and keying
+        // off that segment would read them as features/<name>/types.ts.
+        $owner = Str::before(
+            Str::after($relative, 'resources/js/features/'),
+            '/',
+        );
+
+        foreach (frontendImports($file) as $target) {
+            if (! Str::startsWith($target, 'features/')) {
+                continue;
+            }
+
+            // Str::after, not Str::before: the target starts with 'features/',
+            // so looking for the text before it yields an empty string and every
+            // intra-feature import looks like a violation.
+            if (Str::before(Str::after($target, 'features/'), '/') !== $owner) {
+                $violations[] = "features/{$owner} imports {$target}";
+            }
+        }
+    }
+
+    expect($violations)->toBe([]);
+});
+
+test('hooks and lib import nothing above them', function () {
+    // Part B section 4 puts hooks and lib on the same level as components, at
+    // the bottom of the arrow. They are the leaves everything else is allowed to
+    // depend on, so an import going the other way would make the cycle
+    // unrepresentable.
+    $reachesUp = fn (string $t): bool => Str::startsWith($t, 'pages/')
+        || Str::startsWith($t, 'features/')
+        || Str::startsWith($t, 'components/')
+        || Str::startsWith($t, 'layouts/');
+
+    expect(frontendViolations('hooks', $reachesUp))
+        ->toBe([])
+        ->and(frontendViolations('lib', $reachesUp))->toBe([]);
+});
+
+test('no frontend directory imports one that does not exist', function () {
+    // Not a documented rule. Catches the failure mode this change actually had:
+    // a path that resolves for the bundler and for tsc, but whose directory is
+    // not one of the ten under resources/js. Cheap, and it failed for real once.
+    $known = ['actions', 'components', 'features', 'hooks', 'layouts', 'lib', 'pages', 'routes', 'types', 'wayfinder'];
+    $generated = ['actions', 'routes', 'wayfinder'];
+    $stray = [];
+
+    foreach (File::allFiles(resource_path('js')) as $file) {
+        if (! in_array($file->getExtension(), ['ts', 'tsx'], true)) {
+            continue;
+        }
+
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+        $below = Str::after($relative, 'resources/js/');
+
+        // A file sitting directly in resources/js belongs to no directory, so
+        // there is nothing for it to be inside of.
+        if (! str_contains($below, '/')) {
+            continue;
+        }
+
+        $directory = Str::before($below, '/');
+
+        if (! in_array($directory, $known, true)) {
+            $stray[] = $relative;
+
+            continue;
+        }
+
+        // Wayfinder output is written by a plugin: its import style is not ours
+        // to change and it is not covered by tsc.
+        if (in_array($directory, $generated, true)) {
+            continue;
+        }
+
+        foreach (frontendImports($file) as $target) {
+            // A bare `@/types` names a sibling directory, not a missing one.
+            if ($target === '' || ! str_contains($target, '/')) {
+                continue;
+            }
+
+            if (! in_array(Str::before($target, '/'), $known, true)) {
+                $stray[] = "{$relative} imports {$target}";
+            }
+        }
+    }
+
+    expect($stray)->toBe([]);
 });
 
 /*
