@@ -7,6 +7,10 @@
         "build:ssr": "vp build && vp build --ssr",
         "dev": "vp dev",
         "check": "vp check",
+        "test:unit": "vp test run",
+        "test:unit:watch": "vp test watch",
+        "e2e:prepare": "php artisan app:e2e:prepare",
+        "e2e": "npm run e2e:prepare && playwright test",
         "check:fix": "vp check --fix",
         "types:check": "tsc --noEmit",
         "prepare": "husky"
