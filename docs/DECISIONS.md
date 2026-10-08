@@ -1227,6 +1227,45 @@ pun mempertahankannya. Menambah key di satu tempat berarti menambahkannya di
 tempat lain, dan `InfrastructureFoundationTest` mengunci daftar itu sebagai
 kontrak.
 
+#### 5a. `inertia.ssr.enabled` ternyata `true`, dan itu bukan keputusan kita
+
+Scaffold Laravel 13 / Inertia 3 menulis `'enabled' => true` di
+`config/inertia.php`, dengan `'bundle'` masih dikomentari. `HttpGateway::ssrIsEnabled()`
+juga default ke `true` kalau kuncinya tidak ada. Jadi "SSR dimatikan" di §5 ini
+hanya berlaku karena kebetulan, bukan karena ada yang mengatakannya.
+
+Kebetulan itu cukup untuk production, dan tidak cukup untuk development:
+
+- Tanpa `public/hot`, `HttpGateway::dispatch()` gagal di cek bundle
+  (`bootstrap/ssr/ssr.mjs` tidak pernah dibangun), return `null`, dan slot
+  `<x-inertia::head>` dirender seperti biasa.
+- Dengan `public/hot` — yaitu ketika `composer dev` sedang berjalan — cek bundle
+  dilewati, gateway POST ke `/__inertia_ssr` milik dev server, dan
+  `Inertia\View\Components\Head::render()` mengganti slot dengan
+  `{!! $response->head !!}` yang **kosong**.
+
+Akibatnya setiap `og:*`, `rel="canonical"`, `name="twitter:card"` dan `<title>`
+lenyap dari respons HTML awal, **hanya di development**. Produksi tidak pernah
+menyentuh jalur itu, jadi bug-nya tak terlihat di produksi dan muncul sebagai
+`InfrastructureFoundationTest::open graph tags are present in the initial html
+response` yang gagal tepat ketika gate dijalankan bersamaan dengan `composer dev`.
+itu kelas bug yang paling Mahal: dev dan production menampilkan head yang berbeda,
+dan yang berbeda itu justru SEO.
+
+Diperbaiki dengan `'enabled' => filter_var(env('INERTIA_SSR_ENABLED', false), FILTER_VALIDATE_BOOL)`.
+`filter_var` dipakai karena `phpunit.xml` men-set variabel itu dan PHPUnit menulis
+nilai `"false"` sebagai **string kosong**, bukan boolean — `env()` polos akan
+menghasilkan `""`, yang falsy sehingga Gateway benar, tapi menyesatkan saat
+dibaca. Sekarang unset, kosong, dan `"false"` semuanya benar-benar `false`.
+
+`phpunit.xml` mengunci `INERTIA_SSR_ENABLED=false` supaya suite tidak pernah
+bergantung pada `.env` lokal, dan test baru
+`server side rendering stays off so blade owns the head` mengunci kedua sisi:
+nilai config-nya, dan bahwa `SsrState::dispatch()` mengembalikan `null`.
+
+Kalau SSR diaktifkan di phase UI, `public/hot` harus dihapus dari penyebab
+peserta bug di atas, bukan hanya menyalakan flag.
+
 ### 6. `seo_default_*` akhirnya punya konsumen
 
 Tiga kunci itu bisa diubah di `/admin/pengaturan` dan **tidak dibaca siapa pun**,

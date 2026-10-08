@@ -13,10 +13,20 @@ return [
     |
     | See: https://inertiajs.com/server-side-rendering
     |
+    | SSR is off by default and stays off until a Node daemon is deployed
+    | alongside the app. Leaving it on is not harmless: with a hot Vite dev
+    | server running, the gateway POSTs to /__inertia_ssr and Inertia replaces
+    | the <x-inertia::head> slot with that response's head, silently dropping
+    | the Open Graph, canonical and title tags Blade renders. See D-26.
+    |
+    | filter_var keeps this a real boolean whatever the variable arrives as,
+    | because an unset, empty or "false" value must all resolve to false and
+    | never to a truthy empty string.
+    |
     */
 
     'ssr' => [
-        'enabled' => true,
+        'enabled' => filter_var(env('INERTIA_SSR_ENABLED', false), FILTER_VALIDATE_BOOL),
         'url' => 'http://127.0.0.1:13714',
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
