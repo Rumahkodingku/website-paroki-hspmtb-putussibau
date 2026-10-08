@@ -6,7 +6,18 @@ import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 
-export default function VerifyEmail({ status }: { status?: string }) {
+/**
+ * Fortify's email verification notice. `status` is absent until a verification
+ * link has been requested again, which is what decides between the prompt and
+ * the confirmation.
+ *
+ * @see https://laravel.com/docs/fortify
+ */
+type Props = {
+    status?: string;
+};
+
+export default function VerifyEmail({ status }: Props) {
     return (
         <>
             <Head title="Verifikasi Email" />

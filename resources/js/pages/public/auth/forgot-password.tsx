@@ -9,7 +9,18 @@ import { Label } from '@/components/ui/label';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
 
-export default function ForgotPassword({ status }: { status?: string }) {
+/**
+ * Fortify's password reset view. It receives `status` only after a link has
+ * been sent, and the component renders a confirmation instead of the form when
+ * it is present.
+ *
+ * @see https://laravel.com/docs/fortify
+ */
+type Props = {
+    status?: string;
+};
+
+export default function ForgotPassword({ status }: Props) {
     return (
         <>
             <Head title="Lupa Kata Sandi" />

@@ -8,6 +8,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { home } from '@/routes';
 
 /*
  * ParishNavbar - DESIGN.md, components.global-nav
@@ -89,7 +90,7 @@ export function ParishNavbar({ children }: { children?: ReactNode }) {
         <header className="sticky top-0 z-40 h-16 w-full border-b border-divider-soft bg-background">
             <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-4 px-4">
                 <Link
-                    href="/"
+                    href={home()}
                     className="flex items-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                     <ParishWordmark />
