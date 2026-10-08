@@ -53,6 +53,10 @@ beforeEach(function () {
     Route::middleware('web')->get('/__test/gagal', function () {
         throw new RuntimeException('Pesan internal yang tidak boleh muncul.');
     });
+
+    Route::middleware('web')->get('/__test/tidak-tersedia', function () {
+        abort(503, 'S sedang dalam pemeliharaan.');
+    });
 });
 
 /*
@@ -180,4 +184,45 @@ test('the error page still renders without a debug session cookie', function () 
     // The page is reached by guests. If it needed session state it would 500 on
     // the way to reporting a 404.
     $this->get('/alamat-yang-tidak-ada')->assertNotFound();
+});
+
+test('a route that aborts with 503 is rendered as the Indonesian error page', function () {
+    // 503 has to be produced by a route, not by `artisan down`, and the reason is
+    // worth recording because it is counter-intuitive.
+    //
+    // Maintenance mode never reaches this handler. PreventRequestsDuringMaintenance
+    // short-circuits the request and returns Laravel's built-in errors::503 view —
+    // an English "Service Unavailable" page — before the exception handler is
+    // consulted. So `artisan down` cannot be used to assert anything here, and a
+    // test written that way fails with "Not a valid Inertia response" rather than
+    // with anything that names the cause.
+    //
+    // The 503 branch in the error component is therefore reachable, and this is
+    // how. PRD XC-E2 asks for Indonesian 404 and 500 only, so the maintenance
+    // page being Laravel's own is a framework default and not a gap in scope.
+    $this->get('/__test/tidak-tersedia')
+        ->assertStatus(503)
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('public/error')
+            ->where('status', 503)
+        );
+});
+
+test('maintenance mode answers with the framework page, not ours', function () {
+    // The counterpart of the test above, asserted rather than left as a comment:
+    // an operator putting the site into maintenance sees Laravel's page. That is
+    // the framework's behaviour and it is fine here, but it is exactly the sort
+    // of thing that looks like a regression later if nobody wrote it down.
+    $this->artisan('down', ['--render' => 'errors::503']);
+
+    try {
+        $response = $this->get('/');
+
+        $response->assertStatus(503);
+        $response->assertDontSee('data-inertia', false);
+    } finally {
+        // Leaving the application "under maintenance" would take down every later
+        // test in this file and most of the rest of the suite.
+        $this->artisan('up');
+    }
 });
