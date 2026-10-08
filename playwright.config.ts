@@ -81,6 +81,19 @@ export default defineConfig({
          */
         env: {
             DB_DATABASE: environment.database,
+
+            /**
+             * Force debug off even though a development machine has it on.
+             *
+             * The custom error pages are only rendered when config('app.debug')
+             * is false: the respond() callback in bootstrap/app.php returns the
+             * original response early otherwise, and Laravel's own debug page
+             * takes over. Without this the 404 specs would pass while asserting
+             * on that debug page — the status code is right and the wording is
+             * somebody else's — so they would report the error pages as covered
+             * while proving nothing about them.
+             */
+            APP_DEBUG: 'false',
         },
 
         // /up is Laravel's health endpoint. It answers without touching the
