@@ -1246,8 +1246,17 @@ hanya ada di browser. Mengujinya dari PHP berarti melakukan grep pada berkas
 lulus ketika tidak ada yang menyentuh test-nya.
 
 Yang diuji adalah kontrak backend: status code, komponen Inertia, dan prop
-`status`. Persyaratan kebahasan dijamin oleh konstruksi dan ditinjau secara
+`status`. Persyaratan kebahasa dijamin oleh konstruksi dan ditinjau secara
 visual. Ini kesenjangan nyata, dan dicatat sebagai such.
+
+> **Ditutup oleh P16 (D-29).** Suite Playwright sekarang mem-*assert* copy
+> Bahasa Indonesia itu di browser, termasuk di halaman 404. Yang menarik dari
+> prosesnya: assertion pertamanya **hijau untuk alasan yang salah**, karena mesin
+> development punya `APP_DEBUG=true` sehingga callback `respond()` mengembalikan
+> response asli lebih awal dan yang tampil adalah halaman debug Laravel — bukan
+> halaman error Inertia. Status tetap 404 dan teks "404" tetap ada, jadi keduanya
+> lolos terhadap halaman yang tidak ditulis siapa pun di sini. Web server E2E kini
+> dipaksa `APP_DEBUG=false`.
 
 ### 8. T26 ternyata tidak pernah ter-cover
 
@@ -1419,6 +1428,12 @@ daripada mencegahnya: menambahkan gate yang belum dipenuhi siapa pun.
 saat gap D-26 §7 dibahas. Roadmap §29 hanya menyebut TypeScript, ESLint, dan
 build, dan AGENTS.md melarang menambah test runner tanpa persetujuan. Kesenjangan
 tersebut tetap tercatat.
+
+> **Dibalik oleh P16 (D-29), atas permintaan eksplisit.** Alasannya berubah:
+> ketika tidak ada frontend di Phase 01, tidak ada yang perlu diuji, jadi
+>menambah runner adalah biaya tanpa manfaat. Sekarang ada frontend, dan gap
+> D-26 §7 terbukti tidak bisa ditutup tanpanya. Ketetapan di bawah tetap
+> berlaku: **coverage tetap tidak ditambahkan**, dan E2E tetap di luar gate.
 
 **Code coverage threshold** tidak ditambahkan: tidak diminta roadmap maupun PRD,
 dan CI memakai `coverage: none`. **Level PHPStan tetap 7** — tidak ada satu pun
@@ -1593,3 +1608,192 @@ protection GitHub, dan `PULL_REQUEST_TEMPLATE.md`. Hook `pre-push` sengaja
 tidak ada: PR #1 sudah memberi bukti bahwa alur kerja repo ini adalah push
 branch ke PR terbuka, dan menambah satu gerbang di sana tidak menambah keamanan
 yang berarti.
+---
+
+## D-29 — Frontend testing: Vitest lewat vite-plus, Playwright untuk alur nyata
+
+**Status:** Accepted · berlaku sejak P16 · branch `feat/phase-01-testing`
+
+Ini **membalik** keputusan yang tercatat di D-26 §7 dan D-27 §6, yaitu "tidak ada
+frontend test runner". Keduanya menuliskan gap itu dengan jujur sebagai konsekuensi
+dari pilihan saat itu, jadi membukanya di sini adalah koreksi, bukan tambahan.
+
+Tidak ada frontend di Phase 01, jadi tidak ada test frontend yang perlu dibongkar.
+
+### 1. Unit test tidak memasang Vitest
+
+`vp test` sudah ada di vite-plus dan **adalah** Vitest: `vitest@4.1.11` sudah
+terpasang transitif, dan API-nya diambil dari `vite-plus/test`, bukan dari paket
+`vitest`. Jadi tidak ada dependensi test runner yang baru — hanya `happy-dom` dan
+Testing Library.
+
+Konfigurasinya blok `test` di `vite.config.ts`. Dokumentasi vite-plus secara
+eksplisit **tidak** menyarankan `vitest.config.ts`, dan alasannya masuk akal: satu
+berkas konfigurasi lebih mudah dibaca daripada dua yang sebagian besar isinya
+sama.
+
+> **Diverifikasi, bukan diasumsikan.** Dokumentasi itu menjelaskan vite-plus 1.0
+> dengan Vitest 5, sedangkan yang terpasang di sini **0.3.0 dengan Vitest
+> 4.1.11**. Blok `test` ternyata diterima, alias `@/` ke-resolve, dan JSX jalan
+> tanpa setup tambahan. Tidak ada efek samping: `git status` tetap bersih sesudah
+> `vp test`, jadi plugin Wayfinder **tidak** menulis ulang
+> `resources/js/routes/` saat test berjalan.
+
+### 2. `tests/` sudah milik Pest, jadi frontend masuk ke dalamnya
+
+Bukan `tests-js/` atau apa pun. Frontend unit ada di `tests/js/`, E2E di
+`tests/e2e/`. `composer.json` memetakan PSR-4 `Tests\` → `tests/`, tetapi
+autoloader PHP hanya memetakan `.php`, jadi berkas `.ts` di sana tidak mengganggu
+apa pun. Satu pohon, satu kebiasaan.
+
+`include` Vitest sengaja hanya `tests/js/**`, dengan `exclude` eksplisit
+`tests/e2e/**`. Globe bawaan Vitest adalah `**/*.spec.*`, yang dengan senang hati
+akan **mengumpulkan spec Playwright lalu menjalankannya sebagai unit test**. Keduanya
+disebut, karena salah satu saja masih membuka jebaknya: `include` yang sempit
+melindungi hari ini, `exclude` melindungi kalau suatu saat `include` dilebarkan.
+
+`tsconfig.json` gaining `tests/js`, `tests/e2e`, dan `playwright.config.ts`.
+`include`-nya hanya `resources/js/**`, jadi tanpa itu file test berada di luar
+**kedua** `tsc --noEmit` dan lint type-aware.
+
+### 3. `globals` dimatikan, jadi cleanup ditulis sendiri
+
+Testing Library hanya membersihkan DOM otomatis ketika globals aktif. Di sini
+`globals: false` secara sengaja, jadi `tests/js/setup.ts` memanggil `cleanup()`
+sendiri. Tanpa itu setiap file test meninggalkan DOM terpasang, dan `getByRole`
+berikutnya bisa mencocokkan elemen milik test sebelumnya — gagal karena alasan
+yang keliru.
+
+### 4. Dua fakta yang ditemukan test pertama, bukan dari membaca kode
+
+**`<input type="password">` tidak punya implicit ARIA role.** Password input
+sengaja dikeluarkan dari accessibility tree sebagai textbox, jadi
+`getByRole('textbox')` tidak akan pernah bisa mencocokkannya, ter-masked atau
+tidak. Test pertama sempat gagal karena itu dan terlihat seperti komponen rusak.
+Field-nya dicari lewat label, dengan `aria-label` disuplai test karena layar
+sesungguhnya memasangkan `PasswordInput` dengan `<InputLabel>` dari luar.
+
+**Toggle password harus `type="button"`.** Tombolnya ada di dalam `<form>` login
+tanpa atribut `type`, dan default `<button>` adalah submit — jadi klik pertama
+mengirim form, bukan membuka kata sandi.
+
+### 5. Playwright: tiga hal harus sepakat, dan dua dari mereka PHP
+
+Ini bagian yang paling banyak mengubah desain, dan tidak ada yang terlihat dari
+konfigurasinya saja.
+
+**`.auth.json` ditulis oleh `app:e2e:prepare`, bukan diisi dua kali.** Email,
+password, **dan nama database**. Alasannya adalah kegagalan pertama: `php artisan
+serve` membaca koneksinya dari environment, jadi ia berbicara ke database di
+`.env`, sementara prepare sudah me-*rebuild* database test. Kredensialnya benar,
+loginnya tetap gagal. Kalau spec menyimpan sendiri nama database, tiga hal akan
+menyimpang satu per satu dan gejalanya selalu "login gagal" — yang mengarah ke
+form login, bukan ke wiring-nya.
+
+**`data-test`, bukan `data-testid`.** Komponen di repo ini menandai hook dengan
+`data-test`, sedangkan default Playwright adalah `data-testid`, jadi `getByTestId`
+tidak menemukan apa pun. Disesuaikan sekali di `testIdAttribute`, bukan dengan
+mengulang `[data-test="..."]` di setiap spec.
+
+**`getByLabel('Password')` ambigu.** Playwright mencocokkan label sebagai
+substring, dan tombol toggle punya `aria-label="Show password"` — jadi locator itu
+mencocok dua elemen lalu melempar strict-mode violation. Field dipanggil
+`input[name="password"]`. Field email kebetulan aman hanya karena toggle berkata
+"password", bukan "address".
+
+**`APP_DEBUG=false` dipaksa di web server.** Yang ini menghasilkan **hijau
+palsu**. Mesin development punya `APP_DEBUG=true`, dan callback `respond()` di
+`bootstrap/app.php` mengembalikan response asli lebih awal dalam kasus itu, sehingga
+halaman debug Laravel yang muncul — bukan halaman error Inertia. Status tetap 404
+dan teks "404" tetap ada di layar, jadi kedua assertion hijau, terhadap halaman
+yang tidak ditulis siapa pun di sini.
+
+Specs sekarang meng-*assert* copy Bahasa Indonesia-nya, yang benar-benar menutup gap
+D-26 §7: copy itu sebelumnya hanya diperiksa sebagai prop yang sampai ke React,
+yang tidak mengatakan apa pun soal apakah ia sampai ke layar.
+
+### 6. Urutan test, dan kenapa suite bisa hijau sendiri tapi merah bersama
+
+Spec password salah memicu throttle login Fortify. Limiter-nya tinggal di cache,
+yang di sini adalah database — state yang dipakai bersama seluruh test dalam satu
+run. Akibatnya login yang benar di test berikutnya terkunci: logout test **lolos
+sendiri** (1,8 detik) dan **gagal setelah test password salah**, dan berulang kali
+lokal akan menahan kunci itu sampai jendela limiter habis.
+
+Tiap test sekarang menjalankan `php artisan cache:clear` lebih dulu, 0,2 detik.
+Tidak ada coverage yang hilang: throttling sendiri sudah di-assert di
+`tests/Feature/Auth/AuthenticationTest.php`. Yang penting di sini hanya bahwa
+test-test ini tidak bergantung pada urutan satu sama lain.
+
+### 7. `app:e2e:prepare` mengambil target dari konfigurasi sendiri
+
+`migrate:fresh` menjatuhkan setiap tabel yang ditemuinya. Perintah ini membaca
+`config('e2e.database')` dan **memindahkan koneksinya ke sana lebih dulu**, sebelum
+ada langkah destruktif apa pun.
+
+Sengaja **tidak** membaca environment. Dengan begitu `npm run e2e` berperilaku sama
+apakah `.env` menunjuk database pengembangan atau tidak, dan langkah destructive
+hanya bisa mengikuti konfigurasi suite itu sendiri. Perintah mencetak database yang
+diabaikan, jadi keputusannya terlihat, bukan diam-diam.
+
+> **Dua percobaan sebelum modelnya benar.** Versi pertama **menolak** jalan kalau
+> `DB_DATABASE` tidak sama dengan database test — lalu saya sadar itu membuat suite
+> mustahil dipakai di laptop mana pun yang `.env`-nya menunjuk database dev.
+> Protectif, tapi tidak berguna. Yang kedua membalik modelnya: property yang benar
+> bukan "menolak konfigurasi salah", melainkan "tidak pernah membaca konfigurasi
+> itu".
+
+Test Pest memakai nama database yang **memang tidak ada** untuk membuktikan ini.
+Kalau suatu saat perintahnya regresi ke database environment, `migrate:fresh` akan
+gagal keras dengan "database tidak ada", alih-alih diam-diam menjatuhkan tabel
+milik seseorang — dan kegagalannya akan menyebut bug-nya.
+
+### 8. Yang masuk gate, dan yang tidak
+
+`npm run test:unit` masuk `composer ci:check`, jadi ikut pre-commit: **1,4
+detik**. Murah, dan test yang tidak dijalankan tiap commit akan membusuk.
+
+Playwright **tidak** masuk gate. Commit yang memulai web server, me-*rebuild*
+database, dan mengunduh browser mengubah perubahan satu baris menjadi beberapa
+menit — dan di mesin tanpa Chromium ia **gagal**, bukan dilewati. Gate-nya adalah
+job `e2e` di CI.
+
+Kedua hal itu di-assert di `tests/Unit/ContinuousIntegrationScriptTest.php`,
+dengan alasan yang sama seperti production build yang dikecualikan di sana: yang
+tidak diuji adalah keputusan yang diam-diam berubah.
+
+### 9. `workers: 1`, dan kenapa
+
+`php artisan serve` menjawab satu request pada satu waktu. Worker paralel akan
+antre di belakang satu sama lain, dan gejalanya timeout acak pada suite yang
+sebenarnya tidak menguji apa pun yang terkait waktu.
+
+Readiness probe memakai `/up`, bukan halaman nyata. `/up` menjawab tanpa menyentuh
+database atau manifest Vite, jadi ia probe yang adil: menunggu halaman sungguhan
+akan melaporkan server rusak setiap kali frontend-nya memang belum di-build.
+
+### 10. Yang tidak dikerjakan
+
+**Coverage.** Butuh `@vitest/coverage-v8` dan gate baru. Tidak ada yang memintanya,
+dan coverage yang tidak pernah gagal diverifikasi hanya menambah waktu ke gate.
+
+**Test komponen di browser sungguhan.** vite-plus sudah membundel Playwright
+sebagai provider browser-mode, jadi ini mungkin tanpa dependensi baru — tapi
+memaksa setiap developer dan setiap CI run mengunduh Chromium untuk memeriksa
+layout dan CSS, sementara suite 10 spec ini belum butuh itu. `--dom` (happy-dom)
+yang dipilih untuk itu.
+
+**Mock Inertia.** Komponen yang memakai `router` atau `useForm` belum diuji unit.
+Memock router bukan cara memverifikasi runner-nya, jadi itu pekerjaan berikutnya
+bila ada yang benar-benar butuh.
+
+### 11. Verifikasi
+
+Kedua suite **dijalankan**, bukan hanya dikonfigurasi. E2E dijalankan empat kali
+berturut-turut untuk memastikan tidak ada ketergantungan antar-run pada limiter:
+**10 passed dalam 9,3 detik** setiap kali. Gate penuh: **271 test, 870 assertion,
+PHPStan 0 error.**
+
+Sebelas test unit dan sepuluh spec E2E sengaja dibuat kecil. Yang diuji adalah
+runner, alias, setup, dan kebocoran state antar-test — hal-hal yang tidak bisa
+dipastikan dengan membaca konfigurasi.
