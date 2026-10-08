@@ -128,6 +128,7 @@ export default defineConfig({
             '.codex/**',
             'skills-lock.json',
             'composer.json',
+            'public/**',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
         ],
