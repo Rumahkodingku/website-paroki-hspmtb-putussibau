@@ -91,7 +91,7 @@ test('a guest receives a null user rather than a missing key', function () {
     // contract has to hold.
     $this->get(route('home'))
         ->assertInertia(fn (Assert $page) => $page
-            ->component('welcome')
+            ->component('public/beranda')
             ->has('auth')
             ->where('auth.user', null)
         );

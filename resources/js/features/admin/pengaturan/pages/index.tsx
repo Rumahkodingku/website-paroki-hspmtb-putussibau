@@ -11,7 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import { edit } from '@/routes/settings';
-import type { SettingValue, SettingsMeta } from '@/features/pengaturan/types';
+import type {
+    SettingValue,
+    SettingsMeta,
+} from '@/features/admin/pengaturan/types';
 
 /*
  * Tiptap and ProseMirror together are a few hundred kilobytes, and this page is
@@ -24,7 +27,7 @@ import type { SettingValue, SettingsMeta } from '@/features/pengaturan/types';
  * actually visits.
  */
 const RichTextEditor = lazy(() =>
-    import('@/features/pengaturan/components/rich-text-editor').then(
+    import('@/features/admin/pengaturan/components/rich-text-editor').then(
         (module) => ({
             default: module.RichTextEditor,
         }),
