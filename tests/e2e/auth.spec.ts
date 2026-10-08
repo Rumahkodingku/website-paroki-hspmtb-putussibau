@@ -1,6 +1,12 @@
-import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
 import { e2eEnvironment } from './support/environment';
+import {
+    emailField,
+    loginButton,
+    passwordField,
+    resetLoginRateLimit,
+    signIn,
+} from './support/session';
 
 const admin = e2eEnvironment();
 
@@ -10,25 +16,6 @@ const admin = e2eEnvironment();
  * module these specs import.
  */
 const baseURL = 'http://127.0.0.1:8000';
-
-/*
- * Locators target the input elements by name rather than by label.
- *
- * getByLabel('Password') is ambiguous on this page and resolves to two
- * elements: the field, and the visibility toggle, whose aria-label is "Show
- * password". Playwright matches labels as a case-insensitive substring, so the
- * toggle matches too, and the locator throws a strict-mode violation instead of
- * filling the field. The email field is unaffected only because the toggle says
- * "password" and not "address".
- */
-const emailField = (page: import('@playwright/test').Page) =>
-    page.locator('input[name="email"]');
-
-const passwordField = (page: import('@playwright/test').Page) =>
-    page.locator('input[name="password"]');
-
-const loginButton = (page: import('@playwright/test').Page) =>
-    page.getByTestId('login-button');
 
 /**
  * These specs cover the part of the application where the three middleware
@@ -41,21 +28,7 @@ const loginButton = (page: import('@playwright/test').Page) =>
  */
 test.describe('autentikasi admin', () => {
     test.beforeEach(() => {
-        /*
-         * Fortify throttles the login route, and the limiter lives in the cache,
-         * which here is the database — state that every test in a run shares.
-         * Without this, the wrong-password test below would lock out the correct
-         * login in the tests after it, and repeated local runs would keep the
-         * lockout in place until the limiter window expired.
-         *
-         * Resetting it costs no coverage: throttling itself is asserted in
-         * tests/Feature/Auth/AuthenticationTest.php. What matters here is only
-         * that these tests do not depend on each other's order.
-         */
-        execFileSync('php', ['artisan', 'cache:clear'], {
-            env: { ...process.env, DB_DATABASE: admin.database },
-            stdio: 'ignore',
-        });
+        resetLoginRateLimit();
     });
 
     test('halaman admin mengalihkan tamu ke halaman masuk', async ({
@@ -81,13 +54,7 @@ test.describe('autentikasi admin', () => {
     test('masuk dengan kredensial yang benar membuka dasbor', async ({
         page,
     }) => {
-        await page.goto('/admin/login');
-
-        await emailField(page).fill(admin.email);
-        await passwordField(page).fill(admin.password);
-        await loginButton(page).click();
-
-        await expect(page).toHaveURL(/\/admin$/);
+        await signIn(page);
 
         // The seeded account is visible in the sidebar, which proves the shared
         // auth.user prop arrived rather than just that a redirect happened.
@@ -121,12 +88,7 @@ test.describe('autentikasi admin', () => {
     test('keluar menutup sesi dan mengunci lagi halaman admin', async ({
         page,
     }) => {
-        await page.goto('/admin/login');
-
-        await emailField(page).fill(admin.email);
-        await passwordField(page).fill(admin.password);
-        await loginButton(page).click();
-        await expect(page).toHaveURL(/\/admin$/);
+        await signIn(page);
 
         // The logout control lives in a Radix dropdown, so the trigger has to be
         // opened before the item inside it can be clicked.
