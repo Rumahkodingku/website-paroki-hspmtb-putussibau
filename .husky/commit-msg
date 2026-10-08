@@ -1,0 +1,10 @@
+# PRD D-16 and roadmap section 30: Conventional Commits, validated per message.
+#
+# --no-install so a missing package fails loudly instead of npx quietly
+# downloading it, which would hide a broken install behind a slow commit.
+#
+# git revert generates "Revert ..." which this config rejects. That is the
+# intended behaviour; pass --no-verify to record the revert as git wrote it.
+#
+# @see docs/DECISIONS.md D-28
+npx --no-install commitlint --edit "$1"
