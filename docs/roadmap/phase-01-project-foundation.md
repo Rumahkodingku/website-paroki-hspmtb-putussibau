@@ -1987,12 +1987,58 @@ Do not force unnecessary restructuring.
 
 ## P13 — Quality
 
-- [ ] Pest/PHPUnit.
-- [ ] Pint.
-- [ ] Larastan.
-- [ ] ESLint.
-- [ ] TypeScript.
-- [ ] build.
+- [x] Pest/PHPUnit. — 265 test, 22 file. `pestphp/pest` 4.7.8 + plugin Laravel.
+  T34 (`FreshInstallTest`) ditutup di sini.
+- [x] Pint. — `laravel/pint` ^1.27, `composer lint:check`.
+- [x] Larastan. — `larastan/larastan` ^3.9 level 7, `composer types:check`.
+- [x] ESLint. — `vp check` (oxlint, `denyWarnings: true`), `npm run check`.
+- [x] TypeScript. — `tsc --noEmit`, `npm run types:check`.
+- [x] build. — `vp build`, `npm run build`.
+
+> **P13 tidak memasang apa pun.** Enam checkbox di atas menunjuk tool yang sudah
+> terpasang sejak P01 dan sudah dijalankan CI lewat `composer ci:check`.
+> Yang dikerjakan P13 adalah menyerap utang: divergence #4, T34, dan cakupan
+> PHPStan yang tidak lengkap.
+
+> **Divergence #4 ditutup.** `Model::shouldBeStrict(! isProduction())` di
+> `AppServiceProvider`. Ketiganya dinyalakan: lazy load, atribut yang dibuang
+> diam-diam saat mass assignment, dan atribut yang tidak pernah dipilih.
+> Non-produksi sesuai PRD §3.3, karena `preventLazyLoading()` melempar
+> exception — satu `with()` yang terlupa di produksi jadi 500 di depan
+> pengunjung. Suite penuh tetap hijau dan ketiga guard **diverifikasi hidup**,
+> karena "testsuite lulus" akan terlihat sama dengan "guard-nya mati".
+
+> **`tests/` kini dianalisis PHPStan.** Sebelumnya di luar, sehingga 176 error
+> tidak terlihat. Sekarang **nol**, tanpa baseline, dengan tiga `ignoreErrors`
+> yang dipatok ke pesan + identifier + direktori dan menuntut namespace `Pest\`
+> — kesalahan tipe asli pada kelas aplikasi tetap gagal. Delapan dari 176 itu
+> nyata dan diperbaiki; `method_exists(User::class, 'roles')` ternyata selalu true
+> karena trait yang menyediakannya, dan `getDeclaringClass()` melaporkan kelas
+> pemakai trait, bukan trait-nya.
+
+> **Arch test.** `tests/Unit/ArchitectureTest.php` menerjemahkan larangan yang
+> tadinya hanya tertulis di dokumen menjadi aturan yang menggagalkan build:
+> tanpa repository layer, tanpa `RoleManagementController`, service di luar
+> lapis HTTP, model deklarasi `$fillable` eksplisit, dan seterusnya.
+> **Setiap aturan diuji dengan sengaja melanggar lalu dipastikan merah.**
+> Dua-duanya menyesatkan: aturan controller sempat memakai
+> `not->toContain()` yang lolos satu pelanggaran secara diam-diam, dan aturan
+> sanitasi ternyata hanya bisa melihat *import*, bukan call site. Keduanya
+> sekarang terdokumentasi di docblock masing-masing.
+
+> **T34.** `FreshInstallTest` menguji jalur
+> `DatabaseSeeder::run()` → `SuperAdminSeeder::run()` → `config('admin.*')`,
+> yang dilewati test yang memanggil `seedSuperAdmin()` langsung. Kalau `run()`
+> mulai melempar, semua test yang ada tetap hijau sementara
+> `migrate:fresh --seed` rusak di mana-mana.
+
+> **Catatan cakupan.** **Frontend test runner tetap tidak ada** — roadmap §29
+> hanya menyebut TypeScript, ESLint, dan build, dan AGENTS.md melarang
+> menambahnya tanpa persetujuan. Kesenjangan copy Bahasa Indonesia pada
+> halaman error (D-26 §7) karena itu **tetap tercatat**. Code coverage
+> threshold juga tidak ditambahkan: tidak diminta roadmap maupun PRD.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-27.
 
 ## P14 — Git
 

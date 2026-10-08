@@ -901,7 +901,7 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 | 1 | ~~`HandleInertiaRequests::share()` mengirim **seluruh model User**.~~ **Ditutup di P07** (D-21). Sekarang hanya `id`, `name`, `email`, `email_verified_at`. Catatan koreksi: yang bocor hanya metadata tidak sensitif — `#[Hidden]` sudah melindungi semua secret, jadi ini pelanggaran kontrak, bukan kebocoran. | — | Selesai |
 | 2 | ~~Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash`.~~ **Ditutup di P07** (D-21): ini memang mekanisme **Inertia v3** — flash dikirim sebagai event DOM `flash` dan sengaja tidak masuk history state. Hook yang sudah ada benar; tidak ada yang perlu diubah. | — | Selesai |
 | 3 | ~~`display_timezone` belum dikirim ke frontend.~~ **Ditutup di P07** (D-21): sudah jadi shared prop `displayTimezone`, bersanding dengan `locale`. | — | Selesai |
-| 4 | `Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | P13 — setelah Fortify/Passkeys/Settings diaudit |
+| 4 | ~~`Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif.~~ **Ditutup di P13** (D-27): aktif di non-produksi sesuai PRD §3.3, karena `preventLazyLoading()` melempar exception dan satu lazy load di produksi akan jadi 500 di depan pengunjung. Ketiga guard diverifikasi hidup, bukan diasumsikan. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | — | Selesai |
 | 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
 | 6 | ~~`Features::registration()` masih aktif sehingga `/register` publik hidup.~~ **Ditutup di P06** (D-19). | — | Selesai |
 | 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
@@ -914,11 +914,11 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ## Yang masih diperlukan (Phase 01)
 
-P13 quality · P14 Git · P15 docs.
+P14 Git · P15 docs.
 
-Test matrix yang belum ada: T34.
+Test matrix: **semua 34 baris ter-cover**.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, dan **P12**.
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, P12, dan **P13**.
 P04 (Docker) dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
@@ -1258,3 +1258,173 @@ bernama "a failure marks the row failed and keeps the original" yang memanggil
 Penyebabnya: `phpunit.xml` menyetel `QUEUE_CONNECTION=sync`, jadi `dispatch()`
 menjalankan job inline dan exception-nya masuk langsung ke test.
 `FailedJobTest` memaksa koneksi `database` dan menjalankan worker sungguhan.
+---
+
+## D-27 — Kualitas: strict mode, cakupan PHPStan, dan arch test
+
+**Status:** Accepted · berlaku sejak P13 · branch `feat/phase-01-quality`
+
+Roadmap §33 P12 dan P13 punya enam checkbox yang seluruhnya menunjuk tool yang
+**sudah terpasang sejak P01**. T29–T33 sudah dijalankan CI lewat
+`composer ci:check` dan hijau. P13 tidak memasang apa pun dan tidak menambah satu
+dependency pun.
+
+Yang tersisa adalah satu divergence yang ditugaskan ke P13, satu baris test
+matrix, dan dua hal yang ditemukan saat menelusuri.
+
+### 1. Strict mode: non-produksi
+
+Divergence #4 sudah tertutup. `AppServiceProvider::configureStrictModels()`
+memanggil `Model::shouldBeStrict(! $this->app->isProduction())`.
+
+Satu panggilan itu menyalakan tiga hal sekaligus, jadi docblock menyebut
+ketiganya: melempar saat relasi di-lazy-load, saat atribut dibuang diam-diam
+saat mass assignment, dan saat atribut yang tidak pernah dipilih dibaca.
+
+**Non-produksi** mengikuti kalimat PRD §3.3, dan alasannya bukan sekadar
+patuh dokumen. `preventLazyLoading()` **melempar exception**, jadi satu
+`with()` yang terlupa di produksi menjadi 500 di depan pengunjung, bukan
+halaman yang hanya lambat.
+
+241 test tetap hijau dengan ketiga guard hidup, dan itu **diverifikasi**:
+`Model::preventsLazyLoading()` dibaca secara langsung. Tanpa itu, "testsuite
+lulus" akan terlihat sama persis dengan "guard-nya mati".
+
+### 2. PHPStan sekarang menganalisis `tests/`
+
+Sebelumnya `phpstan.neon` hanya memuat `app/`, `bootstrap/app.php`, `config/`,
+`database/`, dan `routes/`. Ada **176 error** yang tidak pernah terlihat.
+Sekarang `tests/` masuk, dan **tidak ada baseline**.
+
+Tiga `ignoreErrors`, masing-masing dipatok ke pesan, identifier, dan direktori:
+
+| Identifier | Pesan |
+| --- | --- |
+| `method.notFound` | `Call to an undefined method Pest\` |
+| `property.notFound` | `Access to an undefined property Pest\` |
+| `argument.templateType` | `Unable to resolve the template type TValue in call to function expect` |
+
+Pola keduanya menuntut **tipe dari namespace `Pest\`**. Itu yang membuatnya sempit:
+kesalahan tipe asli pada kelas aplikasi tetap gagal.
+
+`vendor/pestphp/pest/phpstan-pest-extension.neon` ikut di-*include*, dan itu
+menyelesaikan rantai `expect()`. Yang tidak diselesaikan adalah metode HTTP
+fluent — itu bagian terbesar dari 176.
+
+Delapan dari 176 itu **nyata** dan diperbaiki, bukan diabaikan. Dua yang paling
+menarik:
+
+- **`method_exists(User::class, 'roles')` selalu true**, karena trait
+  `HasRoles` yang menyediakannya. Assert itu tidak memberi informasi apa pun
+  tentang apakah `User` mendeklarasikan `roles()` sendiri.
+  `getDeclaringClass()` **nama `User`**, bukan trait, karena refleksi melaporkan
+  kelas yang *memakai* trait. `getTraitName()` adalah jawaban yang wajar dan
+  **dihapus di PHP 8**. Yang benar: bandingkan file tempat body method itu
+  hidup. Kalau `User` meng-override, file itu `User.php`.
+- **`Media::find()` bertipe `Model|Collection`**, jadi setiap bacaan atributnya
+  error padahal pencarian primary key jelas tidak bisa mengembalikan dua model.
+  Membaca kolom lewat `value()` mengatakan hal yang sama tanpa memutar union
+  dengan cast.
+
+Satu pola ignore **dihapus**, bukan disimpan: PHPStan melaporkan pola ignore
+yang tidak cocok apa pun, jadi pola yang berhenti dibutuhkan akan menggagalkan
+build di momen itu juga.
+
+### 3. Arch test
+
+`pest-plugin-arch` sudah terpasang sejak P01 dan belum pernah dipakai.
+`tests/Unit/ArchitectureTest.php` menerjemahkan larangan yang tadinya hanya
+tertulis di dokumen:
+
+| Aturan | Menegakkan |
+| --- | --- |
+| tidak ada `App\Repositories`, `App\Domain`, repository provider | roadmap §5.2 |
+| `App\Services` tidak memakai `Illuminate\Http\Request` | ARCHITECTURE Part A §6 |
+| service tidak memakai controller | aturan yang sama, arah yang berbahaya |
+| tidak ada `RoleManagementController` / `PermissionManagementController` | roadmap §10.7 |
+| semua model memakai atribut `Fillable` | ARCHITECTURE Part A §6 |
+| `User` memakai trait `HasRoles` | PRD AUTH-R3 |
+| model tidak memakai facade `DB` | Eloquent adalah persistence layer |
+| `App\Http\Requests` memakai `HtmlSanitizer` | PRD XC-S1, D-25 |
+| hanya `rich-text.tsx` boleh memakai `dangerouslySetInnerHTML` | D-25 |
+
+Kolom `users.role` **sengaja tidak** diulang: arch memantulkan kode dan tidak
+melihat skema, dan `RbacFoundationTest` sudah menjaganya terhadap database.
+
+**Setiap aturan diuji dengan sengaja melanggar lalu dipastikan merah**, karena
+arch test yang tidak bisa gagal adalah komentar dengan galat sintaks. Latihan
+itu memberi hasil dua kali:
+
+- Aturan controller memakai `not->toContain()` dengan empat jarum, yang
+  sebenarnya berarti "tidak mengandung semuanya", jadi **satu pelanggaran
+  lolos diam-diam**. Sekarang himpunan irisan.
+- Aturan sanitasi **lebih lemah dari kelihatannya**, karena arch me-*resolve*
+  import, bukan call site. Ia memperingatkan bahwa sebuah dependency
+  menghilang, bukan membuktikan `clean()` masih dipanggil. Keduanya kini
+  tertulis di docblock masing-masing, dan yang kedua menunjuk
+  `SiteSettingsTest` sebagai jaminan perilaku yang sesungguhnya.
+
+Dua aturan tidak bisa ditulis sebagai arch assertion dan mengatakannya:
+namespace yang tidak ada tidak punya daftar kelas untuk di-*assert*, dan plugin
+menolak target path. Keduanya ditulis sebagai assertion biasa, bukan dipaksa
+menjadi aturan arch yang hanya terlihat seperti hal yang menggantikannya.
+
+### 4. T34: fresh install + seed
+
+Satu-satunya baris test matrix yang belum ter-cover.
+
+`RbacFoundationTest` sudah menguji `SuperAdminSeeder::seedSuperAdmin()` dengan
+baik: idempotensi, password lemah, reaktivasi, role, `is_active`. Semuanya
+memanggil method itu langsung supaya tidak menyentuh process environment, dan
+itu benar di sana.
+
+Yang tertinggal adalah jalur yang dipakai instalasi sungguhan:
+`DatabaseSeeder::run()` → `SuperAdminSeeder::run()` → `config('admin.*')`.
+Kalau `run()` mulai melempar exception, **semua test yang ada tetap hijau**
+sementara `migrate:fresh --seed` rusak di mana-mana. `FreshInstallTest` menutup
+itu: admin tercipta aktif dengan password ter-hash dan langsung bisa login,
+rantainya menghasilkan 15 permission dan tepat dua pengaturan, dua kali jalan
+tidak menggandakan apa pun, dan **semuanya tetap berhasil tanpa kredensial
+sama sekali** — itu yang menjaga fresh clone dan CI tetap jalan. `.env` yang
+setengah terisi (email ada, password tidak) juga diuji, karena kasus itulah yang
+akan menghasilkan akun yang tidak bisa dipakai siapa pun.
+
+"Fresh install" di sini berarti skema yang baru dimigrasikan dan kosong, bukan
+drop-all-tables: yang latter akan meratakan transaksi `RefreshDatabase`.
+
+### 5. Penjaga `composer ci:check`
+
+Satu test asserting bahwa `ci:check` masih menyebut setiap gate yang
+T29–T33 andalkan. Menghapus `npm run check` dari sana tidak merusak apa pun yang
+terlihat: frontend tetap tanpa lint error, TypeScript tetap kompilasi, build
+tetap sukses. Satu-satunya buktinya adalah perubahan perilaku yang tidak pernah
+terjadi.
+
+Dua hal di dalamnya perlu perhatian. Script Composer berbentuk **array**, bukan
+string, jadi casting melempar "Array to string conversion" dan pencarian
+substring pada array berarti kesamaan elemen. Assertion urutan membandingkan
+offset dengan salinan yang sudah di-*sort*, bukan mengindeks, karena
+`array_filter` atas list dua elemen meninggalkan key-nya opsional.
+
+Dokumen gate dibaca dari `docs/roadmap`, bukan `AGENTS.md`, karena yang kedua
+**gitignored**: test yang membacanya akan gagal di mesin yang tidak memilikinya
+dan lulus di mesin yang punya versi basi.
+
+File ini juga bisa menggagalkan build dengan cara yang lebih mungkin terjadi
+daripada mencegahnya: menambahkan gate yang belum dipenuhi siapa pun.
+
+### 6. Yang ditolak
+
+**Frontend test runner tidak ditambahkan**, sesuai keputusan yang sama seperti
+saat gap D-26 §7 dibahas. Roadmap §29 hanya menyebut TypeScript, ESLint, dan
+build, dan AGENTS.md melarang menambah test runner tanpa persetujuan. Kesenjangan
+tersebut tetap tercatat.
+
+**Code coverage threshold** tidak ditambahkan: tidak diminta roadmap maupun PRD,
+dan CI memakai `coverage: none`. **Level PHPStan tetap 7** — tidak ada satu pun
+dokumen yang menyebut level, jadi mengubahnya jadi keputusan tanpa dokumen.
+**Plugin `profanity`** tidak dipakai: kosmetik.
+
+Satu catatan pengamatan, bukan pekerjaan P13: `laravel/sail` masih ada di
+`require-dev` padahal D-15 menghapus Docker. Itu milik butir P01 "remove
+starter artifacts".
