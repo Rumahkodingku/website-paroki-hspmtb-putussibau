@@ -53,10 +53,49 @@ function composerScripts(): array
 test('ci:check runs every gate the phase claims to have', function () {
     $scripts = composerScripts();
 
-    // T29 TypeScript, T30 ESLint, T31 Pint, T32 Larastan, and the suite itself.
+    // T29 TypeScript, T30 ESLint, T31 Pint, T32 Larastan, the Vitest suite, and
+    // the Pest suite.
+    //
+    // `npm run test:unit` is named rather than relying on the bare `test`
+    // assertion below: that substring is satisfied by @test alone, so without it
+    // the frontend suite could be dropped from the gate and this file would
+    // still pass.
     expect($scripts['ci:check'] ?? '')->toContain('npm run check')
         ->toContain('npm run types:check')
+        ->toContain('npm run test:unit')
         ->toContain('test');
+});
+
+test('the Playwright suite stays out of ci:check and out of pre-commit', function () {
+    // The same reasoning as the production build below, applied to E2E. A commit
+    // hook that started a web server, rebuilt a database and downloaded a
+    // browser would turn a one-line change into minutes, and on a machine without
+    // Chromium installed it would simply fail. The e2e job in CI is the gate.
+    //
+    // pre-commit runs composer ci:check, so keeping it out of the script is what
+    // keeps it out of the hook too.
+    $ci = composerScripts()['ci:check'] ?? '';
+
+    expect($ci)->not->toContain('playwright')
+        ->not->toContain('e2e');
+
+    // Asserted rather than assumed: it has to be runnable somewhere, and the
+    // only place that invokes it is the npm script.
+    $package = json_decode((string) file_get_contents(base_path('package.json')), true);
+
+    expect($package['scripts']['e2e'] ?? '')->toContain('playwright test')
+        ->and(file_exists(base_path('playwright.config.ts')))->toBeTrue();
+});
+
+test('Vitest cannot collect the Playwright specs', function () {
+    // Vitest's default glob is **/*.spec.*, so a widened include would hand the
+    // Playwright specs to the unit runner, which cannot run them: they would fail
+    // as a broken environment rather than as a broken configuration. Both halves
+    // are named because either alone leaves the trap open.
+    $config = (string) file_get_contents(base_path('vite.config.ts'));
+
+    expect($config)->toContain('tests/js/**')
+        ->toContain('tests/e2e/**');
 });
 
 test('the composer test script checks style and types before running the suite', function () {

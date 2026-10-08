@@ -42,3 +42,9 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Playwright: reports and traces from the E2E suite.
+/playwright-report
+/test-results
+/blob-report
+/tests/e2e/.auth.json
