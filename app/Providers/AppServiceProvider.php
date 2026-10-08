@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Services\HtmlSanitizer;
+use App\Support\PageFinder;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\DevCommands;
@@ -33,6 +34,23 @@ class AppServiceProvider extends ServiceProvider
          * @see docs/DECISIONS.md D-25
          */
         $this->app->singleton(HtmlSanitizer::class);
+
+        /**
+         * Replace Inertia's own view finder.
+         *
+         * Laravel's FileViewFinder concatenates a configured directory with the
+         * component name, so it can only find a page when the name is a path.
+         * Ours is not: it carries the audience and the feature, and a page called
+         * `index.tsx` stands for its whole feature. PageFinder applies that rule
+         * in one place, shared with the Blade preload.
+         *
+         * Bound here rather than configured, because config('inertia.pages.paths')
+         * is the input to the finder being replaced — setting it would be
+         * configuring something nothing reads.
+         *
+         * @see docs/DECISIONS.md D-30
+         */
+        $this->app->bind('inertia.view-finder', PageFinder::class);
     }
 
     /**

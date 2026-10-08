@@ -154,7 +154,12 @@ container. Lihat D-15 untuk keputusan menghapus Docker.
 
 ## D-08 — Struktur direktori frontend
 
-**Status:** Accepted · dieksekusi pada P06/P07
+**Status:** Accepted · dieksekusi pada P06/P07 · **page dipindah lagi di P18**
+
+> **Digarahkan oleh D-30.** `resources/js/pages/` sudah tidak ada; page kini
+> tinggal di `features/<audience>/<feature>/pages/` dengan `index.tsx` berarti
+> fitur itu sendiri. Paragraf di bawah dipertahankan sebagai catatan alasan pemilihan
+> lowercase.
 
 Tetap memakai `resources/js/pages/` **lowercase** dengan subfolder
 `public/` dan `admin/`. Halaman auth dipindahkan ke `pages/public/auth/*`.
@@ -1799,3 +1804,125 @@ PHPStan 0 error.**
 Sebelas test unit dan sepuluh spec E2E sengaja dibuat kecil. Yang diuji adalah
 runner, alias, setup, dan kebocoran state antar-test — hal-hal yang tidak bisa
 dipastikan dengan membaca konfigurasi.
+
+---
+
+## D-30 — Pages pindah ke dalam `features/`, dan empat hal yang harus sepakat
+
+**Status:** Accepted · berlaku sejak P18 · branch `feat/phase-01-pages-in-features`
+
+`resources/js/pages/` dihapus. Page kini tinggal di
+`features/<audience>/<feature>/pages/`, dan nama page-nya adalah
+`<audience>/<feature>/<path di bawah pages/>` — dengan satu pengecualian yang
+menghapus seluruh sisa redundansi:
+
+> **`index.tsx` berarti fitur itu sendiri.**
+
+```text
+admin/dashboard/pages/index.tsx      → 'admin/dashboard'
+admin/pengaturan/pages/index.tsx    → 'admin/pengaturan'
+admin/akun/pages/profile.tsx        → 'admin/akun/profile'
+public/auth/pages/login.tsx         → 'public/auth/login'
+public/beranda/pages/index.tsx      → 'public/beranda'
+```
+
+Tanpa aturan itu, `admin/pengaturan` harusnya punya file
+`pages/admin/pengaturan.tsx` — URL-nya diulang dua kali di path yang sama.
+
+**Dua belas nama page, sebelas tidak berubah.** Hanya `welcome` → `public/beranda`
+yang berubah, di `routes/web.php`, satu `case` di `app.tsx`, dan satu assertion.
+Itu sebabnya nama tidak ikut diratakan: nama page masuk ke aplikasi sebagai
+string dari controller, jadi mengubahnya berarti menyentuh `Inertia::render()` di
+seluruh controller, konfigurasi Fortify, `bootstrap/app.php`, dan setiap test
+yang meng-`component()`.
+
+### 1. `pages/` adalah kontrak, bukan preferensi
+
+Alasan yang diberikan: "supaya lebih mudah mencari file terkait". Yang sebenarnya
+terjadi adalah `resources/js/pages/` dikunci di **empat** tempat:
+
+```text
+1. @inertiajs/vite    DEFAULT_PAGE_DIRECTORIES = ['./pages', './Pages']
+2. app.blade.php      "resources/js/pages/{$page['component']}.tsx" di dalam @vite()
+3. inertia view finder  dipakai Inertia saat render dan di assertInertia()->component()
+4. tests              lewat no. 3
+```
+
+Nomor 1 adalah suntikan otomatis. Nomor 2 itu preloading chunk — diverifikasi,
+bukan diasumsikan: `login-*.js` memang muncul di HTML, dan harus tetap muncul.
+
+### 2. Dua default framework harus ditulis ulang
+
+**Suntikan resolver `@inertiajs/vite`.** Opsi `pages:` tidak menolong:
+
+```js
+glob   = './features/*/pages/**/*.{tsx,jsx}'      // ✓ glob wildcard jalan
+lookup = pages['./features/*/pages/${name}.tsx']  // ✗ kunci literal dengan *
+```
+
+Kunci lookup berisi `*` yang tidak pernah menjadi path asli. Tidak pernah cocok,
+tanpa error — hanya `Page not found` saat runtime. Jadi `app.tsx` supplying
+resolver sendiri, dan plugin berhenti menyuntik begitu `resolve` ada.
+
+**`FileViewFinder` Laravel.** Ini yang paling diam-diam, dan baru ketahuan saat
+sudah dikerjakan: ia hanya menempelkan nama onto direktori
+(`<configured path>/<name>.<ext>`). NiAo prefiks audience/fitur maupun
+`index.tsx` bisa lewat itu. Gejalanya **bukan** gagal saat boot, melainkan dua
+belas pesan `Inertia page component file [x] does not exist` — satu untuk tiap
+test yang merender page, dan tidak satu pun menyebut konfigurasinya.
+
+Maka `AppServiceProvider` mengikat `inertia.view-finder` ke
+`App\Support\PageFinder`, yang memakai `PageChunk`.
+
+Konsekuensi yang diserah dengan sadar: `config('inertia.pages.paths')` **tidak
+lagi dibaca siapa pun**. Daftar direktorinya tetap akurat — kalau override
+sewaktu-ever dihapus, finder biasa akan menunjuk direktori yang benar dan gagal
+dengan nama seperti `admin/akun/profile`, yang jauh lebih berguna daripada path
+basi.
+
+### 3. `PageChunk` tidak bisa dihilangkan
+
+Suntingan Blade dulu string interpolasi. Vite menandai page sebagai **dynamic
+entry**, dan dynamic entry hanya jadi `<link rel="modulepreload">` kalau
+disebutkan di `@vite()`.
+
+Awalnya `PageChunk::source()` memakai `glob()` dengan wildcard. Itu benar selama
+namanya masih path, dan **salah begitu file berhenti mengulang URL** — glob
+melewati dua segmen audiens+fitur, lalu untuk nama yang tidak ketemu ia
+mengembalikan `index.tsx` **yang pertama ditemukan**, milik fitur lain. Tidak
+error, hanya page yang salah. Sekarang nama menentukan path sepenuhnya, jadi
+`explode` saja cukup dan tanpa wildcard sama sekali.
+
+### 4. Empat pembaca, satu aturan
+
+`app.tsx` (path → nama), `PageFinder` (nama → path, untuk Inertia),
+`PageChunk` (nama → path, untuk Blade), dan `app.blade.php` yang memanggilnya.
+Tiga yang terakhir berbagi `PageChunk`, jadi aturannya benar-benar satu.
+`ArchitectureTest.php` membandingkan kedua arah untuk **setiap** page di
+aplikasi, dan dua diuji dengan sengaja dilanggar.
+
+### 5. Yang hanya bisa ditangkap satu test
+
+**Tabrakan nama.** Frontend mengindeks page dengan nama turunan path-nya. Dua
+fitur dengan page bernama turunan sama akan saling menimpa: tanpa error build,
+tanpa request gagal, dan fitur yang kalah me-render page milik fitur lain.
+
+Hari ini mustahil secara struktural, karena nama memuat audiens dan fitur — tapi
+tetap jadi test, bukan catatan, karena itu berhenti benar begitu level ketiga
+muncul (`features/admin/settings/akun`).
+
+### 6. Kesalahan yang muncul saat mengerjakan
+
+- `PageChunk::source()` mengembalikan path absolut; `@vite()` butuh relatif root.
+- `resolve` mengembalikan `Promise<{default}>`, dan `ComponentResolver` hanya
+  menerima `Promise<ReactComponent>` **atau** objek modul secara sinkron — bukan
+  promise dari objek modul.
+- Fallback `index.tsx` wildcard mengembalikan index milik fitur yang salah, dan
+  kembali ke `substr_count($name, '/')` sebagai penjaga.
+- **Tiga kali** menulis glob di dalam docblock PHP menutup blok comment itu
+  sendiri di `*/`. Yang pertama di `app.tsx`, yang kedua di
+  `PageChunkTest`, yang ketiga di `PageChunk`. Sintaksnya rusak, jadi build
+  menangkapnya — tapi ketiganya setelah yang kedua dianggap selesai.
+- Test arch "no two features claim the same page name" meledak jadi 33 kegagalan
+  begitu `index.tsx` masuk: dua fitur sama-sama punya `index.tsx`, keduanya
+  terbaca bernama `index`. False positive yang hanya terlihat setelah dijalankan.

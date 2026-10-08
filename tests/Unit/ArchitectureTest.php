@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\PageChunk;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Finder\SplFileInfo;
@@ -263,6 +264,27 @@ function frontendViolations(string $directory, Closure $forbidden): array
     return $violations;
 }
 
+/**
+ * The feature a frontend file belongs to, as "audience/feature".
+ *
+ * Two segments, not one. features/ holds an audience directory and then a
+ * feature directory, so taking the first segment would make every admin feature
+ * look like one feature called "admin" — and then features/admin/akun importing
+ * its own settings types would be reported as a cross-feature import.
+ *
+ * Returned as "audience/feature" so the message reads as a path rather than as
+ * an audience and a name that happened to be concatenated.
+ */
+function frontendFeature(string $relative): string
+{
+    // First two segments, taken with array_slice rather than Str::before twice:
+    // the audience is the first segment and the feature is the second, and
+    // everything after them is the file's own path inside the feature.
+    $segments = explode('/', Str::after($relative, 'features/'));
+
+    return implode('/', array_slice($segments, 0, 2));
+}
+
 test('frontend components do not import pages', function () {
     // Part B section 4: components sit below pages in the arrow. A component
     // that imports a page is how a page stops being thin and starts being a
@@ -300,14 +322,7 @@ test('a feature does not import another feature', function () {
         }
 
         $relative = Str::after($file->getRealPath(), base_path().'/');
-        // The feature itself, from the first path segment after features/ and
-        // not from a components/ ancestor: features/<name>/types.ts and
-        // features/<name>/hooks/* have no components/ in their path, and keying
-        // off that segment would read them as features/<name>/types.ts.
-        $owner = Str::before(
-            Str::after($relative, 'resources/js/features/'),
-            '/',
-        );
+        $owner = frontendFeature($relative);
 
         foreach (frontendImports($file) as $target) {
             if (! Str::startsWith($target, 'features/')) {
@@ -317,7 +332,7 @@ test('a feature does not import another feature', function () {
             // Str::after, not Str::before: the target starts with 'features/',
             // so looking for the text before it yields an empty string and every
             // intra-feature import looks like a violation.
-            if (Str::before(Str::after($target, 'features/'), '/') !== $owner) {
+            if (frontendFeature('features/'.Str::after($target, 'features/')) !== $owner) {
                 $violations[] = "features/{$owner} imports {$target}";
             }
         }
@@ -345,7 +360,10 @@ test('no frontend directory imports one that does not exist', function () {
     // Not a documented rule. Catches the failure mode this change actually had:
     // a path that resolves for the bundler and for tsc, but whose directory is
     // not one of the ten under resources/js. Cheap, and it failed for real once.
-    $known = ['actions', 'components', 'features', 'hooks', 'layouts', 'lib', 'pages', 'routes', 'types', 'wayfinder'];
+    // No 'pages': pages moved into features/<audience>/<feature>/pages/, and a
+    // resources/js/pages/ directory reappearing is exactly the mistake this test
+    // is here to catch.
+    $known = ['actions', 'components', 'features', 'hooks', 'layouts', 'lib', 'routes', 'types', 'wayfinder'];
     $generated = ['actions', 'routes', 'wayfinder'];
     $stray = [];
 
@@ -390,6 +408,130 @@ test('no frontend directory imports one that does not exist', function () {
     }
 
     expect($stray)->toBe([]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Where Inertia pages live
+|--------------------------------------------------------------------------
+|
+| Pages moved out of a single resources/js/pages/ directory into
+| features/<audience>/<feature>/pages/. Three things know about that layout and
+| all three have to agree:
+|
+|   resources/js/app.tsx       the resolver, via import.meta.glob
+|   config/inertia.php         Inertia's own view finder, used both when a page
+|                              is rendered and by assertInertia()->component()
+|   app/Support/PageChunk.php  the Blade template, preloading the page chunk
+|
+| The middle one is the surprising one. Nothing in the application asked for it:
+| it is Inertia's config, it takes literal directories rather than wildcards, and
+| getting it wrong does not fail at boot. It fails as one
+| "Inertia page component file [x] does not exist" per test that renders a
+| page — twelve of them, each naming a page rather than the configuration that
+| was wrong.
+|
+| @see docs/DECISIONS.md D-30
+|
+*/
+
+test('the page finder finds every page file in the application', function () {
+    // Inertia's own FileViewFinder was replaced with App\Support\PageFinder,
+    // because it can only concatenate a directory with a name. That replacement
+    // is what twelve tests were failing against while it was missing, and the
+    // failure named a page rather than the configuration at fault.
+    //
+    // This walks the filesystem rather than a list of names, so a page added
+    // without a matching config entry cannot slip past.
+    $pages = PageChunk::all();
+
+    expect($pages)->not->toBeEmpty();
+
+    foreach ($pages as $name => $path) {
+        expect(app('inertia.view-finder')->find($name))->toBe($path);
+    }
+});
+
+test('the page finder rejects a name that resolves to nothing', function () {
+    // The exception is what Inertia turns into a ComponentNotFoundException on
+    // render, and into "component file does not exist" inside an assertion.
+    expect(fn (): string => app('inertia.view-finder')->find('admin/akun/halaman-yang-tidak-ada'))
+        ->toThrow(InvalidArgumentException::class);
+});
+
+test('no two features claim the same page name', function () {
+    // The frontend derives a page's name from its path, so two features holding a
+    // page that derived the same name would overwrite each other in that index.
+    // Silently: no build error, no failed request, and the feature that lost
+    // would render the other feature's page.
+    //
+    // Structurally impossible today, because the name carries the audience and
+    // the feature. It is still a test rather than a note, because that stops
+    // being true the moment a third level appears — features/admin/settings/akun
+    // would put two features one level apart and names would stop being unique by
+    // construction.
+    $owners = [];
+
+    foreach (File::allFiles(resource_path('js/features')) as $file) {
+        if ($file->getExtension() !== 'tsx') {
+            continue;
+        }
+
+        $path = Str::after($file->getRealPath(), base_path().'/');
+
+        if (preg_match(
+            '#^resources/js/features/(?<owner>[^/]+/[^/]+)/pages/(?<rest>.+)\.tsx$#',
+            $path,
+            $matches,
+        ) !== 1) {
+            continue;
+        }
+
+        // index.tsx names the feature itself, so four features each holding one
+        // is four distinct page names and not a collision. Reading the file name
+        // directly would report all four as "index" and fail on the layout that
+        // is working.
+        $name = $matches['rest'] === 'index'
+            ? $matches['owner']
+            : $matches['owner'].'/'.$matches['rest'];
+
+        $owners[$name][] = $matches['owner'];
+    }
+
+    expect(array_filter($owners, fn (array $list): bool => count($list) > 1))->toBe([]);
+});
+
+test('the inertia page finder and the blade lookup find the same files', function () {
+    // config('inertia.pages.paths') and PageChunk::source() answer the same
+    // question by different means: one concatenates a literal directory with a
+    // component name, the other rebuilds the path from the name's own segments.
+    // They can drift apart without either being wrong on its own, and then Inertia
+    // renders a page whose chunk was never preloaded.
+    //
+    // The path is rebuilt here rather than taken from PageChunk, on purpose: a
+    // comparison that reads its expectation from one of the two sides under test
+    // only proves the other side agrees with itself.
+    foreach (array_keys(PageChunk::all()) as $name) {
+        $segments = explode('/', $name);
+        $below = implode('/', array_slice($segments, 2));
+
+        // Only what sits below the pages/ directory: the configured path already
+        // ends there, so prefixing the audience and feature again would look one
+        // level too deep.
+        $file = ($below === '' ? 'index' : $below).'.tsx';
+
+        $found = false;
+
+        foreach ((array) config('inertia.pages.paths') as $directory) {
+            if (is_file(rtrim((string) $directory, '/')."/{$file}")) {
+                $found = true;
+
+                break;
+            }
+        }
+
+        expect($found)->toBeTrue();
+    }
 });
 
 /*

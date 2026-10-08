@@ -37,7 +37,27 @@
         @fonts
 
         @viteReactRefresh
-        @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @php
+            /*
+             * The page chunk is passed to @vite() by component name rather than
+             * by a fixed directory. It used to be
+             * "resources/js/pages/{$page['component']}.tsx", which only worked
+             * while every page lived in one place; pages now live under
+             * features/<audience>/<feature>/pages/ and the name says nothing
+             * about which feature owns it.
+             *
+             * Keep the lookup: Vite emits the page as a dynamic entry, and a
+             * dynamic entry only becomes a preload when it is named in @vite().
+             * Drop it and the first paint of every page waits an extra round
+             * trip for its own JavaScript.
+             */
+            $pageChunk = \App\Support\PageChunk::source($page['component']);
+        @endphp
+        @vite(array_filter([
+            'resources/css/app.css',
+            'resources/js/app.tsx',
+            $pageChunk,
+        ]))
         @php
             /*
              * Baseline head, rendered on the server into the initial HTML.

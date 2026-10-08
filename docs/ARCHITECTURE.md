@@ -68,8 +68,8 @@ Route → Middleware → FormRequest (authorize + validate)
 | Async work                                                         | Job                                                     |
 | Occurrence several parts react to                                  | Event + Listener                                        |
 | User notification                                                  | Notification                                            |
-| Inertia page                                                       | `resources/js/pages`                                    |
-| Feature-specific UI                                                | `resources/js/features`                                 |
+| Inertia page                                                       | `resources/js/features/<audience>/<feature>/pages`      |
+| Feature-specific UI                                                | `resources/js/features/<audience>/<feature>`            |
 | Reusable UI                                                        | `resources/js/components`                               |
 | Generic React behavior                                             | `resources/js/hooks`                                    |
 | Browser-local state                                                | React state                                             |
@@ -304,41 +304,91 @@ resources/js/
 ├── components/       # app-level UI used from more than one place
 │   ├── ui/           # shadcn primitives. Do not edit
 │   └── shared/       # not created yet — see below
-├── features/         # feature-specific frontend code
-│   └── products/
-│       ├── components/   # product-form.tsx, product-table.tsx ...
-│       ├── hooks/        # use-product-filters.ts
-│       ├── types.ts
-│       └── utils.ts
+├── features/         # everything feature-specific, grouped by audience
+│   ├── admin/
+│   │   ├── akun/          components/ pages/{appearance,profile,security}.tsx
+│   │   ├── dashboard/     pages/index.tsx
+│   │   └── pengaturan/    components/ pages/index.tsx types.ts
+│   └── public/
+│       ├── auth/          pages/{login,forgot-password,reset-password,
+│       │                        confirm-password,verify-email}.tsx
+│       ├── beranda/       pages/index.tsx
+│       └── error/         pages/index.tsx
 ├── hooks/            # generic hooks (use-debounce.ts)
 ├── layouts/          # app-layout.tsx, auth-layout.tsx ...
 ├── lib/              # utilities (cn(), formatters)
-├── pages/            # Inertia entry points
-│   └── products/ index.tsx create.tsx edit.tsx show.tsx
 ├── types/            # site-wide types (SharedProps, Paginated<T>, Auth)
-└── app.tsx           # Inertia bootstrap
+└── app.tsx           # Inertia bootstrap: resolver, layout picker, title
 ```
 
-`features/` is frontend-only grouping. It has nothing to do with a PHP
-`app/Modules` directory (which does not exist and must not be created).
+**There is no `pages/` directory.** A page lives in
+`features/<audience>/<feature>/pages/`, and its Inertia name is
+`<audience>/<feature>/<path below pages/>` — except that **`index.tsx` stands
+for the feature itself**, so a single-page feature does not repeat its URL in
+the file name:
 
-**The line between `components/` and `features/<name>/` is how many places use
-it.** One consumer means it belongs to that feature; two or more makes it
-app-level. The cases in this repository:
+| Inertia name | File |
+| --- | --- |
+| `admin/dashboard` | `features/admin/dashboard/pages/index.tsx` |
+| `admin/pengaturan` | `features/admin/pengaturan/pages/index.tsx` |
+| `admin/akun/profile` | `features/admin/akun/pages/profile.tsx` |
+| `public/auth/login` | `features/public/auth/pages/login.tsx` |
+| `public/error` | `features/public/error/pages/index.tsx` |
+| `public/beranda` | `features/public/beranda/pages/index.tsx` |
 
-| Component                     | Consumers                     | Lives in                        |
-| ----------------------------- | ----------------------------- | ------------------------------- |
-| `appearance-tabs.tsx`         | the appearance page only      | `features/akun/components/`     |
-| `rich-text-editor.tsx`        | the settings page only        | `features/pengaturan/components/` |
-| settings types                | the settings page only        | `features/pengaturan/types.ts`  |
-| `password-input.tsx`          | four auth and account pages   | `components/`                   |
-| `heading.tsx`                 | five pages                    | `components/`                   |
-| `text-link.tsx`               | three auth pages              | `components/`                   |
+Because the name carries the audience and the feature, two features can never
+claim the same page name. Naming a page after its file without the prefix would
+be shorter to read and would put `login` and `security` in the same namespace.
+
+**Four things know about that layout and all four must agree:**
+
+| Knows | How |
+| --- | --- |
+| `resources/js/app.tsx` | `import.meta.glob`, deriving each path's name |
+| `app/Support/PageFinder.php` | bound over `inertia.view-finder` |
+| `app/Support/PageChunk.php` | name → file, for the Blade preload |
+| `resources/views/app.blade.php` | calls `PageChunk::source()` |
+
+Two of those are overrides of framework defaults, which is the real cost of
+nesting pages inside features:
+
+- **`@inertiajs/vite`** injects its own resolver when `createInertiaApp` has
+  neither a `pages` nor a `resolve` property, and the injected version
+  hard-codes `./pages` and `./Pages`. Its `pages:` option does not help: the
+  glob accepts a wildcard but the lookup key it builds is a literal string
+  containing a `*`, which never matches. So `app.tsx` supplies its own resolver,
+  and the plugin's page warm-up is lost as a result — a dev-only cost, paid as a
+  one-time Vite re-optimisation on first navigation to a lazy page.
+- **Laravel's `FileViewFinder`** can only concatenate a directory with a name.
+  Neither the audience/feature prefix nor `index.tsx` survives that, so
+  `AppServiceProvider` binds `inertia.view-finder` to `PageFinder`. This one
+  matters beyond the tests: Inertia calls the finder on every page render and on
+  every `assertInertia()->component()`, and getting it wrong does not fail at
+  boot — it becomes a 500 on the first request, or one
+  "Inertia page component file [x] does not exist" per affected test, each
+  naming a page rather than the configuration that is wrong.
+
+`PageChunk` and `PageFinder` share one rule, and `tests/Unit/ArchitectureTest.php`
+asserts the two directions agree on every page in the application.
+
+### 1.1 The line between `components/` and `features/`
+
+**It is how many places use it.** One consumer means it belongs to that
+feature; two or more makes it app-level:
+
+| Component | Consumers | Lives in |
+| --- | --- | --- |
+| `appearance-tabs.tsx` | the appearance page only | `features/admin/akun/components/` |
+| `rich-text-editor.tsx` | the settings page only | `features/admin/pengaturan/components/` |
+| settings types | the settings page only | `features/admin/pengaturan/types.ts` |
+| `password-input.tsx` | four auth and account pages | `components/` |
+| `heading.tsx` | five pages | `components/` |
+| `text-link.tsx` | three auth pages | `components/` |
 
 **`components/shared/` is not created yet.** It only means something once two or
-more features exist, and Part A says a directory is created when it has a first
-file. `types/` holds only the types more than one feature needs, so that deleting
-a feature deletes its contract along with it.
+more features need the same thing, and Part A says a directory is created when it
+has a first file. `types/` holds only the types more than one feature needs, so
+that deleting a feature deletes its contract along with it.
 
 These boundaries are asserted in `tests/Unit/ArchitectureTest.php`. The document
 is not the only thing keeping them in place.
@@ -350,21 +400,24 @@ is not the only thing keeping them in place.
 | File               | kebab-case                       | `product-status-badge.tsx`                |
 | Component export   | PascalCase                       | `ProductStatusBadge`                      |
 | Hook file / export | `use-*.ts` / `useX`              | `use-debounce.ts` / `useDebounce`         |
-| Page file          | matches `Inertia::render()` name | `products/index.tsx` ↔ `'products/index'` |
-| Feature folder     | lowercase plural                 | `features/products`                       |
+| Page file          | path below the feature's `pages/` | `pages/profile.tsx` ↔ `'admin/akun/profile'` |
+| Feature folder     | `audience/feature`, singular      | `features/admin/products`                |
+| Audience folder    | `admin` or `public`               | `features/public/`                       |
+| Feature's main page | `index.tsx`, meaning the feature  | `features/admin/dashboard/pages/index.tsx` |
 
 shadcn files are already kebab-case. Follow the same rule everywhere.
 
 ### 3. Pages
 
 A page: receives typed props, composes feature components, and coordinates
-page-level interaction. A page is thin. Do not put large reusable UI inside
-`pages/`.
+page-level interaction. A page is thin. Do not put large reusable UI inside a
+feature's `pages/` directory.
 
 ```tsx
-import { ProductTable } from "@/features/products/components/product-table";
+// features/admin/products/pages/index.tsx
+import { ProductTable } from "@/features/admin/products/components/product-table";
 import type { Paginated } from "@/types";
-import type { ProductListItem } from "@/features/products/types";
+import type { ProductListItem } from "@/features/admin/products/types";
 
 type Props = { products: Paginated<ProductListItem> };
 
@@ -388,7 +441,8 @@ field:
 // resources/js/app.tsx
 layout: (name) => {
     switch (true) {
-        case name === "welcome": return PublicLayout;
+        case name === "public/beranda": return PublicLayout;
+        case name === "public/error": return PublicLayout;
         case name.startsWith("public/auth/"): return AuthLayout;
         case name.startsWith("admin/akun/"): return [AppLayout, SettingsLayout];
         default: return AppLayout;
@@ -407,13 +461,17 @@ wrapper. Adding one would nest a second layout inside the persistent one.
 ### 4. Dependency direction
 
 ```text
-pages → features → components / hooks / lib / types
+features/<audience>/<feature>/pages/ → features/<audience>/<feature>/
+                                     → components / hooks / lib / types
 ```
 
-- `features/a` MUST NOT import from `features/b`. If both need it, move it to
-  `components/shared`, `hooks`, `lib`, or `types`.
-- `components/ui` and `components/shared` MUST NOT import from `features/*`
-  or `pages/*`.
+- `features/a/x` MUST NOT import from `features/b/y`. If both need it, move it
+  to `components/shared`, `hooks`, `lib`, or `types`. "Feature" means the second
+  path segment: `admin/akun` and `admin/pengaturan` are two features that may
+  not reach into each other, while `admin/akun` may freely use its own files.
+- A feature's `pages/` directory imports its own feature freely, and only its
+  own.
+- `components/ui` and `components/shared` MUST NOT import from `features/*`.
 - Components never touch backend concepts (Eloquent, PHP classes).
 
 ### 5. Routes and navigation (Wayfinder)
@@ -586,7 +644,7 @@ Notes:
 ### 3. Matching TypeScript
 
 ```ts
-// features/products/types.ts
+// features/admin/products/types.ts
 export type ProductStatus = "draft" | "published" | "archived";
 
 export type ProductListItem = {
@@ -836,9 +894,9 @@ app/Http/Controllers/ProductController.php
 app/Http/Controllers/PublishProductController.php
 app/Actions/PublishProductAction.php          # only because publish has side effects
 routes/web.php
-resources/js/pages/products/{index,create,edit}.tsx
-resources/js/features/products/components/{product-form,product-table}.tsx
-resources/js/features/products/types.ts
+resources/js/features/admin/products/pages/{index,create,edit}.tsx
+resources/js/features/admin/products/components/{product-form,product-table}.tsx
+resources/js/features/admin/products/types.ts
 tests/Feature/Products/ProductTest.php
 ```
 
@@ -1053,7 +1111,7 @@ export type ProductFormData = {
 ### 8. Feature component (form shared by create and edit)
 
 ```tsx
-// features/products/components/product-form.tsx
+// features/admin/products/components/product-form.tsx
 import { useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1128,10 +1186,10 @@ export function ProductForm({
 ### 9. Pages (thin)
 
 ```tsx
-// pages/products/create.tsx
+// features/admin/products/pages/create.tsx
 import { store } from "@/actions/App/Http/Controllers/ProductController";
-import { ProductForm } from "@/features/products/components/product-form";
-import type { ProductStatus } from "@/features/products/types";
+import { ProductForm } from "@/features/admin/products/components/product-form";
+import type { ProductStatus } from "@/features/admin/products/types";
 
 type Props = { statuses: ProductStatus[] };
 
