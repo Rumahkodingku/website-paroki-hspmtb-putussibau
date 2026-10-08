@@ -1,0 +1,9 @@
+{
+    "$schema": "https://json.schemastore.org/lint-staged.json",
+    "*.php": ["vendor/bin/pint"],
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+        "vp check --fix --no-error-on-unmatched-pattern"
+    ],
+    "*.css": ["vp check --fix --no-error-on-unmatched-pattern"],
+    "*.json": ["vp check --fix --no-error-on-unmatched-pattern"]
+}

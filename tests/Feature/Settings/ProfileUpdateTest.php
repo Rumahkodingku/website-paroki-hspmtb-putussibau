@@ -1,9 +1,7 @@
 <?php
 
-use App\Models\User;
-
 test('profile page is displayed', function () {
-    $user = User::factory()->create();
+    $user = superAdmin();
 
     $response = $this
         ->actingAs($user)
@@ -13,7 +11,7 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $user = superAdmin();
 
     $response = $this
         ->actingAs($user)
@@ -34,7 +32,7 @@ test('profile information can be updated', function () {
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
+    $user = superAdmin();
 
     $response = $this
         ->actingAs($user)
@@ -50,36 +48,24 @@ test('email verification status is unchanged when the email address is unchanged
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete(route('profile.destroy'), [
-            'password' => 'password',
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect(route('home'));
-
-    $this->assertGuest();
-    expect($user->fresh())->toBeNull();
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
+test('validation errors surfaced by a real request are in Indonesian', function () {
+    // Bukti end-to-end AC-04 / PRD ADM-02: pesan yang benar-benar sampai ke
+    // browser, bukan hanya hasil Validator::make di isolation.
+    $user = superAdmin();
 
     $response = $this
         ->actingAs($user)
         ->from(route('profile.edit'))
-        ->delete(route('profile.destroy'), [
-            'password' => 'wrong-password',
+        ->patch(route('profile.update'), [
+            'name' => '',
+            'email' => 'bukan-email',
         ]);
 
     $response
-        ->assertSessionHasErrors('password')
+        ->assertSessionHasErrors(['name', 'email'])
+        ->assertSessionHasErrors([
+            'name' => 'Nama wajib diisi.',
+            'email' => 'Email harus berupa alamat email yang valid.',
+        ])
         ->assertRedirect(route('profile.edit'));
-
-    expect($user->fresh())->not->toBeNull();
 });

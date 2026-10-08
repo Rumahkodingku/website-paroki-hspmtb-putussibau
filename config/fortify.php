@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Middleware\EnsureAccountCanLogIn;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
+use Laravel\Fortify\Actions\CanonicalizeUsername;
+use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
+use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Contracts\RedirectsIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Features;
 
 return [
@@ -73,7 +79,7 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/admin',
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +92,7 @@ return [
     |
     */
 
-    'prefix' => '',
+    'prefix' => 'admin',
 
     'domain' => null,
 
@@ -116,8 +122,35 @@ return [
 
     'limiters' => [
         'login' => 'login',
-        'two-factor' => 'two-factor',
-        'passkeys' => 'passkeys',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Login Pipeline
+    |--------------------------------------------------------------------------
+    |
+    | Overriding this array replaces Fortify's default pipeline entirely, so the
+    | defaults are listed here explicitly rather than omitted.
+    |
+    | EnsureAccountCanLogIn sits after the username is canonicalized and before
+    | the two-factor redirect, so a deactivated account is refused before any
+    | session is created and before a pending two-factor login is stored.
+    | It only improves the error message; EnsureAccountIsActive is the layer
+    | that actually enforces PRD D-08.
+    |
+    | See docs/DECISIONS.md D-20.
+    |
+    */
+
+    'pipelines' => [
+        'login' => [
+            EnsureLoginIsNotThrottled::class,
+            CanonicalizeUsername::class,
+            EnsureAccountCanLogIn::class,
+            RedirectsIfTwoFactorAuthenticatable::class,
+            AttemptToAuthenticate::class,
+            PrepareAuthenticatedSession::class,
+        ],
     ],
 
     /*
@@ -158,20 +191,23 @@ return [
     | by removing them from this array. You're free to only remove some of
     | these features, or you can even remove all of these if you need to.
     |
+    | Features::registration() is absent on purpose. PRD AUTH-R2 and Phase 01
+    | section F forbid public registration; accounts are created by a Super
+    | Admin. Removing the feature also removes the /register routes entirely.
+    |
+    | Features::twoFactorAuthentication() and Features::passkeys() are absent on
+    | purpose too. Phase 01 section 4 lists two-factor authentication as out of
+    | scope, and on the MVP the single Super Admin account has no use for a
+    | second factor. Removing the features also removes every two-factor and
+    | passkey route. See docs/DECISIONS.md D-09.
+    |
+    | See docs/DECISIONS.md D-19.
+    |
     */
 
     'features' => [
-        Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0
-        ]),
-        Features::passkeys([
-            'confirmPassword' => true,
-        ]),
     ],
 
 ];

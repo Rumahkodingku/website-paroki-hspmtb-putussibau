@@ -4,27 +4,45 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/*
+ * Restyled onto docs/DESIGN.md.
+ *
+ *   variant default    -> components.button-primary         red, pill
+ *   variant outline    -> components.button-secondary-pill  red border, red text
+ *   variant secondary  -> components.button-navy            navy CTA
+ *   variant gold       -> components.button-gold            ceremonial only
+ *   size    icon       -> components.button-icon-circular   44px
+ *
+ * Two rules from the document shape the values. Gold is never the default
+ * action, it only appears when a page asks for it by name. And the pressed
+ * state is a small scale reduction rather than a colour change, which is what
+ * components.button-primary-active specifies.
+ *
+ * Ring colours come from --ring, which is primary-focus in both themes.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-medium transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "rounded-pill bg-primary text-primary-foreground hover:bg-primary-hover",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "rounded-pill bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "rounded-pill border border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground",
+        secondary: "rounded-pill bg-navy text-white hover:bg-navy/90",
+        gold: "rounded-pill bg-gold text-navy-dark hover:bg-gold-dark",
+        ghost: "rounded-pill text-foreground hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        // 11px 22px padding, per components.button-primary.
+        default: "h-11 px-[22px] text-body",
+        sm: "h-9 px-4 text-button-utility",
+        lg: "h-12 px-8 text-button-large",
+        // 44px minimum touch target from the responsive section.
+        icon: "size-11 rounded-full",
       },
     },
     defaultVariants: {
