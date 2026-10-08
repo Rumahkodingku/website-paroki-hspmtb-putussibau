@@ -2042,10 +2042,45 @@ Do not force unnecessary restructuring.
 
 ## P14 — Git
 
-- [ ] Husky.
-- [ ] Commitlint.
-- [ ] Conventional Commits.
-- [ ] hooks.
+- [x] Husky. — `husky` 9.1.7, dipasang lewat `npx husky init` sehingga
+  `core.hooksPath` → `.husky/_` dan `.husky/_/.gitignore` (`*`) dibuat
+  otomatis. Hook **tanpa shebang** dan tanpa `husky.sh`, dua baris yang
+  ditolak aktif oleh 9.1.7 dan akan gagal di v10.
+- [x] Commitlint. — `@commitlint/cli` 21.2.3 + `@commitlint/config-conventional`,
+  di npm `devDependencies`.
+- [x] Conventional Commits. — `commitlint.config.js` memakai config
+  conventional **apa adanya**. Default `header-max-length` = 100 dan subject
+  terpanjang di repo ini **83 karakter**, jadi tidak ada yang perlu diperlebar
+  dan 42 commit yang ada semuanya lolos.
+- [x] hooks. — `pre-commit` (lint-staged lalu `composer ci:check`) dan
+  `commit-msg` (commitlint).
+
+> **`pre-commit` menjalankan gate penuh**, termasuk 265 test, sekitar 22 detik.
+> Konsekuensinya/commit butuh MySQL jalan, dan commit yang hanya menyentuh
+> dokumentasi tetap membayar 22 detik. `|| exit 1` pada baris lint-staged
+> wajib: husky tidak menjalankan hook di bawah `set -e`, jadi tanpa itu
+> kegagalan lint-staged akan ditimpa exit code `composer ci:check` yang berhasil.
+
+> **Kedua hook diuji dengan merusaknya secara sengaja.** Commit dengan pesan
+> `perbaiki stuff` ditolak `commit-msg` dengan exit 1; test yang sengaja gagal
+> ditolak `pre-commit` dengan exit 1; keduanya tidak menggeser HEAD.
+
+> **Job commitlint di CI.** Hook lokal bisa dilewati `--no-verify` dan tidak
+> jalan saat push. Job terpisah dari `ci` — `ci:check` adalah gerbang kode —
+> di-guard `github.event_name` karena `pull_request.base.sha` tidak ada saat
+> push. **Judul PR ikut divalidasi** karena squash merge mengambil pesannya
+> dari judul. Menambahkan aturan itu langsung menggagalkan PR #1 yang sedang
+> terbuka: judulnya 119 karakter, melewati batas 100, dan sekarang 84.
+
+> **Catatan cakupan.** YAML **sengaja tidak** masuk `.lintstagedrc.json`:
+> `vp check` gagal keras pada berkas `.yml` ("Expected at least one target
+> file"), jadi menambah polanya akan merusak commit. Akibatnya commit yang
+> hanya menyentuh YAML/MD mencetak "lint-staged could not find any staged
+> files" — cosmetics, bukan kegagalan. Empat commit lama memicu warning
+> `footer-leading-blank` karena paragraf di-*wrap* mengandung titik dua; itu
+> warning, rentang commit tetap keluar dengan exit 0.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-28.
 
 ## P15 — Documentation
 

@@ -914,11 +914,11 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ## Yang masih diperlukan (Phase 01)
 
-P14 Git · P15 docs.
+P15 docs.
 
 Test matrix: **semua 34 baris ter-cover**.
 
-**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, P12, dan **P13**.
+**Sudah selesai:** P01, P02, P03, P05, P06, P07, P08, P09, P10, P11, P12, P13, dan **P14**.
 P04 (Docker) dibatalkan
 — lihat D-15. Status per butir tercatat di `docs/roadmap/phase-01-project-foundation.md` §33.
 
@@ -1428,3 +1428,168 @@ dokumen yang menyebut level, jadi mengubahnya jadi keputusan tanpa dokumen.
 Satu catatan pengamatan, bukan pekerjaan P13: `laravel/sail` masih ada di
 `require-dev` padahal D-15 menghapus Docker. Itu milik butir P01 "remove
 starter artifacts".
+---
+
+## D-28 — Git workflow: husky, commitlint, dan gate penuh saat commit
+
+**Status:** Accepted · berlaku sejak P14 · branch `feat/phase-01-git`
+
+Roadmap §33 P14 punya empat butir: Husky, Commitlint, Conventional Commits, dan
+dua hook. Semuanya **tidak ada** sebelum P14 — tidak ada `.husky/`,
+`core.hooksPath` kosong, dan `.git/hooks` hanya berisi contoh bawaan git.
+
+Yang sebenarnya sudah ada adalah **disiplin Conventional Commits**: 42 commit
+di PR #1 dan seluruh commit di `main` sudah conforms. Yang belum ada adalah
+*paksaannya*.
+
+### 1. `commitlint.config.js` dipakai apa adanya
+
+`extends: ['@commitlint/config-conventional']` dan tidak ada rule tambahan.
+
+Bukan karena malas, tapi karena tidak ada yang perlu dipatuhi ulang: default
+`header-max-length` adalah **100**, dan subject terpanjang yang pernah ditulis di
+repo ini **83 karakter**. Menambah aturan hanya akan mempersempit gerbang yang
+sedang menerima pekerjaan nyata.
+
+Berkasnya **ESM** karena `package.json` mendeklarasikan `"type": "module"`.
+`module.exports` di sini adalah galat **pada saat commit**, bukan saat build,
+yang berarti ia akan gagal di commit pertama seseorang, bukan di CI tempat
+melihatnya murah.
+
+### 2. `npx husky init`, bukan menulis hook sendiri
+
+Nilai `npx husky init` bukan pada apa yang ia tulis, melainkan pada apa yang ia
+*tidak* izinkan. Hook yang ditulis tangan akan mengikuti versi. Pada 9.1.7, dua
+baris yang muncul di hampir semua tutorial
+
+```
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+```
+
+sudah **ditolak aktif**: `husky.sh` yang dihasilkan husky berisi pesan bahwa baris
+itu WILL FAIL di v10, dan `core.hooksPath` diarahkan ke `.husky/_`.
+
+Hook di `.husky/` karena itu **tanpa shebang** dan tanpa sourcing.
+
+`.husky/_/.gitignore` berisi `*` dan ditulis oleh husky sendiri, jadi
+`.gitignore` utama **tidak perlu disentuh**.
+
+### 3. `pre-commit` menjalankan gate penuh, dan ini pilihan yang mahal
+
+```
+npx lint-staged || exit 1
+composer ci:check
+```
+
+Ini **gate penuh**, termasuk 265 test, sekitar **22 detik** secara lokal.
+
+Konsekuensinya, dituliskan karena harus diketahui orang berikutnya:
+
+- **Commit membutuhkan MySQL berjalan.** Test suite memakai database
+  `website_paroki_hspmtb_test`. Kontributor yang belum menyiapkan MySQL akan
+  gagal commit, bukan hanya gagal CI.
+- Commit yang hanya menyentuh dokumentasi tetap membayar 22 detik.
+- **Commit bisa gagal setelah file di-fix**, kalau yang merah adalah test.
+- `--no-verify` adalah jalan keluar, dan itu juga yang dibutuhkan `git revert`
+  karena pesan yang dihasilkannya ditolak.
+
+`|| exit 1` itu wajib, bukan hiasan. Husky tidak menjalankan hook di bawah
+`set -e`, jadi tanpa baris itu kegagalan lint-staged akan **diikuti**
+`composer ci:check` yang berhasil, dan hook akan keluar dengan 0 pada repo
+yang baru saja gagal diformat.
+
+lint-staged jalan lebih dulu supaya hasil perbaikannya **masuk ke dalam commit**,
+bukan tertinggal di working tree untuk percobaan berikutnya.
+
+### 4. `lint-staged` untuk PHP dan frontend
+
+Pint menerima path PHP yang di-staged; `vp check --fix` menerima path
+frontend. `--no-error-on-unmatched-pattern` mencegah gagal pada file yang tidak
+cocok globaunya.
+
+**YAML sengaja tidak dimasukkan.** `vp check` gagal keras pada berkas `.yml`
+dengan "Expected at least one target file", jadi menambah pola `*.{yml,yaml}`
+akan **merusak** commit, bukan merapikannya. Akibatnya commit yang hanya
+menyentuh YAML atau Markdown mencetak "lint-staged could not find any staged
+files matching configured tasks" — cosmetics, bukan kegagalan.
+
+### 5. Job commitlint di CI
+
+Hook lokal bisa dilewati `--no-verify`, dan tidak berjalan sama sekali saat
+push. Job terpisah menutup keduanya untuk pull request.
+
+Job **terpisah dari `ci`** dengan sengaja: `composer ci:check` adalah gerbang
+kode, dan mencampur pemeriksaan riwayat commit ke sana berarti subjek yang salah
+ketik menggagalkan job yang sama dengan kegagalan test, sehingga alasan sebenarnya
+tenggelam di antara keluaran test.
+
+Job ini **di-guard** dengan `github.event_name == 'pull_request'`, karena
+workflow yang sama jalan saat push di mana `github.event.pull_request` tidak
+ada. Tanpa guard, setiap push ke `main` akan gagal dengan `base.sha` kosong.
+`fetch-depth: 0` diperlukan karena rentangnya dua ujung: clone dangkal tidak punya
+merge base, dan `--from` lalu menyelesaikan ke nol — yang commitlint perlakukan
+sebagai "tidak ada yang diperiksa", bukan sebagai error.
+
+**Judul pull request juga divalidasi.** Squash merge mengambil pesannya dari
+judul PR, jadi repo yang seluruh riwayatnya complies tetap bisa squashed
+menjadi satu commit yang tidak. Itu dicek pada PR dari fork, karena judul PR
+milik orang lain bukan wewenang kita untuk menegakkan.
+
+### 6. Menemukan masalah pada aturan yang baru dibuat sendiri
+
+Menambahkan validasi judul PR langsung **menggagalkan PR #1 yang sedang
+terbuka**: judulnya 119 karakter, melewati batas 100 yang sama. Kalau step itu
+tidak diuji lebih dulu, ia akan menggagalkan build atas alasan yang tidak ada
+hubungannya dengan kode.
+
+Judulnya diperpendek ke 84 karakter.
+
+### 7. Warning yang dibiarkan, dengan alasannya
+
+Empat commit memicu `footer-leading-blank`. itu **warning**, bukan error, dan
+rentang commit tetap keluar dengan exit 0.
+
+Penyebabnya sudah ditelusuri dan **bukan** kesalahan penulisan pesan: commitlint
+membaca **baris prose yang di-*wrap* dan mengandung titik dua** sebagai trailer
+footer. `foo:` dan `suggests:` mereproduksi peringatan yang sama, dan
+`feat(x): a` + satu baris `suggest: ...` sendirian **tidak** —
+hanya berhasil bila baris itu melanjutkan baris lain. Artinya peringatan muncul
+karena paragraf di-*wrap* pada 72 karakter dan salah satunya mengandung titik dua.
+
+Tidak diperbaiki, karena diperbaiki berarti berhenti menulis paragraf di-*wrap*
+dan editorisial yang tidak sebanding dengan warning yang memang tidak memblokir
+apa pun.
+
+### 8. Paket
+
+Empat paket, **58 dependensi transitif**, hampir semuanya rantai
+conventional-changelog milik commitlint. Itu banyak pohon untuk memeriksa satu
+pesan commit, dan itulah biayanya memilih tidak menulis sendiri: alternatifnya
+adalah memercayai regex untuk memutuskan seperti apa commit message yang sah,
+dan regex itu akan diam-diam salah untuk commit yang cukup panjang.
+
+**Lima advisory `critical` di npm bukan dari perubahan ini.** `shell-quote` 1.9.0
+datang bersama `concurrently` dari starter dan masih ada. Diverifikasi
+membandingkan lockfile sebelum dan sesudah, bukan diasumsikan.
+
+Paket ditaruh di npm `devDependencies`, bukan Composer `require-dev`: keduanya
+adalah tooling Node, repo ini npm-based, dan hook dieksekusi lewat Node saat
+commit. Menaruh commitlint di Composer akan menambah bridge tanpa gunanya dan
+membuat `composer dev` bergantung pada Node untuk hal yang tidak memerlukannya.
+
+### 9. Verifikasi
+
+Kedua hook diuji dengan **merusaknya secara sengaja**, bukan dengan membacanya:
+
+| Yang dirusak | Hasil |
+| --- | --- |
+| commit dengan pesan `perbaiki stuff` | ditolak `commit-msg`, **exit 1**, HEAD tidak bergeser |
+| test yang sengaja gagal | ditolak `pre-commit`, **exit 1**, HEAD tidak bergeser |
+| commit yang baik | lolos, `lint-staged` → `composer ci:check` → 265 hijau |
+
+**Di luar cakupan:** commitizen (CLI interaktif), hook `pre-push`, branch
+protection GitHub, dan `PULL_REQUEST_TEMPLATE.md`. Hook `pre-push` sengaja
+tidak ada: PR #1 sudah memberi bukti bahwa alur kerja repo ini adalah push
+branch ke PR terbuka, dan menambah satu gerbang di sana tidak menambah keamanan
+yang berarti.
