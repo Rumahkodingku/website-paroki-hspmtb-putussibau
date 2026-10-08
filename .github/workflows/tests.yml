@@ -13,6 +13,34 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    # Tests run against MySQL so they match the production engine (utf8mb4,
+    # strict mode). MYSQL_DATABASE makes the service container create the test
+    # database, so no separate CREATE DATABASE step is needed.
+    # See docs/DECISIONS.md (D-03).
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: website_paroki_hspmtb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      # DB_HOST must be 127.0.0.1: the job itself runs on the runner, not in a
+      # container, so the service port mapping is reached over localhost.
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: website_paroki_hspmtb_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -36,3 +64,128 @@ jobs:
 
       - name: Run CI Checks
         run: composer ci:check
+
+  # The commit-msg hook is local, so it can be skipped with --no-verify and it
+  # does not run at all on a push. This closes both gaps for pull requests.
+  #
+  # It is a separate job rather than another step in `ci` on purpose: that script
+  # is the code gate, and mixing a commit history check into it would mean a
+  # mistyped subject fails the same job that reports failing tests.
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The range needs both ends, and merge depth is enough to reach the
+          # merge commit GitHub synthesises for a pull request.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Setup Application
+        run: npm ci
+
+      - name: Validate commit messages
+        run: >-
+          npx --no-install commitlint
+          --from "${{ github.event.pull_request.base.sha }}"
+          --to "${{ github.event.pull_request.head.sha }}"
+
+      - name: Validate the pull request title
+        # A squash merge takes its message from the pull request title, so a
+        # conforming history can still squash into a non-conforming commit. This
+        # step keeps that from being the way a subject enters main.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: >-
+          echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint
+
+  # Playwright is a separate job for the same reason as commitlint: `ci` is the
+  # code gate, and this needs a browser, a rebuilt database and a web server.
+  # Adding it there would slow the gate down and give two unrelated kinds of
+  # failure the same job.
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: website_paroki_hspmtb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      # Only `composer setup` reads this. It copies .env.example, which names the
+      # development database and would otherwise send its migrations at a database
+      # this runner does not have. app:e2e:prepare repoints itself at
+      # config('e2e.database') regardless, and prints the value it ignored.
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: website_paroki_hspmtb_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Setup Application
+        # Includes npm install and npm run build. The build is not optional here:
+        # there is no dev server in CI, so Blade has nothing to resolve asset tags
+        # against without public/build/manifest.json.
+        run: composer setup
+
+      - name: Install browser
+        # --with-deps installs the shared libraries Chromium needs on the runner
+        # image as well. Without them the suite fails on a missing .so rather
+        # than on anything in the application.
+        run: npx playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        # prepare first, then test: npm run e2e does both in that order, and the
+        # specs read the credentials and database name it writes.
+        run: npm run e2e
+
+      - name: Upload Playwright report
+        # Only on failure, because on a green run the HTML report is noise. The
+        # trace is where the answer usually is: the screenshot says what broke
+        # and the trace says which request broke it.
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

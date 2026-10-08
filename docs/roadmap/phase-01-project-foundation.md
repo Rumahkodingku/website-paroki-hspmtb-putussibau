@@ -1767,130 +1767,358 @@ Do not force unnecessary restructuring.
 
 ## P01 — Baseline
 
-- [ ] Inspect repository.
-- [ ] Verify versions.
-- [ ] Verify Composer.
-- [ ] Verify frontend.
-- [ ] Verify existing tests.
-- [ ] Remove unnecessary starter artifacts.
+- [x] Inspect repository.
+- [x] Verify versions.
+- [x] Verify Composer.
+- [x] Verify frontend.
+- [x] Verify existing tests.
+- [ ] Remove unnecessary starter artifacts. — *belum*: `.codex/config.toml` (membocorkan path absolut mesin) dan `pnpm-workspace.yaml` (proyek memakai npm) masih ikut ter-track. Keduanya sudah ada di `main` sejak initial commit.
 
 ## P02 — Laravel Config
 
-- [ ] UTC timezone.
-- [ ] display timezone.
-- [ ] locale.
-- [ ] Indonesian translations.
-- [ ] environment configuration.
+- [x] UTC timezone.
+- [x] display timezone.
+- [x] locale.
+- [x] Indonesian translations.
+- [x] environment configuration.
 
 ## P03 — Database
 
-- [ ] users.
-- [ ] is_active.
-- [ ] site_settings.
-- [ ] system tables.
-- [ ] migration verification.
+- [x] users.
+- [x] is_active.
+- [x] site_settings.
+- [x] system tables.
+- [x] migration verification.
 
 ## P04 — Docker
 
-- [ ] MySQL.
-- [ ] volume.
-- [ ] healthcheck.
-- [ ] UTF-8.
-- [ ] `.env` configuration.
+> **Dibatalkan.** Docker tidak dipakai; MySQL 8 berjalan native di host. Semua
+> butir di bawah tidak dikerjakan. Lihat `docs/DECISIONS.md` D-15.
+
+- [~] MySQL. — dibatalkan (D-15)
+- [~] volume. — dibatalkan (D-15)
+- [~] healthcheck. — digantikan CI: service MySQL + `--health-cmd` di `.github/workflows/tests.yml`
+- [~] UTF-8. — dijamin level driver (`utf8mb4_0900_ai_ci`), diuji di `DatabaseFoundationTest`
+- [~] `.env` configuration. — `DB_HOST=127.0.0.1`, tanpa container
 
 ## P05 — RBAC
 
-- [ ] Install Spatie.
-- [ ] publish migration/config.
-- [ ] User HasRoles.
-- [ ] PermissionSeeder.
-- [ ] SuperAdminSeeder.
-- [ ] guard consistency.
-- [ ] authorization tests.
+- [x] Install Spatie.
+- [x] publish migration/config.
+- [x] User HasRoles.
+- [x] PermissionSeeder.
+- [x] SuperAdminSeeder.
+- [x] guard consistency.
+- [x] authorization tests.
 
 ## P06 — Authentication
 
-- [ ] login.
-- [ ] logout.
-- [ ] forgot password.
-- [ ] reset password.
-- [ ] rate limiting.
-- [ ] inactive account protection.
-- [ ] remove registration.
+- [x] login.
+- [x] logout.
+- [x] forgot password.
+- [x] reset password.
+- [x] rate limiting.
+- [x] inactive account protection.
+- [x] remove registration.
 
 ## P07 — Inertia Foundation
 
-- [ ] shared props.
-- [ ] auth props.
-- [ ] flash props.
-- [ ] errors.
-- [ ] TypeScript types.
-- [ ] page structure.
+- [x] shared props.
+- [x] auth props.
+- [x] flash props.
+- [x] errors.
+- [x] TypeScript types.
+- [x] page structure. — pemisahan `pages/{public,admin}` sudah ada; `PublicLayout`/`AdminLayout` sendiri adalah P08b.
 
 ## P08 — UI
 
-- [ ] primitives.
-- [ ] PublicLayout.
-- [ ] AdminLayout.
-- [ ] responsive shell.
-- [ ] accessibility foundation.
+- [x] primitives. — 11 dari §15 sudah ada dari starter; `textarea`, `table`, dan
+  `pagination` diinstal dari registry (0 dependency baru). `ConfirmDialog` dan
+  `EmptyState` tidak ada di registry dan dibuat custom.
+- [x] PublicLayout. — shell saja: `ParishNavbar` + `<Main>` + `ParishFooter`.
+  Seluruh data paroki berupa placeholder `[ISI: ...]`.
+- [x] AdminLayout. — sidebar 12 item §17; hanya Dashboard/Pengaturan/Akun yang
+  punya route, sisanya nonaktif dan diberi label "belum".
+- [x] responsive shell. — Sheet untuk nav publik < lg, sidebar collapsible,
+  token tipografi dan spacing responsif sesuai DESIGN.md.
+- [x] accessibility foundation. — target sentuh 44px, focus ring terpusat,
+  `aria-label` pada trigger, skip-link ke konten utama.
+
+> **Catatan cakupan.** Yang dikerjakan adalah *fondasi* visual, bukan tampilan
+> final. DESIGN.md §15 menyatakan Phase 01 tidak mengimplementasikan visual final
+> website HSPMTB; komposisi finalnya milik phase UI/public website berikutnya.
+> Penyimpangan terhadap DESIGN.md tercatat di `docs/DECISIONS.md` D-22.
 
 ## P09 — Settings
 
-- [ ] SiteSettings model.
-- [ ] service.
-- [ ] cache.
-- [ ] admin page.
-- [ ] tests.
+- [x] SiteSettings model. — `app/Models/SiteSetting.php` + factory. Skema tidak
+  diubah; sudah benar sejak P03 (PRD §9.2).
+- [x] service. — `SiteSettingsService` dengan `all`/`get`/`getGroup`/`set`/
+  `setMany`/`forget`. Kunci, tipe, dan default berasal dari
+  `config/site-settings.php`.
+- [x] cache. — satu kunci untuk seluruh peta, TTL 24 jam sebagai jaring
+  pengaman, `forget()` setiap kali admin menyimpan (XC-C1).
+- [x] admin page. — `/admin/pengaturan`, 5 grup, 29 kunci. Otorisasi `settings.view`
+  di controller dan `settings.update` di FormRequest.
+- [x] tests. — 23 test: T16, T17, T18, otorisasi, render halaman, dan seeder.
+
+> **`SiteSettingsSeeder`** menyemai tepat dua kunci sesuai PRD Lampiran D
+> (`parish_name`, `parish_short_name`) memakai `firstOrCreate`. Kunci lainnya
+> sengaja tidak punya baris agar "belum diatur" berbeda dari "sengaja
+> dikosongkan"; `get()` mengembalikan default dari `config/site-settings.php`.
+
+> **Catatan cakupan.** Saat P09 selesai, grup `privasi`
+> (`privacy_policy_content`) masih ditunda karena isinya rich text dan D-14
+> mewajibkan sanitasi server-side. **P11 mengaktifkannya** dengan
+> `HtmlSanitizer` (D-25). Field gambar (`logo`, `favicon`,
+> `seo_default_og_image`) tetap berupa teks path/URL; widget unggah yang
+> sempat dijanjikan P10 tidak pernah dibangun (D-24 §1). Detail dan alasannya
+> di `docs/DECISIONS.md` D-23.
 
 ## P10 — Media
 
-- [ ] storage.
-- [ ] MIME validation.
-- [ ] image processor.
-- [ ] WebP.
-- [ ] variants.
-- [ ] EXIF stripping.
-- [ ] queue job.
-- [ ] tests.
+- [x] storage. — disk privat untuk asli, disk publik untuk varian (§19), semua
+  nama disk/batas/varian di `config/media.php`. Tabel `media` + `media_variants`.
+- [x] MIME validation. — `IsProcessableImage` membaca **isi file** (`finfo` +
+  `getimagesize`), bukan ekstensi (XC-M3).
+- [x] image processor. — `app/Services/ImageProcessor.php` dengan GD 2.3.3, nol
+  dependency baru.
+- [x] WebP. — `imagewebp` kualitas 82.
+- [x] variants. — thumb 400 / medium 960 / large 1600, lebar saja, **tanpa upscale**.
+- [x] EXIF stripping. — GD tidak menulis blok EXIF, jadi hilang saat re-encode;
+  orientasi tetap dibaca agar foto ponsel tidak terbit terbalik (XC-M2).
+- [x] queue job. — `app/Jobs/GenerateImageVariants.php`, idempoten, `failed()`
+  menandai `failed` tanpa menghapus asli (§21, XC-M1).
+- [x] tests. — 23 test: T19–T23, otorisasi, status, penghapusan.
+
+> **Catatan cakupan — P10 adalah fondasi, bukan fitur.** Tidak ada halaman media
+> library dan tidak ada pemilih gambar di antarmuka mana pun. Endpoint
+> `POST/GET/DELETE /admin/media` hanya bisa dipanggil manual, sehingga **tabel
+> `media` kosong dalam pemakaian normal**. Antarmuka browse menyusul bersama modul
+> pertama yang membutuhkannya. Three permission `media.*` ditambahkan (total 15).
+> Detail dan alasannya di `docs/DECISIONS.md` D-24.
 
 ## P11 — Sanitization
 
-- [ ] sanitizer.
-- [ ] Tiptap.
-- [ ] allowlist.
-- [ ] XSS tests.
+- [x] sanitizer. — `app/Services/HtmlSanitizer.php` di atas
+  `symfony/html-sanitizer` (satu dependency baru, disetujui eksplisit), di-bind
+  sebagai singleton karena allowlist-nya di-parse sekali per instance.
+- [x] Tiptap. — `RichTextEditor` di `resources/js/components/rich-text-editor.tsx`.
+  Paragraf, heading, bold, italic, underline, lists, blockquote, link. Dimuat
+  lewat `React.lazy` sehingga Tiptap tidak masuk chunk halaman pengaturan.
+- [x] allowlist. — `config/html.php` sebagai satu sumber kebenaran: tag
+  persis §22 (+ turunan tabel), atribut per tag, `drop_elements`, skema URL,
+  dan `rel="noopener noreferrer"` yang dipaksakan ke setiap `<a>`.
+- [x] XSS tests. — T24 dan T25 plus 56 test lain di
+  `tests/Unit/HtmlSanitizerTest.php`, dan 10 feature test di
+  `SiteSettingsTest.php` yang memeriksa **kolom** tersimpan, bukan respons.
+
+> **Tiga default Symfony tidak dibiarkan begitu**, dan ketiganya punya test:
+> `default_action` di-override ke `block` supaya tag tak dikenal tidak
+> menghapus paragrafnya; skema media diketatkan ke `http`/`https` karena
+> Symfony mengizinkan `data:`; dan konten elemen raw-text (`<style>`,
+> `<title>`) dibuang bersama tagnya, karena drop tag ternyata tidak drop isi
+> dan stylesheet hasil paste akan muncul sebagai teks di halaman.
+
+> **Normalisasi sebelum parsing:** `<h1>` → `<h2>` (h1 milik judul halaman),
+> `<b>` → `<strong>`, `<i>` → `<em>` (konten hasil paste).
+
+> **Catatan cakupan.** Editor dipakai oleh satu field saja,
+> `privacy_policy_content`, yang sekaligus melunasi utang D-23. **Belum ada
+> halaman publik yang merender rich text** — `RichText` sudah ada tapi belum
+> ada call site. Image dan table sengaja tidak ada di editor: image butuh image
+> picker yang tidak pernah dibangun (D-24 §1), dan roadmap §23 memang
+> menundanya dengan "bila dibutuhkan". Sanitasi `maps_embed_url` (XC-S2) dan
+> `form_url` (XC-S3) belum dikerjakan karena keduanya butuh validasi host yang
+> lebih ketat daripada allowlist skema URL.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-25.
 
 ## P12 — Infrastructure
 
-- [ ] queue.
-- [ ] cache.
-- [ ] scheduler.
-- [ ] failed jobs.
-- [ ] error pages.
-- [ ] SEO component.
+- [x] queue. — `database` sudah jadi default sejak starter dan tabel `jobs` sudah
+  ada, jadi P12 tidak mengubah apa pun. Yang ditambahkan adalah `FailedJobTest`:
+  T26 ternyata **tidak pernah** ter-cover karena `MediaTest` memanggil `->failed()`
+  manual dan `phpunit.xml` menyetel `QUEUE_CONNECTION=sync`. Test itu memaksa
+  koneksi `database` dan menjalankan worker sungguhan.
+- [x] cache. — `database` sudah jadi default, tabel `cache` sudah ada, dan P09
+  sudah memakainya lewat `SiteSettingsService`. Tidak ada perubahan.
+- [x] scheduler. — `withSchedule()` di `bootstrap/app.php` dengan satu task:
+  `queue:prune-failed --hours=168` harian. `model:prune` sengaja tidak
+  dijadwalkan karena tidak ada model `Prunable`.
+- [x] failed jobs. — `failed_jobs` dengan `database-uuids`. Enam test di
+  `FailedJobTest` membuktikan job gagal mendarat di sana dengan payload yang
+  bisa dibaca `queue:retry`, dan baris `media` tetap utuh (§21).
+- [x] error pages. — `$exceptions->respond()` + `resources/js/pages/public/error.tsx`
+  untuk 403, 404, 419, 500, 503, berbahasa Indonesia, di `PublicLayout`, dengan
+  tautan ke Beranda.
+- [x] SEO component. — `resources/js/components/seo.tsx` plus baseline OG di
+  `resources/views/app.blade.php`, dihubungkan oleh `data-inertia`.
+
+> **Scheduler di development.** `composer dev` menjalankan lima proses
+> (server, queue, logs, vite, **scheduler**). `DevCommands` bawa Laravel hanya
+> mendaftarkan empat; `schedule:work` didaftarkan sendiri di
+> `AppServiceProvider`.
+
+> **`schedule:run` tidak dijadwalkan.** Production memakai cron
+> `* * * * * php artisan schedule:run`; development memakai `schedule:work`.
+> Menjadwalkannya di dalam schedule akan membuatnya memanggil dirinya sendiri.
+> Command starter `inspire` juga dihapus.
+
+> **Halaman error di-serve saat `config('app.debug')` false.** Gate-nya debug,
+> bukan daftar environment seperti contoh dokumentasi Inertia: berbasis
+> environment akan mematikan halaman ini selama test suite berjalan. Hanya
+> `status` yang menyeberang ke response, jadi tidak ada stack trace yang bisa
+> bocor dan tidak ada yang perlu disensor.
+
+> **SSR ditunda, klaus fallback-nya yang dikerjakan.** PRD NFR-SEO meminta tag OG
+> ada di respons HTML awal bila SSR nonaktif. React merender setelah hydration,
+> jadi `<Head>` saja tidak sampai ke crawler — karena itu tag-nya juga dirender di
+> Blade. Keduanya dihubungkan `data-inertia`, nilai yang sama dengan `head-key` di
+> komponen React. **Keputusan SSR masih terbuka** untuk phase UI/public website.
+
+> **Catatan cakupan.** `Seo` dan halaman error **belum dipakai halaman mana
+> pun** yang sukses dirender untuk pengunjung: `welcome.tsx` masih placeholder,
+> dan modul publiknya milik Fase 2. Copy Bahasa Indonesia pada halaman error
+> **sudah** diuji di browser sejak P16, jadi kesenjangan D-26 §7 ditutup — dengan
+> satu syarat, yaitu web server E2E dipaksa `APP_DEBUG=false`, karena kalau tidak
+> yang tampil adalah halaman debug Laravel dan spec-nya hijau tanpa menguji apa pun.
+> `sitemap.xml`, `robots.txt`, dan structured data tetap di luar cakupan
+> (§4 "sitemap final"). Detail di `docs/DECISIONS.md` D-26.
 
 ## P13 — Quality
 
-- [ ] Pest/PHPUnit.
-- [ ] Pint.
-- [ ] Larastan.
-- [ ] ESLint.
-- [ ] TypeScript.
-- [ ] build.
+- [x] Pest/PHPUnit. — 271 test, 25 file. `pestphp/pest` 4.7.8 + plugin Laravel.
+  T34 (`FreshInstallTest`) ditutup di sini.
+- [x] Pint. — `laravel/pint` ^1.27, `composer lint:check`.
+- [x] Larastan. — `larastan/larastan` ^3.9 level 7, `composer types:check`.
+- [x] ESLint. — `vp check` (oxlint, `denyWarnings: true`), `npm run check`.
+- [x] TypeScript. — `tsc --noEmit`, `npm run types:check`.
+- [x] build. — `vp build`, `npm run build`.
+
+> **P13 tidak memasang apa pun.** Enam checkbox di atas menunjuk tool yang sudah
+> terpasang sejak P01 dan sudah dijalankan CI lewat `composer ci:check`.
+> Yang dikerjakan P13 adalah menyerap utang: divergence #4, T34, dan cakupan
+> PHPStan yang tidak lengkap.
+
+> **Divergence #4 ditutup.** `Model::shouldBeStrict(! isProduction())` di
+> `AppServiceProvider`. Ketiganya dinyalakan: lazy load, atribut yang dibuang
+> diam-diam saat mass assignment, dan atribut yang tidak pernah dipilih.
+> Non-produksi sesuai PRD §3.3, karena `preventLazyLoading()` melempar
+> exception — satu `with()` yang terlupa di produksi jadi 500 di depan
+> pengunjung. Suite penuh tetap hijau dan ketiga guard **diverifikasi hidup**,
+> karena "testsuite lulus" akan terlihat sama dengan "guard-nya mati".
+
+> **`tests/` kini dianalisis PHPStan.** Sebelumnya di luar, sehingga 176 error
+> tidak terlihat. Sekarang **nol**, tanpa baseline, dengan tiga `ignoreErrors`
+> yang dipatok ke pesan + identifier + direktori dan menuntut namespace `Pest\`
+> — kesalahan tipe asli pada kelas aplikasi tetap gagal. Delapan dari 176 itu
+> nyata dan diperbaiki; `method_exists(User::class, 'roles')` ternyata selalu true
+> karena trait yang menyediakannya, dan `getDeclaringClass()` melaporkan kelas
+> pemakai trait, bukan trait-nya.
+
+> **Arch test.** `tests/Unit/ArchitectureTest.php` menerjemahkan larangan yang
+> tadinya hanya tertulis di dokumen menjadi aturan yang menggagalkan build:
+> tanpa repository layer, tanpa `RoleManagementController`, service di luar
+> lapis HTTP, model deklarasi `$fillable` eksplisit, dan seterusnya.
+> **Setiap aturan diuji dengan sengaja melanggar lalu dipastikan merah.**
+> Dua-duanya menyesatkan: aturan controller sempat memakai
+> `not->toContain()` yang lolos satu pelanggaran secara diam-diam, dan aturan
+> sanitasi ternyata hanya bisa melihat *import*, bukan call site. Keduanya
+> sekarang terdokumentasi di docblock masing-masing.
+
+> **T34.** `FreshInstallTest` menguji jalur
+> `DatabaseSeeder::run()` → `SuperAdminSeeder::run()` → `config('admin.*')`,
+> yang dilewati test yang memanggil `seedSuperAdmin()` langsung. Kalau `run()`
+> mulai melempar, semua test yang ada tetap hijau sementara
+> `migrate:fresh --seed` rusak di mana-mana.
+
+> **Catatan cakupan.** ~~Frontend test runner tetap tidak ada.~~ **Dibalik oleh
+> P16** atas permintaan eksplisit — lihat P16 dan D-29. Code coverage threshold
+> **tetap** tidak ditambahkan: tidak diminta roadmap maupun PRD, dan menambahnya
+> berarti gate baru yang harus dijaga.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-27 dan D-29.
 
 ## P14 — Git
 
-- [ ] Husky.
-- [ ] Commitlint.
-- [ ] Conventional Commits.
-- [ ] hooks.
+- [x] Husky. — `husky` 9.1.7, dipasang lewat `npx husky init` sehingga
+  `core.hooksPath` → `.husky/_` dan `.husky/_/.gitignore` (`*`) dibuat
+  otomatis. Hook **tanpa shebang** dan tanpa `husky.sh`, dua baris yang
+  ditolak aktif oleh 9.1.7 dan akan gagal di v10.
+- [x] Commitlint. — `@commitlint/cli` 21.2.3 + `@commitlint/config-conventional`,
+  di npm `devDependencies`.
+- [x] Conventional Commits. — `commitlint.config.js` memakai config
+  conventional **apa adanya**. Default `header-max-length` = 100 dan subject
+  terpanjang di repo ini **83 karakter**, jadi tidak ada yang perlu diperlebar
+  dan 42 commit yang ada semuanya lolos.
+- [x] hooks. — `pre-commit` (lint-staged lalu `composer ci:check`) dan
+  `commit-msg` (commitlint).
+
+> **`pre-commit` menjalankan gate penuh**, termasuk 265 test, sekitar 22 detik.
+> Konsekuensinya/commit butuh MySQL jalan, dan commit yang hanya menyentuh
+> dokumentasi tetap membayar 22 detik. `|| exit 1` pada baris lint-staged
+> wajib: husky tidak menjalankan hook di bawah `set -e`, jadi tanpa itu
+> kegagalan lint-staged akan ditimpa exit code `composer ci:check` yang berhasil.
+
+> **Kedua hook diuji dengan merusaknya secara sengaja.** Commit dengan pesan
+> `perbaiki stuff` ditolak `commit-msg` dengan exit 1; test yang sengaja gagal
+> ditolak `pre-commit` dengan exit 1; keduanya tidak menggeser HEAD.
+
+> **Job commitlint di CI.** Hook lokal bisa dilewati `--no-verify` dan tidak
+> jalan saat push. Job terpisah dari `ci` — `ci:check` adalah gerbang kode —
+> di-guard `github.event_name` karena `pull_request.base.sha` tidak ada saat
+> push. **Judul PR ikut divalidasi** karena squash merge mengambil pesannya
+> dari judul. Menambahkan aturan itu langsung menggagalkan PR #1 yang sedang
+> terbuka: judulnya 119 karakter, melewati batas 100, dan sekarang 84.
+
+> **Catatan cakupan.** YAML **sengaja tidak** masuk `.lintstagedrc.json`:
+> `vp check` gagal keras pada berkas `.yml` ("Expected at least one target
+> file"), jadi menambah polanya akan merusak commit. Akibatnya commit yang
+> hanya menyentuh YAML/MD mencetak "lint-staged could not find any staged
+> files" — cosmetics, bukan kegagalan. Empat commit lama memicu warning
+> `footer-leading-blank` karena paragraf di-*wrap* mengandung titik dua; itu
+> warning, rentang commit tetap keluar dengan exit 0.
+>
+> Detail dan alasannya di `docs/DECISIONS.md` D-28.
 
 ## P15 — Documentation
 
-- [ ] DEVELOPMENT.md.
-- [ ] RBAC.md.
-- [ ] DECISIONS.md.
+- [x] `docs/DEVELOPMENT.md`. — Prasyarat, instalasi, `.env`, database test, migrasi, seeder, tanpa Docker, frontend, test, queue, scheduler. Termasuk harga yang akan ditemui: commit butuh MySQL dan sekitar 25 detik.
+- [x] `docs/RBAC.md`. — Spatie role, penamaan `resource.action`, `super_admin` dan `Gate::before`, konvensi Policy/Gate, larangan `users.role`, dan strategi perluasan role.
+- [x] `docs/DECISIONS.md`.
+
+## P16 — Frontend Testing
+
+Workstream tambahan, **di luar PRD §33**. Diminta eksplisit setelah Phase 01
+sepenuhnyaaik, dan membalikkan gap yang tercatat di D-26 §7 dan D-27 §6.
+
+- [x] Unit/component test (Vitest). — Dijalankan lewat `vp test`, yang **adalah**
+  Vitest 4.1.11 dan sudah terpasang transitif, jadi tidak ada dependensi test
+  runner baru. API dari `vite-plus/test`, konfigurasi di blok `test`
+  `vite.config.ts`. `happy-dom` + Testing Library. **11 test di `tests/js/`**.
+- [x] E2E test (Playwright). — **10 spec di `tests/e2e/`**: proteksi route admin,
+  alur masuk/keluar, penolakan kata sandi, halaman publik, 404 beserta copy
+  Bahasa Indonesia-nya, dan tidak adanya pendaftaran publik.
+- [x] Gate. — `npm run test:unit` masuk `composer ci:check` (1,4 detik) dan ikut
+  pre-commit. Playwright **tidak** masuk gate; gate-nya job `e2e` di CI.
+- [x] Database E2E terisolasi. — `php artisan app:e2e:prepare` me-*rebuild*
+  `website_paroki_hspmtb_test`, memindahkan koneksinya ke sana **sebelum** langkah
+  destruktif apa pun, dan **tidak pernah membaca** database dari `.env`.
+
+> **Semua test ada di `tests/`.** `tests/` sudah milik Pest, jadi frontend masuk
+> ke dalamnya sebagai subfolder: `tests/js/` untuk Vitest, `tests/e2e/` untuk
+> Playwright. `tsconfig.json` gaining ketiga path itu, karena `include`-nya hanya
+> `resources/js/**`.
+
+> **Dua jebakan yang ditutup dan diuji.** (1) Globe bawaan Vitest adalah
+> `**/*.spec.*` yang akan mengumpulkan spec Playwright, jadi `tests/e2e/**` ada di
+> `exclude`. (2) Mesin development punya `APP_DEBUG=true`, yang membuat callback
+> `respond()` keluar lebih awal sehingga halaman **debug** Laravel yang tampil —
+> spec 404 sempat hijau karena alasan yang salah.
+
+> **Menutup gap D-26 §7.** Copy Bahasa Indonesia pada halaman error akhirnya
+> diuji di browser, bukan hanya sebagai prop yang sampai ke React.
 
 ---
 
@@ -1928,6 +2156,8 @@ P13 Quality
 P14 Git
   ↓
 P15 Documentation
+  ↓
+P16 Frontend Testing (added after the fact, see D-29)
 ```
 
 Some independent tasks may be executed in parallel if dependency safety is maintained.
@@ -2108,45 +2338,45 @@ Tidak ada modul bisnis Phase 02+ yang dianggap selesai atau dibangun secara penu
 
 Phase 01 DONE jika:
 
-- [ ] Laravel 13 project dapat boot.
-- [ ] MySQL dapat dijalankan.
-- [ ] Migration berhasil.
-- [ ] Seed berhasil.
-- [ ] timezone UTC diterapkan.
-- [ ] display timezone Asia/Pontianak tersedia.
-- [ ] locale `id` tersedia.
-- [ ] `users.is_active` tersedia.
-- [ ] tidak ada `users.role`.
-- [ ] Spatie Permission aktif.
-- [ ] `super_admin` aktif.
-- [ ] permission foundation tersedia.
-- [ ] authentication admin bekerja.
-- [ ] public registration disabled.
-- [ ] inactive account ditolak.
-- [ ] admin authorization bekerja.
-- [ ] Inertia React foundation bekerja.
-- [ ] PublicLayout tersedia.
-- [ ] AdminLayout tersedia.
-- [ ] basic UI primitives tersedia.
-- [ ] site settings service bekerja.
-- [ ] site settings cache bekerja.
-- [ ] media validation bekerja.
-- [ ] EXIF stripping bekerja.
-- [ ] WebP conversion bekerja.
-- [ ] image variants bekerja.
-- [ ] queue job bekerja.
-- [ ] HTML sanitizer bekerja.
-- [ ] Tiptap foundation tersedia.
-- [ ] 404 tersedia.
-- [ ] 500 tersedia.
-- [ ] SEO foundation tersedia.
-- [ ] tests hijau.
-- [ ] static analysis hijau.
-- [ ] frontend checks hijau.
-- [ ] production build berhasil.
-- [ ] Husky aktif.
-- [ ] Commitlint aktif.
-- [ ] documentation foundation tersedia.
+- [x] Laravel 13 project dapat boot.
+- [x] MySQL dapat dijalankan.
+- [x] Migration berhasil.
+- [x] Seed berhasil.
+- [x] timezone UTC diterapkan.
+- [x] display timezone Asia/Pontianak tersedia.
+- [x] locale `id` tersedia.
+- [x] `users.is_active` tersedia.
+- [x] tidak ada `users.role`.
+- [x] Spatie Permission aktif.
+- [x] `super_admin` aktif.
+- [x] permission foundation tersedia.
+- [x] authentication admin bekerja.
+- [x] public registration disabled.
+- [x] inactive account ditolak.
+- [x] admin authorization bekerja.
+- [x] Inertia React foundation bekerja.
+- [x] PublicLayout tersedia.
+- [x] AdminLayout tersedia.
+- [x] basic UI primitives tersedia.
+- [x] site settings service bekerja.
+- [x] site settings cache bekerja.
+- [x] media validation bekerja.
+- [x] EXIF stripping bekerja.
+- [x] WebP conversion bekerja.
+- [x] image variants bekerja.
+- [x] queue job bekerja.
+- [x] HTML sanitizer bekerja.
+- [x] Tiptap foundation tersedia.
+- [x] 404 tersedia.
+- [x] 500 tersedia.
+- [x] SEO foundation tersedia.
+- [x] tests hijau.
+- [x] static analysis hijau.
+- [x] frontend checks hijau.
+- [x] production build berhasil.
+- [x] Husky aktif.
+- [x] Commitlint aktif.
+- [x] documentation foundation tersedia.
 
 ---
 
@@ -2154,23 +2384,23 @@ Phase 01 DONE jika:
 
 Sebelum menutup Phase 01, agent harus memeriksa:
 
-- [ ] `.env` tidak tracked.
-- [ ] password tidak hard-coded.
-- [ ] password tidak masuk log.
-- [ ] authentication menggunakan Laravel mechanism.
-- [ ] rate limit login aktif.
-- [ ] inactive users ditolak.
-- [ ] authorization tidak menggunakan custom `users.role`.
-- [ ] Spatie guard konsisten.
-- [ ] mass assignment dikontrol.
-- [ ] CSRF aktif.
-- [ ] validation dilakukan server-side.
-- [ ] uploaded MIME divalidasi server-side.
-- [ ] dangerous HTML disanitasi.
-- [ ] EXIF/GPS dihapus.
-- [ ] private files tidak public.
-- [ ] production debug tidak expose stack trace.
-- [ ] security headers foundation tidak merusak aplikasi.
+- [x] `.env` tidak tracked.
+- [x] password tidak hard-coded.
+- [x] password tidak masuk log.
+- [x] authentication menggunakan Laravel mechanism.
+- [x] rate limit login aktif.
+- [x] inactive users ditolak.
+- [x] authorization tidak menggunakan custom `users.role`.
+- [x] Spatie guard konsisten.
+- [x] mass assignment dikontrol.
+- [x] CSRF aktif.
+- [x] validation dilakukan server-side.
+- [x] uploaded MIME divalidasi server-side.
+- [x] dangerous HTML disanitasi.
+- [x] EXIF/GPS dihapus.
+- [x] private files tidak public.
+- [x] production debug tidak expose stack trace.
+- [x] security headers foundation tidak merusak aplikasi.
 
 ---
 
@@ -2316,3 +2546,48 @@ Kemudian verifikasi manual:
 14. jalankan seluruh test suite.
 
 **Phase 01 hanya boleh diberi status `DONE` jika seluruh gate di atas terpenuhi dan tidak ada requirement MUST yang belum selesai.**
+
+### Cara setiap item diverifikasi
+
+Mencentang 56 butir tanpa cara yang jelas hanya memindahkan masalah ke pembaca
+berikutnya. Setiap item di atas punya bukti, dan tidak semuanya berupa test Pest:
+
+| Cara | Item |
+| --- | --- |
+| **Test Pest** — boot, migrasi, seed, timezone, locale, `is_active`, permission, `super_admin`, auth, registration, otorisasi admin, Inertia, layout, primitive UI, site settings + cache, media, MIME, EXIF, WebP, variant, queue, sanitizer, Tiptap, 403/404/419/500/503, flash, Wayfinder, security |
+| **Test arsitektur** (`tests/Unit/ArchitectureTest.php`) | repository layer, services tanpa HTTP, tanpa role/permission controller, `$fillable`, `HasRoles`, tanpa `$user->role`, sanitasi, directionality frontend |
+| **Playwright** (`tests/e2e/`) | alur masuk/keluar nyata, halaman publik, halaman error 404 + copy Indonesia, halaman pengaturan + lazy chunk, middleware |
+| **Job CI** | Husky + commitlint + judul PR (`commitlint`), build produksi (`composer setup`), gate penuh (`ci`) |
+| **`tsc` / PHPStan** | `Paginated<T>`, arah import frontend, absence Docker |
+| **Keberadaan** | tidak ada `docker-compose.yml`/`Dockerfile`, `.env` di `.gitignore` |
+
+Empat butir **tidak** punya test khusus dan itu disengaja:
+
+- **Commitlint** — diverifikasi CI. hook bisa dilewati `--no-verify`, jadi hanya
+  job `commitlint` yang benar-benar menegakkan; ia yang menolak judul PR 101
+  karakter (D-28).
+- **CSRF** — default framework. Tidak ada kode di repo ini yang menyalakannya
+  dan tidak ada yang mematikannya; `VerifyCsrfToken` aktif di group `web`
+  tanpa pengecualian yang dikonfigurasi.
+- **Halaman 503 saat maintenance** — lihat `tests/Feature/Foundation/ErrorPageTest.php`.
+  Branch 503 di komponen **tidak** dapat dicapai lewat `artisan down`:
+  `PreventRequestsDuringMaintenance` mengembalikan view `errors::503` bawaan
+  Laravel sebelum handler exception dipanggil. Itu perilaku framework dan
+  PRD XC-E2 hanya menuntut 404 dan 500 dalam Bahasa Indonesia.
+- **Tidak ada Docker** — dibuktikan dengan tidak adanya berkas, bukan test.
+
+### Yang dicentang pada perubahan ini
+
+Butir yang selesai pada P16 dan P17:
+
+| Butir | Test |
+| --- | --- |
+| Frontend test runner | `tests/js/` (11 test) dan `tests/e2e/` (13 spec) |
+| Arah dependensi frontend | enam aturan baru di `ArchitectureTest.php`, masing-masing diuji dengan sengaja dilanggar |
+| Dokumentasi | `docs/DEVELOPMENT.md`, `docs/RBAC.md`, `docs/ARCHITECTURE.md` (6 `⚠ CONFIRM` ditutup) |
+
+### Yang tetap menjadi kesenjangan
+
+Halaman error publik belum pernah dirender di browser **sebelum P16**; sekarang
+`tests/e2e/public.spec.ts` asserts copy Bahasa Indonesia untuk 404. Kesenjangan
+D-26 §7 ditutup.

@@ -35,8 +35,31 @@ return [
 
     'pages' => [
 
+        /*
+         | One entry per feature that owns an Inertia page.
+         |
+         | Inertia's own view finder concatenates each path with the component
+         | name, so this list is what makes `assertInertia()->component(...)`
+         | work at all, and it is why pages cannot simply live anywhere: the
+         | finder takes literal directories and does not expand wildcards.
+         |
+         | NOT the mechanism. AppServiceProvider replaces `inertia.view-finder`
+         | with App\Support\PageFinder, because Laravel's FileViewFinder can only
+         | concatenate a directory with a name, and neither the audience/feature
+         | prefix nor index.tsx survives that. This list is kept accurate rather
+         | than accurate-and-load-bearing: if the override is ever removed, the
+         | plain finder points at these real directories and fails on a name like
+         | admin/akun/profile, which is a far better failure than a stale path.
+         |
+         | See docs/DECISIONS.md D-30.
+         */
         'paths' => [
-            resource_path('js/pages'),
+            resource_path('js/features/admin/akun/pages'),
+            resource_path('js/features/admin/dashboard/pages'),
+            resource_path('js/features/admin/pengaturan/pages'),
+            resource_path('js/features/public/auth/pages'),
+            resource_path('js/features/public/beranda/pages'),
+            resource_path('js/features/public/error/pages'),
         ],
 
         'extensions' => [

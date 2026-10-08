@@ -20,12 +20,25 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <!--
+            D-01 (PRD): datetimes are stored in UTC, displayed in Asia/Pontianak.
+            These are pinned here so configuration tests never depend on a
+            developer's local .env file.
+        -->
+        <env name="APP_DISPLAY_TIMEZONE" value="Asia/Pontianak"/>
+        <env name="APP_FALLBACK_LOCALE" value="id"/>
+        <env name="APP_LOCALE" value="id"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="DB_URL" value=""/>
+        <!--
+            Tests run against a dedicated MySQL database so they match the
+            production engine (utf8mb4, strict mode). Credentials are read
+            from the local .env / CI job env - never hard-coded here.
+            See docs/DECISIONS.md (D-03, D-04).
+        -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="website_paroki_hspmtb_test"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

@@ -1,6 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
+    - vendor/pestphp/pest/phpstan-pest-extension.neon
 
 parameters:
     paths:
@@ -9,5 +10,37 @@ parameters:
         - config/
         - database/
         - routes/
+        - tests/
 
     level: 7
+
+    ignoreErrors:
+        # Pest hands a test closure to PHPUnit's TestCase at runtime and binds
+        # $this to it, but a static analyser sees the closure as belonging to
+        # the `test()` call, whose declared return type is Pest\PendingCalls\
+        # TestCall. Every fluent HTTP method and assertion inside a test then
+        # looks like a call to a method that does not exist.
+        #
+        # This is a limitation of analysing Pest, not a defect in the tests,
+        # and it is one Pest's own extension does not solve:
+        # phpstan-pest-extension.neon (included above) registers the type
+        # extension for higher-order expect() chains and nothing else.
+        #
+        # Pinned to the message, the identifier and the directory on purpose.
+        # Widening it to identifier: method.notFound would silence genuine type
+        # errors in test code, which is the whole reason tests/ is analysed at
+        # all, and a baseline file would do the same thing more quietly.
+        #
+        # @see docs/DECISIONS.md D-27
+        -
+            message: '#^Call to an undefined method Pest\\#'
+            identifier: method.notFound
+            path: tests/
+
+        # `$this->someProperty` set in beforeEach() is the same problem: at
+        # runtime the closure is bound to the TestCase, statically it belongs
+        # to the test() call. `->not` is Pest's own Expectation property.
+        -
+            message: '#^Access to an undefined property Pest\\#'
+            identifier: property.notFound
+            path: tests/
