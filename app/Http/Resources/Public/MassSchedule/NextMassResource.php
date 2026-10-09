@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Public\MassSchedule;
 
+use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Support\NextMass;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,6 +20,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class NextMassResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -29,7 +32,12 @@ class NextMassResource extends JsonResource
             'starts_at' => $this->startsAtInDisplayTimezone()->toIso8601String(),
             'name' => $this->name,
             'language' => $this->language,
-            'location' => new PublicLocationResource($this->location),
+            // Resolved rather than handed over as a resource: a nested resource
+            // inside an already-resolved array keeps its {"data": ...} envelope,
+            // which is how nextMass.location.name becomes
+            // nextMass.location.data.name in the page source.
+            // See ARCHITECTURE.md Part C section 2.
+            'location' => $this->nested(PublicLocationResource::class, $this->location),
         ];
     }
 }

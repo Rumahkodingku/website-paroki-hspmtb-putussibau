@@ -48,7 +48,10 @@ class UpdateMassScheduleRequest extends FormRequest
     {
         return [
             ...$this->massScheduleRules(),
-            'location_id' => [...$this->uniqueOccurrenceRule($this->massSchedule())],
+            'location_id' => [
+                ...$this->activeLocationRule(),
+                ...$this->uniqueOccurrenceRule($this->massSchedule()),
+            ],
         ];
     }
 

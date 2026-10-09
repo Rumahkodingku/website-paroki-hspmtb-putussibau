@@ -5,6 +5,7 @@ namespace App\Http\Controllers\MassSchedule;
 use App\Enums\DayOfWeek;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Public\MassSchedule\NextMassResource;
+use App\Http\Resources\Public\MassSchedule\PublicLocationResource;
 use App\Http\Resources\Public\MassSchedule\PublicMassScheduleResource;
 use App\Http\Resources\Public\MassSchedule\PublicScheduleNoticeResource;
 use App\Http\Resources\Public\MassSchedule\PublicSpecialMassResource;
@@ -54,7 +55,13 @@ class PublicMassScheduleController extends Controller
             'regularMasses' => $this->regularMasses($location, $day),
             'specialMasses' => $this->specialMasses($location),
             'notices' => $this->notices($location),
-            'locations' => Location::query()->active()->orderBy('name')->get(),
+            // Through the public resource, never the raw model. LocationResource
+            // carries slug, coordinates, notes, is_active and the timestamps,
+            // and handing it to a visitor would publish every one of them —
+            // Part C rule 2 says send only what the page renders.
+            'locations' => array_values(PublicLocationResource::collection(
+                Location::query()->active()->orderBy('name')->get()
+            )->resolve()),
             'filters' => [
                 'location_id' => $location?->getKey(),
                 'day' => $day?->value,
@@ -120,14 +127,24 @@ class PublicMassScheduleController extends Controller
         return array_values(PublicScheduleNoticeResource::collection(
             ScheduleNotice::query()
                 ->currentlyVisible()
-                ->where(fn (Builder $query) => $query
-                    // No target: applies to everyone.
-                    ->whereNull('location_id')
-                    ->whereNull('mass_schedule_id')
-                    ->whereNull('special_mass_id')
-                    // Or it matches the filter currently in effect.
-                    ->when($location, fn (Builder $targeted) => $targeted
-                        ->where('location_id', $location->getKey())))
+                // Two branches, and they have to be OR'd: either the notice has
+                // no target at all, or it names the location currently being
+                // filtered. Written as one group with a `->when()` inside it,
+                // the second condition is AND-ed onto the first and the group
+                // can never be true — a location-targeted notice would then be
+                // invisible on the one page it was written for.
+                ->where(function (Builder $targeted) use ($location): void {
+                    $targeted->where(function (Builder $general): void {
+                        $general
+                            ->whereNull('location_id')
+                            ->whereNull('mass_schedule_id')
+                            ->whereNull('special_mass_id');
+                    });
+
+                    if ($location !== null) {
+                        $targeted->orWhere('location_id', $location->getKey());
+                    }
+                })
                 ->orderByDesc('starts_at')
                 ->get()
         )->resolve());

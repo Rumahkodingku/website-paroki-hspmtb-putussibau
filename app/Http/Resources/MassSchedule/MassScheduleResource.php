@@ -23,6 +23,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class MassScheduleResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -37,7 +39,7 @@ class MassScheduleResource extends JsonResource
             'language' => $this->language,
             'notes' => $this->notes,
             'is_active' => $this->is_active,
-            'location' => new LocationOptionResource($this->whenLoaded('location')),
+            'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
             ],

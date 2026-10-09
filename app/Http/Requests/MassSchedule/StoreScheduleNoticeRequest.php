@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Validates creating a schedule-change notice.
@@ -69,18 +70,48 @@ class StoreScheduleNoticeRequest extends FormRequest
             'special_mass_id' => ['nullable', 'integer', Rule::exists('special_masses', 'id')],
         ];
 
-        // prohibited_with is "this field is forbidden when one of these others
-        // is present", which is what enforces at-most-one rather than
-        // at-least-one: an all-empty notice stays valid and means "everyone".
-        //
-        // Each field lists the other two, so the message names the field the
-        // admin actually filled rather than saying "prohibited with".
-        foreach (self::TARGETS as $target) {
-            $others = implode(',', array_values(array_diff(self::TARGETS, [$target])));
-            $rules[$target][] = "prohibited_with:{$others}";
-        }
-
         return $rules;
+    }
+
+    /**
+     * At most one target.
+     *
+     * Written as a check rather than as a rule because Laravel 13 has no
+     * `prohibited_with` — the family is prohibited, prohibited_if,
+     * prohibited_unless, and nothing that takes a list of other fields. Reaching
+     * for one that does not exist produces a BadMethodCallException at
+     * validation time, which surfaces as a 500 rather than as a field error.
+     *
+     * `prohibited_unless` could express it as a chain of three, at the cost of
+     * a message per field that reads "unless another field is empty" — accurate
+     * and useless to an admin holding one picker. This reports on the *second*
+     * target filled, which is the one they will change.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            /** @var array<string, mixed> $input */
+            $input = $this->all();
+
+            $filled = array_values(array_filter(
+                self::TARGETS,
+                static fn (string $target): bool => ($input[$target] ?? null) !== null
+                    && ($input[$target] ?? '') !== ''
+            ));
+
+            if (count($filled) > 1) {
+                foreach (array_slice($filled, 1) as $target) {
+                    $validator->errors()->add(
+                        $target,
+                        __('Isi paling banyak satu target. Kosongkan semua untuk notice umum.')
+                    );
+                }
+            }
+        });
     }
 
     /**
@@ -91,9 +122,6 @@ class StoreScheduleNoticeRequest extends FormRequest
         return [
             'ends_at.after_or_equal' => 'Akhir tampil tidak boleh lebih awal dari mulai tampil.',
             'starts_at.required' => 'Waktu mulai tampil wajib diisi.',
-            'location_id.prohibited_with' => 'Isi paling banyak satu target. Kosongkan semua untuk notice umum.',
-            'mass_schedule_id.prohibited_with' => 'Isi paling banyak satu target. Kosongkan semua untuk notice umum.',
-            'special_mass_id.prohibited_with' => 'Isi paling banyak satu target. Kosongkan semua untuk notice umum.',
         ];
     }
 

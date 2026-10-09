@@ -113,7 +113,7 @@ it('creates a location', function () {
             'name' => 'Gereja Paroki',
             'slug' => 'gereja-paroki',
             'type' => LocationType::GerejaParoki->value,
-            'address' => 'Jl. 示例',
+            'address' => 'Jalan Contoh No. 1, Putussibau',
             'latitude' => null,
             'longitude' => null,
             'maps_url' => null,

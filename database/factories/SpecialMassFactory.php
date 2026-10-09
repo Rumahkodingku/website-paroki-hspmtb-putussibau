@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Location;
 use App\Models\SpecialMass;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -48,11 +49,30 @@ class SpecialMassFactory extends Factory
     }
 
     /**
-     * A mass in the future at an explicit moment.
+     * A mass still to come. The default already is one; named for symmetry with
+     * past(), so a test saying which case it means does not have to know it.
+     */
+    public function upcoming(): static
+    {
+        return $this->state(fn (): array => [
+            'start_at' => now()->addWeek()->setTime(9, 0),
+        ]);
+    }
+
+    /**
+     * A mass at an explicit moment, converted to UTC first.
+     *
+     * The conversion is not ceremony. Laravel's datetime cast formats a
+     * DateTimeInterface in *its own* timezone rather than converting it, so
+     * handing this a Carbon built from '2026-12-25T09:00' in Asia/Pontianak
+     * stores 09:00 UTC — seven hours late, with nothing anywhere reporting an
+     * error. The request path calls ->utc() explicitly for the same reason.
      */
     public function startingAt(\DateTimeInterface $when): static
     {
-        return $this->state(fn (): array => ['start_at' => $when]);
+        return $this->state(fn (): array => [
+            'start_at' => CarbonImmutable::instance($when)->utc(),
+        ]);
     }
 
     /**

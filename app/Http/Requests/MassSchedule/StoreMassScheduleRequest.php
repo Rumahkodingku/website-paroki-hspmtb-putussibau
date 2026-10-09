@@ -42,7 +42,10 @@ class StoreMassScheduleRequest extends FormRequest
             ...$this->massScheduleRules(),
             // MASS-06 as a rule, on top of the exists check the shared rules
             // already put on this field.
-            'location_id' => [...$this->uniqueOccurrenceRule()],
+            'location_id' => [
+                ...$this->activeLocationRule(),
+                ...$this->uniqueOccurrenceRule(),
+            ],
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Public\MassSchedule;
 
+use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Models\MassSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,6 +19,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class PublicMassScheduleResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -30,7 +33,7 @@ class PublicMassScheduleResource extends JsonResource
             'name' => $this->name,
             'language' => $this->language,
             'notes' => $this->notes,
-            'location' => new PublicLocationResource($this->whenLoaded('location')),
+            'location' => $this->nested(PublicLocationResource::class, $this->whenLoaded('location')),
         ];
     }
 }

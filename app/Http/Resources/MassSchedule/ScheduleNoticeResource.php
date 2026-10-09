@@ -19,6 +19,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ScheduleNoticeResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -39,9 +41,9 @@ class ScheduleNoticeResource extends JsonResource
             // it targets a location or applies to everyone.
             'target_kind' => $this->targetKind()?->value,
             'status' => $this->status(),
-            'location' => new LocationOptionResource($this->whenLoaded('location')),
-            'mass_schedule' => new MassScheduleOptionResource($this->whenLoaded('massSchedule')),
-            'special_mass' => new SpecialMassOptionResource($this->whenLoaded('specialMass')),
+            'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
+            'mass_schedule' => $this->nested(MassScheduleOptionResource::class, $this->whenLoaded('massSchedule')),
+            'special_mass' => $this->nested(SpecialMassOptionResource::class, $this->whenLoaded('specialMass')),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
             ],

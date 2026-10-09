@@ -18,6 +18,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class SpecialMassResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -32,7 +34,7 @@ class SpecialMassResource extends JsonResource
             'end_at' => $this->end_at?->toIso8601String(),
             'notes' => $this->notes,
             'is_active' => $this->is_active,
-            'location' => new LocationOptionResource($this->whenLoaded('location')),
+            'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
             ],
