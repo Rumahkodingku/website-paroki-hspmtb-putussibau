@@ -2322,3 +2322,160 @@ page", dan itu memang kontras yang rendah.
 - **Review visual dua tema** di lima halaman admin dan lima halaman publik
   belum dilakukan — yang di atas adalah angka, dan angka tidak sama dengan
   mata.
+
+---
+
+## D-33 — `Text`: satu komponen tipografi, dan satu perbaikan `cn()`
+
+**Status:** Accepted · Phase 03
+
+`resources/js/components/text.tsx` menjadi satu-satunya cara memilih tipografi
+di seluruh aplikasi. `variant` memetakan enam belas token di
+`resources/css/app.css` ke nama peran, `as` memilih elemen, dan keduanya tidak saling menggantikan.
+
+### 1. Token typography harus didaftarkan ke tailwind-merge
+
+Ini bukan detail kosmetik — **ini bug yang sedang berjalan**.
+
+tailwind-merge hanya mengenal skala Tailwind sendiri, dan `text-` adalah prefix
+untuk ukuran **dan** warna. Jadi setiap token typography yang tidak dikenal
+diklasifikasikan sebagai **warna**, dan dua kelas `text-*` terlihat konflik.
+Urutan menentukan pemenang, secara senyap:
+
+```text
+cn('text-body', 'text-foreground')  =>  'text-foreground'
+```
+
+Dua konsekuensi yang sudah aktif sebelum perubahan ini:
+
+| Komponen | Yang hilang | Akibat |
+| --- | --- | --- |
+| `ui/button.tsx`, ketiganya | `text-body`, `text-button-utility`, `text-button-large` | **setiap Button di aplikasi** tampil pada 16px bawaan browser, bukan 17/14/18px |
+| `ui/badge.tsx` | `text-micro-legal` | Badge tampil pada 16px, bukan 10px |
+
+Perbaikannya: daftarkan enam belas nama token itu pada class group `font-size`
+di `lib/utils.ts`. Warna **tidak** didaftarkan — sudah tertangani oleh group
+`text-color` bawaan tailwind-merge, termasuk nilai arbitrer.
+
+Enam belas nama itu tidak merusak apa pun yang sudah ada. `text-sm`, `text-2xl`
+dan `text-[13px]` tetap berfungsi persis seperti sebelumnya, dan sekarang
+benar-benar berkonflik dengan token desain — sehingga `className="text-2xl"`
+menang seperti yang dimaksud, bukan kalah diam-diam.
+
+**Konsekuensi yang terlihat di layar**, dan disengaja:
+
+| Komponen | Sebelum | Sesudah |
+| --- | --- | --- |
+| Button `lg` | 16px | 18px |
+| Button `sm` | 16px | 14px |
+| Button default | 16px | 17px |
+| Badge | 16px | 10px |
+
+Menutup ini dengan "Button memang selalu 16px selama ini" akan membiarkan bug
+tetap ada dan mengabadikannya.
+
+### 2. `h1`…`h6`: hierarki nyata, bukan tiga varian identik
+
+DESIGN.md mendefinisikan tiga langkah display dan **tidak pernah** mendefinisikan
+level heading. Pemetaan yang dipilih:
+
+| variant | token | px |
+| --- | --- | ---: |
+| `h1` | `display-lg` | 40 |
+| `h2` | `display-md` | 34 |
+| `h3` | `tagline` | 21 |
+| `h4` | `body-strong` | 17 |
+| `h5`, `h6` | `caption-strong` | 14 |
+
+Sebelum ini `h1`, `h2` **dan** `h3` semuanya `font-display text-display-md`, jadi
+outline dokumen tidak membawa hierarki visual sama sekali.
+
+`text-balance` ikut terbawa oleh varian `hero`, `display-lg`, `display-md`, `h1`
+dan `h2`, dan **tidak** oleh `h3` ke bawah. Setiap heading display di aplikasi
+sudah memakainya sebagai `className` tulis-tangan — empat salinan terpisah —
+padahal itu justru ukuran tempat line breaking bawaan browser menghasilkan
+kata yatim yang terbaca sebagai bug tata letak. Pada 21px ke bawah heading
+biasanya satu atau dua baris dan `text-balance` hampir tidak melakukan apa-apa,
+jadi membawa utility yang hanya untuk di-override adalah pemborosan.
+
+`h1` dan `display-lg` identik, begitu pula `h2` dan `display-md`. Itu disengaja,
+dan keduanya perlu dibaca berpasangan: nama `display-*` adalah langkah skala
+yang diambil ketika pemanggil menginginkan ukuran itu pada elemen lain,
+sementara `h1`…`h6` adalah jangkar semantiknya. Meminta `h3` dan mendapat 21px
+adalah point-nya; meminta `h2` dan mendapat 34px tidak berubah.
+
+**Konsekuensi yang terlihat:** h1 Beranda dan halaman error 34 → 40px.
+`SectionHeading level={3}` 34 → 21px — tidak ada halaman yang mengirimnya
+saat ini, jadi tidak ada yang berubah di layar.
+
+### 3. Elemen default diturunkan dari variant
+
+`span` untuk semua yang bukan heading atau kutipan — satu-satunya elemen yang
+valid di setiap posisi teks bisa muncul. Default `<p>` akan membuat
+`<Text variant="caption">` di dalam sebuah paragraf menjadi HTML tidak valid,
+dan `<div>` akan rusak dengan cara yang sama di dalam heading.
+
+Heading default ke tag-nya sendiri, supaya `variant="h3"` tidak bisa diam-diam
+merender span bergaya heading. Itu heading yang tidak terlihat screen reader
+yang menelusuri per level, dan itulah kesalahan yang paling mungkin disebabkan
+oleh API polimorfik. `as` menimpa seluruhnya **tanpa menyentuh `variant`**.
+
+### 4. Yang sengaja tidak ada
+
+- **`success` dan `warning`.** DESIGN.md tidak punya hijau maupun amber di
+  paletnya, dan D-22 sudah menghapus pesan sukses `text-green-600` untuk alasan
+  yang sama. Menambahkannya di sini akan memasukkan warna tak terdokumentasi
+  ke dalam design system lewat pintu belakang.
+- **`code` dan `kbd`.** Tidak ada token, tidak ada font monospace di `@theme`,
+  dan DESIGN.md melarang menambah paket font tanpa keputusan eksplisit.
+  Ditunda sampai ada konsumen nyata **dan** mono font yang terdokumentasi.
+  Varian `blockquote` dibuat justru karena perlakuannya sudah terbukti di
+  `.rich-text blockquote` milik app.css.
+- **Prop `size`.** Berduplikasi dengan `variant`, yang brief sendiri Prioritaskan.
+- **`fontFamily`.** Hanya ada dua nilai, dan display sudah menyatu ke varian
+  display.
+- **`asChild`.** Tidak ada yang membutuhkannya; `TextLink` dan `Badge` membawa
+  mechanismenya sendiri.
+- **`disabled`.** Tidak ada semantik native yang sah pada elemen teks.
+
+### 5. `Heading` (admin) pindah ke token, ukurannya bergeser ≤1px
+
+`text-xl` (20px) dan `text-base` (16px) tidak punya token. Dipetakan ke
+`tagline` (21px) dan `body-strong` (17px + medium). API `Heading` tidak berubah
+— lima halaman memanggilnya dan tidak seorang pun perlu tahu bahwa tipografi
+di bawahnya berpindah. Yang dibeli: tracking dan line-height sekarang berasal dari
+tabel yang sama dengan halaman publik.
+
+Admin **sengaja** memakai skala yang jauh lebih kecil dari situs publik. Halaman
+admin adalah permukaan kerja, bukan halaman editorial, dan langkah display
+DESIGN.md akan membuat panel pengaturan sekeras beranda.
+
+### 6. `RichText` tidak disentuh
+
+Invariant sanitasi server-side dan satu-satunya `dangerouslySetInnerHTML` di repo
+bergantung padanya tetap apa adanya. `tests/Unit/ArchitectureTest.php` menyebut
+nama file itu secara eksplisit dan akan gagal kalau `<Text>` masuk ke sana.
+
+### 7. Bukti
+
+- `tests/js/components/text.test.tsx` — 100 kasus: children, setiap variant,
+  pemetaan heading ke level yang benar, `as`, warna semantik, alignment,
+  transform, decoration, override, truncate/lineClamp/break/whitespace,
+ atribut native, event handler, komposisi dengan ikon serta link, dan
+  `text-balance` yang terbawa varian display.
+- `tests/js/components/text.types.tsx` — dikompilasi, tidak pernah diimpor.
+  Tujuh `@ts-expect-error` membuktikan tipe menolak `<Text as="p" href>`,
+  `color="success"`, `weight="bold"`, dan `lineClamp={12}`. Direktorinya
+  `.types.tsx` dan bukan `.test.tsx` karena glob Vitest akan mengambilnya dan
+  gagal karena tidak berisi test.
+- `tests/js/lib/utils.test.ts` — kontrak merge, termasuk kasus Button dan Badge
+  yang selama ini diam-diam kehilangan tokennya.
+
+### 8. Yang belum dikerjakan
+
+- **Step-down responsif untuk hero** (56 → 40 → 34 → 28, roadmap §"Typography
+  responsive strategy") tetap belum diimplementasikan. `Text` tidak membawa
+  breakpoint karena itu keputusan komposisi halaman, bukan typography; pemanggil
+  menuliskannya lewat `className`.
+- **Review visual dua tema.** Angka kontras di atas adalah hitungan, dan
+  hitungan bukan mata.

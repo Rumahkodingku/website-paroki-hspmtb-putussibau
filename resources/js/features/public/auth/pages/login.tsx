@@ -1,6 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -47,9 +48,18 @@ export default function Login({ status, canResetPassword }: Props) {
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
+                                        /*
+                                         * caption rather than the text-sm it
+                                         * carried before: same 14px, but the
+                                         * design system's tracking instead of
+                                         * Tailwind's scale step. TextLink owns
+                                         * its own colour and underline - it is
+                                         * a link, not a piece of text - so only
+                                         * the size comes from here.
+                                         */
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-caption"
                                             tabIndex={5}
                                         >
                                             Forgot your password?
@@ -98,9 +108,22 @@ export default function Login({ status, canResetPassword }: Props) {
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-navy dark:text-navy-light">
+                /*
+                 * A status message, not body copy. `caption` is the same 14px
+                 * this was at as text-sm, and `brand` carries the dark override
+                 * with it - see the colour variant's comment for why that pair
+                 * is not left to the caller.
+                 */
+                <Text
+                    as="p"
+                    variant="caption"
+                    weight="medium"
+                    color="brand"
+                    align="center"
+                    className="mb-4"
+                >
                     {status}
-                </div>
+                </Text>
             )}
         </>
     );

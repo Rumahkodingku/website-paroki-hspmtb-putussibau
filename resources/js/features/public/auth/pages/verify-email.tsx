@@ -1,5 +1,6 @@
 // Components
 import { Form, Head } from '@inertiajs/react';
+import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -23,10 +24,17 @@ export default function VerifyEmail({ status }: Props) {
             <Head title="Verifikasi Email" />
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-center text-sm font-medium text-navy dark:text-navy-light">
+                <Text
+                    as="p"
+                    variant="caption"
+                    weight="medium"
+                    color="brand"
+                    align="center"
+                    className="mb-4"
+                >
                     A new verification link has been sent to the email address
                     you provided during registration.
-                </div>
+                </Text>
             )}
 
             <Form {...send.form()} className="space-y-6 text-center">
@@ -39,7 +47,7 @@ export default function VerifyEmail({ status }: Props) {
 
                         <TextLink
                             href={logout()}
-                            className="mx-auto block text-sm"
+                            className="mx-auto block text-caption"
                         >
                             Log out
                         </TextLink>

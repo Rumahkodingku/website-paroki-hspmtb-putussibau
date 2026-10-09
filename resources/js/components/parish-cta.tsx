@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -24,8 +25,6 @@ export function ParishCta({
     align = 'left',
     className,
 }: ParishCtaProps) {
-    const Heading = level === 2 ? 'h2' : 'h3';
-
     return (
         <div
             className={cn(
@@ -40,12 +39,20 @@ export function ParishCta({
                     align === 'center' && 'mx-auto max-w-2xl',
                 )}
             >
-                <Heading className="font-display text-display-md text-balance">
+                <Text as={level === 2 ? 'h2' : 'h3'} variant="display-md">
                     {title}
-                </Heading>
+                </Text>
 
                 {description && (
-                    <p className="text-lead text-navy-light">{description}</p>
+                    /*
+                     * brand-inverse, because the CTA sits on bg-navy. The
+                     * container already sets text-white; navy-light is the
+                     * ramp read against that surface, and it measures 15.24:1
+                     * there where white on navy measures less.
+                     */
+                    <Text as="p" variant="lead" color="brand-inverse">
+                        {description}
+                    </Text>
                 )}
             </div>
 

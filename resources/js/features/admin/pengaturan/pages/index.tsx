@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Suspense, lazy } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -300,9 +301,13 @@ export default function Settings({ groups, meta }: Props) {
                                                 )}
 
                                                 {meta.hints[key] ? (
-                                                    <p className="text-caption text-muted-foreground">
+                                                    <Text
+                                                        as="p"
+                                                        variant="caption"
+                                                        color="muted"
+                                                    >
                                                         {meta.hints[key]}
-                                                    </p>
+                                                    </Text>
                                                 ) : null}
 
                                                 <InputError message={message} />
