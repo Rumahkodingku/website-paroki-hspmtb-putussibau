@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 
 import AppLogoIcon from '@/components/app-logo-icon';
+import { Text } from '@/components/text';
 
 export default function AppLogo() {
     const { name } = usePage().props;
@@ -17,9 +18,21 @@ export default function AppLogo() {
                 <AppLogoIcon className="size-5 fill-current text-white" />
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
+                {/*
+                    leading-tight stays on the wrapper rather than becoming a
+                    leading override here: it is what makes this a single-line
+                    block in a 32px row, and the paragraph's own line height is
+                    not the thing being tuned.
+                */}
+                <Text
+                    as="span"
+                    variant="body-strong"
+                    weight="semibold"
+                    leading="tight"
+                    truncate
+                >
                     {name}
-                </span>
+                </Text>
             </div>
         </>
     );

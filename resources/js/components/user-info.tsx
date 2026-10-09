@@ -1,3 +1,4 @@
+import { Text } from '@/components/text';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
 import type { User } from '@/types';
@@ -18,12 +19,22 @@ export function UserInfo({
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
+            {/*
+                The container keeps text-sm leading-tight because that is a
+                two-line stack and the tightness is what makes it one; the two
+                lines inside it are named roles. name is body-strong (the
+                user's own name is the strongest thing in a 32px avatar row)
+                and email is fine-print, which is two steps below and reads as
+                the secondary line without needing muted to do all the work.
+            */}
             <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <Text as="span" variant="body-strong" truncate>
+                    {user.name}
+                </Text>
                 {showEmail && (
-                    <span className="truncate text-xs text-muted-foreground">
+                    <Text as="span" variant="fine-print" color="muted" truncate>
                         {user.email}
-                    </span>
+                    </Text>
                 )}
             </div>
         </>

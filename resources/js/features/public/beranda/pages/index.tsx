@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import { ParishCard, ParishCardContent } from '@/components/parish-card';
 import { PublicSection } from '@/components/public-section';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { dashboard, login } from '@/routes';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
@@ -31,19 +32,33 @@ export default function Welcome() {
             <PublicSection>
                 <div className="flex flex-col gap-8">
                     <section className="space-y-6">
-                        <p className="text-caption-strong text-red-on-surface">
+                        <Text as="p" variant="caption-strong" color="danger">
                             Paroki Hati Santa Perawan Maria Tak Bernoda
-                        </p>
+                        </Text>
 
-                        <h1 className="max-w-3xl font-display text-display-md text-balance">
+                        {/*
+                            variant h1 rather than display-md: this is the
+                            page's h1 and the largest heading the public site
+                            uses. display-md is the section step, and using it
+                            for both is what made every h1, h2 and h3 the same
+                            size. text-balance comes with the variant - a
+                            one-sentence welcome that breaks badly reads as a
+                            bug.
+                        */}
+                        <Text as="h1" variant="h1" className="max-w-3xl">
                             [ISI: kalimat sambutan paroki]
-                        </h1>
+                        </Text>
 
-                        <p className="max-w-2xl text-body text-muted-foreground">
+                        <Text
+                            as="p"
+                            variant="body"
+                            color="muted"
+                            className="max-w-2xl"
+                        >
                             [ISI: ringkasan singkat siapa kami dan mengapa situs
                             ini ada. Dipilih agar pengunjung baru memahami
                             sebelum menjelajah.]
-                        </p>
+                        </Text>
 
                         <div className="flex flex-wrap items-center gap-3">
                             {auth.user ? (
@@ -94,21 +109,29 @@ export default function Welcome() {
                         ].map((item) => (
                             <ParishCard key={item.label}>
                                 <ParishCardContent className="flex flex-col gap-2">
-                                    <p className="text-caption-strong text-muted-foreground">
+                                    <Text
+                                        as="p"
+                                        variant="caption-strong"
+                                        color="muted"
+                                    >
                                         {item.label}
-                                    </p>
-                                    <p className="text-body text-foreground">
+                                    </Text>
+                                    <Text
+                                        as="p"
+                                        variant="body"
+                                        color="foreground"
+                                    >
                                         {item.value}
-                                    </p>
+                                    </Text>
                                 </ParishCardContent>
                             </ParishCard>
                         ))}
                     </section>
 
-                    <p className="text-fine-print text-muted-foreground">
+                    <Text as="p" variant="fine-print" color="muted">
                         Halaman ini adalah placeholder fondasi. Situs publik
                         lengkap dibangun pada phase Beranda berikutnya.
-                    </p>
+                    </Text>
                 </div>
             </PublicSection>
         </>

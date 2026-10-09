@@ -1,5 +1,6 @@
 import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
+import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
 
 type EmptyStateProps = {
@@ -22,8 +23,6 @@ export function EmptyState({
     level = 3,
     className,
 }: EmptyStateProps) {
-    const Heading = level === 2 ? 'h2' : 'h3';
-
     return (
         <div
             className={cn(
@@ -41,14 +40,30 @@ export function EmptyState({
             )}
 
             <div className="space-y-1">
-                <Heading className="text-caption-strong text-foreground">
+                {/*
+                    caption-strong rather than a heading step, on purpose.
+                    An empty state is a status message sitting inside whatever
+                    section the page already headed, so it should not compete
+                    with that section's own heading - and defaulting to level 3
+                    keeps it from adding a sibling at h2.
+                */}
+                <Text
+                    as={level === 2 ? 'h2' : 'h3'}
+                    variant="caption-strong"
+                    color="foreground"
+                >
                     {title}
-                </Heading>
+                </Text>
 
                 {description && (
-                    <p className="mx-auto max-w-md text-body text-muted-foreground">
+                    <Text
+                        as="p"
+                        variant="body"
+                        color="muted"
+                        className="mx-auto max-w-md"
+                    >
                         {description}
-                    </p>
+                    </Text>
                 )}
             </div>
 

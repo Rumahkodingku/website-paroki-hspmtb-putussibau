@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { Text } from '@/components/text';
 import {
     Card,
     CardContent,
@@ -34,8 +35,21 @@ export default function AuthCardLayout({
                 <div className="flex flex-col gap-6">
                     <Card className="rounded-xl">
                         <CardHeader className="px-10 pt-8 pb-0 text-center">
+                            {/*
+                                CardTitle and CardDescription keep their own
+                                classes: ui/card.tsx is a generated shadcn
+                                primitive and AGENTS.md forbids restyling it.
+                                Only the description's inner span is a Text,
+                                because that is application code and it is what
+                                puts the design system's own tracking on the
+                                line instead of inheriting text-sm.
+                            */}
                             <CardTitle className="text-xl">{title}</CardTitle>
-                            <CardDescription>{description}</CardDescription>
+                            <CardDescription>
+                                <Text as="span" variant="caption">
+                                    {description}
+                                </Text>
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="px-10 py-8">
                             {children}

@@ -384,11 +384,44 @@ feature; two or more makes it app-level:
 | `password-input.tsx` | four auth and account pages | `components/` |
 | `heading.tsx` | five pages | `components/` |
 | `text-link.tsx` | three auth pages | `components/` |
+| `text.tsx` | every text element outside `components/ui/` | `components/` |
 
 **`components/shared/` is not created yet.** It only means something once two or
 more features need the same thing, and Part A says a directory is created when it
 has a first file. `types/` holds only the types more than one feature needs, so
 that deleting a feature deletes its contract along with it.
+
+### 1.2 Typography
+
+**`text.tsx` owns the choice of typography; `as` owns the choice of element.**
+The two are independent, and `as` never changes the variant.
+
+`variant` maps the sixteen `--text-*` tokens in `resources/css/app.css` onto
+role names. `h1`…`h6` are mapped onto display steps DESIGN.md already defines —
+`h1` is `display-lg`, `h2` is `display-md`, `h3` is `tagline`, and so on — rather
+than given tokens of their own, because the document never defines heading
+levels. There is no `size` prop; the token scale is not an API to route around.
+
+Default element is derived from the variant: headings and `blockquote` render
+their own tag, everything else is a `span`. That is why `<Text variant="h3">`
+cannot silently produce a styled span instead of a heading. Write `as` to choose
+the element and `variant` for the style, and neither reaches into the other.
+
+Use `Heading` for an admin section title, `SectionHeading` for a public section
+block with an eyebrow, description and action, and `RichText` for stored HTML —
+`RichText` is not interchangeable with `Text` and must not be given one. Its
+`html` prop is the only `dangerouslySetInnerHTML` in the repository and is only
+safe because `HtmlSanitizer` ran on the way into storage; see DECISIONS.md D-25.
+
+`components/ui/*` keeps its own typography. Button, Badge, Label and the rest are
+shadcn primitives with size steps that are part of their hit target, and
+AGENTS.md forbids restyling them.
+
+`cn()` merges classes, and the design tokens have to be registered with
+tailwind-merge for it to merge them correctly — see DECISIONS.md D-33. Passing a
+design token and a text colour through `cn()` unregistered silently drops the
+size, which is what made every Button in the application render at the browser's
+default size.
 
 These boundaries are asserted in `tests/Unit/ArchitectureTest.php`. The document
 is not the only thing keeping them in place.
