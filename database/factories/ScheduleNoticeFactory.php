@@ -37,6 +37,21 @@ class ScheduleNoticeFactory extends Factory
     }
 
     /**
+     * A notice nobody targeted: it applies to everyone.
+     *
+     * Already the default; named because "general" is the case most of the
+     * MASS-05 tests want and saying so reads better than relying on it.
+     */
+    public function general(): static
+    {
+        return $this->state(fn (): array => [
+            'location_id' => null,
+            'mass_schedule_id' => null,
+            'special_mass_id' => null,
+        ]);
+    }
+
+    /**
      * A notice about one recurring schedule.
      */
     public function forSchedule(MassSchedule $schedule): static

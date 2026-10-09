@@ -40,9 +40,16 @@ class DuplicateMassScheduleAction
     public function handle(MassSchedule $source, Location $target, array $overrides = []): MassSchedule
     {
         return DB::transaction(function () use ($source, $target, $overrides): MassSchedule {
-            $copy = $source->replicate([
-                'location_id' => $target->getKey(),
-            ]);
+            // replicate() with no argument copies every column except the
+            // primary key and the timestamps, which is exactly what roadmap 5.7
+            // asks for. Its one parameter is a list of attributes to *skip*,
+            // not values to set — passing location_id there would exclude the
+            // column and leave the copy pointing at the source's location, so
+            // the unique index on (location_id, day_of_week, start_time) would
+            // reject it and the copy would appear to do nothing.
+            $copy = $source->replicate();
+
+            $copy->location_id = $target->getKey();
 
             // Only apply the keys the caller actually supplied, so a partial
             // override does not blank the columns it left out.

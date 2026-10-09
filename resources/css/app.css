@@ -597,3 +597,90 @@
         @apply bg-muted text-body-strong font-semibold;
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Print
+|--------------------------------------------------------------------------
+|
+| PRD XC-B2 requires the schedule page to have a print stylesheet: no
+| navigation, no banners, clean typography. There was none in this file before
+| Phase 04 — not one @media print anywhere — so this is the first.
+|
+| Two mechanisms, deliberately. Tailwind's print: variant handles the elements a
+| component knows about (the filter, the share buttons), because that keeps the
+| decision next to the markup. These rules handle what markup cannot: the page
+| chrome, which lives in the layout and has no opinion about being printed.
+|
+| The schedule is expected to be printed and carried to church, so it is the
+| thing the rules below protect. Everything else is removed to make room.
+|
+*/
+
+@media print {
+    /*
+     * Chrome. The navbar, the footer and the skip link are the three things a
+     * printed schedule cannot use and a visitor will always be told to remove.
+     * Removing them here rather than in the layout means the layout does not
+     * need to know it can be printed.
+     */
+    header nav,
+    header [role='banner'],
+    footer,
+    [role='contentinfo'],
+    .skip-to-content {
+        display: none !important;
+    }
+
+    /*
+     * A printed page is paper, not a screen: the soft canvas and the ink-muted
+     * text colour are chosen for a backlit display and cost toner here.
+     */
+    body {
+        background: #fff !important;
+    }
+
+    main {
+        padding: 0 !important;
+    }
+
+    /*
+     * Cards lose their border-radius and shadow. A rounded box in print is a
+     * shape a printer either crops or wastes ink filling.
+     */
+    .print-flat,
+    [data-print-flat] {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /*
+     * Links are followed by their URL only where the URL is the point. On a
+     * schedule every link is either a map link or nothing, and printing a
+     * Google Maps URL under every mass makes the page unreadable.
+     */
+    a[href^='http']::after {
+        content: ' (' attr(href) ')';
+        font-size: 0.75em;
+        color: #555;
+    }
+
+    /*
+     * The map buttons are a screen affordance; the printed page keeps the
+     * location's name and address, which is what someone needs on paper.
+     */
+    [data-test='maps-link'],
+    [data-test='location-maps-link'] {
+        display: none !important;
+    }
+
+    /*
+     * `print:hidden` already removes the filter, the tabs and the share
+     * buttons. This covers the tab panels' own borders so the surviving one
+     * does not carry a rule that framed the removed sibling.
+     */
+    [role='tabpanel'] {
+        border: 0 !important;
+        padding: 0 !important;
+    }
+}

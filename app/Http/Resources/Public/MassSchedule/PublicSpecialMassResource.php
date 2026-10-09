@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Public\MassSchedule;
 
+use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Models\SpecialMass;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,6 +20,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class PublicSpecialMassResource extends JsonResource
 {
+    use ResolvesNestedResources;
+
     /**
      * @return array<string, mixed>
      */
@@ -30,7 +33,7 @@ class PublicSpecialMassResource extends JsonResource
             'description' => $this->description,
             'start_at' => $this->start_at->toIso8601String(),
             'end_at' => $this->end_at?->toIso8601String(),
-            'location' => new PublicLocationResource($this->whenLoaded('location')),
+            'location' => PublicLocationResource::make($this->whenLoaded('location'))->resolve(),
         ];
     }
 }
