@@ -97,6 +97,21 @@
         <x-inertia::head>
             <title>{{ $seoTitle ?? config('app.name', 'Laravel') }}</title>
 
+            {{--
+                Counterpart of the two tags Seo adds in Phase 03. They have to
+                live here as well or they exist only after hydration, which is the
+                exact failure the rest of this block exists to prevent. A client
+                tag whose key has no server counterpart does not replace anything:
+                Inertia matches on data-inertia, so the two end up side by side
+                and the crawler sees the indexable default.
+
+                index,follow is the right server-side default because the majority
+                of pages are real pages; a placeholder page that renders <Seo
+                noIndex> replaces this by the same key.
+            --}}
+            <meta data-inertia="robots" name="robots" content="index, follow">
+            <meta data-inertia="og-locale" property="og:locale" content="id_ID">
+
             @if($seoSiteName)
                 <meta data-inertia="og-site-name" property="og:site_name" content="{{ $seoSiteName }}">
             @endif

@@ -226,3 +226,40 @@ test('maintenance mode answers with the framework page, not ours', function () {
         $this->artisan('up');
     }
 });
+
+test('the error page is rendered without shared props', function () {
+    /*
+     * A constraint Phase 03 discovered by breaking the 404 page, and the reason
+     * a component inside PublicLayout may not assume props.seo exists.
+     *
+     * Shared props are registered by HandleInertiaRequests, which is appended to
+     * the web middleware group. Routing runs before middleware, so a request to
+     * an unknown URL throws NotFoundHttpException before that registration
+     * happens. The handler then renders the error page itself, outside the
+     * pipeline, and the response carries only its own props.
+     *
+     * This is asserted rather than left as a comment because it is invisible
+     * until something reads a shared prop: the error page itself did not read
+     * one until ParishFooter started reading props.seo.siteName, and the
+     * symptom was a blank 404 page rather than a failed assertion anywhere.
+     */
+    $props = $this->get('/halaman-yang-tidak-ada')
+        ->assertNotFound()
+        ->viewData('page')['props'];
+
+    expect(array_keys($props))->toBe(['status'])
+        ->and($props['status'])->toBe(404);
+
+    // And the contrast that makes it legible: a page that went through the
+    // middleware has all of them.
+    $normal = $this->get('/')->viewData('page')['props'];
+
+    expect($normal)->toHaveKeys([
+        'name',
+        'auth',
+        'locale',
+        'displayTimezone',
+        'sidebarOpen',
+        'seo',
+    ]);
+});
