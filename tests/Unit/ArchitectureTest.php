@@ -571,3 +571,134 @@ test('only the error page renders sanitized html on the frontend', function () {
 
     expect($offenders)->toBe([]);
 });
+
+/*
+|--------------------------------------------------------------------------
+| The public shell's three token contracts
+|--------------------------------------------------------------------------
+|
+| Phase 03 completed the public navigation, which turned three rules that had
+| only ever been written in prose into things a machine could check. Each of the
+| three was, at some point during this phase, actually broken:
+|
+|   - the navbar had href: '/' and the footer had two href: '#'
+|   - two of the footer groups reached for a brand colour by hex value
+|   - the Seo component and app.blade.php kept their head keys in step by hand,
+|     which is exactly the kind of agreement that survives review and dies in a
+|     merge
+|
+| None of them is a style preference. A dead href is navigation to nowhere; an
+| arbitrary hex cannot be re-themed and DESIGN.md forbids it outright; a
+| duplicated meta tag is read by a crawler as two descriptions.
+|
+*/
+
+test('navigation never hard-codes an application URL', function () {
+    // AGENTS.md: "Never hard-code app URLs." Wayfinder exists so that changing a
+    // route prefix is one edit rather than a search, and a literal string opts
+    // out of that silently - the link keeps working, which is why nobody notices
+    // until the prefix moves.
+    //
+    // Both shapes are refused, and a regex rather than a list of literals
+    // because a list was the wrong shape twice: it caught href="/" but let
+    // href="/beranda" through, which is the same mistake with a different
+    // word. Any href whose value is a string starting with a slash is a
+    // hard-coded application URL.
+    //
+    // A generated href cannot match: href={jadwalMisa()} and href={link.href}
+    // are calls or variables, and the pattern needs a quote right after the
+    // equals sign (with an optional brace for href={"..."}).
+    //
+    // A consequence worth knowing: the pattern also matches inside a comment,
+    // so a component cannot explain what it is not allowed to write by writing
+    // it. That is mildly annoying and mildly protective.
+    //
+    // Scanned across every frontend file rather than a named pair, because the
+    // rule is not about the navbar and the footer specifically - it is about any
+    // navigation in the app - and because naming two files made this test break
+    // the day the parish navbar moved under layouts/public/components.
+    $offenders = [];
+
+    foreach (File::allFiles(resource_path('js')) as $file) {
+        if (! in_array($file->getExtension(), ['ts', 'tsx'], true)) {
+            continue;
+        }
+
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+
+        // Generated output is not ours to restyle.
+        if (Str::startsWith(Str::after($relative, 'resources/js/'), [
+            'actions/',
+            'routes/',
+            'wayfinder/',
+        ])) {
+            continue;
+        }
+
+        $contents = (string) $file->getContents();
+
+        if (preg_match('/\bhref\s*(?:=|:)\s*\{?\s*[\'"]\//', $contents, $matches) === 1) {
+            $offenders[] = "{$relative}: {$matches[0]}";
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
+test('no component reaches for a brand colour by hex value', function () {
+    // DESIGN.md, "Tailwind Rules": avoid arbitrary values such as bg-[#AB020E]
+    // in application components, and keep the brand tokens in the global theme.
+    //
+    // The pattern matched is a Tailwind arbitrary value, not a hex in prose:
+    // [ #AB020E ] is the only way a colour reaches the DOM this way, so this
+    // cannot fire on a comment or on a documentation string the way a bare
+    // /#[0-9A-F]{6}/ would.
+    $offenders = [];
+
+    foreach (File::allFiles(resource_path('js')) as $file) {
+        // Generated and restyled on purpose; the shadcn primitives carry their
+        // own values and AGENTS.md forbids editing them.
+        if (Str::startsWith(Str::after($file->getRealPath(), base_path().'/resources/js/'), [
+            'actions/',
+            'routes/',
+            'wayfinder/',
+            'components/ui/',
+        ])) {
+            continue;
+        }
+
+        if (preg_match('/\[#[0-9A-Fa-f]{3,8}\]/', (string) $file->getContents()) === 1) {
+            $offenders[] = Str::after($file->getRealPath(), base_path().'/');
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
+test('the seo head keys match the ones the blade template renders', function () {
+    // Inertia manages the document head by the data-inertia attribute and matches
+    // a server tag to a client tag by its value. That is the only mechanism
+    // joining the two layers, and it is load-bearing: SSR is off (D-26), so the
+    // blade output is what a crawler and a WhatsApp unfurl actually read.
+    //
+    // A key present in one file and not the other does not error. It produces a
+    // page where the client tag sits *next to* the server tag instead of
+    // replacing it - two meta descriptions, two og:title - and nothing in a
+    // browser shows it. Phase 03 added robots and og:locale to both sides in one
+    // change; this is what keeps the next person from adding them to one.
+    $blade = (string) File::get(resource_path('views/app.blade.php'));
+    $component = (string) File::get(resource_path('js/components/seo.tsx'));
+
+    preg_match_all('/data-inertia="([^"]+)"/', $blade, $bladeMatches);
+    preg_match_all('/head-key="([^"]+)"/', $component, $componentMatches);
+
+    $inBlade = array_values(array_unique($bladeMatches[1]));
+    $inComponent = array_values(array_unique($componentMatches[1]));
+
+    // Only keys the two are meant to share. og:title, og:description and
+    // canonical are also conditional in blade, and canonical is emitted as a
+    // <link> in both, so a key can legitimately appear in one file and not the
+    // other without being a bug. What must never happen is a client key with no
+    // server counterpart, because that tag can never replace anything.
+    expect(array_diff($inComponent, $inBlade))->toBe([]);
+});

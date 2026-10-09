@@ -20,7 +20,7 @@ export default function AppearanceToggleTab({
     return (
         <div
             className={cn(
-                'inline-flex gap-1 rounded-lg bg-muted p-1 dark:bg-secondary',
+                'inline-flex gap-1 rounded-lg bg-muted p-1',
                 className,
             )}
             {...props}
@@ -31,9 +31,17 @@ export default function AppearanceToggleTab({
                     onClick={() => updateAppearance(value)}
                     className={cn(
                         'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
+                        /*
+                         * bg-card, not bg-background. DESIGN.md's Appearance
+                         * Selector asks for "one elevated surface step" on the
+                         * selected option. In light mode card is canvas, so
+                         * nothing changes; in dark mode background is
+                         * dark-canvas, which sits below the muted container and
+                         * would leave the selected tab invisible at 1.11:1.
+                         */
                         appearance === value
-                            ? 'bg-background text-foreground shadow-xs'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-secondary/60',
+                            ? 'bg-card text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                     )}
                 >
                     <Icon className="-ml-1 h-4 w-4" />

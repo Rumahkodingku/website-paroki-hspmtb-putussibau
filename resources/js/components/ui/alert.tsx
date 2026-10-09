@@ -3,6 +3,22 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/*
+ * Restyled onto docs/DESIGN.md, and the destructive variant is the reason this
+ * file is one of the four AGENTS.md calls out as deliberately edited.
+ *
+ * DESIGN.md maps accent-foreground to gold-dark and destructive to primary, and
+ * both are followed except where a value cannot be read. destructive-text is the
+ * case: the alert renders the destructive colour as TEXT on a red-tinted
+ * surface, and #AB020E on red-soft-dark measures 2.08:1. red-on-surface points at
+ * primary-on-dark in dark mode, which measures 5.61:1 on the same surface.
+ *
+ * Destructive itself is left alone, because it is right where it is used as a
+ * fill: a destructive button is white on #AB020E, which is 7.65:1. The split is
+ * the same one every other token in app.css had to make.
+ *
+ * @see docs/DECISIONS.md D-32
+ */
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
@@ -10,7 +26,7 @@ const alertVariants = cva(
       variant: {
         default: "bg-background text-foreground",
         destructive:
-          "border-destructive/20 bg-primary-light text-destructive [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/80",
+          "border-destructive/20 bg-red-soft text-red-on-surface [&>svg]:text-current *:data-[slot=alert-description]:text-red-on-surface/80",
       },
     },
     defaultVariants: {
