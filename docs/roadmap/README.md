@@ -43,9 +43,9 @@ PHASE 11 — Production, Content Population & Handover
 | Phase        | Focus                                     | Status     |
 | ------------ | ----------------------------------------- | ---------- |
 | **Phase 0**  | Product Scope & Initial Preparation       | ✅ Done    |
-| **Phase 1**  | Project Foundation                        | 🟡 Current |
-| **Phase 2**  | Authentication & Admin Foundation         | ⚪ Planned |
-| **Phase 3**  | Design System & Public Website Shell      | ⚪ Planned |
+| **Phase 1**  | Project Foundation                        | ✅ Done    |
+| **Phase 2**  | Authentication & Admin Foundation         | ✅ Done    |
+| **Phase 3**  | Design System & Public Website Shell      | 🟡 Current |
 | **Phase 4**  | Mass Schedule                             | ⚪ Planned |
 | **Phase 5**  | News & Agenda                             | ⚪ Planned |
 | **Phase 6**  | Parish Profile & Services                 | ⚪ Planned |
@@ -148,22 +148,28 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 1 — Project Foundation
+### Phase 3 — Design System & Public Website Shell
 
-Phase ini membangun fondasi teknis proyek sebelum pengembangan authentication, admin foundation, design system, dan modul bisnis.
+Phase ini membangun shell antarmuka publik: design token HSPMTB, komponen
+bersama, navigasi yang bisa diklik, route publik PRD §5.1 sebagai placeholder,
+dan fondasi SEO. Modul bisnis belum disentuh.
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-01-project-foundation.md
+roadmap/phase-03-design-system-&-public-website-shell.md
+plan-implementation/plan-phase-03-design-system-public-website-shell.md
 ```
 
-Setelah Phase 1 selesai:
+Phase 1 dan Phase 2 selesai lebih dahulu. Keputusan Phase 03 tercatat di
+`docs/DECISIONS.md` D-31.
+
+Setelah Phase 3 selesai:
 
 ```text
-Phase 1
+Phase 3
    ↓
-Phase 2 — Authentication & Admin Foundation
+Phase 4 — Mass Schedule
 ```
 
 ---

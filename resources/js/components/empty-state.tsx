@@ -9,27 +9,21 @@ type EmptyStateProps = {
     icon?: LucideIcon;
     /** Primary call to action, such as "Create the first one". */
     action?: ReactNode;
+    /** Heading level, so a page can keep its outline intact.  */
+    level?: 2 | 3;
     className?: string;
 };
 
-/**
- * Shown when a list or section has no content yet.
- *
- * Every data-driven view needs an empty state, so this is a primitive rather
- * than a per-page block. The surface stays flat: DESIGN.md asks for surface
- * changes rather than decorative chrome, and a bordered box would compete with
- * the content that replaces it later.
- *
- * Copy should say what will appear here and what to do next. "No data" on its
- * own leaves the reader stuck.
- */
 export function EmptyState({
     title,
     description,
     icon: Icon,
     action,
+    level = 3,
     className,
 }: EmptyStateProps) {
+    const Heading = level === 2 ? 'h2' : 'h3';
+
     return (
         <div
             className={cn(
@@ -47,10 +41,12 @@ export function EmptyState({
             )}
 
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">{title}</h3>
+                <Heading className="text-caption-strong text-foreground">
+                    {title}
+                </Heading>
 
                 {description && (
-                    <p className="mx-auto max-w-md text-sm text-muted-foreground">
+                    <p className="mx-auto max-w-md text-body text-muted-foreground">
                         {description}
                     </p>
                 )}

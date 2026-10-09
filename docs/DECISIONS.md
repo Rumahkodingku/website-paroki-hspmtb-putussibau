@@ -1965,3 +1965,360 @@ muncul (`features/admin/settings/akun`).
 - Test arch "no two features claim the same page name" meledak jadi 33 kegagalan
   begitu `index.tsx` masuk: dua fitur sama-sama punya `index.tsx`, keduanya
   terbaca bernama `index`. False positive yang hanya terlihat setelah dijalankan.
+
+---
+
+## D-31 — Public website shell Phase 03, dan 10 route sementara
+
+**Status:** Accepted · berlaku sejak P03 · branch
+`feat/phase-03-design-system-public-website-shell`
+
+Phase 03 membangun shell publik: design token elevation, komponen bersama,
+`PublicLayout` yang sudah jadi shell tunggal, navbar dan footer yang bisa
+diklik, 23 route placeholder, dan fondasi SEO. Yang tersisa di dokumen ini adalah
+apa yang **sengaja tidak** diselesaikan, dan kenapa.
+
+### 1. Route publik dibangun sebagai placeholder
+
+PRD §5.1 mendaftarkan 23 URL. Semuanya dibuat sekarang, tanpa query, props,
+controller, atau CRUD — roadmap §10 mengizinkan placeholder untuk pengujian
+navigasi dan melarang sisanya. Sub-halaman profil menjadi lima halaman statis
+karena PRD §5.1 memberi masing-masing URL sendiri dan bookmark harus tetap bekerja.
+
+Teks placeholder ditulis di page React, bukan di PHP atau Blade. Kalimat seperti
+`[ISI: halaman ini diimplementasikan pada Fase Profil]` hanya bisa jujur berada di
+tempat yang jelas sedang menampilkan placeholder; di sisi server ia akan
+terkirim sebagai konten.
+
+### 2. XC-E3 ditunda, bukan dianggap selesai
+
+Selama route detail placeholder hidup, `/berita/{slug}` mengembalikan **200 untuk
+slug valid apa pun**. PRD XC-E3 (MUST) mensyaratkan 404 bagi konten draf atau
+belum terbit.
+
+Ini penundaan bertanggal, bukan ketidaksengaja:
+
+| Route | Fase yang menggantinya |
+| --- | --- |
+| `berita.show` | Fase 4 |
+| `agenda.show`, `agenda.ics` | Fase 4 |
+| `pelayanan.show` | Fase 5 |
+| `komunitas.show` | Fase 5 |
+| `galeri.show` | Fase 6 |
+
+Setiap penggantian **harus** memakai route dengan model binding, sehingga slug yang
+tidak ada kembali 404 secara otomatis.
+
+`tests/Feature/Public/PublicPlaceholderRoutesTest.php` mengunci daftar route ini.
+Kalau satu route placeholder hilang tanpa diganti, test gagal dan pesannya
+menyebut D-31 — supaya penghapusan yang disengaja selalu disertai penggantiannya.
+
+### 3. `.ics` dan `/unduh` mengembalikan placeholder, bukan 501
+
+`/agenda/{slug}/ics` mengembalikan `VCALENDAR` minimal tanpa `VTIMEZONE` dan tanpa
+`VEVENT`; `/download/{id}/unduh` mengembalikan body teks tanpa counter dan tanpa
+nama berkas. Bentuk respons (status dan content-type) benar agar bisa diuji, dan
+`Content-Type: text/calendar` dengan line ending CRLF diuji secara terpisah karena
+RFC 5545 mensyaratkannya.
+
+Logika domain tetap milik fase masing-masing: konversi WIB dan pembuatan kalender
+adalah bisnis Agenda; counter unduhan dan nama berkas adalah bisnis Download.
+Respons 501 ditolak karena menghasilkan halaman error dan bertabrakan dengan AC
+§10 "Navigation tidak menghasilkan broken route".
+
+### 4. Halaman detail punya `show.tsx` masing-masing
+
+Bukan satu komponen placeholder bersama. ARCHITECTURE.md Part B §4 melarang
+satu feature menyentuh folder feature lain; placeholder bersama akan terhapus
+bersama empat route lain begitu modul pertama mulai hidup.
+
+### 5. `/design-system` adalah route di luar PRD §5.1
+
+Satu-satunya route yang tidak ada di PRD: satu reference page untuk membuktikan
+token, primitive, komponen bersama, layout, responsif, dan aksesibilitas
+bekerja bersama. `noindex,follow`, dan **dapat diakses di setiap environment**
+supaya bisa diuji — route yang digate environment tidak bisa dicakup Pest maupun
+Playwright. Dihapus ketika shell publik sudah stabil.
+
+### 6. Urutan menu mengikuti DESIGN.md, bukan PRD §5.3
+
+DESIGN.md §576: `… Galeri, Download, Kontak`, label "Berita & Artikel".
+PRD §5.3: `… Galeri, Kontak, Download`, label "Berita". Implementasi mengikuti
+DESIGN.md karena itu yang sudah ada sejak Phase 01, jadi perubahannya nol. Divergensi
+dicatat, bukan diperbaiki.
+
+### 7. Footer memakai placeholder, bukan site settings
+
+Hanya `parish_name` yang dirender dari shared prop `seo.siteName`, karena itu
+satu-satunya nilai yang ter-seed (PRD Lampiran D). `contact_*`, `social_*`, dan
+`maps_*` tetap `[ISI: …]`, dan **tidak** dirender sebagai link mati: tautan ke
+saluran yang mungkin tidak ada lebih buruk daripada tidak ada tautan, karena
+pengunjung baru menyadarinya setelah menekan.
+
+`HandleInertiaRequests` tidak diperluas. Membaca setting yang belum terisi akan
+merender string kosong di tempat alamat seharusnya ada, yang terbaca sebagai situs
+rusak — bukan situs yang belum dikonfigurasi.
+
+### 8. Logo navbar memakai aset statis
+
+`public/logo.svg`, bukan `site_settings.logo`, karena image picker D-24 belum
+ada. Saat D-24 selesai, navbar harus pindah ke setting.
+
+### 9. Error page dirender tanpa shared props
+
+Ini ditemukan karena `ParishFooter` mulai membaca `props.seo.siteName`, dan
+seluruh halaman 404 jadi putih.
+
+Shared props didaftarkan oleh `HandleInertiaRequests`, yang ada di middleware group
+`web` — dan **routing berjalan sebelum middleware**. Permintaan ke URL yang tidak
+dikenal melempar `NotFoundHttpException` sebelum pendaftaran itu terjadi, lalu
+handler merender halaman error di luar pipeline. Isi responsnya persis
+`{"status":404}`: tanpa `auth`, tanpa `locale`, tanpa `seo`.
+
+Halaman error memakai `PublicLayout`, jadi navbar dan footer berada di halaman
+yang **tidak punya shared props sama sekali**. Aturan yang lahir dari ini: komponen
+di dalam shell publik boleh tidak menemukan shared prop.
+
+`tests/Feature/Foundation/ErrorPageTest.php` mengunci sifat itu sebagai test,
+dengan kontras ke halaman yang melewati middleware.
+
+### 10. `BreadcrumbItem.href` jadi opsional
+
+Admin selalu menyelesaikan breadcrumb dengan halaman yang punya link, jadi `href`
+wajib benar sampai halaman publik pertama memakai `Breadcrumbs` — dengan crumb
+terakhir berupa halaman yang sedang dibuka. `href?` lebih jujur: item terakhir
+dirender sebagai teks, dan `Breadcrumbs` memperlakukan href yang hilang sebagai
+"halaman ini", bukan sebagai tautan ke string kosong.
+
+### 11. Kebutuhan variant Button sudah terpenuhi
+
+`ui/button.tsx` sudah memetakan `primary / secondary / navy / gold / icon /
+utility`. Tidak ada primitive baru. `ParishCta` membungkus slot sekundernya dalam
+outline Button sehingga secara struktural tidak mungkin menjadi primary kedua.
+
+### 12. Arch test bersifat tekstual, termasuk untuk prosa
+
+Tiga asersi baru memindai isi file, bukan AST. Dua kali docblock saya sendiri yang
+mematikannya: satu menyebut nama API HTML mentah yang dilarang, satu lagi menulis
+bentuk `href` yang tepat dilarang. Keduanya ditulis ulang tanpa nama tersebut.
+
+Konsekuensinya dicatat, bukan disembunyikan: file yang memperkenalkan pola terlarang
+tidak bisa sekaligus menjelaskan mengapa pola itu salah, dan file yang menjelaskan
+kenapa pola itu salah bisa ikut gagal. Keduanya diterima.
+
+### 13. Kesalahan yang muncul saat mengerjakan
+
+- **`Route::inertia()` tidak meneruskan parameter route.** Kelima halaman detail
+  ditulis `function Show({ slug }: { slug: string })` dan akan menerima
+  `undefined` saat runtime — tipenya berbohong. Diganti closure yang
+  meneruskan `slug` secara eksplisit ke `Inertia::render`.
+- **`<img>` di navbar membuat Vitest mencetak `ECONNRESET`.** happy-dom memuat
+  sub-resource yang ia temukan di DOM, dan tidak tahu bahwa test komponen hanya
+  peduli pada markup. Tidak ada pengaturan happy-dom untuk mematikan pemuatan
+  gambar; konfigurasi yang dicoba tidak mengubahnya. Exit code tetap 0, jadi ini
+  kosmetik dan tercatat di sini agar tidak dicari ulang.
+- **`getByText` gagal saat dua text node berdekatan.** Dua label tombol dalam satu
+  `div` terbaca sebagai satu string, jadi query harus berbasis role.
+- `assertNotRedirect()` tidak ada di Laravel ini; `assertOk()` sudah cukup.
+
+### 14. Gap yang ditumpuk, bukan diselesaikan Phase 03
+
+- **Footer legal link.** `privacy_policy_content` ada dan tersanitasi (D-25),
+  tetapi PRD §5.1 tidak punya route `/kebijakan-privasi`.
+- **`sitemap.xml` + `robots.txt`.** PRD §13 menugaskan ke Fase 4 dan roadmap §20
+  melarangnya di sini. `public/robots.txt` yang ada adalah file statis.
+- **Open Graph bersyarat.** `og:title` dan `og:description` hanya dirender blade
+  bila `seo_default_title` dan `seo_default_description` terisi, dan tidak ada
+  seeding (D-12). Dua pengujian di `PublicRoutesTest` menutup kedua arah.
+- **Item styling-only** (token, radius, shadow, tipografi responsif, kontras)
+  tidak di-automate. `tests rules` AGENTS.md menyatakan perubahan styling murni
+  tidak memerlukan test; itu dipilih atas "setiap AC harus punya test", dan
+  alasannya ditulis di §26 phase record.
+
+---
+
+## D-32 — Design system v1.1: dark mode netral, dan pemisahan merah
+
+**Status:** Accepted · berlaku sejak revisi DESIGN.md v1.1 · branch
+`feat/phase-03-design-system-public-website-shell`
+
+DESIGN.md naik ke versi 1.1. Perubahan terbesarnya bukan warna baru, melainkan
+penegasan bahwa dark mode yang ada sebelumnya **tidak boleh dipakai**: navy sebagai kanvas
+global, dan navy-di-atas-navy, itu persis yang D-22 §3 buat dan
+dinyatakan masih perlu konfirmasi paroki. Dokumen sekarang mendefinisikan dark
+mode sebagai tema netral-charcoal dan menyebut hasilnya sebagai sesuatu yang
+*deprecated*.
+
+**D-22 §3 superseded.** Palet dark tidak lagi diturunkan dari ramp navy dengan
+`color-mix()`. Seluruh nilai sekarang berasal dari empat belas token `dark-*`
+yang dokumen definisikan, dan tidak ada satu pun `color-mix()` di blok `.dark`.
+Ini memenuhi aturan yangolmendokumen nyatakan eksplisit: *"Do not use HSPMTB
+Navy as the global page background."*
+
+**D-22 §4 superseded.** `colors.red-light` yang tadinya tidak pernah
+didefinisikan kini bernama `red-soft` (#FDE7E9), dengan pasangan gelap
+`red-soft-dark` (#3A171A). Token turunan `--color-primary-light` dihapus;
+menyimpan nama turunan untuk warna yang sudah didokumentasikan adalah cara
+palet mulai melenceng.
+
+### 1. Merah harus dipisah antara fill dan teks
+
+Ini keputusan paling menentukan di revisi ini, dan ia tidak bisa diambil
+hanya dengan membaca dokumen.
+
+| Pasangan di dark mode | Rasio | Status |
+| --- | --- | --- |
+| `text-primary` #AB020E di atas dark-canvas | 2.28:1 | gagal AA |
+| `text-primary` #AB020E di atas dark-surface | 1.89:1 | gagal AA |
+| `destructive` #AB020E di atas red-soft-dark | 2.08:1 | gagal AA |
+| ring #C51624 di atas dark-canvas | 2.92:1 | gagal SC 2.4.11 |
+
+`semantic.dark.primary` adalah `primary` (#AB020E). Nilai itu **benar** untuk
+tombol terisi — putih di atasnya 7.65:1, dan merah merek memang harus tetap
+menjadi sinyal aksi. Nilai itu **salah** sebagai teks di permukaan gelap, karena
+merah tua tidak punya luminansi yang bisa tersisa di atas permukaan gelap.
+
+Maka `--primary` dan `--destructive` di dark mengikuti dokumen, dan satu token
+baru `--red-on-surface` (**#FF6670** = `colors.primary-on-dark`) membawa merah
+ketika dipakai sebagai teks atau sebagai garis batas.
+
+Presedennya persis sama dengan D-22 §2: `accent-foreground` yang secara literal
+dokumen tunjuk ke `gold-dark` diganti `navy-dark` karena pasangan aslinya
+2.34:1. Bedanya hanya bahwa nilai penggantinya benar-benar ada di dokumen.
+
+Token itu dipakai di navbar (menu aktif), footer, eyebrow section heading,
+link `.rich-text`, `input-error`, dan varian `outline` serta `link` pada Button.
+
+### 2. Cincin fokus di dark
+
+`semantic.dark.ring` menunjuk ke `primary-focus` (#C51624), yang **lebih gelap**
+daripada kanvasnya sendiri: 2.92:1. Itu persis kebalikan dari tujuan cincin
+fokus. Diganti `primary-on-dark` (#FF6670) → 6.14:1.
+
+Preseden sama seperti di atas. `--color-primary-focus` tetap ada sebagai token
+merek; hanya perannya di dark mode yang hilang.
+
+### 3. Fill tombol utama 2.28:1 terhadap halaman — bukan kegagalan
+
+Terverifikasi dan **sengaja diterima**. Tombol terisi teridentifikasi oleh
+**labelnya** (putih di atas merah, 7.65:1), bukan oleh warna isinya, jadi syarat
+3:1 WCAG 1.4.11 tidak berlaku untuk fill terhadap halaman. Yang wajib 3:1
+adalah *border* — dan border outline memakai `red-on-surface`, bukan
+`primary`.
+
+### 4. Canvas admin tidak bisa berbagi `body` dengan canvas publik
+
+DESIGN.md v1.1 memberi dua kanvas halaman: publik `canvas` (putih) dan app
+canvas admin `canvas-soft` (abu). Keduanya sharing satu elemen `body`, jadi
+satu token tidak bisa melayani keduanya tanpa membuat halaman publik salah
+warna.
+
+`--background` **tetap** `canvas`, sesuai `semantic.background`. Tabel
+`Admin Surface Hierarchy` diterapkan di shell admin (`app-shell.tsx`), karena
+bagian itu memang urusan admin — dokumen memang menaruhnya di
+"Admin Appearance & Theme", bukan di blok semantic global.
+
+Varian `header` tidak dapat `canvas-soft`: tabel yang sama memberi header admin
+warna `canvas`.
+
+### 5. Sidebar aktif jadi merah, dan hover ikut merah
+
+`--sidebar-accent` berubah dari `navy-light` menjadi `red-soft`, dan
+`--sidebar-accent-foreground` dari `navy-dark` menjadi `primary`. DESIGN.md:
+*"The active item uses HSPMTB Red, a subtle red-tinted background."*
+
+Konsekuensinya dicatat, bukan disembunyikan: `ui/sidebar.tsx` memakai pasangan
+yang sama untuk `hover:` **dan** untuk `data-[active=true]:`, dan keduanya tidak
+bisa dipisahkan tanpa mengedit file generated. Jadi hover baris sidebar ikut
+merah. Itu sesuai merek — merah adalah warna interaktif di seluruh sistem — tapi
+perubahan visualnya nyata dan perlu dilihat, bukan ditemukan kemudian.
+
+### 6. Komponen yang harus berubah, dan alasannya
+
+| File | Perubahan | Rasio sebelum → sesudah |
+| --- | --- | --- |
+| `parish-card.tsx` | varian `agenda` pakai `secondary` | 1.04:1 → 11.09:1 |
+| `parish-image.tsx` | fallback `bg-secondary` | 1.04:1 → 7.63:1 |
+| `parish-navbar.tsx` | `border-border` sesuai `global-nav` | — |
+| `ui/alert.tsx` | `text-red-on-surface` | 2.08:1 → 5.61:1 |
+| `ui/button.tsx` | `outline` dan `link` pakai `red-on-surface` | 2.28:1 → 6.14:1 |
+| `error/pages/index.tsx` | `bg-red-soft text-red-on-surface` | — |
+| `app-shell.tsx` | kanvas `canvas-soft` | — |
+| `app-logo.tsx` | hapus `dark:text-black` | — |
+| `appearance-tabs.tsx` | hapus `dark:bg-secondary`, selected `bg-card` | 1.11:1 → 1.42:1 |
+| `app.css` `.rich-text blockquote` | `dark:text-navy-light` | 1.25:1 → 15.24:1 |
+
+`ParishCard` dan `ParishImage` paling parah: keduanya memakai literal
+`bg-navy-light`, yang di dark mode menjadi permukaan nyaris putih dengan teks
+*nyaris* putih — 1.04:1, Placeholder yang tidak terlihat. `secondary` adalah
+`navy-light` di light mode, jadi tidak ada perubahan visual sama sekali di sana.
+
+### 7. `--sidebar-accent` dan teks yang tidak berbalik
+
+`--color-navy`, `--color-ink`, `--color-ink-muted`, `--color-ink-muted-strong`
+adalah warna merek yang **tidak** berubah antar tema. Dipakai sebagai teks di
+dark mode, mereka gagal:
+
+| | dark-canvas |
+| --- | --- |
+| `text-ink` | 1.02:1 |
+| `text-navy` | 1.25:1 |
+| `text-ink-muted-strong` | 2.27:1 |
+| `text-ink-muted` | 3.51:1 |
+
+Ini **bukan** regresi yang diperkenalkan revisi ini — token tersebut sudah
+seperti itu sejak Phase 01 — tapi dark mode v1.1 membuatnya terlihat, karena
+sebelumnya kanvasnya navy dan kontrasnya kebetulan lebih tinggi. Semua call site
+yang bermasalah sudah memakai pasangan `dark:` (`profile.tsx`,
+`login.tsx`, `forgot-password.tsx`, `verify-email.tsx`) kecuali satu di
+`design-system/pages/index.tsx`. Daftar lengkapnya belum diaudit dan dicatat
+sebagai pekerjaan lanjutan, bukan diperbaiki diam-diam di sini.
+
+### 8. Tombol tema publik
+
+Permintaan tambahan: satu tombol light/dark di navigasi publik.
+
+Dua keadaan, bukan tiga. `theme.supported-modes` mencantumkan Light/Dark/System,
+tetapi "System" di navbar publik adalah preferensi yang tidak diketahui
+pengunjung — dan pengunjung dengan sistem gelap yang ingin tampilan terang
+adalah justru yang akan hilang dari situs yang hanya mengikuti sistem. Klik
+menetapkan pilihan secara eksplisit.
+
+Nama aksesibelnya tetap ("Mode gelap") dengan `aria-pressed` yang menandai
+status. Bentuk lain — label yang berubah mengikuti status, "Aktifkan mode
+gelap" lalu "Aktifkan mode terang" — terbaca sebagai kontrol berbeda setiap kali
+dan tidak memberi pengguna screen reader cara bertanya apa yang sedang aktif
+tanpa harus-pressed.
+
+Penyimpanan tetap dua tempat: `localStorage` untuk klien, cookie untuk
+`HandleAppearance` dan `app.blade.php`, sehingga pilihan bertahan setelah
+*pemuatan ulang* dan bukan hanya setelah navigasi Inertia. Ini diuji di E2E
+karena assertion yang hanya berjalan di sisi klien tidak akan menangkapnya.
+
+### 9. Hasil verifikasi kontras
+
+45 pasangan dihitung dari `app.css` yang dibaca ulang oleh skrip, bukan dari
+daftar yang diketik manual: setiap pasangan foreground/background di `:root` dan `.dark`,
+termasuk cincin fokus, batas, dan label tombol.
+
+Semua lolos. Yang terendah di dark mode adalah `red-on-surface` di atas
+`popover` pada 4.55:1 — cukup untuk teks normal, dan `popover` sudah
+merupakan permukaan yang dinaikkan.
+
+Border dan langkah permukaan sengaja lolos di bawah 3:1 (1.71:1 dan 1.20:1):
+DESIGN.md meminta "clear but quiet borders" dan "one surface step above the
+page", dan itu memang kontras yang rendah.
+
+### 10. Yang belum dikerjakan
+
+- **`ui/checkbox.tsx`, `input.tsx`, `textarea.tsx`, `select.tsx`, `toggle.tsx`,
+  `badge.tsx`, `dropdown-menu.tsx`** memakai `border-destructive` untuk state
+  `aria-invalid`. Di dark mode `destructive` kini #AB020E, jadi border tersebut
+  2.28:1. Semuanya perlu `red-on-surface`, dan semuanya file generated yang
+  tidak termasuk daftar yang AGENTS.md acknowledge sebagai restyled.
+- **`use-appearance.tsx` masih default `system`.** DESIGN.md §Theme Switching:
+  *"If no preference exists, default to light"* dan `light-priority: true`.
+  Ini perubahan perilaku, bukan styling, dan tidak dikerjakan di sini.
+- **Review visual dua tema** di lima halaman admin dan lima halaman publik
+  belum dilakukan — yang di atas adalah angka, dan angka tidak sama dengan
+  mata.

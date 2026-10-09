@@ -91,12 +91,12 @@ export default function ErrorPage({ status }: Props) {
                     <div className="flex items-center gap-3">
                         <span
                             aria-hidden="true"
-                            className="inline-flex size-11 items-center justify-center rounded-full bg-primary-light text-primary"
+                            className="inline-flex size-11 items-center justify-center rounded-full bg-red-soft text-red-on-surface"
                         >
                             <AlertTriangle className="size-5" />
                         </span>
 
-                        <p className="text-caption-strong text-primary">
+                        <p className="text-caption-strong text-red-on-surface">
                             Kode {status}
                         </p>
                     </div>
