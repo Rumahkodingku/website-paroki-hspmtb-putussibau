@@ -120,7 +120,7 @@ class MassScheduleController extends Controller
         Gate::authorize('update', $massSchedule);
 
         return Inertia::render('admin/jadwal-misa/misa-rutin/ubah', [
-            'massSchedule' => MassScheduleResource::make($massSchedule->load('location')),
+            'massSchedule' => MassScheduleResource::make($massSchedule->load('location'))->resolve(),
             'locations' => LocationOptionResource::collection($this->activeLocations()),
             ...$this->formMeta(),
         ]);

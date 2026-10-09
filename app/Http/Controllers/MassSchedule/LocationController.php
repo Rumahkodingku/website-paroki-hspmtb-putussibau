@@ -91,7 +91,7 @@ class LocationController extends Controller
         Gate::authorize('update', $location);
 
         return Inertia::render('admin/jadwal-misa/lokasi/ubah', [
-            'location' => LocationResource::make($location->load('massSchedules')),
+            'location' => LocationResource::make($location->load('massSchedules'))->resolve(),
             ...$this->formMeta(),
         ]);
     }

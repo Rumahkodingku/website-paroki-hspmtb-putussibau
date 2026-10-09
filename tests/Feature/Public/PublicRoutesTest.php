@@ -53,6 +53,39 @@ dataset('public pages', fn (): array => [
     '/design-system' => ['/design-system', 'public/design-system'],
 ]);
 
+/**
+ * The pages that are still placeholders.
+ *
+ * Phase 04 gave /jadwal-misa a controller, four resources and a resolver, so it
+ * now sends props — and the "no page-specific props" test below would fail on it
+ * while telling the truth about a page that is no longer a placeholder.
+ *
+ * Excluded by name rather than filtered by inspection, because the assertion
+ * exists precisely to notice a page that starts receiving props before its module
+ * exists. Deriving the list from what currently has no props would make the test
+ * pass by construction and check nothing.
+ *
+ * When another module lands, move its URL out of here deliberately. That edit is
+ * the moment to notice the placeholder set shrinking, not something to automate.
+ */
+dataset('placeholder pages', fn (): array => [
+    '/' => ['/', 'public/beranda'],
+    '/profil' => ['/profil', 'public/profil'],
+    '/profil/sejarah' => ['/profil/sejarah', 'public/profil/sejarah'],
+    '/profil/visi-misi' => ['/profil/visi-misi', 'public/profil/visi-misi'],
+    '/profil/wilayah' => ['/profil/wilayah', 'public/profil/wilayah'],
+    '/profil/pastor' => ['/profil/pastor', 'public/profil/pastor'],
+    '/profil/struktur' => ['/profil/struktur', 'public/profil/struktur'],
+    '/berita' => ['/berita', 'public/berita'],
+    '/agenda' => ['/agenda', 'public/agenda'],
+    '/pelayanan' => ['/pelayanan', 'public/pelayanan'],
+    '/komunitas' => ['/komunitas', 'public/komunitas'],
+    '/galeri' => ['/galeri', 'public/galeri'],
+    '/kontak' => ['/kontak', 'public/kontak'],
+    '/download' => ['/download', 'public/download'],
+    '/design-system' => ['/design-system', 'public/design-system'],
+]);
+
 it('renders the expected page for every public route', function (string $url, string $component) {
     $this->get($url)
         ->assertOk()
@@ -74,9 +107,12 @@ it('lets a guest reach every public route without signing in', function (string 
  * The placeholder contract from roadmap section 10, restated as a test.
  *
  * A page that receives props is a page that has started depending on something,
- * and at this stage there is nothing legitimate for it to depend on - no
- * module, no model, no service. The moment one of these fails, the page has
- * grown business logic, which is the exact thing this phase forbids.
+ * and for a page whose module does not exist yet there is nothing legitimate for
+ * it to depend on. The moment one of these fails, the page has grown business
+ * logic before its module arrived - which is the exact thing to catch.
+ *
+ * Runs against the placeholder dataset rather than all of them: /jadwal-misa left
+ * that set in Phase 04, and this assertion is about the ones still in it.
  */
 it('sends no page-specific props from a placeholder', function (string $url) {
     $props = $this->get($url)->viewData('page')['props'];
@@ -84,7 +120,7 @@ it('sends no page-specific props from a placeholder', function (string $url) {
     $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'errors'];
 
     expect(array_diff(array_keys($props), $shared))->toBe([]);
-})->with('public pages');
+})->with('placeholder pages');
 
 it('serves the same shared SEO defaults on every public page', function (string $url) {
     // NFR-SEO: the meta tags must be in the first HTML response, and the blade

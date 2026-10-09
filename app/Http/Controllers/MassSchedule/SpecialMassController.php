@@ -94,7 +94,7 @@ class SpecialMassController extends Controller
         Gate::authorize('update', $specialMass);
 
         return Inertia::render('admin/jadwal-misa/misa-khusus/ubah', [
-            'specialMass' => SpecialMassResource::make($specialMass->load('location')),
+            'specialMass' => SpecialMassResource::make($specialMass->load('location'))->resolve(),
             'locations' => LocationOptionResource::collection($this->activeLocations()),
             ...$this->formMeta(),
         ]);
