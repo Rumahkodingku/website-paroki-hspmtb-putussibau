@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import type { HTMLAttributes } from 'react';
+import { Text } from '@/components/text';
 import type { Appearance } from '@/hooks/use-appearance';
 import { useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
@@ -45,7 +46,17 @@ export default function AppearanceToggleTab({
                     )}
                 >
                     <Icon className="-ml-1 h-4 w-4" />
-                    <span className="ml-1.5 text-sm">{label}</span>
+                    {/*
+                        caption, the same 14px this was at as text-sm, now with
+                        the design system's own tracking. button-utility is the
+                        14px step DESIGN.md documents for buttons, but it is
+                        Button's to apply: its line height of 1.29 is measured
+                        against a button box, and this label is a span inside a
+                        button rather than the button's own type slot.
+                    */}
+                    <Text as="span" variant="caption" className="ml-1.5">
+                        {label}
+                    </Text>
                 </button>
             ))}
         </div>

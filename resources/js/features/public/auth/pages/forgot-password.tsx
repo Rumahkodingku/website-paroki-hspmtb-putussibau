@@ -2,6 +2,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
+import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,9 +27,16 @@ export default function ForgotPassword({ status }: Props) {
             <Head title="Lupa Kata Sandi" />
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-navy dark:text-navy-light">
+                <Text
+                    as="p"
+                    variant="caption"
+                    weight="medium"
+                    color="brand"
+                    align="center"
+                    className="mb-4"
+                >
                     {status}
-                </div>
+                </Text>
             )}
 
             <div className="space-y-6">
@@ -65,10 +73,23 @@ export default function ForgotPassword({ status }: Props) {
                     )}
                 </Form>
 
-                <div className="space-x-1 text-center text-sm text-muted-foreground">
+                {/*
+                    The line inherits its size from the Text, and the TextLink
+                    inside it inherits too - TextLink carries no size of its own,
+                    so a caller that wanted one had been reaching for a Tailwind
+                    scale step to add to the anchor. `caption` is the same 14px
+                    this was at as text-sm.
+                */}
+                <Text
+                    as="p"
+                    variant="caption"
+                    color="muted"
+                    align="center"
+                    className="space-x-1"
+                >
                     <span>Or, return to</span>
                     <TextLink href={login()}>log in</TextLink>
-                </div>
+                </Text>
             </div>
         </>
     );

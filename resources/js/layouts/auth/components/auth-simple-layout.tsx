@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { Text } from '@/components/text';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -24,10 +25,26 @@ export default function AuthSimpleLayout({
                         </Link>
 
                         <div className="space-y-2 text-center">
-                            <h1 className="text-xl font-medium">{title}</h1>
-                            <p className="text-center text-sm text-muted-foreground">
+                            {/*
+                                `as="h1"` with the h3 variant rather than
+                                variant="h1". An auth page title is the one h1
+                                on the page but it is not an editorial heading,
+                                and DESIGN.md's display steps would make a login
+                                form as loud as a page title. h3 is the smallest
+                                heading step and reads at about the size this
+                                used to.
+                            */}
+                            <Text as="h1" variant="h3" weight="medium">
+                                {title}
+                            </Text>
+                            <Text
+                                as="p"
+                                variant="caption"
+                                color="muted"
+                                className="text-center"
+                            >
                                 {description}
-                            </p>
+                            </Text>
                         </div>
                     </div>
                     {children}

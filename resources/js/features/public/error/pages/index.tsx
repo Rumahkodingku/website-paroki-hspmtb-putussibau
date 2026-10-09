@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertTriangle, ArrowLeft, Home, RefreshCw } from 'lucide-react';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { home, login } from '@/routes';
 
@@ -96,18 +97,29 @@ export default function ErrorPage({ status }: Props) {
                             <AlertTriangle className="size-5" />
                         </span>
 
-                        <p className="text-caption-strong text-red-on-surface">
+                        <Text as="p" variant="caption-strong" color="danger">
                             Kode {status}
-                        </p>
+                        </Text>
                     </div>
 
-                    <h1 className="font-display text-display-md text-balance">
+                    {/*
+                        variant h1, not display-md: this is the page's h1 and
+                        now matches the homepage's, which is the point - a 404
+                        that renders smaller than the page you were trying to
+                        reach reads as a lesser page.
+                    */}
+                    <Text as="h1" variant="h1">
                         {copy.title}
-                    </h1>
+                    </Text>
 
-                    <p className="max-w-xl text-body text-muted-foreground">
+                    <Text
+                        as="p"
+                        variant="body"
+                        color="muted"
+                        className="max-w-xl"
+                    >
                         {copy.description}
-                    </p>
+                    </Text>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">

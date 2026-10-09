@@ -1,8 +1,9 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Text } from '@/components/text';
+import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -88,24 +89,39 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
                             {mustVerifyEmail &&
                                 user.email_verified_at === null && (
                                     <div>
-                                        <p className="-mt-4 text-sm text-muted-foreground">
+                                        {/*
+                                            TextLink replaces a Link whose
+                                            className was a byte-for-byte copy
+                                            of text-link.tsx's own base string.
+                                            The `as="button"` is kept: it carries
+                                            the role and the tab stop, and the
+                                            component forwards both.
+                                        */}
+                                        <Text
+                                            as="p"
+                                            variant="caption"
+                                            color="muted"
+                                            className="-mt-4"
+                                        >
                                             Your email address is unverified.{' '}
-                                            <Link
-                                                href={send()}
-                                                as="button"
-                                                className="text-foreground underline decoration-hairline underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-ink-muted-soft"
-                                            >
+                                            <TextLink href={send()} as="button">
                                                 Click here to re-send the
                                                 verification email.
-                                            </Link>
-                                        </p>
+                                            </TextLink>
+                                        </Text>
 
                                         {status ===
                                             'verification-link-sent' && (
-                                            <div className="mt-2 text-sm font-medium text-navy dark:text-navy-light">
+                                            <Text
+                                                as="p"
+                                                variant="caption"
+                                                weight="medium"
+                                                color="brand"
+                                                className="mt-2"
+                                            >
                                                 A new verification link has been
                                                 sent to your email address.
-                                            </div>
+                                            </Text>
                                         )}
                                     </div>
                                 )}
