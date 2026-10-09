@@ -1,369 +1,419 @@
 ---
-version: alpha
+version: 1.1
 name: HSPMTB-design-system
-description: A photography-first parish interface for Paroki HSPMTB Putussibau. The system combines Apple-inspired editorial composition with HSPMTB's red, navy, gold, and white identity. Tailwind CSS is the styling foundation, shadcn/ui provides accessible primitives, and custom HSPMTB components define the parish-specific experience. UI chrome stays quiet so parish photography, worship information, community life, and pastoral services remain the focus.
+description: A photography-first parish interface for Paroki HSPMTB Putussibau. The system combines Apple-inspired editorial composition with HSPMTB's red, navy, gold, and white identity. Tailwind CSS is the styling foundation, shadcn/ui provides accessible primitives, and custom HSPMTB components define the parish-specific experience. The interface is light-first; dark mode uses a soft neutral charcoal theme and MUST NOT turn the entire UI into saturated navy. UI chrome stays quiet so parish photography, worship information, community life, and pastoral services remain the focus.
 
 stack:
-  styling: "Tailwind CSS"
-  component-primitives: "shadcn/ui"
-  custom-components: "HSPMTB UI components"
-  frontend: "React + Inertia.js"
-  accessibility: "WCAG-oriented, semantic HTML, keyboard accessible"
-  icon-library: "Lucide React"
+    styling: "Tailwind CSS"
+    component-primitives: "shadcn/ui"
+    custom-components: "HSPMTB UI components"
+    frontend: "React + Inertia.js"
+    accessibility: "WCAG-oriented, semantic HTML, keyboard accessible"
+    icon-library: "Lucide React"
+
+theme:
+    strategy: "light-first with an optional soft-neutral dark mode"
+    default: "light"
+    supported-modes: ["light", "dark", "system"]
+    light-priority: true
+    dark-mode-intent: "comfortable low-glare workspace, not a brand-colored canvas"
+    dark-mode-rules:
+        - "Do not use HSPMTB Navy as the global page background."
+        - "Do not use pure black (#000000) or pure white (#FFFFFF) as the dominant dark-mode canvas/text pair."
+        - "Use neutral charcoal surfaces for page, sidebar, cards, and inputs."
+        - "Reserve HSPMTB Navy for selected accents, active structural elements, or editorial sections."
+        - "Reduce the number of simultaneous high-contrast elements; hierarchy should come from surface steps and typography."
+        - "Gold is decorative/ceremonial only and MUST NOT become a large glowing or high-contrast dark-mode surface."
+        - "Dark mode MUST preserve the same component hierarchy and spacing as light mode; only theme tokens change."
 
 colors:
-  primary: "#AB020E"
-  primary-hover: "#8F010B"
-  primary-focus: "#C51624"
-  primary-on-dark: "#FF6670"
-  navy: "#01266D"
-  navy-dark: "#001A4D"
-  navy-light: "#EAF0FA"
-  gold: "#FCB027"
-  gold-dark: "#D99400"
-  gold-light: "#FFF4D6"
-  ink: "#111827"
-  body: "#1F2937"
-  body-on-dark: "#FFFFFF"
-  body-muted: "#667085"
-  ink-muted-80: "#475467"
-  ink-muted-48: "#98A2B3"
-  divider-soft: "#F2F4F7"
-  hairline: "#E4E7EC"
-  canvas: "#FFFFFF"
-  canvas-soft: "#F8F9FB"
-  surface-pearl: "#FCFCFD"
-  surface-navy: "#01266D"
-  surface-navy-dark: "#001A4D"
-  surface-red: "#AB020E"
-  surface-gold: "#FFF4D6"
-  surface-black: "#0B1220"
-  surface-chip-translucent: "#E5E7EB"
-  on-primary: "#FFFFFF"
-  on-dark: "#FFFFFF"
+    primary: "#AB020E"
+    primary-hover: "#8F010B"
+    primary-focus: "#C51624"
+    primary-on-dark: "#FF6670"
+    navy: "#01266D"
+    navy-dark: "#001A4D"
+    navy-light: "#EAF0FA"
+    gold: "#FCB027"
+    gold-dark: "#D99400"
+    gold-light: "#FFF4D6"
+    ink: "#111827"
+    body: "#1F2937"
+    body-on-dark: "#FFFFFF"
+    body-muted: "#667085"
+    ink-muted-80: "#475467"
+    ink-muted-48: "#98A2B3"
+    divider-soft: "#F2F4F7"
+    hairline: "#E4E7EC"
+    canvas: "#FFFFFF"
+    canvas-soft: "#F8F9FB"
+    surface-pearl: "#FCFCFD"
+    surface-navy: "#01266D"
+    surface-navy-dark: "#001A4D"
+    surface-red: "#AB020E"
+    surface-gold: "#FFF4D6"
+    surface-black: "#0B1220"
+    surface-chip-translucent: "#E5E7EB"
+    on-primary: "#FFFFFF"
+    on-dark: "#FFFFFF"
+    red-soft: "#FDE7E9"
+    red-soft-dark: "#3A171A"
+    dark-canvas: "#171A1F"
+    dark-canvas-soft: "#1C2229"
+    dark-surface: "#232A33"
+    dark-surface-elevated: "#2A323D"
+    dark-border: "#39424E"
+    dark-border-soft: "#303844"
+    dark-ink: "#F3F4F6"
+    dark-body: "#E5E7EB"
+    dark-muted: "#AAB4C0"
+    dark-subtle: "#7F8A98"
+    dark-navy-accent: "#315A96"
+    dark-navy-soft: "#223653"
+    dark-gold-soft: "#3A2E17"
 
 semantic:
-  background: "canvas"
-  foreground: "ink"
-  card: "canvas"
-  card-foreground: "ink"
-  primary: "primary"
-  primary-foreground: "on-primary"
-  secondary: "navy-light"
-  secondary-foreground: "navy-dark"
-  accent: "gold-light"
-  accent-foreground: "gold-dark"
-  muted: "canvas-soft"
-  muted-foreground: "body-muted"
-  destructive: "primary"
-  destructive-foreground: "on-primary"
-  border: "hairline"
-  input: "hairline"
-  ring: "primary-focus"
+    background: "canvas"
+    foreground: "ink"
+    card: "canvas"
+    card-foreground: "ink"
+    primary: "primary"
+    primary-foreground: "on-primary"
+    secondary: "navy-light"
+    secondary-foreground: "navy-dark"
+    accent: "gold-light"
+    accent-foreground: "gold-dark"
+    muted: "canvas-soft"
+    muted-foreground: "body-muted"
+    destructive: "primary"
+    destructive-foreground: "on-primary"
+    border: "hairline"
+    input: "hairline"
+    ring: "primary-focus"
+
+    dark:
+        background: "dark-canvas"
+        foreground: "dark-ink"
+        card: "dark-surface"
+        card-foreground: "dark-ink"
+        primary: "primary"
+        primary-foreground: "on-primary"
+        secondary: "dark-navy-soft"
+        secondary-foreground: "dark-ink"
+        accent: "dark-gold-soft"
+        accent-foreground: "gold"
+        muted: "dark-canvas-soft"
+        muted-foreground: "dark-muted"
+        destructive: "primary"
+        destructive-foreground: "on-primary"
+        border: "dark-border"
+        input: "dark-border"
+        ring: "primary-focus"
 
 typography:
-  hero-display:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 56px
-    fontWeight: 600
-    lineHeight: 1.07
-    letterSpacing: -0.28px
-  display-lg:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 40px
-    fontWeight: 600
-    lineHeight: 1.1
-    letterSpacing: -0.4px
-  display-md:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 34px
-    fontWeight: 600
-    lineHeight: 1.18
-    letterSpacing: -0.374px
-  lead:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 28px
-    fontWeight: 400
-    lineHeight: 1.14
-    letterSpacing: 0.196px
-  lead-airy:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 24px
-    fontWeight: 300
-    lineHeight: 1.5
-    letterSpacing: 0
-  tagline:
-    fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 21px
-    fontWeight: 600
-    lineHeight: 1.19
-    letterSpacing: 0.231px
-  body-strong:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 17px
-    fontWeight: 600
-    lineHeight: 1.24
-    letterSpacing: -0.374px
-  body:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 17px
-    fontWeight: 400
-    lineHeight: 1.47
-    letterSpacing: -0.2px
-  dense-link:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 17px
-    fontWeight: 400
-    lineHeight: 2.0
-    letterSpacing: 0
-  caption:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.43
-    letterSpacing: -0.224px
-  caption-strong:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 14px
-    fontWeight: 600
-    lineHeight: 1.29
-    letterSpacing: -0.224px
-  button-large:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 18px
-    fontWeight: 500
-    lineHeight: 1.0
-    letterSpacing: 0
-  button-utility:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.29
-    letterSpacing: -0.224px
-  fine-print:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.3
-    letterSpacing: -0.12px
-  micro-legal:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 10px
-    fontWeight: 400
-    lineHeight: 1.3
-    letterSpacing: -0.08px
-  nav-link:
-    fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: 13px
-    fontWeight: 400
-    lineHeight: 1.0
-    letterSpacing: -0.12px
+    hero-display:
+        fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 56px
+        fontWeight: 600
+        lineHeight: 1.07
+        letterSpacing: -0.28px
+    display-lg:
+        fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 40px
+        fontWeight: 600
+        lineHeight: 1.1
+        letterSpacing: -0.4px
+    display-md:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 34px
+        fontWeight: 600
+        lineHeight: 1.18
+        letterSpacing: -0.374px
+    lead:
+        fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 28px
+        fontWeight: 400
+        lineHeight: 1.14
+        letterSpacing: 0.196px
+    lead-airy:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 24px
+        fontWeight: 300
+        lineHeight: 1.5
+        letterSpacing: 0
+    tagline:
+        fontFamily: "SF Pro Display, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 21px
+        fontWeight: 600
+        lineHeight: 1.19
+        letterSpacing: 0.231px
+    body-strong:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 17px
+        fontWeight: 600
+        lineHeight: 1.24
+        letterSpacing: -0.374px
+    body:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 17px
+        fontWeight: 400
+        lineHeight: 1.47
+        letterSpacing: -0.2px
+    dense-link:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 17px
+        fontWeight: 400
+        lineHeight: 2.0
+        letterSpacing: 0
+    caption:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 14px
+        fontWeight: 400
+        lineHeight: 1.43
+        letterSpacing: -0.224px
+    caption-strong:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 14px
+        fontWeight: 600
+        lineHeight: 1.29
+        letterSpacing: -0.224px
+    button-large:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 18px
+        fontWeight: 500
+        lineHeight: 1.0
+        letterSpacing: 0
+    button-utility:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 14px
+        fontWeight: 400
+        lineHeight: 1.29
+        letterSpacing: -0.224px
+    fine-print:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 12px
+        fontWeight: 400
+        lineHeight: 1.3
+        letterSpacing: -0.12px
+    micro-legal:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 10px
+        fontWeight: 400
+        lineHeight: 1.3
+        letterSpacing: -0.08px
+    nav-link:
+        fontFamily: "SF Pro Text, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        fontSize: 13px
+        fontWeight: 400
+        lineHeight: 1.0
+        letterSpacing: -0.12px
 
 rounded:
-  none: 0px
-  xs: 5px
-  sm: 8px
-  md: 12px
-  lg: 18px
-  xl: 24px
-  pill: 9999px
-  full: 9999px
+    none: 0px
+    xs: 5px
+    sm: 8px
+    md: 12px
+    lg: 18px
+    xl: 24px
+    pill: 9999px
+    full: 9999px
 
 spacing:
-  xxs: 4px
-  xs: 8px
-  sm: 12px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 80px
-  section-lg: 112px
+    xxs: 4px
+    xs: 8px
+    sm: 12px
+    md: 16px
+    lg: 24px
+    xl: 32px
+    xxl: 48px
+    section: 80px
+    section-lg: 112px
 
 components:
-  button-primary:
-    base: "shadcn/ui Button variant=default"
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 11px 22px
-  button-primary-focus:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.pill}"
-    focusRing: "2px solid {colors.primary-focus}"
-  button-primary-active:
-    backgroundColor: "{colors.primary-hover}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.pill}"
-    transform: "scale(0.98)"
-  button-secondary-pill:
-    base: "shadcn/ui Button variant=outline"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.primary}"
-    borderColor: "{colors.primary}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 11px 22px
-  button-navy:
-    base: "Custom HSPMTB Button"
-    backgroundColor: "{colors.navy}"
-    textColor: "{colors.on-dark}"
-    rounded: "{rounded.pill}"
-    padding: 11px 22px
-  button-gold:
-    base: "Custom HSPMTB Button"
-    backgroundColor: "{colors.gold}"
-    textColor: "{colors.navy-dark}"
-    rounded: "{rounded.pill}"
-    padding: 10px 20px
-  button-dark-utility:
-    base: "shadcn/ui Button variant=ghost or custom utility"
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.button-utility}"
-    rounded: "{rounded.sm}"
-    padding: 8px 15px
-  button-pearl-capsule:
-    base: "shadcn/ui Button variant=secondary"
-    backgroundColor: "{colors.surface-pearl}"
-    textColor: "{colors.ink-muted-80}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.md}"
-    padding: 8px 14px
-  button-icon-circular:
-    base: "shadcn/ui Button size=icon"
-    backgroundColor: "{colors.surface-chip-translucent}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    size: 44px
-  text-link:
-    base: "Custom HSPMTB text link"
-    backgroundColor: transparent
-    textColor: "{colors.primary}"
-    typography: "{typography.body}"
-  text-link-on-dark:
-    base: "Custom HSPMTB text link"
-    backgroundColor: transparent
-    textColor: "{colors.primary-on-dark}"
-    typography: "{typography.body}"
-  global-nav:
-    base: "Custom ParishNavbar"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.nav-link}"
-    height: 64px
-    borderBottom: "1px solid {colors.divider-soft}"
-  sub-nav-frosted:
-    base: "Custom ProfileSubNav"
-    backgroundColor: "rgba(248, 249, 251, 0.84)"
-    textColor: "{colors.ink}"
-    typography: "{typography.tagline}"
-    height: 56px
-    backdropFilter: "saturate(180%) blur(20px)"
-  hero:
-    base: "Custom ParishHero"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    minHeight: "clamp(520px, 72vh, 760px)"
-    imageTreatment: "full-bleed photographic image; no decorative gradient"
-  profile-hero:
-    base: "Custom ProfileHero"
-    backgroundColor: "{colors.navy}"
-    textColor: "{colors.on-dark}"
-    minHeight: "360px"
-    imageTreatment: "full-width parish photography"
-  profile-sidebar:
-    base: "Custom ParishProfileSidebar"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    activeBackgroundColor: "{colors.red-light}"
-    activeTextColor: "{colors.primary}"
-    rounded: "{rounded.lg}"
-    padding: 16px
-  parish-card:
-    base: "shadcn/ui Card + custom HSPMTB variants"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    borderColor: "{colors.hairline}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  news-card:
-    base: "Custom ParishNewsCard"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    imageRadius: "{rounded.md}"
-  mass-schedule-card:
-    base: "Custom MassScheduleCard"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    borderColor: "{colors.hairline}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  agenda-card:
-    base: "Custom AgendaCard"
-    backgroundColor: "{colors.navy-light}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  service-card:
-    base: "Custom SacramentServiceCard"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    imageRadius: "{rounded.sm}"
-  community-card:
-    base: "Custom CommunityCard"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-  timeline:
-    base: "Custom ParishTimeline"
-    lineColor: "{colors.primary}"
-    markerColor: "{colors.primary}"
-    yearColor: "{colors.navy}"
-  quote-card:
-    base: "Custom ParishQuoteCard"
-    backgroundColor: "{colors.navy-light}"
-    textColor: "{colors.navy-dark}"
-    rounded: "{rounded.lg}"
-    padding: 32px
-  gallery:
-    base: "Custom ParishGallery"
-    backgroundColor: "{colors.canvas}"
-    imageRadius: "{rounded.md}"
-  parish-cta:
-    base: "Custom ParishCTA"
-    backgroundColor: "{colors.navy}"
-    textColor: "{colors.on-dark}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  floating-sticky-bar:
-    base: "Custom HSPMTB FloatingBar"
-    backgroundColor: "rgba(248, 249, 251, 0.84)"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    height: 64px
-    padding: 12px 32px
-    backdropFilter: "saturate(180%) blur(20px)"
-  search-input:
-    base: "shadcn/ui Input"
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.pill}"
-    padding: 12px 20px
-    height: 44px
-    borderColor: "{colors.hairline}"
-  footer:
-    base: "Custom ParishFooter"
-    backgroundColor: "{colors.canvas-soft}"
-    textColor: "{colors.ink-muted-80}"
-    typography: "{typography.fine-print}"
-    padding: 64px
-
+    button-primary:
+        base: "shadcn/ui Button variant=default"
+        backgroundColor: "{colors.primary}"
+        textColor: "{colors.on-primary}"
+        typography: "{typography.body}"
+        rounded: "{rounded.pill}"
+        padding: 11px 22px
+    button-primary-focus:
+        backgroundColor: "{colors.primary}"
+        textColor: "{colors.on-primary}"
+        rounded: "{rounded.pill}"
+        focusRing: "2px solid {colors.primary-focus}"
+    button-primary-active:
+        backgroundColor: "{colors.primary-hover}"
+        textColor: "{colors.on-primary}"
+        rounded: "{rounded.pill}"
+        transform: "scale(0.98)"
+    button-secondary-pill:
+        base: "shadcn/ui Button variant=outline"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.primary}"
+        borderColor: "{colors.primary}"
+        typography: "{typography.body}"
+        rounded: "{rounded.pill}"
+        padding: 11px 22px
+    button-navy:
+        base: "Custom HSPMTB Button"
+        backgroundColor: "{colors.navy}"
+        textColor: "{colors.on-dark}"
+        rounded: "{rounded.pill}"
+        padding: 11px 22px
+    button-gold:
+        base: "Custom HSPMTB Button"
+        backgroundColor: "{colors.gold}"
+        textColor: "{colors.navy-dark}"
+        rounded: "{rounded.pill}"
+        padding: 10px 20px
+    button-dark-utility:
+        base: "shadcn/ui Button variant=ghost or custom utility"
+        backgroundColor: "{colors.ink}"
+        textColor: "{colors.on-dark}"
+        typography: "{typography.button-utility}"
+        rounded: "{rounded.sm}"
+        padding: 8px 15px
+    button-pearl-capsule:
+        base: "shadcn/ui Button variant=secondary"
+        backgroundColor: "{colors.surface-pearl}"
+        textColor: "{colors.ink-muted-80}"
+        typography: "{typography.caption}"
+        rounded: "{rounded.md}"
+        padding: 8px 14px
+    button-icon-circular:
+        base: "shadcn/ui Button size=icon"
+        backgroundColor: "{colors.surface-chip-translucent}"
+        textColor: "{colors.ink}"
+        rounded: "{rounded.full}"
+        size: 44px
+    text-link:
+        base: "Custom HSPMTB text link"
+        backgroundColor: transparent
+        textColor: "{colors.primary}"
+        typography: "{typography.body}"
+    text-link-on-dark:
+        base: "Custom HSPMTB text link"
+        backgroundColor: transparent
+        textColor: "{colors.primary-on-dark}"
+        typography: "{typography.body}"
+    global-nav:
+        base: "Custom ParishNavbar"
+        backgroundColor: "{semantic.background}"
+        textColor: "{semantic.foreground}"
+        typography: "{typography.nav-link}"
+        height: 64px
+        borderBottom: "1px solid {semantic.border}"
+        darkBackgroundColor: "{semantic.dark.background}"
+        darkTextColor: "{semantic.dark.foreground}"
+    sub-nav-frosted:
+        base: "Custom ProfileSubNav"
+        backgroundColor: "rgba(248, 249, 251, 0.84)"
+        textColor: "{colors.ink}"
+        typography: "{typography.tagline}"
+        height: 56px
+        backdropFilter: "saturate(180%) blur(20px)"
+    hero:
+        base: "Custom ParishHero"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        minHeight: "clamp(520px, 72vh, 760px)"
+        imageTreatment: "full-bleed photographic image; no decorative gradient"
+    profile-hero:
+        base: "Custom ProfileHero"
+        backgroundColor: "{colors.navy}"
+        textColor: "{colors.on-dark}"
+        minHeight: "360px"
+        imageTreatment: "full-width parish photography"
+    profile-sidebar:
+        base: "Custom ParishProfileSidebar"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        activeBackgroundColor: "{colors.red-soft}"
+        activeTextColor: "{colors.primary}"
+        rounded: "{rounded.lg}"
+        padding: 16px
+    parish-card:
+        base: "shadcn/ui Card + custom HSPMTB variants"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        borderColor: "{colors.hairline}"
+        rounded: "{rounded.lg}"
+        padding: 24px
+    news-card:
+        base: "Custom ParishNewsCard"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        rounded: "{rounded.lg}"
+        imageRadius: "{rounded.md}"
+    mass-schedule-card:
+        base: "Custom MassScheduleCard"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        borderColor: "{colors.hairline}"
+        rounded: "{rounded.lg}"
+        padding: 24px
+    agenda-card:
+        base: "Custom AgendaCard"
+        backgroundColor: "{colors.navy-light}"
+        textColor: "{colors.ink}"
+        rounded: "{rounded.lg}"
+        padding: 24px
+    service-card:
+        base: "Custom SacramentServiceCard"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        rounded: "{rounded.lg}"
+        imageRadius: "{rounded.sm}"
+    community-card:
+        base: "Custom CommunityCard"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        rounded: "{rounded.lg}"
+    timeline:
+        base: "Custom ParishTimeline"
+        lineColor: "{colors.primary}"
+        markerColor: "{colors.primary}"
+        yearColor: "{colors.navy}"
+    quote-card:
+        base: "Custom ParishQuoteCard"
+        backgroundColor: "{colors.navy-light}"
+        textColor: "{colors.navy-dark}"
+        rounded: "{rounded.lg}"
+        padding: 32px
+    gallery:
+        base: "Custom ParishGallery"
+        backgroundColor: "{colors.canvas}"
+        imageRadius: "{rounded.md}"
+    parish-cta:
+        base: "Custom ParishCTA"
+        backgroundColor: "{colors.navy}"
+        textColor: "{colors.on-dark}"
+        rounded: "{rounded.lg}"
+        padding: 48px
+    floating-sticky-bar:
+        base: "Custom HSPMTB FloatingBar"
+        backgroundColor: "rgba(248, 249, 251, 0.84)"
+        textColor: "{colors.ink}"
+        typography: "{typography.body}"
+        height: 64px
+        padding: 12px 32px
+        backdropFilter: "saturate(180%) blur(20px)"
+    search-input:
+        base: "shadcn/ui Input"
+        backgroundColor: "{colors.canvas}"
+        textColor: "{colors.ink}"
+        typography: "{typography.body}"
+        rounded: "{rounded.pill}"
+        padding: 12px 20px
+        height: 44px
+        borderColor: "{colors.hairline}"
+    footer:
+        base: "Custom ParishFooter"
+        backgroundColor: "{colors.canvas-soft}"
+        textColor: "{colors.ink-muted-80}"
+        typography: "{typography.fine-print}"
+        padding: 64px
 ---
 
 ## Overview
@@ -377,9 +427,9 @@ The implementation is intentionally limited to **Tailwind CSS + shadcn/ui + cust
 ### Key Characteristics
 
 - Photography-first presentation; parish imagery should communicate place, people, worship, and community.
-- White and soft-neutral surfaces dominate the interface.
+- White and soft-neutral surfaces dominate the interface in light mode; dark mode uses neutral charcoal surfaces for comfort.
 - HSPMTB Red (`#AB020E`) is the primary interactive color.
-- HSPMTB Navy (`#01266D`) is the principal structural and editorial dark color.
+- HSPMTB Navy (`#01266D`) is the principal structural/editorial accent, but MUST NOT be used as the global dark-mode background.
 - HSPMTB Gold (`#FCB027`) is a restrained accent, not a second primary CTA color.
 - Apple-inspired spacing and typography create an editorial, premium feel.
 - Cards use subtle borders and restrained radius; shadows are used sparingly.
@@ -431,9 +481,70 @@ The implementation is intentionally limited to **Tailwind CSS + shadcn/ui + cust
 - **Divider Soft** (`{colors.divider-soft}` — `#F2F4F7`): Very subtle section and navigation separation.
 - **Hairline** (`{colors.hairline}` — `#E4E7EC`): Standard 1px border for cards, inputs, and utility surfaces.
 
+### Dark Mode Tokens
+
+- **Dark Canvas** (`{colors.dark-canvas}` — `#171A1F`): Default dark page background.
+- **Dark Canvas Soft** (`{colors.dark-canvas-soft}` — `#1C2229`): Secondary regions such as sidebar and utility navigation.
+- **Dark Surface** (`{colors.dark-surface}` — `#232A33`): Cards, panels, inputs, and content surfaces.
+- **Dark Surface Elevated** (`{colors.dark-surface-elevated}` — `#2A323D`): Dialogs, popovers, dropdowns, and selected controls.
+- **Dark Border** (`{colors.dark-border}` — `#39424E`): Standard dark-mode border.
+- **Dark Border Soft** (`{colors.dark-border-soft}` — `#303844`): Quiet separators.
+- **Dark Ink** (`{colors.dark-ink}` — `#F3F4F6`): Heading and primary UI text.
+- **Dark Body** (`{colors.dark-body}` — `#E5E7EB`): Body copy and normal labels.
+- **Dark Muted** (`{colors.dark-muted}` — `#AAB4C0`): Metadata and secondary copy.
+- **Dark Subtle** (`{colors.dark-subtle}` — `#7F8A98`): Disabled or tertiary information; do not use for essential content.
+
 ### Brand Gradient
 
 **No decorative gradients.** Depth should come from photography, surface changes, whitespace, typography, and restrained overlays when necessary for text legibility. If an image naturally contains light or atmospheric gradients, that is content photography rather than a UI gradient.
+
+## Theme Modes
+
+### Light Mode — Default
+
+Light mode is the canonical HSPMTB visual language and MUST remain the default for the public website and the admin panel unless the user explicitly selects another mode. White and soft-neutral surfaces dominate. The visual hierarchy is created with whitespace, subtle borders, typography, and restrained HSPMTB red/navy accents.
+
+### Dark Mode — Soft Neutral
+
+Dark mode is an accessibility and comfort option, not a second visual identity. It MUST avoid the saturated navy-on-navy treatment that can cause eye strain and make secondary navigation appear muddy.
+
+| Role                   | Light                    | Dark                             | Rule                                                                    |
+| ---------------------- | ------------------------ | -------------------------------- | ----------------------------------------------------------------------- |
+| Page background        | `{colors.canvas}`        | `{colors.dark-canvas}`           | Dark canvas is neutral charcoal, not navy.                              |
+| Secondary background   | `{colors.canvas-soft}`   | `{colors.dark-canvas-soft}`      | Use for sidebar/utility regions.                                        |
+| Card / panel           | `{colors.canvas}`        | `{colors.dark-surface}`          | Cards should be only one surface step above the page.                   |
+| Elevated surface       | `{colors.surface-pearl}` | `{colors.dark-surface-elevated}` | Use sparingly for popovers/dialogs/selected controls.                   |
+| Primary text           | `{colors.ink}`           | `{colors.dark-ink}`              | Avoid pure white for large text areas.                                  |
+| Body text              | `{colors.body}`          | `{colors.dark-body}`             | Maintain comfortable reading contrast.                                  |
+| Muted text             | `{colors.body-muted}`    | `{colors.dark-muted}`            | Must remain readable; never use low-opacity white as the only strategy. |
+| Border                 | `{colors.hairline}`      | `{colors.dark-border}`           | Prefer clear but quiet borders over heavy shadows.                      |
+| Soft border            | `{colors.divider-soft}`  | `{colors.dark-border-soft}`      | For separators and navigation chrome.                                   |
+| Primary action         | `{colors.primary}`       | `{colors.primary}`               | Brand red remains the main action signal.                               |
+| Navy accent            | `{colors.navy}`          | `{colors.dark-navy-accent}`      | Navy becomes an accent, not the global canvas.                          |
+| Soft active background | `{colors.red-soft}`      | `{colors.red-soft-dark}`         | Use for selected navigation and active tabs.                            |
+
+#### Dark Mode Comfort Rules
+
+- Do not use a full-screen `bg-navy` layout.
+- Do not use `#FFFFFF` for all dark-mode text; use `{colors.dark-ink}` for headings and `{colors.dark-body}` for body copy.
+- Do not use large pure-black panels.
+- Do not stack navy, red, gold, and white at full saturation in the same viewport.
+- Keep secondary navigation and disabled items distinguishable without making them excessively dim.
+- Avoid opacity-only text such as `text-white/40` when a documented muted token is available.
+- Use borders and surface steps before shadows.
+- Dialogs, dropdowns, command palettes, and sheets should use `{colors.dark-surface-elevated}`.
+- Images should not receive a heavy dark overlay merely because dark mode is active; preserve photography and adjust text placement/contrast instead.
+- Theme switching MUST be instant and MUST NOT cause layout shifts.
+
+#### Theme Switching
+
+- The Appearance setting exposes **Light**, **Dark**, and **System**.
+- `Light` applies the light tokens regardless of OS preference.
+- `Dark` applies the soft-neutral dark tokens regardless of OS preference.
+- `System` follows `prefers-color-scheme`.
+- Persist the user's explicit selection.
+- If no preference exists, default to `light`.
+- Theme tokens MUST be implemented through CSS variables/Tailwind semantic tokens; components MUST NOT branch on hard-coded hex values.
 
 ## Typography
 
@@ -568,6 +679,46 @@ Shadows are intentionally restrained. They should establish separation, not crea
 - **No excessive rounded corners on hero photography.**
 - Use responsive `srcset`, `sizes`, WebP/AVIF where supported, and lazy loading below the fold.
 - Above-the-fold hero imagery should load eagerly.
+
+## Admin Appearance & Theme
+
+The admin panel may expose more utility UI than the public website, but it MUST follow the same HSPMTB token system. The screenshots used during development show that the previous dark mode made the entire workspace overly saturated navy and reduced the visual distinction of secondary navigation. That treatment is deprecated.
+
+### Admin Layout
+
+- **Light mode:** warm/soft white canvas, white content surfaces, subtle neutral borders, dark text, restrained navy accents.
+- **Dark mode:** neutral charcoal page background, slightly lighter sidebar, slightly lighter content surface, clear borders, and HSPMTB red only for active/important actions.
+- The sidebar MUST NOT be `bg-navy` across its entire height in dark mode.
+- The main content area MUST NOT use HSPMTB Navy as its base background.
+- Header and sidebar separation should come from surface and border tokens, not strong color blocks.
+- Disabled or unavailable menu items should remain legible enough to understand their existence; use `{colors.dark-subtle}` rather than very low opacity.
+
+### Appearance Selector
+
+The Light / Dark / System selector should itself remain low-contrast and calm:
+
+- container: `{semantic.muted}` / `{semantic.dark.muted}`;
+- selected option: one elevated surface step;
+- selected text: foreground token;
+- unselected text: muted foreground token;
+- active indicator: subtle, not a bright full-width color block;
+- icons: Lucide React, 16–18px;
+- minimum touch target: 44px;
+- transition: 150–200ms color/background transition only.
+
+### Admin Surface Hierarchy
+
+| Layer          | Light                    | Dark                             |
+| -------------- | ------------------------ | -------------------------------- |
+| App canvas     | `{colors.canvas-soft}`   | `{colors.dark-canvas}`           |
+| Sidebar        | `{colors.canvas}`        | `{colors.dark-canvas-soft}`      |
+| Header         | `{colors.canvas}`        | `{colors.dark-canvas-soft}`      |
+| Content panel  | `{colors.canvas}`        | `{colors.dark-surface}`          |
+| Card           | `{colors.canvas}`        | `{colors.dark-surface}`          |
+| Popover/dialog | `{colors.surface-pearl}` | `{colors.dark-surface-elevated}` |
+| Border         | `{colors.hairline}`      | `{colors.dark-border}`           |
+
+The admin interface should feel like a quiet content-management workspace, not a saturated command center.
 
 ## Components
 
@@ -719,9 +870,9 @@ Footer may be denser than the main page because it is intended to expose the sit
 ### Do
 
 - Use HSPMTB Red (`#AB020E`) as the primary interactive signal.
-- Use HSPMTB Navy (`#01266D`) for structural dark surfaces and editorial emphasis.
+- Use HSPMTB Navy (`#01266D`) for structural/editorial accents; do not use it as the global dark-mode canvas.
 - Use HSPMTB Gold (`#FCB027`) sparingly as a ceremonial accent.
-- Keep white and soft-neutral surfaces dominant.
+- Keep white and soft-neutral surfaces dominant in light mode; use soft charcoal surfaces in dark mode.
 - Use Tailwind CSS utilities and semantic tokens instead of arbitrary inline styling.
 - Reuse shadcn/ui primitives before creating new primitives.
 - Build custom components when the behavior or visual language is parish-specific.
@@ -739,8 +890,10 @@ Footer may be denser than the main page because it is intended to expose the sit
 ### Don't
 
 - Do not introduce Ant Design, Material UI, Bootstrap, or another UI component library.
-- Do not use arbitrary brand colors outside the documented palette.
+- Do not use arbitrary brand colors outside the documented palette or dark-mode token system.
 - Do not use red, navy, and gold at equal visual intensity.
+- Do not make the dark mode a navy-only theme.
+- Do not use pure black backgrounds or pure white text as the dominant dark-mode pair.
 - Do not make gold the primary CTA color.
 - Do not use decorative gradients as a default visual treatment.
 - Do not add heavy shadows to every card.
@@ -815,17 +968,13 @@ The structural breakpoints that matter most are:
 Example:
 
 ```tsx
-<Button className="rounded-full">
-  Jadwal Misa
-</Button>
+<Button className="rounded-full">Jadwal Misa</Button>
 ```
 
 Prefer:
 
 ```tsx
-<Button variant="default">
-  Jadwal Misa
-</Button>
+<Button variant="default">Jadwal Misa</Button>
 ```
 
 when the shadcn theme already defines the correct radius and colors.
@@ -902,8 +1051,9 @@ ParishFooter
 - Exact parish typography assets have not been supplied; the system therefore uses SF Pro/system fallbacks.
 - The final icon set has not been formally locked beyond the recommendation to use Lucide React.
 - Exact image dimensions/crops for every parish page are not yet defined.
-- Dark-mode requirements have not been established; the public MVP should remain light-dominant unless the project explicitly adds dark mode.
+- Dark mode is established as an optional soft-neutral theme. Light mode remains the canonical/default mode, while dark mode uses neutral charcoal tokens and must not use saturated navy as the global background.
 - Form validation/error states should be documented as implementation proceeds.
+- Dark-mode contrast must be verified in the implemented admin UI, especially muted navigation, disabled states, borders, dialogs, and text over photography.
 - Exact motion/animation tokens are not yet formalized. Motion should remain subtle and functional.
 - The final accessibility audit should be performed against the implemented interface, not only this design document.
 - The final content hierarchy must be validated against approved parish content before launch.

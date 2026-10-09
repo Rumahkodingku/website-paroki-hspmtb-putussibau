@@ -61,15 +61,30 @@ return [
          | plain finder points at these real directories and fails on a name like
          | admin/akun/profile, which is a far better failure than a stale path.
          |
+         | One entry per feature directory holding at least one page. A directory
+         | missing from here is caught by ArchitectureTest's "the inertia page
+         | finder and the blade lookup find the same files", which walks
+         | PageChunk::all() instead of trusting this list.
+         |
          | See docs/DECISIONS.md D-30.
          */
         'paths' => [
             resource_path('js/features/admin/akun/pages'),
             resource_path('js/features/admin/dashboard/pages'),
             resource_path('js/features/admin/pengaturan/pages'),
+            resource_path('js/features/public/agenda/pages'),
             resource_path('js/features/public/auth/pages'),
             resource_path('js/features/public/beranda/pages'),
+            resource_path('js/features/public/berita/pages'),
+            resource_path('js/features/public/design-system/pages'),
+            resource_path('js/features/public/download/pages'),
             resource_path('js/features/public/error/pages'),
+            resource_path('js/features/public/galeri/pages'),
+            resource_path('js/features/public/jadwal-misa/pages'),
+            resource_path('js/features/public/komunitas/pages'),
+            resource_path('js/features/public/kontak/pages'),
+            resource_path('js/features/public/pelayanan/pages'),
+            resource_path('js/features/public/profil/pages'),
         ],
 
         'extensions' => [

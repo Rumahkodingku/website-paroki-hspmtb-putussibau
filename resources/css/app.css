@@ -30,13 +30,15 @@
 |      48/80/112 scale and Tailwind's default already produces exactly those
 |      values as p-1, p-2, p-3, p-4, p-6, p-8, p-12, p-20 and p-28.
 |
-| Dark mode is derived from the navy ramp using color-mix() against the
-| documented surfaces, so every dark value still traces back to a colour in
-| DESIGN.md rather than being picked by eye.
+| Dark mode is not derived. DESIGN.md v1.1 defines it: fourteen dark-* colours,
+| a semantic.dark block, and the rule "Do not use HSPMTB Navy as the global
+| page background". Every value in the .dark block below is one of them, with no
+| color-mix() anywhere.
 |
 | @see docs/DESIGN.md
 | @see docs/DECISIONS.md D-22
-|
+| @see docs/DECISIONS.md D-32
+
 */
 
 @theme {
@@ -143,6 +145,23 @@
     --radius-xl: 24px;
     --radius-pill: 9999px;
 
+    /*
+     * DESIGN.md "Elevation & Depth". Two tokens, and only two, because the
+     * document only defines two shadowed levels; everything else on that table
+     * is flat or a 1px hairline, which the border tokens already cover.
+     *
+     *   shadow-soft-card  a card that needs to separate from a similar background
+     *   shadow-image      photography that needs visual weight
+     *
+     * Tailwind's own shadow-* scale is deliberately unused on public surfaces.
+     * DESIGN.md is explicit that shadows "should establish separation, not
+     * create a floating SaaS-card aesthetic" and that they must not go on every
+     * card. A token named after the level makes shadow-xl-on-everything the
+     * deliberate choice rather than the default.
+     */
+    --shadow-soft-card: 0 8px 30px rgba(16, 24, 40, 0.06);
+    --shadow-image: 0 8px 30px rgba(0, 0, 0, 0.16);
+
     /* shadcn semantic tokens, backed by the CSS variables below. */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -186,6 +205,15 @@
     --color-gold-light: #fff4d6;
     --color-ink: #111827;
     --color-canvas-soft: #f8f9fb;
+    /*
+     * Near-white, and NOT a duplicate of --background. DESIGN.md lists both
+     * `canvas` (#FFFFFF) and `surface-pearl` (#FCFCFD) as separate colours and
+     * gives pearl a distinct job: `button-pearl-capsule`, a secondary control
+     * that has to read as a step below the canvas rather than on top of it. The
+     * two values are three hex digits apart, so this looks like an accidental
+     * copy-paste to anyone reading it cold. It is deliberate; collapsing them
+     * would flatten that control into the background.
+     */
     --color-surface-pearl: #fcfcfd;
     --color-surface-chip: #e5e7eb;
     --color-hairline: #e4e7ec;
@@ -194,11 +222,40 @@
     --color-ink-muted-strong: #475467;
     --color-ink-muted-soft: #98a2b3;
     /*
-     * DESIGN.md refers to {colors.red-light} for the active profile sidebar
-     * state but never defines it in the colors block. Derived from primary so
-     * the value still traces to the palette. Recorded in D-22.
+     * The red to use when red is TEXT rather than a fill: the active navigation
+     * item, a link inside rich text, the eyebrow above a heading, the text on the
+     * destructive Alert.
+     *
+     * It exists because one value cannot do both jobs in dark mode. The brand
+     * red fills a button well - white on #AB020E is 7.65:1 - but as text on the
+     * dark canvas it measures 2.28:1, because a dark red has no luminance left
+     * to offer against a dark surface. DESIGN.md already names the answer in
+     * its palette as primary-on-dark (#FF6670), which measures 6.14:1 on the same
+     * canvas; this token just points at it in dark mode and at primary in light.
+     *
+     * Fill surfaces keep using bg-primary. Text uses this.
+     *
+     * @see docs/DECISIONS.md D-32
      */
-    --color-primary-light: color-mix(in oklab, #ab020e 8%, #ffffff);
+    --color-red-on-surface: var(--red-on-surface);
+    /*
+     * red-on-surface is what a red BORDER wants too, not just red text.
+     *
+     * An outline button or the border of a focused card is a UI boundary, and
+     * WCAG 1.4.11 wants 3:1 between a boundary and what sits behind it. The
+     * brand red on the dark canvas is 2.28:1, so a red-bordered control would
+     * dissolve into the page; primary-on-dark is 6.14:1 there.
+     */
+    /*
+     * DESIGN.md colors.red-soft, and it replaces --color-primary-light.
+     *
+     * D-22 recorded primary-light as a colour-mix derived from primary to stand
+     * in for a token the document then left undefined. v1.1 defines it properly
+     * as red-soft (#FDE7E9), so the derived name is gone: two names for one
+     * colour is how a palette starts drifting. The dark value is red-soft-dark
+     * and is declared in the .dark block below.
+     */
+    --color-red-soft: var(--red-soft);
     --color-primary-hover: #8f010b;
     --color-primary-focus: #c51624;
     --color-red-on-dark: #ff6670;
@@ -230,7 +287,7 @@
     --card: #ffffff; /* canvas */
     --card-foreground: #111827; /* ink */
 
-    --popover: #ffffff; /* canvas */
+    --popover: #fcfcfd; /* surface-pearl - Admin Surface Hierarchy */
     --popover-foreground: #111827; /* ink */
 
     --primary: #ab020e;
@@ -262,6 +319,15 @@
     --destructive: #ab020e;
     --destructive-foreground: #ffffff;
 
+    /*
+     * The red as text, in light mode. Identical to primary here, which is the
+     * point: the split between this and primary exists only because dark mode
+     * cannot use the same value for both. See the .dark block.
+     */
+    --red-on-surface: #ab020e;
+    /* DESIGN.md colors.red-soft, replacing the derived primary-light from D-22. */
+    --red-soft: #fde7e9;
+
     --border: #e4e7ec; /* hairline */
     --input: #e4e7ec; /* hairline */
     --ring: #c51624; /* primary-focus */
@@ -272,68 +338,143 @@
     --chart-4: #667085; /* body-muted */
     --chart-5: #475467; /* ink-muted-80 */
 
-    --sidebar: #f8f9fb; /* canvas-soft */
+    /*
+ * Admin Surface Hierarchy, light mode: app canvas canvas-soft, sidebar and
+ * header canvas, content panel canvas.
+ *
+ * The app canvas is NOT --background. --background is semantic.background, which
+ * DESIGN.md defines as canvas and which the public pages use as their page
+ * background. The admin needs a different canvas behind its panels, and the two
+ * cannot share one body colour, so the admin applies canvas-soft at its own
+ * shell (app-shell.tsx) rather than redefining a global token. See D-32.
+ */
+    --sidebar: #ffffff; /* canvas */
     --sidebar-foreground: #111827; /* ink */
     --sidebar-primary: #ab020e;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #eaf0fa; /* navy-light */
-    --sidebar-accent-foreground: #001a4d; /* navy-dark */
+    /*
+     * red-soft, and it replaces navy-light.
+     *
+     * DESIGN.md assigns red-soft to the selected navigation and active tab
+     * state, with red as the selected text - "The active item uses HSPMTB Red,
+     * a subtle red-tinted background". The navy-light that was here marked the
+     * active row in blue, which is not the brand's choice.
+     *
+     * One consequence worth stating plainly: ui/sidebar.tsx uses this same pair
+     * for `hover:` as well as for `data-[active=true]:`, and the two states
+     * cannot be told apart without editing a generated file. Hovering a sidebar
+     * row therefore tints it red too. That is on-brand rather than wrong - red
+     * is the interactive colour throughout - but it is a visible change and it
+     * is recorded in D-32 rather than left to be discovered.
+     */
+    --sidebar-accent: #fde7e9; /* red-soft */
+    --sidebar-accent-foreground: #ab020e; /* primary */
     --sidebar-border: #e4e7ec; /* hairline */
     --sidebar-ring: #c51624; /* primary-focus */
 }
 
 /*
-| Dark theme — derived from the navy ramp.
+| Dark theme — DESIGN.md v1.1, "Dark Mode — Soft Neutral".
 |
-| DESIGN.md section "Known Gaps" states dark mode has not been established, so
-| this palette is not from the document. It is built only from colours the
-| document does specify: navy-dark as the canvas, navy for raised surfaces,
-| and primary-on-dark for anything interactive, because the primary red is not
-| legible on navy. See docs/DECISIONS.md D-22.
+| Every value below is a documented token. Phase 01 derived this palette from
+| the navy ramp with color-mix() because the document said dark mode had not been
+| established. v1.1 establishes it, and states the rule that invalidated the old
+| one outright:
+|
+|     "Do not use HSPMTB Navy as the global page background."
+|     "Do not use pure black (#000000) or pure white (#FFFFFF) as the dominant
+|      dark-mode canvas/text pair."
+|
+| So there is no navy in the canvas, the cards or the text, and no color-mix()
+| anywhere below: each value is one of the fourteen dark-* colours the document
+| defines. D-22 section 3 recorded the old palette and is superseded by D-32.
+|
+| Navy still appears in this block - as secondary's surface and as the sidebar
+| accent - because the document keeps it for "selected accents, active
+| structural elements, or editorial sections", which is exactly those two jobs.
+|
+| Two values depart from a literal reading, both measured rather than guessed:
+|
+|   --ring        The document's semantic.dark.ring is primary-focus (#C51624),
+|                 which measures 2.92:1 against dark-canvas and 2.42:1 against
+|                 dark-surface. WCAG 2.2 SC 2.4.11 wants 3:1 from a focus
+|                 indicator to what sits next to it, so a ring that is darker
+|                 than its own background is invisible in the one place it is
+|                 needed. primary-on-dark (#FF6670) is the same colour the
+|                 document already offers for red on dark, at 6.14:1.
+|
+|   --red-on-surface   Semantic.dark.primary is primary (#AB020E), and it is
+|                 honoured here: --primary is that red, because a button filled
+|                 with it carries white text at 7.65:1 and the brand red should
+|                 stay the action signal. But #AB020E used as TEXT measures
+|                 2.28:1 on dark-canvas, so red text points at a separate token.
+|
+| Every foreground/background pair in this block measures 4.98:1 or better.
 */
 .dark {
-    --background: #001a4d; /* navy-dark */
-    --foreground: #ffffff; /* body-on-dark */
+    --background: #171a1f; /* dark-canvas */
+    --foreground: #f3f4f6; /* dark-ink */
 
-    --card: #01266d; /* navy */
-    --card-foreground: #ffffff;
+    --card: #232a33; /* dark-surface */
+    --card-foreground: #f3f4f6; /* dark-ink */
 
-    --popover: #01266d;
-    --popover-foreground: #ffffff;
+    /* Dialogs, popovers and dropdowns sit one step above the content they open
+       from, which is what makes them readable without a heavy shadow. */
+    --popover: #2a323d; /* dark-surface-elevated */
+    --popover-foreground: #f3f4f6; /* dark-ink */
 
-    --primary: #ff6670; /* primary-on-dark */
-    --primary-foreground: #0b1220; /* surface-black */
+    --primary: #ab020e; /* primary - unchanged from light */
+    --primary-foreground: #ffffff; /* on-primary */
 
-    --secondary: color-mix(in oklab, #eaf0fa 12%, #001a4d);
-    --secondary-foreground: #eaf0fa; /* navy-light */
+    --secondary: #223653; /* dark-navy-soft */
+    --secondary-foreground: #f3f4f6; /* dark-ink */
 
-    --muted: color-mix(in oklab, #eaf0fa 12%, #001a4d);
-    --muted-foreground: #98a2b3; /* ink-muted-48 */
+    --muted: #1c2229; /* dark-canvas-soft */
+    --muted-foreground: #aab4c0; /* dark-muted */
 
-    --accent: color-mix(in oklab, #fcb027 18%, #001a4d);
+    /* Dark gold is a ceremonial surface, not a highlight. The document is
+       explicit that gold must not become a large or glowing dark surface, so
+       this is the darkened gold ramp rather than the brand gold. */
+    --accent: #3a2e17; /* dark-gold-soft */
     --accent-foreground: #fcb027; /* gold */
 
-    --destructive: #ff6670;
-    --destructive-foreground: #0b1220;
+    --destructive: #ab020e; /* primary */
+    --destructive-foreground: #ffffff; /* on-primary */
 
-    --border: color-mix(in oklab, #eaf0fa 16%, #001a4d);
-    --input: color-mix(in oklab, #eaf0fa 16%, #001a4d);
-    --ring: #ff6670;
+    --border: #39424e; /* dark-border */
+    --input: #39424e; /* dark-border */
+    --ring: #ff6670; /* primary-on-dark - see the note above */
 
-    --chart-1: #eaf0fa; /* navy-light */
+    /* See the note above: this is the one value that cannot be the brand red. */
+    --red-on-surface: #ff6670; /* primary-on-dark */
+    /* DESIGN.md colors.red-soft-dark. */
+    --red-soft: #3a171a;
+
+    /*
+     * Charts are not specified in DESIGN.md, so they reuse the palette the
+     * document defines for dark surfaces and text: dark-body for the strongest
+     * series, red-on-surface for the brand one, gold for the ceremonial one.
+     */
+    --chart-1: #e5e7eb; /* dark-body */
     --chart-2: #ff6670; /* primary-on-dark */
     --chart-3: #fcb027; /* gold */
-    --chart-4: #98a2b3; /* ink-muted-48 */
-    --chart-5: #c9d6ee;
+    --chart-4: #aab4c0; /* dark-muted */
+    --chart-5: #7f8a98; /* dark-subtle */
 
-    --sidebar: #001a4d;
-    --sidebar-foreground: #ffffff;
-    --sidebar-primary: #ff6670;
-    --sidebar-primary-foreground: #0b1220;
-    --sidebar-accent: color-mix(in oklab, #eaf0fa 12%, #001a4d);
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: color-mix(in oklab, #eaf0fa 16%, #01266d);
-    --sidebar-ring: #ff6670;
+    /*
+     * Admin Surface Hierarchy, dark: the sidebar and the header are one step
+     * above the app canvas, so the sidebar reads as a distinct region without
+     * being a colour block. dark-subtle is the disabled-item colour the document
+     * names for that purpose.
+     */
+    --sidebar: #1c2229; /* dark-canvas-soft */
+    --sidebar-foreground: #f3f4f6; /* dark-ink */
+    --sidebar-primary: #ab020e; /* primary */
+    --sidebar-primary-foreground: #ffffff; /* on-primary */
+    --sidebar-accent: #3a171a; /* red-soft-dark */
+    --sidebar-accent-foreground: #ff6670; /* primary-on-dark */
+    --sidebar-border: #39424e; /* dark-border */
+    --sidebar-ring: #ff6670; /* primary-on-dark */
 }
 
 @layer base {
@@ -410,11 +551,25 @@
     }
 
     .rich-text blockquote {
-        @apply border-s-4 border-primary ps-4 text-navy italic;
+        /*
+         * The dark override is not optional. text-navy is #01266D, which
+         * measures 1.25:1 against the dark canvas - dark blue on a dark surface
+         * is not a subtle choice, it is invisible. navy-light is the same ramp
+         * read the other way and measures 15.24:1.
+         *
+         * features/admin/akun/pages/profile.tsx already pairs them the same way.
+         */
+        @apply border-s-4 border-primary ps-4 text-navy italic dark:text-navy-light;
     }
 
     .rich-text a {
-        @apply text-primary underline underline-offset-4 hover:text-primary-hover;
+        /*
+         * text-red-on-surface, not text-primary. In dark mode primary is the
+         * brand red #AB020E, which is right for a fill and wrong for a link on
+         * a dark surface: 2.28:1. red-on-surface points at primary-on-dark
+         * there and measures 6.14:1 on the same background.
+         */
+        @apply text-red-on-surface underline underline-offset-4 hover:text-primary-hover;
     }
 
     .rich-text img {
