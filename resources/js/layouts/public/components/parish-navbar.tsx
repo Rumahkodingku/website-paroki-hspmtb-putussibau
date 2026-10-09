@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { AppearanceToggle } from '@/components/appearance-toggle';
 import { PublicContainer } from '@/components/public-container';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -52,13 +53,20 @@ function ParishLogo() {
                 height={42}
                 className="size-10 shrink-0 object-contain"
             />
+            {/*
+                leading-tight stays on the wrapper: it is what makes these two
+                lines read as one lockup inside a 64px bar. The lines themselves
+                are named roles, and the full parish name is fine-print rather
+                than micro-legal here because it has to stay legible - it is the
+                only place a visitor is told which parish they are on.
+            */}
             <span className="hidden flex-col leading-tight sm:flex">
-                <span className="text-caption-strong text-foreground">
+                <Text as="span" variant="caption-strong" color="foreground">
                     HSPMTB Putussibau
-                </span>
-                <span className="text-micro-legal text-muted-foreground">
+                </Text>
+                <Text as="span" variant="micro-legal" color="muted">
                     Hati Santa Perawan Maria Tak Bernoda
-                </span>
+                </Text>
             </span>
         </span>
     );
@@ -91,14 +99,28 @@ function NavList({
 
                 return (
                     <li key={entry.label}>
+                        {/*
+                            The nav-link token lives on the Text rather than
+                            on the Link, because the token is a line height of
+                            1.0 and the Link is a flex row: putting it on the
+                            anchor makes the label sit off the vertical centre
+                            of the 44px hit target. On the inner span it centres
+                            correctly and min-h-11 still owns the touch target.
+
+                            font-medium on the active item overrides the
+                            token's 400 weight, which is the same weight every
+                            inactive item carries - the difference between the
+                            two states has to be visible without colour, or it
+                            fails for anyone who cannot see the red.
+                        */}
                         <Link
                             href={entry.href}
                             onClick={onNavigate}
                             aria-current={active ? 'page' : undefined}
                             className={
                                 drawer
-                                    ? 'flex min-h-11 items-center rounded-md px-3 text-nav-link transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
-                                    : 'relative inline-flex h-11 items-center rounded-sm text-nav-link transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none'
+                                    ? 'flex min-h-11 items-center rounded-md px-3 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
+                                    : 'relative inline-flex h-11 items-center rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none'
                             }
                             style={
                                 active && !drawer
@@ -109,15 +131,19 @@ function NavList({
                                     : undefined
                             }
                         >
-                            <span
+                            <Text
+                                as="span"
+                                variant="nav"
+                                weight={active ? 'medium' : undefined}
+                                color={active ? 'danger' : undefined}
                                 className={
                                     active
-                                        ? 'font-medium text-red-on-surface'
+                                        ? undefined
                                         : 'hover:text-red-on-surface'
                                 }
                             >
                                 {entry.label}
-                            </span>
+                            </Text>
                         </Link>
                     </li>
                 );

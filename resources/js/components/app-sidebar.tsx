@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavUser } from '@/components/nav-user';
+import { Text } from '@/components/text';
 import {
     Sidebar,
     SidebarContent,
@@ -75,9 +76,21 @@ function SidebarEntry({ entry }: { entry: Entry }) {
                 >
                     <entry.icon />
                     <span className="truncate">{entry.title}</span>
-                    <span className="ml-auto text-micro-legal tracking-tight text-muted-foreground/60">
+                    {/*
+                        tracking-tight overrides the token's own -0.08px. That
+                        is deliberate and it is a real trade: the token was
+                        measured for running text, and a three-letter status
+                        marker sitting at 10px next to a 14px label needs the
+                        extra separation to stay legible at that size.
+                    */}
+                    <Text
+                        as="span"
+                        variant="micro-legal"
+                        tracking="tight"
+                        className="ml-auto text-muted-foreground/60"
+                    >
                         belum
-                    </span>
+                    </Text>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         );
@@ -98,9 +111,25 @@ function SidebarEntry({ entry }: { entry: Entry }) {
 function SidebarGroup({ label, entries }: { label: string; entries: Entry[] }) {
     return (
         <div className="px-2 py-1">
-            <p className="px-2 pb-1 text-micro-legal font-medium tracking-wider text-muted-foreground uppercase">
+            {/*
+                An uppercase group label, which DESIGN.md permits for exactly
+                this: "Small uppercase labels may be used for eyebrow text."
+                The spacing is tracking-wider rather than the token's own
+                negative tracking, because uppercase text reads as a solid
+                block at 10px without it. font-medium replaces the token's 400
+                for the same reason.
+            */}
+            <Text
+                as="p"
+                variant="micro-legal"
+                weight="medium"
+                tracking="wider"
+                transform="uppercase"
+                color="muted"
+                className="px-2 pb-1"
+            >
                 {label}
-            </p>
+            </Text>
 
             <SidebarMenu>
                 {entries.map((entry) => (

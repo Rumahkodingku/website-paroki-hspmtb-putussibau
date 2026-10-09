@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
 
 export type SectionHeadingProps = {
@@ -23,8 +24,6 @@ export function SectionHeading({
     align = 'left',
     className,
 }: SectionHeadingProps) {
-    const Heading = level === 2 ? 'h2' : 'h3';
-
     const centred = align === 'center';
 
     return (
@@ -42,19 +41,31 @@ export function SectionHeading({
                 )}
             >
                 {eyebrow && (
-                    <p className="text-caption-strong text-red-on-surface">
+                    <Text as="p" variant="caption-strong" color="danger">
                         {eyebrow}
-                    </p>
+                    </Text>
                 )}
 
-                <Heading className="font-display text-display-md text-balance">
+                {/*
+                    `level` decides the element and `variant` decides the
+                    style, which is the separation that lets a subsection drop
+                    to h3 without the size changing with it. Spelled out as a
+                    ternary rather than a template so `as` stays a literal and
+                    keeps resolving its props against the right tag.
+                */}
+                <Text as={level === 2 ? 'h2' : 'h3'} variant="display-md">
                     {title}
-                </Heading>
+                </Text>
 
                 {description && (
-                    <p className="max-w-2xl text-lead text-muted-foreground">
+                    <Text
+                        as="p"
+                        variant="lead"
+                        color="muted"
+                        className="max-w-2xl"
+                    >
                         {description}
-                    </p>
+                    </Text>
                 )}
             </div>
 
