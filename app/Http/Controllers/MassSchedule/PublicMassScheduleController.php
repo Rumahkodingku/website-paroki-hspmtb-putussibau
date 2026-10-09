@@ -166,16 +166,23 @@ class PublicMassScheduleController extends Controller
     /**
      * The "Misa Berikutnya" card's data, or null for a polite empty state.
      *
+     * Resolved rather than handed over as a resource, for the same reason the
+     * three lists above are: a resource serialises as {"data": ...} and this
+     * page's props are plain values.
+     *
      * Scoped to the filtered location for the same reason the lists are: a
      * visitor who chose a stasi and sees the parish church's next mass has been
      * shown something that is not at the place they asked about.
      */
-    private function nextMass(?Location $location): ?NextMassResource
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function nextMass(?Location $location): ?array
     {
         $next = $location === null
             ? $this->resolver->resolve()
             : $this->resolver->resolveFor($location);
 
-        return $next === null ? null : NextMassResource::make($next);
+        return $next === null ? null : NextMassResource::make($next)->resolve();
     }
 }

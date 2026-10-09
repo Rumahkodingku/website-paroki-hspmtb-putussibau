@@ -52,7 +52,13 @@ test('the foundation permissions are seeded with resource.action names', functio
 
     // Verbatim from Phase 01 10.4, plus admin.access added in P06 as the gate for
     // /admin/* (D-19), plus the media trio added in P10 for the upload
-    // endpoints (D-24).
+    // endpoints (D-24), plus the twelve Jadwal Misa permissions added with the
+    // module in Phase 04 (D-36).
+    //
+    // Single words on purpose. The regex below is /^[a-z]+\.[a-z]+$/, and
+    // `mass-schedules.view` would fail it — so loosening the rule to allow
+    // hyphens was available and deliberately not taken. If a future resource
+    // wants one, changing this regex is the honest place to notice.
     $expected = [
         'admin.access',
 
@@ -70,6 +76,19 @@ test('the foundation permissions are seeded with resource.action names', functio
         'posts.create',
         'posts.update',
         'posts.delete',
+
+        'locations.view',
+        'locations.create',
+        'locations.update',
+        'massschedules.view',
+        'massschedules.create',
+        'massschedules.update',
+        'specialmasses.view',
+        'specialmasses.create',
+        'specialmasses.update',
+        'schedulenotices.view',
+        'schedulenotices.create',
+        'schedulenotices.update',
     ];
 
     expect(Permission::query()->pluck('name')->sort()->values()->all())

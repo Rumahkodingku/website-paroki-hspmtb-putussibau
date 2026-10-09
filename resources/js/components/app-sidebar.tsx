@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 import { edit as editSettings } from '@/routes/settings';
 import { dashboard } from '@/routes';
+import { index as massSchedulesIndex } from '@/routes/mass-schedules';
 import { edit as editProfile } from '@/routes/profile';
 
 /*
@@ -36,6 +37,8 @@ import { edit as editProfile } from '@/routes/profile';
  * Dashboard, the account pages and Appearance have routes today, so those are
  * links and everything else is a disabled row with a "belum" marker. No entry
  * points at a URL that would 404.
+ *
+ * Jadwal Misa became a link in Phase 04, when the module behind it arrived.
  *
  * The two entries that were here before, Repository and Documentation, linked to
  * laravel.com and the Laravel starter repository. They have been removed.
@@ -51,7 +54,7 @@ type Entry = {
 const CONTENT_ENTRIES: Entry[] = [
     { title: 'Beranda', icon: Sparkles },
     { title: 'Profil', icon: Users },
-    { title: 'Jadwal Misa', icon: CalendarDays },
+    { title: 'Jadwal Misa', href: massSchedulesIndex(), icon: CalendarDays },
     { title: 'Berita', icon: Newspaper },
     { title: 'Agenda', icon: CalendarDays },
     { title: 'Pelayanan', icon: Sparkles },

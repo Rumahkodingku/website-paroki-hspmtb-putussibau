@@ -17,7 +17,6 @@ use App\Models\SpecialMass;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -94,7 +93,7 @@ class ScheduleNoticeController extends Controller
         return Inertia::render('admin/jadwal-misa/pemberitahuan/ubah', [
             'notice' => ScheduleNoticeResource::make(
                 $scheduleNotice->load(['location', 'massSchedule', 'specialMass'])
-            ),
+            )->resolve(),
             'targets' => $this->targets(),
             ...$this->formMeta(),
         ]);
@@ -137,20 +136,20 @@ class ScheduleNoticeController extends Controller
      * happened has nothing to announce. Inactive schedules stay, because "the
      * Sunday mass at Stasi is suspended" is exactly what a notice is for.
      *
-     * @return array<string, AnonymousResourceCollection>
+     * @return array<string, list<array<string, mixed>>>
      */
     private function targets(): array
     {
         return [
-            'locations' => LocationOptionResource::collection(
+            'locations' => array_values(LocationOptionResource::collection(
                 Location::query()->active()->orderBy('name')->get()
-            ),
-            'mass_schedules' => MassScheduleOptionResource::collection(
+            )->resolve()),
+            'mass_schedules' => array_values(MassScheduleOptionResource::collection(
                 MassSchedule::query()->with('location')->orderBy('day_of_week')->orderBy('start_time')->get()
-            ),
-            'special_masses' => SpecialMassOptionResource::collection(
+            )->resolve()),
+            'special_masses' => array_values(SpecialMassOptionResource::collection(
                 SpecialMass::query()->where('start_at', '>=', now())->orderBy('start_at')->get()
-            ),
+            )->resolve()),
         ];
     }
 }
