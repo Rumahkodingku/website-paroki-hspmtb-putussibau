@@ -2471,7 +2471,51 @@ nama file itu secara eksplisit dan akan gagal kalau `<Text>` masuk ke sana.
 - `tests/js/lib/utils.test.ts` — kontrak merge, termasuk kasus Button dan Badge
   yang selama ini diam-diam kehilangan tokennya.
 
-### 8. Yang belum dikerjakan
+### 8. `XMLHttpRequest` di-stub di `tests/js/setup.ts` — cacat lama, bukan yang baru
+
+Tidak terkait `Text`. Ditemukan karena perubahan ini tidak bisa hijau.
+
+`tests/js/components/parish-navbar.test.tsx` mengklik link sungguhan di drawer.
+Inertia mengirim XHR-nya **sebelum** resolver komponen berjalan, jadi resolver
+yang melempar di `support/inertia.tsx` tidak pernah sampai menahan permintaan
+itu: `GET localhost:3000/profil` benar-benar keluar dan kembali `ECONNREFUSED`.
+
+Di `main` kegagalan itu tidak terlihat. Rejection-nya settle **setelah** Vitest
+sudah melaporkan hasil dan sedang keluar, jadi run keluar dengan exit 0 sambil
+mencetak `Error: socket hang up` yang tidak terlacak. 107 kasus test baru dari
+susaunan `Text` memindahkan settle itu ke dalam jendela pelaporan, di mana Vitest
+menghitung unhandled rejection sebagai kegagalan — jadi suite menjadi merah
+karena cacat yang sudah ada sejak navbar ditulis.
+
+**Diverifikasi di `main`, bukan disimpulkan.** Enam run berturut-turut pada
+branch yang tidak disentuh semuanya mencetak `Error: socket hang up` yang sama
+dan tetap keluar dengan exit 0.
+
+Perbaikannya ada di environment, bukan di production code, dengan alasan yang
+sama seperti stub `localStorage` di file yang sama: unit test tidak pernah
+navigasi, dan browser tidak pernah yang salah di sini. Tidak ada satu pun test
+yang memeriksa respons, sehingga XHR yang tidak pernah selesai tidak kehilangan
+apa pun — dan ini juga menghapus upaya jaringan sungguhan dari setiap render,
+termasuk di mesin pengembang yang kebetulan punya dev server menyala.
+
+Tiga jebakan yang harus dilalui, semuanya karena `happy-dom` menyimpan state
+XHR di private field:
+
+| Kesalahan | Gejala |
+| --- | --- |
+| `open` dijadikan no-op | `setRequestHeader` menolak: state harus OPENED |
+| memakai `this.OPENED` | `undefined` — konstantanya ada di constructor, bukan di instance |
+| hanya mendefinisikan `readyState` | `Cannot read properties of null (reading 'headers')` — `open()`lah yang membangun record request private itu |
+
+Akhirnya `open()` mendefinisikan `readyState` sebagai own property dan
+`setRequestHeader` menjadi no-op. `send()` tetap tidak pernah dispatch apa pun:
+visit-nya tidak pernah selesai, dan itulah yang dikehendaki unit test
+— tidak ada yang menunggu respons, jadi tidak ada yang perlu di-resolve.
+
+Resolver yang melempar di `support/inertia.tsx` **tetap ada**. Ia masih menangkap
+navigasi yang lolos lewat stub ini; ia hanya bukan lagi baris pertama.
+
+### 9. Yang belum dikerjakan
 
 - **Step-down responsif untuk hero** (56 → 40 → 34 → 28, roadmap §"Typography
   responsive strategy") tetap belum diimplementasikan. `Text` tidak membawa
