@@ -14,6 +14,72 @@ afterEach(() => {
 });
 
 /**
+ * A link click never reaches the network, and this is why.
+ *
+ * Inertia's Link issues its XHR before the component resolver runs, so
+ * renderWithInertia's throwing resolver cannot stop one. parish-navbar's drawer
+ * test clicks a real link, and the request to localhost:3000/profil went out and
+ * came back ECONNREFUSED.
+ *
+ * On main that failure was invisible. The rejection settled after Vitest had
+ * already reported its results and was on its way out, so the run exited 0 and
+ * printed an unattributed "Error: socket hang up" on the way out with it. The 107
+ * additional test cases in the Text suite moved that settlement inside the
+ * reporting window, where Vitest counts an unhandled rejection as a failure -
+ * so the suite went red on a defect that had been present since the navbar was
+ * written. Reproduced on main before the change, not inferred from it.
+ *
+ * The fix belongs in the environment rather than in production code, for the
+ * same reason as the localStorage stub below: a unit test does not navigate, and
+ * a browser is never the thing that is wrong here. Nothing in the suite asserts
+ * on a response, so an XHR that never fires costs nothing and removes a real
+ * network attempt from every render - including on a developer machine, where it
+ * could reach a dev server that happens to be running.
+ *
+ * The resolver's throw in support/inertia.tsx stays. It still catches a
+ * navigation that gets past this; it is simply no longer the first line.
+ */
+if (typeof XMLHttpRequest !== 'undefined') {
+    class InertXmlHttpRequest extends XMLHttpRequest {
+        /**
+         * Reaches OPENED without opening anything.
+         *
+         * Assigning to `readyState` is not enough - happy-dom defines it as an
+         * accessor backed by a private field - so this redefines it as an own
+         * property. The constant comes off the constructor rather than off
+         * `this`, because on an instance it is undefined.
+         */
+        override open(): void {
+            Object.defineProperty(this, 'readyState', {
+                configurable: true,
+                value: XMLHttpRequest.OPENED,
+                writable: false,
+            });
+        }
+
+        /**
+         * A no-op, because there is no request object to hold a header.
+         *
+         * Skipping this one is not an option even though the state now reads as
+         * OPENED: happy-dom's open() is what builds the private request record,
+         * and setRequestHeader writes into it. Letting the real implementation
+         * run throws "Cannot read properties of null" instead.
+         */
+        override setRequestHeader(): void {
+            // Intentionally empty.
+        }
+
+        override send(): void {
+            // Deliberately never dispatches readyState, load or error. The visit
+            // simply never settles, which is what a unit test wants: nothing
+            // awaits the response, so nothing has to be resolved.
+        }
+    }
+
+    globalThis.XMLHttpRequest = InertXmlHttpRequest;
+}
+
+/**
  * An in-memory localStorage, installed only when the environment has none.
  *
  * happy-dom runs on Node here, and Node only exposes localStorage when it is
