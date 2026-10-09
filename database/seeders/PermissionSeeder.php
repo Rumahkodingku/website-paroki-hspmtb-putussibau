@@ -59,6 +59,40 @@ class PermissionSeeder extends Seeder
         'posts.create',
         'posts.update',
         'posts.delete',
+
+        /*
+         * Jadwal Misa, added with the module in Phase 04.
+         *
+         * Three abilities per resource rather than one `mass-schedule.*` set,
+         * because D-18 and D-24 both argue that a permission nothing reads is
+         * worse than no permission at all: a named resource is what a future
+         * editor role could be granted one module at a time.
+         *
+         * All single words, deliberately. RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/, and `mass-schedules.view` would
+         * not. Relaxing that test to allow hyphens would be a small thing to do
+         * on purpose; doing it by accident while adding a module is not one.
+         * See D-36.
+         *
+         * No delete ability, for the reason there is no delete endpoint. A
+         * permission guarding a route that does not exist is the exact thing
+         * D-24 criticises.
+         */
+        'locations.view',
+        'locations.create',
+        'locations.update',
+
+        'massschedules.view',
+        'massschedules.create',
+        'massschedules.update',
+
+        'specialmasses.view',
+        'specialmasses.create',
+        'specialmasses.update',
+
+        'schedulenotices.view',
+        'schedulenotices.create',
+        'schedulenotices.update',
     ];
 
     /**
