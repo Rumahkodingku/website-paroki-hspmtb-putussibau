@@ -391,7 +391,13 @@ it('renders the edit form with the schedule and the day labels', function () {
             // in TypeScript, so the day names cannot drift from the enum.
             ->where('days.0.label', 'Minggu')
             ->where('days.6.label', 'Sabtu')
-            ->has('locations')
+            // Counted, and the wrapper explicitly absent. A resource
+            // collection Inertia wraps as {data: [...]} is an array of exactly
+            // one key, so has('locations', 1) passes just as happily on the
+            // broken shape as on the right one - and this page then renders
+            // nothing at all in a browser. See D-39.
+            ->where('locations.0.id', $this->location->id)
+            ->missing('locations.data')
         );
 });
 

@@ -298,7 +298,10 @@ it('offers past special masses as no notice target', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/jadwal-misa/pemberitahuan/tambah')
             ->has('targets.special_masses', 1)
-            ->has('targets.locations')
+            // For the reason given in MassScheduleTest: an existence check
+            // cannot tell an empty list from a wrongly wrapped one. See D-39.
+            ->where('targets.locations.0.id', $this->location->id)
+            ->missing('targets.locations.data')
         );
 });
 

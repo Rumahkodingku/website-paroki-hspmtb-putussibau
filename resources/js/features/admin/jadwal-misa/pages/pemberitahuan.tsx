@@ -34,11 +34,7 @@ import type { Paginated } from '@/types';
 type Props = {
     notices: Paginated<ScheduleNoticeRow>;
     filters: { search: string; status: string };
-    meta: Pick<
-        FormMeta,
-        'labels' | 'hints' | 'statuses' | 'days' | 'types' | 'noticeScopes'
-    >;
-};
+} & Pick<FormMeta, 'noticeScopes'>;
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Semua status' },
@@ -48,7 +44,7 @@ const STATUS_OPTIONS = [
     { value: 'expired', label: 'Kedaluwarsa' },
 ];
 
-export default function Index({ notices, filters, meta }: Props) {
+export default function Index({ notices, filters, noticeScopes }: Props) {
     const { displayTimezone } = usePage().props;
 
     const applyFilter = (next: Partial<typeof filters>) => {
@@ -63,7 +59,7 @@ export default function Index({ notices, filters, meta }: Props) {
 
     const scopeLabel = (notice: ScheduleNoticeRow): string => {
         if (notice.is_general) {
-            return meta.noticeScopes?.general ?? 'Umum';
+            return noticeScopes?.general ?? 'Umum';
         }
 
         if (notice.mass_schedule) {

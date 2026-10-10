@@ -37,8 +37,7 @@ import type { Paginated } from '@/types';
 type Props = {
     locations: Paginated<LocationRow>;
     filters: { search: string; status: string };
-    meta: Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'types'>;
-};
+} & Pick<FormMeta, 'types'>;
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Semua status' },
@@ -46,7 +45,7 @@ const STATUS_OPTIONS = [
     { value: 'inactive', label: 'Nonaktif' },
 ];
 
-export default function Index({ locations, filters, meta }: Props) {
+export default function Index({ locations, filters, types }: Props) {
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
             locationsIndex().url,
@@ -58,7 +57,7 @@ export default function Index({ locations, filters, meta }: Props) {
     const hasFilter = filters.search !== '' || filters.status !== '';
 
     const typeLabel = (value: string): string =>
-        meta.types.find((type) => type.value === value)?.label ?? value;
+        types.find((type) => type.value === value)?.label ?? value;
 
     return (
         <>

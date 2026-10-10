@@ -2523,3 +2523,235 @@ navigasi yang lolos lewat stub ini; ia hanya bukan lagi baris pertama.
   menuliskannya lewat `className`.
 - **Review visual dua tema.** Angka kontras di atas adalah hitungan, dan
   hitungan bukan mata.
+
+---
+
+## D-34 — Skema tabel Jadwal Misa, dan tiga divergensi dari PRD §9.5
+
+**Status:** Accepted · berlaku sejak P04 · branch `feat/phase-04-mass-schedule`
+
+PRD §9.5 dan roadmap Phase 04 §4 tidak sepakat pada tiga titik. Roadmap menang
+ketiganya, karena artefak yang lebih spesifik untuk fase ini, dan karena PRD §9.5
+sendiri menyatakan "Nama dan tipe bersifat usulan; boleh disesuaikan saat
+implementasi selama perilaku di dokumen ini terpenuhi".
+
+### 1. Tidak ada soft delete
+
+PRD §9.5 menandai `locations` (SD) dan `special_masses` (SD); ADM-05 (MUST)
+menyatakan operasi hapus memakai soft delete pada tabel konten utama. Roadmap §4
+menyatakan sebaliknya — jangan menambahkan soft delete bila `is_active` cukup —
+dan §5.6 melarang endpoint hapus permanen.
+
+Dipilih: hanya `is_active`, tanpa `deleted_at` di tabel mana pun.
+
+Alasannya bukan sekadar perbedaan dokumen. Modul ini **tidak punya endpoint hapus
+sama sekali** — 21 route admin dan tidak satu pun `DELETE`. Kolom soft delete
+karena itu tidak akan pernah diisi, dan kolom yang tidak pernah diisi adalah
+persis apa yang D-24 kritik pada permission yang belum punya kode pembaca.
+Menghapus kolom juga membuat MASS-04 ("tidak dihapus permanen") benar secara
+struktural, bukan hanya lewat konvensi.
+
+Konsekuensi yang harus dicatat: **ADM-05 belum terpenuhi** untuk tabel konten
+modul ini, dan baru akan terasa sampai suatu modul benar-benar punya endpoint
+hapus.
+
+### 2. `locations`: `slug` + `notes`, tanpa `sort_order`
+
+PRD §9.5 punya `sort_order` dan tidak punya `slug`/`notes`. Roadmap §4.1
+sebaliknya, dan §5.2 mewajibkan validasi slug.
+
+Dipilih `slug` (unique) dan `notes`, tanpa `sort_order`. `slug` membuat filter
+publik terbaca manusia dan dapat dibagikan (`?lokasi=stasi-tanah-empang`)
+daripada `?lokasi=7`. `sort_order` dihapus karena **tidak ada satu pun
+requirement yang mengurutkan lokasi** — filter publik mengurutkan dengan nama.
+
+### 3. `schedule_notices` mengikuti roadmap §4.4
+
+PRD §9.5 hanya menyebut `message`, `starts_at` (nullable), `ends_at`,
+`is_active`. Roadmap §2.1 meminta CRUD pemberitahuan dengan rentang tampil, dan
+§6.5 meminta target umum / lokasi / jadwal / misa khusus. Bentuk PRD §9.5 tidak
+dapat menyediakan target.
+
+Dipilih bentuk roadmap §4.4: `title` wajib, tiga foreign key nullable, `starts_at`
+wajib. **Tepat satu** target boleh terisi (D-5 di plan implementasi) — notice yang
+menunjuk lokasi sekaligus jadwal di dalamnya tidak punya satu arti, dan banner
+publik harus menebak mana yang dimaksud.
+
+### 4. Konsekuensi yang bukan divergensi
+
+- `start_time` **tidak di-cast** di model. Kolom TIME adalah jam dinding WIB
+  (PRD D-02); `cast('datetime')` akan menggesernya sebesar offset UTC dan
+  memindahkan "misa berikutnya" ke hari yang salah.
+- Validasi ditulis di `FormRequest`; controller tetap tipis.
+
+## D-35 — Jadwal tidak di-cache, dan kenapa XC-C1 ditunda
+
+**Status:** Accepted · berlaku sejak P04
+
+PRD XC-C1 (SHOULD) menyebut cache untuk "data jarang berubah (jadwal misa
+rutin)" dengan invalidasi saat admin menyimpan, dan satu syarat yang tegas: cache
+**tidak boleh** membuat "misa berikutnya" salah.
+
+Cache ditunda pada fase ini. Empat tabel ini kecil — jumlah lokasi, jadwal, misa
+khusus, dan notice sebuah paroki berada di bawah ratusan baris — sehingga query
+publik yang sudah ter-indeks lebih murah daripada biaya invalidasi yang benar.
+XC-C1 adalah SHOULD, dan "punya cache dengan invalidasi nanti" lebih aman daripada
+"punya cache sekarang tanpa invalidasi".
+
+Konsekuensi:
+
+- **AC-MASS-3 terpenuhi tanpa pekerjaan invalidasi apa pun.** Perubahan admin
+  terlihat pada request berikutnya, dan `PublicMassSchedulePageTest` +
+  `DuplicateMassScheduleTest` mengukurnya setiap kali.
+- Kalau cache ditambahkan nanti, aturan berikutnya wajib: hitung ulang
+  `NextMassResolver` per request dari data yang ter-cache, jangan pernah
+  mengambil kandidat dari cache.
+- `SiteSettingsService` **tetap** memakai cache untuk pengaturan situs — yang itu
+  memang jarang berubah dan D-23 sudah menyelesaikannya.
+
+## D-36 — Granularitas permission: satu kata, bukan satu set per modul
+
+**Status:** Accepted · berlaku sejak P04
+
+Dua opsi tersedia dan satu dipilih:
+
+| Opsi | Bentuk | Konsekuensi |
+| --- | --- | --- |
+| **A (dipilih)** | 12 permission `resource.action` satu kata: `locations.*`, `massschedules.*`, `specialmasses.*`, `schedulenotices.*` | Nol perubahan pada test yang ada |
+| B | 3 permission `mass-schedule.{view,create,update}` | `RbacFoundationTest` harus dilonggarkan |
+
+Opsi A dipilih karena `RbacFoundationTest` mengunci
+`/^[a-z]+\.[a-z]+$/` untuk setiap nama permission, dan `mass-schedules.view`
+tidak mengenuhinya. Melonggarkan regex itu mudah — hanya satu
+baris — dan itulah sebabnya ia berbahaya: test itu ada untuk
+menangkap rename yang tidak disengaja, dan melonggarkannya sebagai
+efek samping akan menutup yang justru penting. `massschedules` ditulis satu
+kata supaya aturan aslinya tidak perlu disentuh sama sekali.
+
+Pertimbangan yang lebih luas: permission per resource, bukan per modul, karena
+D-18 dan D-24 sama-sama mengatakan bahwa permission yang tidak dibaca lebih
+buruk daripada tidak ada. Empat sumber daya dengan tiga kemampuan masing-masing
+memberi peran editor di masa depan granularity yang nyata.
+
+Tidak ada permission `*.delete`, karena tidak ada route hapus (D-34).
+
+## D-37 — `is_active` adalah field form, bukan endpoint toggle
+
+**Status:** Accepted · berlaku sejak P04
+
+Roadmap §5.6 menyebut "deactivate/activate" sebagai endpoint. Yang diterapkan:
+`is_active` adalah field biasa pada form `update`.
+
+Alasan: roadmap §6 meminta "perubahan sekecil mungkin" pada admin, dan
+deactivating sudah merupakan sebuah edit. Delapan endpoint toggle tambahan tidak
+dibaca komponen mana pun.
+
+Konsekuensi yang perlu diketahui:
+
+- Peringatan MASS-07 tetap ada, diimplementasikan di `lokasi/ubah.tsx` dengan
+  `ConfirmDialog`, dan **hanya ketika `active_schedules_count > 0`**.
+- Dialog itu adalah courtesy, bukan jaminan. Jaminan MASS-07 ada di server:
+  `Location::scopeActive` dan `MassSchedule::scopeActive` menyembunyikan lokasi
+  beserta jadwalnya dari halaman publik, sehingga aturan itu tetap berlaku untuk
+  request yang melewati form ini.
+- `AdminAccessTest::$adminPages` tidak bertambah untuk route toggle.
+
+## D-38 — Empat URL PRD §5.2, dan empat pintasan sebagai kartu
+
+**Status:** Accepted · berlaku sejak P04
+
+PRD §5.2 memetakan `/admin/lokasi`, `/admin/jadwal-misa`, `/admin/misa-khusus`
+dan `/admin/pemberitahuan-jadwal` ke empat fungsi. Roadmap §6.1 meminta satu
+"Halaman ringkasan Jadwal Misa" berisi empat pintasan.
+
+Tiga cara memenuhi keduanya:
+
+| Opsi | Bentuk | Masalah |
+| --- | --- | --- |
+| **A (dipilih)** | `/admin/jadwal-misa` = ringkasan + daftar Misa Rutin; tiga URL lain = halaman daftar sendiri | 13 halaman, tanpa redirect |
+| B | Ringkasan di `/admin/jadwal-misa`, daftar rutin di `/admin/jadwal-misa/jadwal-rutin` | menyimpang dari PRD §5.2 |
+| C | Satu halaman dengan `?tab=`, URL lain redirect | redirect yang tidak perlu |
+
+Opsi A dipilih: URL PRD tetap persis, dan keempat pintasan tetap ada.
+
+Kenapa pintasan berupa **kartu**, bukan sidebar kedua:
+
+- `ArchitectureTest` melarang `layouts/` meng-import `features/`, jadi array nav
+  tidak bisa tinggal di layout tanpa diteruskan ke setiap halaman.
+- `layouts/settings/layout.tsx` terikat pada tiga route `akun` dengan copy
+  berbahasa Inggris; menggeneralikannya berarti menambah layout kedua untuk satu
+  modul.
+- Roadmap §6.1 hanya meminta tombol tambah sesuai konteks, bukan navigasi
+  bersarang, dan §6 meminta perubahan sekecil mungkin pada navigasi.
+
+Yang **tidak** berubah: shell admin, sidebar, header, dan breadcrumb.
+`app-sidebar.tsx` hanya mendapat satu `href` pada entri yang sudah ada.
+
+## D-39 — Tiga jebakan yang hanya terlihat di browser, dan why E2E exists at all
+
+**Status:** Accepted · berlaku sejak P04
+
+Tiga bug di Phase 04 lolos dari 528 test Pest yang hijau, dari 212 test Vitest
+yang hijau, dari PHPStan, dan dari `npm run build`. Semuanya ketahuan hanya
+ketika `tests/e2e/mass-schedule.spec.ts` dibuka di Chromium. Dicatat di sini
+karena ketiganya akan berulang di Phase 05 dan sesudahnya.
+
+### 1. Inertia membungkus resource collection yang tidak dipaginasikan
+
+```php
+'locations' => LocationOptionResource::collection($this->activeLocations()),
+```
+
+mengirim `{"data": [...]}`, bukan `[...]`. `PropsResolver` mengambil
+`Responsable::toResponse()->getData(true)`, dan `JsonResource::collection()`
+dengan `->get()` (bukan `->paginate()`) menghasilkan respons tanpa paginator —
+yang justru **memakai** pembungkus `data`. Akibatnya `locations.map(...)` di
+React melempar `p.map is not a function`, dan seluruh halaman admin modul ini
+render jadi layar kosong.
+
+Halaman publik tidak pernah kena karena `PublicMassScheduleController` sudah
+memakai `array_values(...->resolve())` sejak awal.
+
+Yang dipatok: **prop non-paginasikan harus `array_values(Resource::collection(...)->resolve())`.**
+Prop terpaginasikan (`LocationResource::collection($paginator)`) tidak boleh
+disentuh — hasilnya memang `{data, links, meta}` dan itu memang yang
+`Paginated<T>` baca. Satu-satunya bedanya: satu dipaginasikan dan satu tidak.
+
+### 2. Assertion yang lulus karena menghitung kunci, bukan isinya
+
+`->has('locations')` hanya memastikan prop itu ada. Dan `->has('locations', 1)`
+justru **lolos** pada `{data: [...]}` — satu kunci, satu elemen. Dua test
+yang menjaga prop ini sama-sama tidak melihat apa pun.
+
+Assertion yang benar, dan sekarang dipakai:
+
+```php
+->where('locations.0.id', $this->location->id)
+->missing('locations.data')      // the wrapper itself
+```
+
+`missing()` adalah penjaga yang sesungguhnya: ia gagal tepat pada bentuk yang
+salah, bukan hanya pada jumlahnya. Diverifikasi dengan mengembalikan bug-nya
+sementara — test-nya gagal dengan `Property [locations.0.id] does not exist`.
+
+### 3. `<form>` tanpa `noValidate` membuang seluruh pesan validasi
+
+Empat form modul ini menandai field wajib dengan atribut `required`, dan tidak
+satu pun `<form>` punya `noValidate`. Chromium karena itu menjalankan
+validasi HTML5-nya sendiri, memblokir submit, dan `onSubmit` Inertia **tidak
+pernah jalan**. Server tidak pernah dipanggil, jadi pesan bahasa Indonesia
+yang ada di `lang/id/validation.php` tidak pernah tampil — dan tidak ada satu
+pun error di log karena memang tidak ada yang salah.
+
+`noValidate` sekarang ada di keempat form. Atribut `required` tetap, karena
+ia tetap berarti bagi pembaca layar; yang dipatok hanya siapa yang
+memvalidasi: server, satu-satunya yang bisa berbahasa Indonesia.
+
+Aturan turunannya: **hanya server yang memvalidasi.** Aturan HTML5 pada form
+Inertia bukan lapisan kedua, dan tidak boleh ditambahkan diam-diam.
+
+### Kenapa test browser ini bukan tambahan opsional
+
+Keempat test yang menangkap tiga bug di atas tidak bisa ditulis sebagai test
+Pest. Semuanya menanyakan "apakah React berhasil merender" — dan
+`assertInertia` memeriksa payload, bukan hasil render.

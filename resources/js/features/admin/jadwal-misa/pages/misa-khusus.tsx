@@ -17,7 +17,7 @@ import {
     StatusBadge,
 } from '../components/list-parts';
 import { TablePagination } from '../components/table-pagination';
-import type { FormMeta, LocationOption, SpecialMassRow } from '../types';
+import type { SpecialMassRow } from '../types';
 import type { Paginated } from '@/types';
 
 /*
@@ -34,9 +34,7 @@ import type { Paginated } from '@/types';
 
 type Props = {
     specialMasses: Paginated<SpecialMassRow>;
-    locations: LocationOption[];
     filters: { search: string; status: string };
-    meta: Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'days' | 'types'>;
 };
 
 const STATUS_OPTIONS = [

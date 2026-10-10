@@ -3,7 +3,7 @@
 > **Project:** Website Paroki Hati Santa Perawan Maria Tak Bernoda (HSPMTB)
 > Putussibau\
 > **Phase:** 04 — Mass Schedule (Jadwal Misa)\
-> **Status:** Rencana — menunggu persetujuan untuk mulai implementasi\
+> **Status:** Dieksekusi — branch `feat/phase-04-mass-schedule`\
 > **Spesifikasi:** `docs/roadmap/phase-04-mass-schedule.md`\
 > **Sumber kebenaran:** `PRD.md` → `ARCHITECTURE.md` → `DESIGN.md` → `DECISIONS.md`
 
@@ -12,8 +12,8 @@ roadmap Phase 04 menjelaskan _apa_ yang harus ada; dokumen ini menjelaskan _baga
 perubahannya, dalam urutan apa, dan bagaimana diverifikasinya.
 
 > Dokumen ini disusun setelah audit codebase terhadap `main` pada commit `4e398ac`
-> dan **8 pertanyaan keputusan yang sudah dijawab pengguna**. Belum ada satu baris
-> kode yang ditulis.
+> dan **8 pertanyaan keputusan yang sudah dijawab pengguna**. Seluruh rencana di
+> sini sudah diimplementasikan; lihat §14 untuk hasilnya.
 
 ---
 
@@ -1679,11 +1679,11 @@ Status:
 [x] Audit codebase (main @ 4e398ac)
 [x] Keputusan diambil (8 pertanyaan)
 [x] Plan disusun
-[ ] Persetujuan plan
-[ ] Tahap B — Database & backend
-[ ] Tahap C — Frontend admin
-[ ] Tahap D — Frontend publik & integrasi
-[ ] Tahap E — Verifikasi akhir
+[x] Branch feat/phase-04-mass-schedule
+[x] Tahap B — Database & backend
+[x] Tahap C — Frontend admin
+[x] Tahap D — Frontend publik & integrasi
+[x] Tahap E — Verifikasi akhir
 
 Keputusan yang sudah diambil:
 D-1  Tanpa soft delete, hanya is_active
@@ -1705,14 +1705,52 @@ Keputusan yang menunggu:
  ke docs/DECISIONS.md pada Tahap E)
 
 Ringkasan:
-// Dibuat   : 48 backend + 30 frontend + 12 test = 90 file baru
-// Diubah   : 14 file
+// Dibuat   : 48 backend + 30 frontend + 13 test = 91 file baru
+// Diubah   : 17 file
 // Dihapus  : 0
 // Dependency baru : 0
 // Perubahan config : 1 (config/inertia.php pages.paths)
+
+Hasil verifikasi:
+// php artisan test       528 passed, 0 failed
+// npm run test:unit      212 passed, 11 files
+// composer types:check   phpstan level 7, 0 errors
+// npm run check          oxlint type-aware, 0 warnings
+// npm run types:check    tsc --noEmit, 0 errors
+// npm run build          Vite production build sukses
+// npm run e2e            39 passed (12 mass-schedule + 27 lainnya)
 ```
 
-> **Dokumen ini adalah rencana, bukan implementasi. Belum ada kode yang ditulis.**
+> `npm run e2e` menjalankan `app:e2e:prepare` lebih dulu. Suite Pest dan
+> Playwright memakai database yang sama, jadi `npx playwright test` telanjang
+> setelah `php artisan test` akan gagal seluruhnya di `signIn`.
+
+### Yang berbeda dari rencana
+
+Tiga tempat di mana implementasi melampaui apa yang dokumen ini prediksi, dan
+ketiganya tercatat di tempat kodenya berada:
+
+| Rencana | Kenyataan |
+| --- | --- |
+| "9 `JsonResource`" | Butuh satu trait `ResolvesNestedResources`: `whenLoaded()` mengembalikan `null` untuk relasi yang dimuat tetapi kosong, dan me-resolve `null` itu adalah error, bukan field yang absen |
+| "`has('regularMasses', 0)` counts an empty list" | A `JsonResource` serialises as `{"data": [...]}`, so an empty list counted as **one** element. Two assertions were passing without checking anything |
+| "2 enum" | Three: `MassKind` became necessary once the tie-break in MASS-08 step 4 had to be observable by a test |
+
+Dan tiga bug yang **tidak** ada di rencana ini, yang tidak bisa ditangkap test
+Pest mana pun dan baru terlihat di browser. Semuanya sudah diperbaiki dan
+dicatat di `docs/DECISIONS.md` D-39:
+
+1. Inertia membungkus prop non-paginasikan sebagai `{data: [...]}` — seluruh
+   halaman admin modul ini render jadi layar kosong di browser, sementara 528
+   test Pest hijau.
+2. Empat `<form>` tanpa `noValidate`: Chromium memvalidasi sendiri, submit
+   tidak pernah jalan, dan pesan bahasa Indonesia tidak pernah muncul.
+3. `->has('locations', 1)` **lolos** pada `{data: [...]}` karena menghitung
+   satu kunci. Dua assertion yang menjaga prop ini tidak melihat apa pun.
+
+> **Dokumen ini adalah rencana; implementasinya ada di branch
+> `feat/phase-04-mass-schedule`.**
 >
-> Berkas dokumen acuan: `docs/roadmap/phase-04-mass-schedule.md` (**belum
-> ter-commit** — `git status` menunjukkan `??`).
+> Catatan yang paling sering berguna nanti ada di §14 dan di `docs/DECISIONS.md`
+> D-34 … D-38 — khususnya pengakuan bahwa ADM-05 (soft delete) **belum**
+> terpenuhi untuk modul ini, dan bahwa isi jadwal paroki belum ada.

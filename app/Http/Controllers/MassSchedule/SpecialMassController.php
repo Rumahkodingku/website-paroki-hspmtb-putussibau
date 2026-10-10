@@ -62,7 +62,9 @@ class SpecialMassController extends Controller
 
         return Inertia::render('admin/jadwal-misa/misa-khusus', [
             'specialMasses' => SpecialMassResource::collection($specialMasses),
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             ...$this->formMeta(),
             'filters' => [
                 'search' => $search,
@@ -76,7 +78,9 @@ class SpecialMassController extends Controller
         Gate::authorize('create', SpecialMass::class);
 
         return Inertia::render('admin/jadwal-misa/misa-khusus/tambah', [
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             ...$this->formMeta(),
         ]);
     }
@@ -95,7 +99,9 @@ class SpecialMassController extends Controller
 
         return Inertia::render('admin/jadwal-misa/misa-khusus/ubah', [
             'specialMass' => SpecialMassResource::make($specialMass->load('location'))->resolve(),
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             ...$this->formMeta(),
         ]);
     }
