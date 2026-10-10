@@ -75,7 +75,20 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
                     )}
                 </div>
 
-                <LocationLink location={nextMass.location} />
+                {/* The location is named whether or not it has a map link.
+                    Roadmap 7.1.2 lists "lokasi" as part of the card, so
+                    rendering it inside LocationLink would hide it for every
+                    location the parish has not given coordinates to — which is
+                    most of them until the ministry adds them. */}
+                <div className="space-y-2 text-right sm:min-w-48">
+                    <Text as="p" variant="caption" color="muted">
+                        {nextMass.location.name}
+                    </Text>
+
+                    <div className="flex justify-end">
+                        <LocationLink location={nextMass.location} />
+                    </div>
+                </div>
             </div>
         </Card>
     );
