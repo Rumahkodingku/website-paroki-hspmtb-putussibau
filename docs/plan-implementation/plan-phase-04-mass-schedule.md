@@ -127,21 +127,27 @@ Audit dilakukan terhadap `main` pada commit `4e398ac`
 | Assertion database            | **Tidak ada `assertDatabaseHas` di repo ini.** Semua pakai query Eloquent ke `expect()`                                                                                                          |
 | Assertion Inertia             | `use Inertia\Testing\AssertableInertia as Assert;` + closure `fn (Assert $page)`                                                                                                                 |
 | Nama route                    | Wayfinder mengelompokkan per segmen sebelum titik: `mass-schedules.index` → `@/routes/mass-schedules` (export `index`). **Import path dibaca dari output `wayfinder:generate`, bukan ditebak**   |
-| Import halaman lain           | `import { index } from '@/routes/mass-shadules'`; hanya **nama route**, bukan `@/actions`                                                                                                        |
+| Import halaman lain           | `import { index } from '@/routes/mass-schedules'`; hanya **nama route**, bukan `@/actions`                                                                                                    |
 | Test Vitest                   | API selalu di-import eksplisit dari `vite-plus/test` (`globals: false`); render lewat `renderWithInertia()` dari `tests/js/support/inertia.tsx`; query berbasis role/label                       |
 | Test E2E                      | Nama test **bahasa Indonesia**; `page.goto('/path')`; `resetLoginRateLimit(); await signIn(page)` di `beforeEach`; selector `data-test`                                                          |
 
 ## 2.5 Inkonsistensi dokumen yang ditemukan saat audit
 
-Bukan blocker, tapi harus dikoreksi di Tahap E:
+Bukan blocker, tapi harus dikoreksi di Tahap E. **Semuanya sudah dikoreksi**;
+kolom status menandai mana yang sudah tertutup.
 
-| Temuan                                                                    | Lokasi                                                     |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `AGENTS.md` menulis "Current: **Phase 1**"                                | `AGENTS.md:14`                                             |
-| `AGENTS.md` menulis "role `super_admin` + **12 permissions**", aktual 15  | `AGENTS.md:139`                                            |
-| `docs/roadmap/README.md` masih `Phase 3 🟡 Current`, `Phase 4 ⚪ Planned` | `roadmap/README.md:48-49`                                  |
-| **`docs/roadmap/phase-04-mass-schedule.md` belum di-commit**              | `git status` → `?? docs/roadmap/phase-04-mass-schedule.md` |
-| `docs/roadmap/phase-02-*.md` tidak ada di folder                          | Phase 02 sudah selesai (D-19), dokumennya hilang           |
+| Temuan                                                                    | Lokasi                                | Status |
+| ------------------------------------------------------------------------- | ------------------------------------- | ------ |
+| `AGENTS.md` menulis "Current: **Phase 1**"                                | `AGENTS.md:14`                        | ✅ D-39 |
+| `AGENTS.md` menulis "role `super_admin` + **12 permissions**", aktual 15  | `AGENTS.md:139`                       | ✅ D-39 |
+| `docs/roadmap/README.md` masih `Phase 3 🟡 Current`, `Phase 4 ⚪ Planned` | `roadmap/README.md:48-49`             | ✅ D-39 |
+| **`docs/roadmap/phase-04-mass-schedule.md` belum di-commit**              | `git status` → `?? ...phase-04-...md` | ✅ D-39 |
+| `docs/roadmap/phase-02-*.md` tidak ada di folder                          | Phase 02 sudah selesai (D-19)         | ⚠️ dibiarkan |
+
+Yang terakhir dibiarkan dengan sengaja: Phase 02 selesai dan tested, tetapi
+dokumen roadmap-nya tidak pernah masuk repo. Menulis ulang roadmap Phase 02
+dari memori setelah fact adalah cara yang salah untuk membuat sejarah; lebih
+baik Phase 05 menulis ulang roadmap-nya sendiri saat mulai.
 
 ---
 
