@@ -79,9 +79,15 @@ export function formatWibDate(iso: string, timeZone?: string | null): string {
 /**
  * "Minggu, 5 Oktober 2026 · 07.30 WIB".
  *
- * The middle dot is the separator the Indonesian format in XC-T2 is written
- * with, and keeping the time in WIB in the string means nobody has to infer the
- * timezone from context.
+ * The clock is assembled from formatToParts rather than read out of a formatted
+ * string, because the separator between hours and minutes is the locale's
+ * choice: id-ID writes "09.30" with a dot, en-GB writes "09:30" with a colon,
+ * and reading the formatted string would therefore produce two different
+ * formats for the same clock depending on which locale the browser picked.
+ * XC-T2 writes "07.30 WIB", so the dot is explicit here.
+ *
+ * WIB is spelled out rather than left to the reader, and the middle dot is the
+ * separator the Indonesian format in XC-T2 uses between date and time.
  */
 export function formatWibDateTime(
     iso: string,
@@ -93,14 +99,17 @@ export function formatWibDateTime(
         return '';
     }
 
-    const formatted = new Intl.DateTimeFormat('id-ID', {
+    const parts = new Intl.DateTimeFormat('en-GB', {
         timeZone: timezone(timeZone),
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
-    }).format(date);
+    }).formatToParts(date);
 
-    return `${formatWibDate(iso, timeZone)} · ${formatted.replace('.', ':')} WIB`;
+    const hour = parts.find((part) => part.type === 'hour')?.value ?? '00';
+    const minute = parts.find((part) => part.type === 'minute')?.value ?? '00';
+
+    return `${formatWibDate(iso, timeZone)} · ${hour}.${minute} WIB`;
 }
 
 /**
