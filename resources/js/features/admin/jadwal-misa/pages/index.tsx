@@ -49,8 +49,7 @@ type Props = {
     locations: LocationOption[];
     stats: ModuleStats;
     filters: { search: string; location_id: string; status: string };
-    meta: Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'days' | 'types'>;
-};
+} & Pick<FormMeta, 'days'>;
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Semua status' },
@@ -70,7 +69,7 @@ export default function Index({
     locations,
     stats,
     filters,
-    meta,
+    days,
 }: Props) {
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
@@ -86,8 +85,7 @@ export default function Index({
         filters.location_id !== '';
 
     const dayLabel = (value: number): string =>
-        meta.days.find((day) => day.value === value)?.label ??
-        formatDayName(value);
+        days.find((day) => day.value === value)?.label ?? formatDayName(value);
 
     return (
         <>
@@ -97,7 +95,7 @@ export default function Index({
 
             <div className="space-y-6 p-6">
                 <ListHeader
-                    title="Jadwal Misa"
+                    title="Misa Rutin"
                     description="Kelola lokasi, jadwal misa rutin, misa khusus, dan pemberitahuan perubahan jadwal."
                     action={
                         <Button asChild>

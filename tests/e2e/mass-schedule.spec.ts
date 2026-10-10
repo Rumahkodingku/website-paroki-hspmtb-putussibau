@@ -52,8 +52,10 @@ test.describe('jadwal misa publik', () => {
             page.getByRole('tab', { name: 'Misa Khusus' }),
         ).toBeVisible();
 
+        // A link, not a button: it hands the URL to wa.me in a new tab. Only
+        // copy and print are actions this page performs itself.
         await expect(
-            page.getByRole('button', { name: 'Bagikan lewat WhatsApp' }),
+            page.getByRole('link', { name: 'Bagikan lewat WhatsApp' }),
         ).toBeVisible();
         await expect(
             page.getByRole('button', { name: 'Cetak jadwal' }),
@@ -69,19 +71,36 @@ test.describe('jadwal misa publik', () => {
         await signIn(page);
 
         await buatLokasi(page, LOKASI, 'gereja-paroki-e2e');
-        await page.getByRole('link', { name: 'Ubah' }).first().click();
-        await expect(page).toHaveURL(/\/admin\/lokasi\/\d+\/ubah$/);
 
-        // The edit form is how a location is switched off, and MASS-07 says the
-        // schedules behind it stop being published.
+        const row = (name: string) =>
+            page.getByRole('row').filter({ hasText: name });
+
+        // MASS-07, first half: switching a location off takes it off the public
+        // page. The edit form is the only way to do it - there is no delete and
+        // no toggle endpoint (D-34, D-37).
+        await row(LOKASI).getByRole('link', { name: 'Ubah' }).click();
+        await expect(page).toHaveURL(/\/admin\/lokasi\/\d+\/ubah$/);
         await page.getByRole('switch', { name: /aktif/i }).click();
         await page.getByRole('button', { name: 'Simpan perubahan' }).click();
         await expect(page).toHaveURL(/\/admin\/lokasi$/);
 
-        // Now create a schedule at that location, reactivate it, and look for it.
+        await page.goto('/jadwal-misa');
+        await expect(page.getByText(LOKASI)).toHaveCount(0);
+
+        // Back on, so the schedule below has somewhere to live. The admin list
+        // keeps deactivated locations visible - otherwise switching one off
+        // would be the one edit a secretary could not undo.
+        await page.goto('/admin/lokasi');
+        await row(LOKASI).getByRole('link', { name: 'Ubah' }).click();
+        await page.getByRole('switch', { name: /aktif/i }).click();
+        await page.getByRole('button', { name: 'Simpan perubahan' }).click();
+        await expect(page).toHaveURL(/\/admin\/lokasi$/);
+
         await page.goto('/admin/jadwal-misa/tambah');
 
-        await page.getByLabel('Lokasi').selectOption({ label: LOKASI });
+        await page
+            .getByLabel('Lokasi', { exact: true })
+            .selectOption({ label: LOKASI });
         await page.getByLabel('Hari').selectOption({ label: 'Minggu' });
         await page.getByLabel('Jam mulai').fill('07:30');
         await page.getByLabel('Nama misa').fill('Misa Minggu E2E');
@@ -92,7 +111,9 @@ test.describe('jadwal misa publik', () => {
         // AC-MASS-3: the public page reads this on the very next request.
         await page.goto('/jadwal-misa');
 
-        await expect(page.getByText('Misa Minggu E2E')).toBeVisible();
+        await expect(
+            page.getByTestId('mass-schedule-card').getByText('Misa Minggu E2E'),
+        ).toBeVisible();
         await expect(page.getByText('07.30 WIB').first()).toBeVisible();
     });
 
@@ -103,7 +124,9 @@ test.describe('jadwal misa publik', () => {
 
         await expect(page.getByLabel('Hari', { exact: true })).toHaveValue('0');
 
-        await page.getByLabel('Lokasi').selectOption({ index: 1 });
+        await page
+            .getByLabel('Lokasi', { exact: true })
+            .selectOption({ index: 1 });
 
         await expect(page).toHaveURL(/lokasi=\d+/);
         await expect(page.getByText(/filter aktif/i)).toBeVisible();
@@ -115,9 +138,15 @@ test.describe('jadwal misa publik', () => {
         const response = await page.goto('/jadwal-misa?hari=99&lokasi=abc');
 
         expect(response?.status()).toBe(200);
+
+        // The schedule itself, not a card: whether "Misa Berikutnya" is a
+        // heading or a label depends on what earlier tests left behind, and a
+        // test that breaks when a sibling adds a schedule is testing the
+        // sibling.
         await expect(
-            page.getByRole('heading', { name: 'Misa Berikutnya' }),
+            page.getByRole('tab', { name: 'Misa Rutin' }),
         ).toBeVisible();
+        await expect(page.getByTestId('schedule-filter')).toBeVisible();
     });
 
     /**
@@ -165,7 +194,7 @@ test.describe('jadwal misa admin', () => {
         await page.goto('/admin/jadwal-misa');
 
         await expect(
-            page.getByRole('heading', { name: 'Jadwal Misa' }),
+            page.getByRole('heading', { name: 'Jadwal Misa', exact: true }),
         ).toBeVisible();
 
         for (const label of [
@@ -198,7 +227,10 @@ test.describe('jadwal misa admin', () => {
         await page.goto('/admin/lokasi/tambah');
         await page.getByRole('button', { name: 'Simpan lokasi' }).click();
 
-        await expect(page.getByText('Nama lokasi wajib diisi.')).toBeVisible();
+        // The sentence comes from lang/id/validation.php: the message is
+        // ":attribute wajib diisi." and attributes.name is "Nama". The form
+        // label "Nama lokasi" is not what a visitor is told.
+        await expect(page.getByText('Nama wajib diisi.')).toBeVisible();
         await expect(page.getByText('Slug wajib diisi.')).toBeVisible();
     });
 
@@ -212,7 +244,11 @@ test.describe('jadwal misa admin', () => {
         await page.getByRole('button', { name: 'Simpan lokasi' }).click();
 
         await expect(
-            page.getByText(/Lintang dan bujur harus diisi keduanya/),
+            page
+                .getByText(
+                    'Koordinat lintang dan bujur harus diisi keduanya atau dikosongkan keduanya.',
+                )
+                .first(),
         ).toBeVisible();
     });
 
@@ -245,27 +281,42 @@ test.describe('jadwal misa admin', () => {
         ).toBeVisible();
     });
 
-    test('pemberitahuan dengan dua target ditolak', async ({ page }) => {
+    test('pemberitahuan disimpan dan tampil sebagai daftar', async ({
+        page,
+    }) => {
         await page.goto('/admin/pemberitahuan-jadwal/tambah');
 
-        await page.getByLabel('Judul').fill('Dua target');
-        await page.getByLabel('Pesan').fill('Tidak jelas berlaku di mana.');
+        await page.getByLabel('Judul').fill('Ibadat syukur E2E');
+        await page
+            .getByLabel('Pesan')
+            .fill('Misa syukur heeft plaatsgevonden.');
 
+        // starts_at is required (D-34 section 3), so an empty form saves
+        // nothing at all.
+        await page
+            .getByRole('button', { name: 'Simpan pemberitahuan' })
+            .click();
+        await expect(page.getByText(/wajib diisi/)).toBeVisible();
+        await expect(page).toHaveURL(/\/admin\/pemberitahuan-jadwal\/tambah$/);
+
+        await page.getByLabel('Mulai tampil').fill('2026-01-01T08:00');
+
+        // One select, one target. Two at once is not something this form can
+        // express, which is why the server-side rule that rejects it lives in
+        // ScheduleNoticeTest rather than here.
         const target = page.getByLabel('Target');
         const options = await target.locator('option').all();
+        expect(options.length).toBeGreaterThan(1);
 
-        // Choose the first real target, then try to combine it with another by
-        // hand — the form's picker cannot do it, and that is the point.
-        if (options.length > 1) {
-            await target.selectOption(await options[1].getAttribute('value'));
-            await page
-                .getByRole('button', { name: 'Simpan pemberitahuan' })
-                .click();
+        await target.selectOption(await options[1].getAttribute('value'));
+        await page
+            .getByRole('button', { name: 'Simpan pemberitahuan' })
+            .click();
 
-            await expect(page).toHaveURL(/\/admin\/pemberitahuan-jadwal$/);
-        }
-
-        expect(await page.getByLabel('Target').count()).toBe(1);
+        await expect(page).toHaveURL(/\/admin\/pemberitahuan-jadwal$/);
+        await expect(
+            page.getByRole('cell', { name: 'Ibadat syukur E2E' }),
+        ).toBeVisible();
     });
 
     test('halaman admin menolak tamu', async ({ page, context }) => {

@@ -77,7 +77,9 @@ class MassScheduleController extends Controller
 
         return Inertia::render('admin/jadwal-misa', [
             'massSchedules' => MassScheduleResource::collection($massSchedules),
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             'stats' => self::stats(),
             ...$this->formMeta(),
             'filters' => [
@@ -96,7 +98,9 @@ class MassScheduleController extends Controller
         Gate::authorize('create', MassSchedule::class);
 
         return Inertia::render('admin/jadwal-misa/misa-rutin/tambah', [
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             ...$this->formMeta(),
         ]);
     }
@@ -121,7 +125,9 @@ class MassScheduleController extends Controller
 
         return Inertia::render('admin/jadwal-misa/misa-rutin/ubah', [
             'massSchedule' => MassScheduleResource::make($massSchedule->load('location'))->resolve(),
-            'locations' => LocationOptionResource::collection($this->activeLocations()),
+            'locations' => array_values(
+                LocationOptionResource::collection($this->activeLocations())->resolve()
+            ),
             ...$this->formMeta(),
         ]);
     }

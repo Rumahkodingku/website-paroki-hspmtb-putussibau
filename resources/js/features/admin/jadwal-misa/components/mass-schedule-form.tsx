@@ -75,6 +75,10 @@ export function MassScheduleForm({
 
     return (
         <form
+            // noValidate: the browser's own bubbles would swallow the submit
+            // and the Indonesian messages from the server would never appear.
+            // See D-39.
+            noValidate
             onSubmit={(event) => {
                 event.preventDefault();
                 onSubmit(form);
