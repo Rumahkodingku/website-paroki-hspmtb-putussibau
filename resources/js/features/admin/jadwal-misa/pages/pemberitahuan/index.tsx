@@ -9,18 +9,18 @@ import {
     edit as editScheduleNotice,
     index as scheduleNoticesIndex,
 } from '@/routes/schedule-notices';
-import { DataTable } from '../../components/data-table';
+import { DataTable } from '@/components/data-table';
 import { scheduleNoticeColumns } from '../../components/columns';
-import { DeleteDialog } from '../../components/delete-dialog';
+import { DeleteDialog } from '@/components/delete-dialog';
 import {
     ListEmpty,
     ListHeader,
     ListToolbar,
     ResetFilters,
-} from '../../components/list-parts';
-import { RowActions } from '../../components/row-actions';
+} from '@/components/list-parts';
+import { RowActions } from '@/components/row-actions';
 import { ScheduleNoticeCards } from './components/schedule-notice-cards';
-import { TablePagination } from '../../components/table-pagination';
+import { ListPagination } from '@/components/list-pagination';
 import type { FormMeta, ScheduleNoticeRow } from '../../types';
 import type { Paginated } from '@/types';
 
@@ -173,7 +173,7 @@ export default function Index({ notices, filters, noticeScopes }: Props) {
                     />
                 </div>
 
-                <TablePagination
+                <ListPagination
                     meta={notices.meta}
                     previous={notices.links.prev}
                     next={notices.links.next}

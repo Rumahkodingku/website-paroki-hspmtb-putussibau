@@ -10,9 +10,6 @@
  * and the shape below is that rule made checkable.
  */
 
-/** App\Enums\LocationType */
-export type LocationType = 'gereja_paroki' | 'stasi' | 'kapel' | 'lainnya';
-
 /** App\Enums\MassKind */
 export type MassKind = 'rutin' | 'khusus';
 
@@ -28,41 +25,17 @@ export type NoticeStatus = 'draft' | 'scheduled' | 'visible' | 'expired';
  */
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-/** LocationOptionResource */
-export type LocationOption = {
-    id: number;
-    name: string;
-    type: LocationType;
-};
+/**
+ * LocationOptionResource.
+ *
+ * Re-exported from types/location.ts rather than declared here, because Phase 05
+ * gave the Agenda form a second consumer and ARCHITECTURE.md Part B section 4
+ * forbids one feature importing another. Everything inside this feature keeps
+ * importing it from './types', so nothing else here had to change.
+ */
+import type { LocationOption, LocationType } from '@/types/location';
 
-/** LocationResource */
-export type LocationRow = {
-    id: number;
-    name: string;
-    slug: string;
-    type: LocationType;
-    address: string | null;
-    latitude: string | null;
-    longitude: string | null;
-    maps_url: string | null;
-    notes: string | null;
-    is_active: boolean;
-    /**
-     * Absent when the list did not count them. The MASS-07 dialog needs this
-     * number, and showing 0 for "we did not look" would understate the impact.
-     */
-    active_schedules_count?: number;
-    /**
-     * What stands in the way of deleting this location. Absent when the list
-     * did not count them, same reason as above: the delete dialog states a
-     * number the server then enforces, and a 0 that means "we did not look"
-     * would promise a delete that is about to be refused.
-     */
-    mass_schedules_count?: number;
-    special_masses_count?: number;
-    schedule_notices_count?: number;
-    can: { update: boolean; delete: boolean };
-};
+export type { LocationOption, LocationType };
 
 /** MassScheduleResource */
 export type MassScheduleRow = {

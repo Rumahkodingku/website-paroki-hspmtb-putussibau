@@ -38,6 +38,24 @@ return Application::configure(basePath: dirname(__DIR__))
          * @see docs/DECISIONS.md D-26
          */
         $schedule->command('queue:prune-failed --hours=168')->daily();
+
+        /**
+         * Scheduled articles, PRD AC-POST-6/AC-POST-7.
+         *
+         * Every minute because the scheduler's whole value is that an article
+         * dated 08:00 is public at 08:00 and not whenever the next nightly cron
+         * happens to fire — and withoutOverlapping because a parish site on
+         * shared hosting will have two of these overlap the moment one run
+         * takes longer than the gap between them. The command is idempotent, so
+         * the overlap is harmless anyway; the guard is here to stop a slow run
+         * from being duplicated on every tick.
+         *
+         * An article whose time has passed stays invisible until this flips it,
+         * which is the one window worth knowing about: between the scheduled
+         * minute and the next tick the article is still `scheduled`, and
+         * therefore still private. ScheduledPublishingTest pins that.
+         */
+        $schedule->command('posts:publish-scheduled')->everyMinute()->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

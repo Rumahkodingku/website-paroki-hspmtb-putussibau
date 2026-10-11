@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import type { DataColumn } from './data-table';
-import { StatusBadge, NoticeStatusBadge } from './list-parts';
+import type { DataColumn, RowActions } from '@/components/data-table';
+import { NoticeStatusBadge } from './list-parts';
+import { StatusBadge } from '@/components/list-parts';
 import { Text } from '@/components/text';
 import {
     formatDayName,
@@ -8,61 +8,10 @@ import {
     formatWibTime,
 } from '@/lib/datetime';
 import type {
-    LocationRow,
     MassScheduleRow,
     ScheduleNoticeRow,
     SpecialMassRow,
 } from '../types';
-
-export type RowActions<T> = (row: T) => ReactNode;
-
-export function locationColumns(
-    types: { find: (value: string) => string | undefined },
-    actions: RowActions<LocationRow>,
-): DataColumn<LocationRow>[] {
-    return [
-        {
-            id: 'no',
-            accessorKey: 'no',
-            header: 'No',
-            cell: ({ row }) => row.index + 1,
-        },
-        {
-            id: 'name',
-            accessorKey: 'name',
-            header: 'Nama lokasi',
-            sortKey: 'name',
-            cell: ({ row }) => (
-                <Text as="p" variant="caption">
-                    {row.original.name}
-                </Text>
-            ),
-        },
-        {
-            id: 'type',
-            accessorKey: 'type',
-            header: 'Jenis',
-            sortKey: 'type',
-            cell: ({ row }) =>
-                types.find(row.original.type) ?? row.original.type,
-        },
-        {
-            id: 'active_schedules_count',
-            header: 'Jadwal aktif',
-            cell: ({ row }) => row.original.active_schedules_count ?? '—',
-        },
-        {
-            id: 'maps_url',
-            header: 'Peta',
-            cell: ({ row }) => (row.original.maps_url ? 'Ada' : '—'),
-        },
-        {
-            id: 'actions',
-            header: () => <span className="sr-only">Aksi</span>,
-            cell: ({ row }) => actions(row.original),
-        },
-    ];
-}
 
 export function massScheduleColumns(
     days: Array<{ value: number; label: string }>,

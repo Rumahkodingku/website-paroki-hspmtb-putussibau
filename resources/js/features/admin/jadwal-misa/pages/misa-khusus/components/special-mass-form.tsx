@@ -8,7 +8,7 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from '../../../components/form-fields';
+} from '@/components/form-fields';
 
 export type SpecialMassFormInstance = ReturnType<
     typeof useForm<SpecialMassFormData>

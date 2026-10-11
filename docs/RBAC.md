@@ -11,9 +11,20 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and fourteen permissions. That is not an oversight: the PRD puts role
-management out of MVP scope, and a permission for a module with no code to guard
-would be a name nothing reads.
+One role and forty-three permissions. That is not an oversight: the PRD puts
+role management out of MVP scope, and a permission for a module with no code to
+guard would be a name nothing reads.
+
+Four verbs per entity — `view`, `create`, `update`, `delete` — and no
+permission for anything a module does not have an endpoint for. Two things are
+absent on purpose:
+
+- There is no `posts.preview` or `events.duplicate`. Both exist as endpoints,
+  and both are gated on `update`, because they write. See
+  `EventResource`'s `can` block for the shape and §4 for why.
+- There is no `posts.publish` or `events.publish`. Publishing is `is_published`
+  on the row, an ordinary field of the update form, not a separate act — the
+  same decision as D-37 for `is_active`.
 
 | Group | Permissions |
 | --- | --- |
@@ -22,7 +33,14 @@ would be a name nothing reads.
 | Settings | `settings.view`, `settings.update` |
 | Media | `media.view`, `media.create`, `media.delete` |
 | Users | `users.view`, `users.create`, `users.update`, `users.disable` |
+| Locations | `locations.view`, `locations.create`, `locations.update`, `locations.delete` |
+| Mass schedules | `massschedules.view`, `massschedules.create`, `massschedules.update`, `massschedules.delete` |
+| Special masses | `specialmasses.view`, `specialmasses.create`, `specialmasses.update`, `specialmasses.delete` |
+| Schedule notices | `schedulenotices.view`, `schedulenotices.create`, `schedulenotices.update`, `schedulenotices.delete` |
 | Posts | `posts.view`, `posts.create`, `posts.update`, `posts.delete` |
+| Post categories | `postcategories.view`, `postcategories.create`, `postcategories.update`, `postcategories.delete` |
+| Events | `events.view`, `events.create`, `events.update`, `events.delete` |
+| Event categories | `eventcategories.view`, `eventcategories.create`, `eventcategories.update`, `eventcategories.delete` |
 
 The role:
 

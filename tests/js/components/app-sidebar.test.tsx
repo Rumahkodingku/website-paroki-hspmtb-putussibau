@@ -24,11 +24,17 @@ import { TooltipProvider } from '@/components/ui/tooltip';
  * inside it, stays shut when they are not, and toggles on demand.
  */
 
-const SUB_MENU = [
-    ['Lokasi', '/admin/jadwal-misa/lokasi'],
+const JADWAL_MISA_SUB_MENU = [
     ['Misa Rutin', '/admin/jadwal-misa/misa-rutin'],
     ['Misa Khusus', '/admin/jadwal-misa/misa-khusus'],
     ['Pemberitahuan', '/admin/jadwal-misa/pemberitahuan-jadwal'],
+] as const;
+
+/** Master Data took Lokasi in Phase 05 and is the second group. */
+const MASTER_DATA_SUB_MENU = [
+    ['Lokasi', '/admin/master-data/lokasi'],
+    ['Kategori Berita', '/admin/master-data/kategori-berita'],
+    ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
 ] as const;
 
 /**
@@ -50,6 +56,27 @@ function renderSidebar(url = '/admin') {
     );
 }
 
+/**
+ * Open every closed group, so all the sidebar's links are reachable from one
+ * render.
+ *
+ * Async on purpose: the disclosure is React state, so a click has not been
+ * applied until userEvent's promise settles. Querying in the same tick as the
+ * click finds a sub-menu that has not been rendered yet, and the failure reads
+ * as "the link is missing" rather than "the test did not wait".
+ */
+async function renderSidebarWithGroupsOpen(url = '/admin') {
+    renderSidebar(url);
+
+    for (const title of ['Jadwal Misa', 'Master Data']) {
+        const button = screen.queryByRole('button', { name: title });
+
+        if (button?.getAttribute('aria-expanded') === 'false') {
+            await userEvent.click(button);
+        }
+    }
+}
+
 describe('AppSidebar', () => {
     it('makes the module title a disclosure rather than a link', () => {
         renderSidebar();
@@ -65,8 +92,8 @@ describe('AppSidebar', () => {
         ).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it.each(SUB_MENU)('links %s to %s', (title, href) => {
-        renderSidebar('/admin/jadwal-misa/lokasi');
+    it.each(JADWAL_MISA_SUB_MENU)('links %s to %s', (title, href) => {
+        renderSidebar('/admin/jadwal-misa/misa-rutin');
 
         expect(screen.getByRole('link', { name: title })).toHaveAttribute(
             'href',
@@ -75,9 +102,9 @@ describe('AppSidebar', () => {
     });
 
     it('gives every child its own URL', () => {
-        renderSidebar('/admin/jadwal-misa/lokasi');
+        renderSidebar('/admin/jadwal-misa/misa-rutin');
 
-        const hrefs = SUB_MENU.map(([title]) =>
+        const hrefs = JADWAL_MISA_SUB_MENU.map(([title]) =>
             screen.getByRole('link', { name: title }).getAttribute('href'),
         );
 
@@ -89,7 +116,7 @@ describe('AppSidebar', () => {
     it('keeps the sub-menu shut when the admin is outside the module', () => {
         renderSidebar('/admin');
 
-        for (const [title] of SUB_MENU) {
+        for (const [title] of JADWAL_MISA_SUB_MENU) {
             expect(screen.queryByRole('link', { name: title })).toBeNull();
         }
 
@@ -99,8 +126,9 @@ describe('AppSidebar', () => {
     });
 
     it('opens itself when the admin is already inside the module', () => {
-        // Landing on /admin/jadwal-misa/lokasi and finding "Jadwal Misa" shut above it reads
-        // as a broken sidebar, so the group opens from where the admin is.
+        // Landing on /admin/jadwal-misa/misa-khusus and finding "Jadwal Misa"
+        // shut above it reads as a broken sidebar, so the group opens from
+        // where the admin is.
         renderSidebar('/admin/jadwal-misa/misa-khusus');
 
         expect(
@@ -127,16 +155,117 @@ describe('AppSidebar', () => {
 
         expect(screen.queryByRole('link', { name: 'Misa Rutin' })).toBeNull();
     });
+});
 
-    it('does not link a module that has no route yet', () => {
-        renderSidebar();
+describe('AppSidebar — Master Data', () => {
+    it('holds Lokasi, which moved here out of Jadwal Misa', async () => {
+        // A room is announced in by an activity as well as by a mass, so
+        // listing it under Jadwal Misa claimed an ownership it does not have.
+        await renderSidebarWithGroupsOpen('/admin');
 
-        // Newspaper and the rest are marked rather than linked, so nothing in
-        // this sidebar points at a URL that would 404. Asserted through the
-        // absence of a link rather than through the marker text: the marker is
-        // micro-legal styling, and a test that fails when someone rewords it
-        // stops guarding the thing it was written for.
-        expect(screen.queryByRole('link', { name: 'Berita' })).toBeNull();
+        expect(screen.getByRole('link', { name: 'Lokasi' })).toHaveAttribute(
+            'href',
+            '/admin/master-data/lokasi',
+        );
+    });
+
+    it.each(MASTER_DATA_SUB_MENU)('links %s to %s', async (title, href) => {
+        await renderSidebarWithGroupsOpen('/admin');
+
+        expect(screen.getByRole('link', { name: title })).toHaveAttribute(
+            'href',
+            href,
+        );
+    });
+
+    it('gives every lookup table its own URL', async () => {
+        await renderSidebarWithGroupsOpen('/admin');
+
+        const hrefs = MASTER_DATA_SUB_MENU.map(([title]) =>
+            screen.getByRole('link', { name: title }).getAttribute('href'),
+        );
+
+        expect(new Set(hrefs).size).toBe(hrefs.length);
+    });
+
+    it('is a disclosure and not a link', () => {
+        // There is no /admin/master-data page, and a group pointing at a URL
+        // that 404s is the failure this file exists to prevent.
+        renderSidebar('/admin');
+
+        expect(screen.queryByRole('link', { name: 'Master Data' })).toBeNull();
+        expect(
+            screen.getByRole('button', { name: 'Master Data' }),
+        ).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('opens itself when the admin is already on one of its tables', () => {
+        // Checked against the children's URLs, not the parent's: a child URL is
+        // not prefixed by the parent's, so `isCurrentOrParentUrl` on the group
+        // alone would never match.
+        renderSidebar('/admin/master-data/kategori-agenda');
+
+        expect(
+            screen.getByRole('button', { name: 'Master Data' }),
+        ).toHaveAttribute('aria-expanded', 'true');
+        expect(
+            screen.getByRole('link', { name: 'Kategori Agenda' }),
+        ).toBeVisible();
+    });
+
+    it('stays shut when the admin is somewhere else entirely', () => {
+        renderSidebar('/admin/jadwal-misa/misa-rutin');
+
+        expect(
+            screen.getByRole('button', { name: 'Master Data' }),
+        ).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('does not appear under Jadwal Misa as well', async () => {
+        // Both groups were once carrying "Kategori Berita". A sidebar that
+        // renders the same label twice has two links with the same name, and
+        // getByRole throws on that — which is how the duplicate was found.
+        await renderSidebarWithGroupsOpen('/admin');
+
+        expect(
+            screen.getAllByRole('link', { name: 'Kategori Berita' }),
+        ).toHaveLength(1);
+        expect(
+            screen.getAllByRole('link', { name: 'Kategori Agenda' }),
+        ).toHaveLength(1);
+        expect(screen.getAllByRole('link', { name: 'Lokasi' })).toHaveLength(1);
+    });
+});
+
+describe('AppSidebar — Berita and Agenda', () => {
+    it('links both modules straight to their lists', () => {
+        // Flat links, not groups with one child. A single-child group is a link
+        // with two extra clicks, and /admin/berita redirects to /daftar anyway.
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Berita' })).toHaveAttribute(
+            'href',
+            '/admin/berita/daftar',
+        );
+        expect(screen.getByRole('link', { name: 'Agenda' })).toHaveAttribute(
+            'href',
+            '/admin/agenda/daftar',
+        );
+    });
+});
+
+describe('AppSidebar — modules with no route yet', () => {
+    it('does not link them', () => {
+        renderSidebar('/admin');
+
+        // Marked rather than linked, so nothing in this sidebar points at a URL
+        // that would 404. Asserted through the absence of a link rather than
+        // through the marker text: the marker is micro-legal styling, and a test
+        // that fails when someone rewords it stops guarding the thing it was
+        // written for.
         expect(screen.queryByRole('link', { name: 'Galeri' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Komunitas' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Pelayanan' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Kontak' })).toBeNull();
     });
 });

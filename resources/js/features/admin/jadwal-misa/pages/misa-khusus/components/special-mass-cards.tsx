@@ -1,6 +1,6 @@
 import { Text } from '@/components/text';
 import { formatWibDateTime } from '@/lib/datetime';
-import { StatusBadge } from '../../../components/list-parts';
+import { StatusBadge } from '@/components/list-parts';
 import type { SpecialMassRow } from '../../../types';
 
 /*
