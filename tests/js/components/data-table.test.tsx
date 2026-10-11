@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-    DataTable,
-    type DataColumn,
-} from '@/features/admin/jadwal-misa/components/data-table';
+import { DataTable, type DataColumn } from '@/components/data-table';
 
 /*
  * The shared table, and the one thing it does that a plain <table> cannot.

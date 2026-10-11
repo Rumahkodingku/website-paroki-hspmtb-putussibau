@@ -60,13 +60,16 @@ dataset('public pages', fn (): array => [
  * now sends props — and the "no page-specific props" test below would fail on it
  * while telling the truth about a page that is no longer a placeholder.
  *
+ * Phase 05 did the same for /berita and /agenda, which is why they left this
+ * list. Their props are asserted by the modules that own them.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
  * pass by construction and check nothing.
  *
  * When another module lands, move its URL out of here deliberately. That edit is
- * the moment to notice the placeholder set shrinking, not something to automate.
+ * the moment to notice the placeholder set shrinking.
  */
 dataset('placeholder pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
@@ -76,8 +79,6 @@ dataset('placeholder pages', fn (): array => [
     '/profil/wilayah' => ['/profil/wilayah', 'public/profil/wilayah'],
     '/profil/pastor' => ['/profil/pastor', 'public/profil/pastor'],
     '/profil/struktur' => ['/profil/struktur', 'public/profil/struktur'],
-    '/berita' => ['/berita', 'public/berita'],
-    '/agenda' => ['/agenda', 'public/agenda'],
     '/pelayanan' => ['/pelayanan', 'public/pelayanan'],
     '/komunitas' => ['/komunitas', 'public/komunitas'],
     '/galeri' => ['/galeri', 'public/galeri'],

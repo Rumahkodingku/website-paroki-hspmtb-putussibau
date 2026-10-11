@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { buatLokasi, pilih } from './support/admin-forms';
 import { resetLoginRateLimit, signIn } from './support/session';
 
 /*
@@ -18,46 +19,6 @@ import { resetLoginRateLimit, signIn } from './support/session';
  */
 
 const LOKASI = 'Gereja Paroki E2E';
-
-/**
- * Choose one option in a ChoiceSelect.
- *
- * The admin selects are Radix popovers, not <select> elements: the trigger is
- * a button and the options only exist while the list is open. Playwright's
- * selectOption() has nothing to act on, so every pick is open-then-click.
- *
- * The trigger is addressed by label. SelectTrigger renders a <button>, which
- * is a labelable element, so the form's <Label htmlFor> still names it.
- */
-async function pilih(
-    page: import('@playwright/test').Page,
-    label: string,
-    option: string,
-): Promise<void> {
-    await page.getByLabel(label, { exact: true }).click();
-    await page.getByRole('option', { name: option, exact: true }).click();
-
-    // Wait for the list to close, or the next click lands on an overlay.
-    await expect(
-        page.getByRole('option', { name: option, exact: true }),
-    ).toBeHidden();
-}
-
-/** Fill the location form and save. */
-async function buatLokasi(
-    page: import('@playwright/test').Page,
-    nama: string,
-    slug: string,
-): Promise<void> {
-    await page.goto('/admin/jadwal-misa/lokasi/tambah');
-
-    await page.getByLabel('Nama lokasi').fill(nama);
-    await page.getByLabel('Slug').fill(slug);
-    await page.getByLabel('Alamat').fill('Alamat pengujian');
-    await page.getByRole('button', { name: 'Simpan lokasi' }).click();
-
-    await expect(page).toHaveURL(/\/admin\/jadwal-misa\/lokasi$/);
-}
 
 test.describe('jadwal misa publik', () => {
     test('halaman memuat kartu Misa Berikutnya dan kedua tab', async ({
@@ -104,11 +65,11 @@ test.describe('jadwal misa publik', () => {
         // no toggle endpoint (D-34, D-37).
         await row(LOKASI).getByRole('link', { name: 'Ubah' }).click();
         await expect(page).toHaveURL(
-            /\/admin\/jadwal-misa\/lokasi\/\d+\/ubah$/,
+            /\/admin\/master-data\/lokasi\/\d+\/ubah$/,
         );
         await page.getByRole('switch', { name: /aktif/i }).click();
         await page.getByRole('button', { name: 'Simpan perubahan' }).click();
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/lokasi$/);
+        await expect(page).toHaveURL(/\/admin\/master-data\/lokasi$/);
 
         await page.goto('/jadwal-misa');
         await expect(page.getByText(LOKASI)).toHaveCount(0);
@@ -116,11 +77,11 @@ test.describe('jadwal misa publik', () => {
         // Back on, so the schedule below has somewhere to live. The admin list
         // keeps deactivated locations visible - otherwise switching one off
         // would be the one edit a secretary could not undo.
-        await page.goto('/admin/jadwal-misa/lokasi');
+        await page.goto('/admin/master-data/lokasi');
         await row(LOKASI).getByRole('link', { name: 'Ubah' }).click();
         await page.getByRole('switch', { name: /aktif/i }).click();
         await page.getByRole('button', { name: 'Simpan perubahan' }).click();
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/lokasi$/);
+        await expect(page).toHaveURL(/\/admin\/master-data\/lokasi$/);
 
         await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
 
@@ -229,7 +190,7 @@ test.describe('jadwal misa admin', () => {
         ).toBeVisible();
     });
 
-    test('sub-menu sidebar membawa keempat bagian modul', async ({ page }) => {
+    test('sub-menu sidebar membawa ketiga bagian modul', async ({ page }) => {
         // Outside the module, so the group starts shut: this test is about the
         // disclosure, not about the auto-open.
         await page.goto('/admin');
@@ -250,8 +211,11 @@ test.describe('jadwal misa admin', () => {
             sidebar.getByRole('button', { name: 'Jadwal Misa', exact: true }),
         ).toHaveAttribute('aria-expanded', 'true');
 
+        // Tiga, bukan empat. Lokasi pindah ke grup Master Data pada Fase 05:
+        // sebuah ruangan dipakai kegiatan agenda, bukan hanya misa, jadi
+        // listing-nya di bawah Jadwal Misa mengklaim kepemilikan yang tidak
+        // dimilikinya.
         for (const [title, href] of [
-            ['Lokasi', '/admin/jadwal-misa/lokasi'],
             ['Misa Rutin', '/admin/jadwal-misa/misa-rutin'],
             ['Misa Khusus', '/admin/jadwal-misa/misa-khusus'],
             ['Pemberitahuan', '/admin/jadwal-misa/pemberitahuan-jadwal'],
@@ -272,6 +236,27 @@ test.describe('jadwal misa admin', () => {
         await expect(
             sidebar.getByRole('button', { name: 'Jadwal Misa', exact: true }),
         ).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    test('Berita dan Agenda adalah tautan langsung ke daftarnya', async ({
+        page,
+    }) => {
+        await page.goto('/admin');
+
+        const sidebar = page.getByRole('navigation', {
+            name: 'Navigasi utama',
+        });
+
+        // Keduanya datar, bukan grup dengan satu anak: grup satu anak adalah
+        // tautan dengan dua klik tambahan, dan /admin/berita memang hanya
+        // redirect ke daftar.
+        await expect(
+            sidebar.getByRole('link', { name: 'Berita', exact: true }),
+        ).toHaveAttribute('href', '/admin/berita/daftar');
+
+        await expect(
+            sidebar.getByRole('link', { name: 'Agenda', exact: true }),
+        ).toHaveAttribute('href', '/admin/agenda/daftar');
     });
 
     test('sub-menu tertutup lagi setelah diklik dua kali', async ({ page }) => {
@@ -301,7 +286,14 @@ test.describe('jadwal misa admin', () => {
     test('judul modul hanya membuka sub-menu, modul lewat breadcrumb', async ({
         page,
     }) => {
-        await page.goto('/admin/jadwal-misa/lokasi');
+        // Started from the location page until Lokasi moved to Master Data
+        // (D-48), which quietly changed what this test was about: that page's
+        // breadcrumb says "Master Data" now, so the "Jadwal Misa" link it was
+        // looking for stopped existing and the locator timed out. A Jadwal Misa
+        // page is what it should have used all along — the breadcrumb under
+        // test belongs to this module, not to whichever page happened to be
+        // reachable when it was written.
+        await page.goto('/admin/jadwal-misa/misa-rutin');
 
         const sidebar = page.getByRole('navigation', {
             name: 'Navigasi utama',
@@ -320,7 +312,7 @@ test.describe('jadwal misa admin', () => {
             .click();
 
         // Clicking the title must not navigate: it only opens the sub-menu.
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/lokasi$/);
+        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
 
         // The breadcrumb still leads there, and it lands on the list — the
         // module root is a redirect now, so "Jadwal Misa" means "the module",
@@ -352,37 +344,6 @@ test.describe('jadwal misa admin', () => {
         // row order that comes back from the server.
         await expect(page).toHaveURL(/sort=name/);
         await expect(page).toHaveURL(/direction=asc/);
-    });
-
-    test('form lokasi memvalidasi dan menampilkan pesan bahasa Indonesia', async ({
-        page,
-    }) => {
-        await page.goto('/admin/jadwal-misa/lokasi/tambah');
-        await page.getByRole('button', { name: 'Simpan lokasi' }).click();
-
-        // The sentence comes from lang/id/validation.php: the message is
-        // ":attribute wajib diisi." and attributes.name is "Nama". The form
-        // label "Nama lokasi" is not what a visitor is told.
-        await expect(page.getByText('Nama wajib diisi.')).toBeVisible();
-        await expect(page.getByText('Slug wajib diisi.')).toBeVisible();
-    });
-
-    test('koordinat setengah terisi ditolak', async ({ page }) => {
-        // A half-filled pair is a map link pointing at open ocean.
-        await page.goto('/admin/jadwal-misa/lokasi/tambah');
-
-        await page.getByLabel('Nama lokasi').fill('Koordinat Setengah');
-        await page.getByLabel('Slug').fill('koordinat-setengah');
-        await page.getByLabel('Lintang').fill('-0.0293');
-        await page.getByRole('button', { name: 'Simpan lokasi' }).click();
-
-        await expect(
-            page
-                .getByText(
-                    'Koordinat lintang dan bujur harus diisi keduanya atau dikosongkan keduanya.',
-                )
-                .first(),
-        ).toBeVisible();
     });
 
     test('jadwal duplikat ditolak dengan pesan yang jelas', async ({
@@ -456,69 +417,6 @@ test.describe('jadwal misa admin', () => {
         await expect(
             page.getByRole('cell', { name: 'Ibadat syukur E2E' }),
         ).toBeVisible();
-    });
-
-    /**
-     * D-40. Deletion is a soft delete reserved for super admins, and this is the
-     * only place the button, the dialog and the redirect are exercised together.
-     *
-     * The location is created through the form rather than seeded, so the flow
-     * starts where a secretary would start.
-     */
-    test('lokasi kosong bisa dihapus lewat dialog konfirmasi', async ({
-        page,
-    }) => {
-        await buatLokasi(page, 'Lokasi Untuk Dihapus', 'lokasi-dihapus-e2e');
-
-        const row = page.getByRole('row').filter({
-            hasText: 'Lokasi Untuk Dihapus',
-        });
-
-        await row.getByRole('button', { name: 'Hapus' }).click();
-
-        // The dialog has to state the consequence, not just the verb.
-        // Scoped to the dialog: the name is also on the row behind it, and
-        // there is a card version of the list on small screens besides.
-        const dialog = page.getByRole('dialog');
-        await expect(
-            dialog.getByTestId('confirm-dialog-confirm'),
-        ).toBeVisible();
-        await expect(dialog).toContainText('Lokasi Untuk Dihapus');
-        await expect(dialog).toContainText('tidak dapat dibatalkan');
-
-        await page.getByTestId('confirm-dialog-confirm').click();
-
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/lokasi$/);
-        await expect(page.getByText('Lokasi Untuk Dihapus')).toHaveCount(0);
-    });
-
-    test('lokasi yang punya jadwal tidak menawarkan tombol hapus', async ({
-        page,
-    }) => {
-        // Roadmap 4.5: the button is not offered for something the server will
-        // refuse, and the refusal is asserted by DeleteTest on the backend.
-        await buatLokasi(page, 'Lokasi Sibuk E2E', 'lokasi-sibuk-e2e');
-
-        await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
-
-        await pilih(page, 'Lokasi', 'Lokasi Sibuk E2E');
-        await pilih(page, 'Hari', 'Selasa');
-        await page.getByLabel('Jam mulai').fill('10:00');
-        await page.getByLabel('Nama misa').fill('Misa Sibuk E2E');
-        await page.getByRole('button', { name: 'Simpan jadwal' }).click();
-
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
-
-        await page.goto('/admin/jadwal-misa/lokasi');
-
-        const busy = page
-            .getByRole('row')
-            .filter({ hasText: 'Lokasi Sibuk E2E' });
-
-        await expect(busy.getByRole('link', { name: 'Ubah' })).toBeVisible();
-        await expect(busy.getByRole('button', { name: 'Hapus' })).toHaveCount(
-            0,
-        );
     });
 
     test('jadwal misa rutin bisa dihapus', async ({ page }) => {
