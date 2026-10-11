@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MassSchedule\PublicMassScheduleController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Middleware\EnsureAccountIsActive;
@@ -22,11 +23,17 @@ use Inertia\Inertia;
 | no link, and that was the correct call while the routes were missing. They are
 | no longer missing, so the disabled branch is gone and the menu is real.
 |
-| None of them query anything. No model, no resource, no controller, no props.
-| Placeholder copy is written in the React page, which is the only place a
+| All but one still query nothing. No model, no resource, no controller, no
+| props. Placeholder copy is written in the React page, which is the only place a
 | sentence like "[ISI: halaman ini diimplementasikan pada Fase Profil]" can
 | honestly live - a PHP or Blade string would ship placeholder text as if it
 | were content.
+|
+| /jadwal-misa is the exception, and has been since Phase 04: it is the one page
+| whose module arrived, so it has a controller, four resources and a resolver
+| behind it. Its route name did not change, which is why
+| PublicPlaceholderRoutesTest still passes and why a link written down from the
+| Phase 03 output still works.
 |
 | There are two shapes here and the difference matters:
 |
@@ -55,7 +62,7 @@ Route::inertia('/profil/wilayah', 'public/profil/wilayah')->name('profil.wilayah
 Route::inertia('/profil/pastor', 'public/profil/pastor')->name('profil.pastor');
 Route::inertia('/profil/struktur', 'public/profil/struktur')->name('profil.struktur');
 
-Route::inertia('/jadwal-misa', 'public/jadwal-misa')->name('jadwal-misa.index');
+Route::get('/jadwal-misa', [PublicMassScheduleController::class, 'index'])->name('jadwal-misa.index');
 
 Route::inertia('/berita', 'public/berita')->name('berita.index');
 Route::get('/berita/{slug}', fn (string $slug) => Inertia::render('public/berita/show', ['slug' => $slug]))
@@ -148,3 +155,4 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
     });
 
 require __DIR__.'/settings.php';
+require __DIR__.'/mass-schedule.php';

@@ -1934,7 +1934,7 @@ error, hanya page yang salah. Sekarang nama menentukan path sepenuhnya, jadi
 
 ### 4. Empat pembaca, satu aturan
 
-`app.tsx` (path → nama), `PageFinder` (nama → path, untuk Inertia),
+`lib/page-name.ts` (path → nama), `PageFinder` (nama → path, untuk Inertia),
 `PageChunk` (nama → path, untuk Blade), dan `app.blade.php` yang memanggilnya.
 Tiga yang terakhir berbagi `PageChunk`, jadi aturannya benar-benar satu.
 `ArchitectureTest.php` membandingkan kedua arah untuk **setiap** page di
@@ -1965,6 +1965,54 @@ muncul (`features/admin/settings/akun`).
 - Test arch "no two features claim the same page name" meledak jadi 33 kegagalan
   begitu `index.tsx` masuk: dua fitur sama-sama punya `index.tsx`, keduanya
   terbaca bernama `index`. False positive yang hanya terlihat setelah dijalankan.
+
+### 7. Komponen boleh hidup di bawah `pages/`
+
+**Status:** Accepted · berlaku sejak P04 · branch `feat/phase-04-mass-schedule`
+
+Rapikan Modul Jadwal Misa menaruh tiap halaman daftar di foldernya sendiri,
+supaya `tambah.tsx` dan `ubah.tsx` punya tetangga:
+
+```text
+pages/lokasi.tsx + pages/lokasi/tambah.tsx   →  pages/lokasi/index.tsx + pages/lokasi/tambah.tsx
+```
+
+Yang berubah adalah **nama page ikut pindah**, bukan nama yang disembunyikan:
+
+> `pages/lokasi/index.tsx` bernama `admin/jadwal-misa/lokasi/index`.
+
+Ini yang membuat aturan D-30 tetap berlaku tanpa tambahan apa pun — nama itu
+memang path-nya. Alasannya menolak cara lain, yaitu menamai file itu
+`admin/jadwal-misa/lokasi` saja: satu file jadi punya dua nama, dan peta
+`pagesByName` menyimpan satu entri per nama, jadi yang kalah dibuang tanpa error
+build. Selain itu, mengorbankan aturan yang berlaku untuk 44 page lain demi 4
+halaman. Sibling-nya `lokasi/tambah` dan `lokasi/ubah` sudah berupa path biasa
+di folder yang sama, jadi tidak ada yang perlu dijelaskan ulang.
+
+Yang benar-benar rusak dari perpindahan ini ada di tempat lain: `PageChunk` dan
+`pageName` sama-sama membaca pola `pages/<apa saja>.tsx`, sehingga
+`pages/lokasi/components/` ikut terbaca sebagai page. Lima komponen form —
+`location-form`, `location-cards`, `mass-schedule-form`, `special-mass-form`,
+`schedule-notice-form` — mendaftarkan diri di bawah nama yang tak pernah
+ditanyakan controller. Keduanya kini menyaring segment `components/`.
+
+Bukan `components/` sebagai nama sakral, melainkan daftar
+(`PageChunk::NON_PAGE_DIRECTORIES`): menambahkan `hooks/` berarti satu baris di
+dua tempat.
+
+`pageName` dipindah dari `app.tsx` ke `resources/js/lib/page-name.ts` supaya bisa
+diuji: mengimpor `app.tsx` dari test akan menjalankan `createInertiaApp()`
+berserta seluruh efek sampingnya.
+
+
+### 8. Kesalahan yang muncul saat mengerjakan aturan ini
+
+- Klaim "lima komponen" meledak jadi lima, bukan empat — `location-cards` ikut
+  terhitung. hitungan yang salah hampir sama dengan benar, dan hanya
+  terlihat karena `ArchitectureTest` walking daftar page.
+- Test JS pertama memperkilir `pageName()` untuk path diakhiri garis miring.
+  Glob tidak pernah menghasilkannya, jadi test itu mengunci perilaku untuk input
+  yang mustahil, bukan aturan yang benar.
 
 ---
 
@@ -2523,3 +2571,584 @@ navigasi yang lolos lewat stub ini; ia hanya bukan lagi baris pertama.
   menuliskannya lewat `className`.
 - **Review visual dua tema.** Angka kontras di atas adalah hitungan, dan
   hitungan bukan mata.
+
+---
+
+## D-34 — Skema tabel Jadwal Misa, dan tiga divergensi dari PRD §9.5
+
+**Status:** Accepted · berlaku sejak P04 · branch `feat/phase-04-mass-schedule`
+
+PRD §9.5 dan roadmap Phase 04 §4 tidak sepakat pada tiga titik. Roadmap menang
+ketiganya, karena artefak yang lebih spesifik untuk fase ini, dan karena PRD §9.5
+sendiri menyatakan "Nama dan tipe bersifat usulan; boleh disesuaikan saat
+implementasi selama perilaku di dokumen ini terpenuhi".
+
+### 1. Tidak ada soft delete
+
+PRD §9.5 menandai `locations` (SD) dan `special_masses` (SD); ADM-05 (MUST)
+menyatakan operasi hapus memakai soft delete pada tabel konten utama. Roadmap §4
+menyatakan sebaliknya — jangan menambahkan soft delete bila `is_active` cukup —
+dan §5.6 melarang endpoint hapus permanen.
+
+Dipilih: hanya `is_active`, tanpa `deleted_at` di tabel mana pun.
+
+Alasannya bukan sekadar perbedaan dokumen. Modul ini **tidak punya endpoint hapus
+sama sekali** — 21 route admin dan tidak satu pun `DELETE`. Kolom soft delete
+karena itu tidak akan pernah diisi, dan kolom yang tidak pernah diisi adalah
+persis apa yang D-24 kritik pada permission yang belum punya kode pembaca.
+Menghapus kolom juga membuat MASS-04 ("tidak dihapus permanen") benar secara
+struktural, bukan hanya lewat konvensi.
+
+Konsekuensi yang harus dicatat: **ADM-05 belum terpenuhi** untuk tabel konten
+modul ini, dan baru akan terasa sampai suatu modul benar-benar punya endpoint
+hapus.
+
+> **Digantikan oleh D-40.** Bagian 1 ini berlaku pada saat modul dikirim.
+> Soft delete kemudian ditambahkan — `deleted_at` di keempat tabel, empat
+> endpoint, empat permission — dan ADM-05 kini **terpenuhi**. Alasan yang
+> dipakai D-40 adalah kebalikan dari yang dipakai di sini: D-34 memilih
+> "tidak ada hapus sama sekali", D-40 memilih "hapus dengan soft delete" justru
+> karena tanpa endpoint hapus, ADM-05 tidak bisa dipenuhi.
+>
+> Bagian 2 dan 3 di bawah tidak terpengaruh dan tetap berlaku.
+
+### 2. `locations`: `slug` + `notes`, tanpa `sort_order`
+
+PRD §9.5 punya `sort_order` dan tidak punya `slug`/`notes`. Roadmap §4.1
+sebaliknya, dan §5.2 mewajibkan validasi slug.
+
+Dipilih `slug` (unique) dan `notes`, tanpa `sort_order`. `slug` membuat filter
+publik terbaca manusia dan dapat dibagikan (`?lokasi=stasi-tanah-empang`)
+daripada `?lokasi=7`. `sort_order` dihapus karena **tidak ada satu pun
+requirement yang mengurutkan lokasi** — filter publik mengurutkan dengan nama.
+
+### 3. `schedule_notices` mengikuti roadmap §4.4
+
+PRD §9.5 hanya menyebut `message`, `starts_at` (nullable), `ends_at`,
+`is_active`. Roadmap §2.1 meminta CRUD pemberitahuan dengan rentang tampil, dan
+§6.5 meminta target umum / lokasi / jadwal / misa khusus. Bentuk PRD §9.5 tidak
+dapat menyediakan target.
+
+Dipilih bentuk roadmap §4.4: `title` wajib, tiga foreign key nullable, `starts_at`
+wajib. **Tepat satu** target boleh terisi (D-5 di plan implementasi) — notice yang
+menunjuk lokasi sekaligus jadwal di dalamnya tidak punya satu arti, dan banner
+publik harus menebak mana yang dimaksud.
+
+### 4. Konsekuensi yang bukan divergensi
+
+- `start_time` **tidak di-cast** di model. Kolom TIME adalah jam dinding WIB
+  (PRD D-02); `cast('datetime')` akan menggesernya sebesar offset UTC dan
+  memindahkan "misa berikutnya" ke hari yang salah.
+- Validasi ditulis di `FormRequest`; controller tetap tipis.
+
+## D-35 — Jadwal tidak di-cache, dan kenapa XC-C1 ditunda
+
+**Status:** Accepted · berlaku sejak P04
+
+PRD XC-C1 (SHOULD) menyebut cache untuk "data jarang berubah (jadwal misa
+rutin)" dengan invalidasi saat admin menyimpan, dan satu syarat yang tegas: cache
+**tidak boleh** membuat "misa berikutnya" salah.
+
+Cache ditunda pada fase ini. Empat tabel ini kecil — jumlah lokasi, jadwal, misa
+khusus, dan notice sebuah paroki berada di bawah ratusan baris — sehingga query
+publik yang sudah ter-indeks lebih murah daripada biaya invalidasi yang benar.
+XC-C1 adalah SHOULD, dan "punya cache dengan invalidasi nanti" lebih aman daripada
+"punya cache sekarang tanpa invalidasi".
+
+Konsekuensi:
+
+- **AC-MASS-3 terpenuhi tanpa pekerjaan invalidasi apa pun.** Perubahan admin
+  terlihat pada request berikutnya, dan `PublicMassSchedulePageTest` +
+  `DuplicateMassScheduleTest` mengukurnya setiap kali.
+- Kalau cache ditambahkan nanti, aturan berikutnya wajib: hitung ulang
+  `NextMassResolver` per request dari data yang ter-cache, jangan pernah
+  mengambil kandidat dari cache.
+- `SiteSettingsService` **tetap** memakai cache untuk pengaturan situs — yang itu
+  memang jarang berubah dan D-23 sudah menyelesaikannya.
+
+## D-36 — Granularitas permission: satu kata, bukan satu set per modul
+
+**Status:** Accepted · berlaku sejak P04
+
+Dua opsi tersedia dan satu dipilih:
+
+| Opsi | Bentuk | Konsekuensi |
+| --- | --- | --- |
+| **A (dipilih)** | 12 permission `resource.action` satu kata: `locations.*`, `massschedules.*`, `specialmasses.*`, `schedulenotices.*` | Nol perubahan pada test yang ada |
+| B | 3 permission `mass-schedule.{view,create,update}` | `RbacFoundationTest` harus dilonggarkan |
+
+Opsi A dipilih karena `RbacFoundationTest` mengunci
+`/^[a-z]+\.[a-z]+$/` untuk setiap nama permission, dan `mass-schedules.view`
+tidak mengenuhinya. Melonggarkan regex itu mudah — hanya satu
+baris — dan itulah sebabnya ia berbahaya: test itu ada untuk
+menangkap rename yang tidak disengaja, dan melonggarkannya sebagai
+efek samping akan menutup yang justru penting. `massschedules` ditulis satu
+kata supaya aturan aslinya tidak perlu disentuh sama sekali.
+
+Pertimbangan yang lebih luas: permission per resource, bukan per modul, karena
+D-18 dan D-24 sama-sama mengatakan bahwa permission yang tidak dibaca lebih
+buruk daripada tidak ada. Empat sumber daya dengan tiga kemampuan masing-masing
+memberi peran editor di masa depan granularity yang nyata.
+
+Tidak ada permission `*.delete`, karena tidak ada route hapus (D-34).
+
+## D-37 — `is_active` adalah field form, bukan endpoint toggle
+
+**Status:** Accepted · berlaku sejak P04
+
+Roadmap §5.6 menyebut "deactivate/activate" sebagai endpoint. Yang diterapkan:
+`is_active` adalah field biasa pada form `update`.
+
+Alasan: roadmap §6 meminta "perubahan sekecil mungkin" pada admin, dan
+deactivating sudah merupakan sebuah edit. Delapan endpoint toggle tambahan tidak
+dibaca komponen mana pun.
+
+Konsekuensi yang perlu diketahui:
+
+- Peringatan MASS-07 tetap ada, diimplementasikan di `lokasi/ubah.tsx` dengan
+  `ConfirmDialog`, dan **hanya ketika `active_schedules_count > 0`**.
+- Dialog itu adalah courtesy, bukan jaminan. Jaminan MASS-07 ada di server:
+  `Location::scopeActive` dan `MassSchedule::scopeActive` menyembunyikan lokasi
+  beserta jadwalnya dari halaman publik, sehingga aturan itu tetap berlaku untuk
+  request yang melewati form ini.
+- `AdminAccessTest::$adminPages` tidak bertambah untuk route toggle.
+
+## D-38 — Empat URL PRD §5.2, dan empat pintasan sebagai kartu
+
+**Status:** Accepted · berlaku sejak P04
+
+PRD §5.2 memetakan `/admin/lokasi`, `/admin/jadwal-misa`, `/admin/misa-khusus`
+dan `/admin/pemberitahuan-jadwal` ke empat fungsi. Roadmap §6.1 meminta satu
+"Halaman ringkasan Jadwal Misa" berisi empat pintasan.
+
+Tiga cara memenuhi keduanya:
+
+| Opsi | Bentuk | Masalah |
+| --- | --- | --- |
+| **A (dipilih)** | `/admin/jadwal-misa` = ringkasan + daftar Misa Rutin; tiga URL lain = halaman daftar sendiri | 13 halaman, tanpa redirect |
+| B | Ringkasan di `/admin/jadwal-misa`, daftar rutin di `/admin/jadwal-misa/jadwal-rutin` | menyimpang dari PRD §5.2 |
+| C | Satu halaman dengan `?tab=`, URL lain redirect | redirect yang tidak perlu |
+
+Opsi A dipilih: URL PRD tetap persis, dan keempat pintasan tetap ada.
+
+Kenapa pintasan berupa **kartu**, bukan sidebar kedua:
+
+- `ArchitectureTest` melarang `layouts/` meng-import `features/`, jadi array nav
+  tidak bisa tinggal di layout tanpa diteruskan ke setiap halaman.
+- `layouts/settings/layout.tsx` terikat pada tiga route `akun` dengan copy
+  berbahasa Inggris; menggeneralikannya berarti menambah layout kedua untuk satu
+  modul.
+- Roadmap §6.1 hanya meminta tombol tambah sesuai konteks, bukan navigasi
+  bersarang, dan §6 meminta perubahan sekecil mungkin pada navigasi.
+
+Yang **tidak** berubah: shell admin, sidebar, header, dan breadcrumb.
+`app-sidebar.tsx` hanya mendapat satu `href` pada entri yang sudah ada.
+
+## D-39 — Tiga jebakan yang hanya terlihat di browser, dan why E2E exists at all
+
+**Status:** Accepted · berlaku sejak P04
+
+Tiga bug di Phase 04 lolos dari 528 test Pest yang hijau, dari 212 test Vitest
+yang hijau, dari PHPStan, dan dari `npm run build`. Semuanya ketahuan hanya
+ketika `tests/e2e/mass-schedule.spec.ts` dibuka di Chromium. Dicatat di sini
+karena ketiganya akan berulang di Phase 05 dan sesudahnya.
+
+### 1. Inertia membungkus resource collection yang tidak dipaginasikan
+
+```php
+'locations' => LocationOptionResource::collection($this->activeLocations()),
+```
+
+mengirim `{"data": [...]}`, bukan `[...]`. `PropsResolver` mengambil
+`Responsable::toResponse()->getData(true)`, dan `JsonResource::collection()`
+dengan `->get()` (bukan `->paginate()`) menghasilkan respons tanpa paginator —
+yang justru **memakai** pembungkus `data`. Akibatnya `locations.map(...)` di
+React melempar `p.map is not a function`, dan seluruh halaman admin modul ini
+render jadi layar kosong.
+
+Halaman publik tidak pernah kena karena `PublicMassScheduleController` sudah
+memakai `array_values(...->resolve())` sejak awal.
+
+Yang dipatok: **prop non-paginasikan harus `array_values(Resource::collection(...)->resolve())`.**
+Prop terpaginasikan (`LocationResource::collection($paginator)`) tidak boleh
+disentuh — hasilnya memang `{data, links, meta}` dan itu memang yang
+`Paginated<T>` baca. Satu-satunya bedanya: satu dipaginasikan dan satu tidak.
+
+### 2. Assertion yang lulus karena menghitung kunci, bukan isinya
+
+`->has('locations')` hanya memastikan prop itu ada. Dan `->has('locations', 1)`
+justru **lolos** pada `{data: [...]}` — satu kunci, satu elemen. Dua test
+yang menjaga prop ini sama-sama tidak melihat apa pun.
+
+Assertion yang benar, dan sekarang dipakai:
+
+```php
+->where('locations.0.id', $this->location->id)
+->missing('locations.data')      // the wrapper itself
+```
+
+`missing()` adalah penjaga yang sesungguhnya: ia gagal tepat pada bentuk yang
+salah, bukan hanya pada jumlahnya. Diverifikasi dengan mengembalikan bug-nya
+sementara — test-nya gagal dengan `Property [locations.0.id] does not exist`.
+
+### 3. `<form>` tanpa `noValidate` membuang seluruh pesan validasi
+
+Empat form modul ini menandai field wajib dengan atribut `required`, dan tidak
+satu pun `<form>` punya `noValidate`. Chromium karena itu menjalankan
+validasi HTML5-nya sendiri, memblokir submit, dan `onSubmit` Inertia **tidak
+pernah jalan**. Server tidak pernah dipanggil, jadi pesan bahasa Indonesia
+yang ada di `lang/id/validation.php` tidak pernah tampil — dan tidak ada satu
+pun error di log karena memang tidak ada yang salah.
+
+`noValidate` sekarang ada di keempat form. Atribut `required` tetap, karena
+ia tetap berarti bagi pembaca layar; yang dipatok hanya siapa yang
+memvalidasi: server, satu-satunya yang bisa berbahasa Indonesia.
+
+Aturan turunannya: **hanya server yang memvalidasi.** Aturan HTML5 pada form
+Inertia bukan lapisan kedua, dan tidak boleh ditambahkan diam-diam.
+
+### Kenapa test browser ini bukan tambahan opsional
+
+Keempat test yang menangkap tiga bug di atas tidak bisa ditulis sebagai test
+Pest. Semuanya menanyakan "apakah React berhasil merender" — dan
+`assertInertia` memeriksa payload, bukan hasil render.
+
+## D-40 — Soft delete untuk Jadwal Misa, dan tiga konsekuensi yang tidak terlihat
+
+**Status:** Accepted · berlaku sejak P04 (lanjutan) · menggantikan D-34 §1
+
+Modul ini(ERROR) dikirim tanpa satu pun endpoint hapus. D-34 §1.recorded
+sebagai divergensi terhadap **ADM-05**, yang berbunyi "operasi hapus memakai
+soft delete pada tabel konten utama". Keputusan ini menutup divergensi itu.
+
+### 1. Yang berubah, dan apa yang tidak
+
+Ditambah: `deleted_at` di keempat tabel, trait `SoftDeletes` di keempat model,
+empat `Route::delete`, empat method `destroy()`, empat permission `*.delete`,
+satu migration baru, dan satu dialog konfirmasi bersama.
+
+**Roadmap §5.6 dilanggar secara eksplisit.** Ia berbunyi "jangan menambahkan
+endpoint delete permanen bila kebutuhan PRD cukup dengan nonaktifkan". Yang
+yang ditambahkan adalah endpoint *soft* delete, dan alasannya justru karena PRD
+belum terpenuhi dengan nonaktifkan saja: ADM-05 — sebuah **MUST** — meminta
+soft delete pada operasi hapus, dan tanpa endpoint hapus sama sekali ADM-05
+tidak bisa terpenuhi.
+
+PRD §7.3 ("nonaktifkan, tidak hapus") tetap menggambarkan kerja
+sehari-hari secara akurat; delete adalah jalur keluar untuk super admin, bukan
+kata kerja harian.
+
+Tiga hal sengaja **tidak** berubah:
+
+- **`is_active` tetap Kendali harian.** Menghapus lokasi yang sedang tayang
+  akan langsung menghilangkan dari situs publik;Menonaktifkan melakukan hal
+  yang sama tanpa meninggalkanbot. Dialog delete menyebut
+  pilihan ini secara eksplisit.
+- **Tidak ada `deleted_by`.** Hanya `deleted_at`. Kolom tambahan hanya berarti
+  kalau ada yang membacanya, dan tak seorang pun membacanya.
+- **Tidak ada pemulihan.** Baris yang terhapus tersembunyi dari semua query
+  default, termasuk daftar admin. Karena generated column (bagian 2) sudah
+  membebaskan slot, tidak ada alasan administratif untuk memulihkannya.
+
+### 2. Generated column, dan kenapa tidak bisa pakai `deleted_at` langsung
+
+Ini bagian yang paling mudah ditulis salah, dan salah di sini berarti 500 pada
+sesuatu yang dilakukanRural benar.
+
+Dua index di modul ini bersifat menentukan:
+
+```
+locations.slug                                        UNIQUE
+mass_schedules (location_id, day_of_week, start_time) UNIQUE  (MASS-06)
+```
+
+Baris yang di-soft-delete **tetap ada di tabel**. Kalau begitu saja, menghapus
+misa Minggu 07.30 membuat slot itu tetap terkunci, dan attempt berikutnya untuk
+membuat misa di 07.30 ditolak oleh index dengan `QueryException` — 500 untuk
+sesuatu yangindeed dilakukanRural dengan benar.
+
+Menambahkan `deleted_at` ke index **juga tidak memperbaiki**. MySQL menganggap
+NULL berbeda dalam unique index, jadi `(location_id, day_of_week, start_time,
+deleted_at)` mengizinkan sembarang jumlah baris aktif berbagi satu slot, dan
+MASS-06 berhenti berlaku. Itu lebih buruk daripada bug aslinya, karena hilang
+tanpa suara.
+
+Solusinya kolom generated: `IF(deleted_at IS NULL, 1, NULL)`. Baris hidup
+membawa `1` sehingga index tetap menegakkan "satu baris aktif per slot"; baris
+terhapus membawa `NULL`, yang berbeda dari segalanya, sehingga bisa menumpuk
+tanpa batasi. Pola MySQL standar untuk soft delete di atas unique constraint.
+
+`STORED`, bukan `VIRTUAL`: MySQL sudah mendukung index pada virtual generated
+column sejak 5.7, tetapi `STORED` tidak punya catatan tersebut, dan tabelnya
+sangat kecil.
+
+Diverifikasi di MySQL 8.0.46 sebelum kode lain ditulis — sembilan pemeriksaan,
+termasuk bahwa dua baris aktif di satu slot tetap ditolak dan slug yang sudah
+dihapus benar-benar dapat dipakai ulang. Sawtooth yang tidak diuji akan muncul
+sebagai 500 di halaman, bukan sebagai test merah.
+
+### 3. Empat privilege baru, dan berikan yang tidak bergerak
+
+`locations.delete`, `massschedules.delete`, `specialmasses.delete`,
+`schedulenotices.delete` — mengikuti preseden `media.delete` di
+`MediaController::destroy`.
+
+Satu catatan jujur yang terlihat dari sebuah test: **hari ini keempat
+permission ini tidak menahan apa pun.** `EnsureAdminAccess` sudah membatasi
+seluruh `/admin` untuk super admin, jadi user tanpa role tidak pernah mencapai
+policy. Yang memblokirnya adalah middleware, bukan permission.
+
+Permission tetap dipakai, dan bukan mati: `LocationPolicy::delete()` dan tiga
+polisi lainnya membacanya hari ini, jadi ia punya pembaca nyata. Ia adalah
+garis yang digeser pada hari role kedua muncul — bukan izin yang ditambahkan
+untuk kemudian. `DeleteTest` menyatakan ini terbuka, bukan menyamarkan
+ketidakaktifan itu di balik nama test yang terdengar.
+
+### 4. Yang/refuse dan yang diperingatkan
+
+Roadmap §4.5 ("jangan menghapus lokasi yang masih memiliki jadwal") menjadi
+satu-satunya aturan yang ditegakkan, di `LocationController::destroy()`.
+Keduanya menunjuk `locations` dengan `ON DELETE RESTRICT`, jadi tanpa
+pemeriksaan database menjawab 500. Pesannya menyebut **kedua** jumlah, karena
+memberi tahu "lokasi ini punya jadwal" dan kemudian menemukan misa khusus juga
+tidak memberi informasi yang bisa ditindaklanjuti.
+
+Notice **tidak** memblokir. `schedule_notices` menunjuk entitas lain dengan
+`SET NULL`, jadi sebuah notice menunjuk jadwal yang dihapus akan kehilangan
+targetnya. Query publik hanya menampilkan notice yang ketiga FK-nya NULL atau
+yang menunjuk lokasi yang sedang difilter — sehingga notice seperti itu
+**berhenti tampil tanpa jejak**. Yang dilakukan: dialog menyebut jumlahnya, dan
+daftar admin menampilkan badge "Target terhapus".
+
+Kebutuhan `withoutGlobalScope(SoftDeletingScope::class)` di dalam `withCount`
+adalah bug nyata yang sempat lolos ke test: relasi membawa scope itu sendiri,
+jadi baris terhapus sudah dikeluarkan sebelum `whereNotNull('deleted_at')`
+berjalan, dan semua hitungan balik nol.
+
+### 5. Dua hal yang ditemukan di luar lingkup
+
+Keduanya ditemukan sambil menulis test dan **keduanya tidak diperbaiki di sini**:
+
+1. **Notice yang menunjuk jadwal atau misa khusus tidak pernah tampil di
+   halaman publik.** `PublicMassScheduleController::notices()` hanya
+   menangani dua cabang: tanpa target, atau menunjuk lokasi yang difilter.
+   Notice dengan `mass_schedule_id` atau `special_mass_id` tidak cocok dengan
+   keduanya, sehingga tidak pernah tampil. Ini.jetak Phase 04, bukan D-40.
+2. **`npm run check:fix` menghapus isi file, bukan hanya memformatnya.** Setelah
+   berjalan, tiga file kehilangan seluruh komentar dan elemen `<Heading>`.
+   `git checkout HEAD --` memulihkannya. Penyebabnya belum terisolasi — file
+   yang tidak disentuh tidak berubah saat diuji ulang — sehingga catatan di
+   `AGENTS.md` memperlakukan `check:fix` sebagai alat yang harus diperiksa
+   hasilnya dengan `git diff`, bukan dijalankan lalu dipercaya.
+
+### @see
+
+- PRD ADM-05, §7.3, MASS-02, MASS-04, MASS-06
+- Roadmap Phase 04 §4.5, §5.6
+- D-34 §1 (digantikan), D-36 (keputusan permission), D-39 (jebakan Inertia)
+
+## D-41 — Sub-menu di sidebar, tabel TanStack, dan satu divergensi terhadap PRD §5.2
+
+**Status:** Accepted · berlaku sejak P04 (lanjutan kedua)
+
+Tiga perubahan UI dalam satu keputusan karena ketiganya menyentuh hal yang
+sama: bentuk navigasi modul Jadwal Misa.
+
+### 1. Empat daftar pindah ke sub-menu, dan ringkasan bukan lagi tujuan judul
+
+Sidebar admin punya satu entri "Jadwal Misa". Sekarang entri itu punya **empat
+anak**: Lokasi, Misa Rutin, Misa Khusus, Pemberitahuan — dan anak-anaknya dapat
+dibuka serta ditutup.
+
+**Seluruh baris judul adalah disclosure**, yaitu `<button>` yang membawa
+`aria-expanded`, bukan sebuah link. Jadi `/admin/jadwal-misa` **tidak lagi
+terjangkau dari sidebar**.
+
+"Ringkasan" tidak dikembalikan sebagai anak. Sebagai anak ia hanya
+menduplikasi tujuan yang sudah tidak ada, dan sebagai tujuan judul ia memang
+sudah tidak ada. Yang menggantikannya adalah **breadcrumb**, yang dirender setiap
+halaman jadwal misa lewat `Index.layout.breadcrumbs`.
+
+Konsekuensi yang harus diuji dari dua arah: **link-nya tidak ada, dan tombolnya
+ada** dengan `aria-expanded` yang benar. Hanya salah satu dari keduanya akan
+tetap lulus kalau sebagian rusaknya, jadi tes yang hanya assert link masih ada
+justru akan gagal dengan pesan yang menunjuk ke tes, bukan ke komponennya.
+
+**Ini membatalkan D-38.** D-38 memakai empat kartu pintasan di halaman
+ringkasan *karena* `ArchitectureTest` melarang `layouts/` meng-import
+`features/`, sehingga larik navigasi tidak bisa tinggal di sana. Dampanya yang
+dihindari sudah ada: sub-menu dideklarasikan di `layouts/app/components/app-sidebar.tsx`
+dengan import Wayfinder — pola yang sudah dipakai file itu sendiri untuk
+`massSchedulesIndex()`. Aturan arsitekturnya tidak dilanggar; yang berubah
+adalah bentuk navigasinya.
+
+Akibatnya kartu pintasan dihapus, dan **PRD §5.2 berubah makna**. D-38
+sengaja menahan `/admin/jadwal-misa` sebagai daftar misa rutin agar URL PRD
+tetap persis tanpa redirect. Sekarang:
+
+| URL | D-38 | D-41 | D-42 |
+| --- | --- | --- | --- |
+| `/admin/jadwal-misa` | ringkasan + tabel Misa Rutin | ringkasan saja | redirect ke tabel Misa Rutin |
+| `/admin/jadwal-misa/misa-rutin` | — | tabel Misa Rutin | tabel Misa Rutin |
+
+PRD §5.2 dipetakan ke daftar misa rutin, jadi ini **divergensi yang harus
+dinyatakan**, bukan penyederhanaan. Konsekuensinya:
+
+- Redirect setelah menyimpan, mendarat di `mass-schedules.list` dan bukan
+  ringkasan — admin harus berakhir di tabel yang baru saja ia ubah.
+- Anak "Misa Rutin" di sub-menu menunjuk URL barunya, bukan URL lama.
+
+D-42 menghapus_ringkasannya seluruhnya, jadi tabel di atas punya kolom ketiga:
+`/admin/jadwal-misa` kini hanya pengalihan, dan empat angka yang tersisa di sana
+sudah tidak ada.
+
+State buka-tutup ada, dan dalam React state biasa — bukan Radix Collapsible.
+Alasannya ditemukan lewat E2E: `CollapsibleContent` memasang tinggi inline pada
+`<ul>` anak, dan `<ul>` yang tinggi terkonsteksi itu menumpuk baris-barisnya
+satu di atas yang lain. Akibatnya setiap sub-link tidak bisa diklik, dan log E2E
+hanya bilang sebuah `svg` dari baris lain "intercepts pointer events" — yang
+tidak pernah menunjuk ke DOM yang benar. `SidebarMenuSub` karena itu dibiarkan
+apa adanya sebagai `<ul>` polos dari shadcn.
+
+State awal dihitung dari semua URL grup, bukan hanya URL induknya: URL anak
+tidak berawalan dengan URL induknya, jadi menguji induk saja membuat tiga dari
+empat halaman tiba dengan menu-nya tertutup.
+
+Satu lagi yang tidak terlihat di browser dan sudah ditulis sebagai test:
+breadcrumb tiga halaman memakai `href: { url: '...' }` dan berakhir sebagai
+`admin/[object Object]`.
+
+### 2. Tabel: `ui/table` di atas TanStack Table
+
+`components/ui/table.tsx` sudah ada di repositori sejak awal dan **tidak
+dipakai di mana pun**. Keempat daftar modul ini sekarang memakainya, dengan
+`@tanstack/react-table` (v9) sebagai lapisan di bawahnya.
+
+Dependency ini adalah perubahan pertama sejak Phase 01, dan tercatat di sini
+karena plan Phase 04 ditulis dengan "tanpa dependency baru". Yang dibeli darinya
+adalah satu kemampuan: **sorting yang benar**. Tanpa TanStack, sorting harus
+ditulis tangan di setiap tabel; TanStack menyediakan model state-nya.
+
+Akar keputusannya adalah `manualSorting: true`. Keempat daftar ini dipaginasi
+server sebanyak lima belas baris, jadi sorting sisi klien akan mengurutkan lima
+belas baris itu dan meninggalkan sisanya — header yang menulis "A–Z" sementara
+tiga perempat tabel belum bergerak adalah kebohongan kecil yang lebih buruk
+daripada tidak ada header. Klik header karena itu menjadi **kunjungan**, bukan
+reorder, dan urutannya datang dari server.
+
+### 3. Sorting server-side, dan tiga aturan yang membuatnya tidak merusak apa pun
+
+`app/Concerns/SortsAdminList.php` adalah separuh dari fitur ini. Tiga aturan
+di dalamnya masing-masing menjawab satu cara hal ini bisa rusak:
+
+- **Whitelist, bukan nama kolom.** Kunci sort datang dari query string dan
+  masuk ke `ORDER BY`, yang tidak bisa menerima bound parameter. Kunci di luar
+  daftar diabaikan — dan diabaikan **diam-diam**, dengan alasan yang sama
+  dengan `?status=` yang rusak: tautan rusak menampilkan daftar, bukan 422.
+- **Tie-breaker selalu ditambahkan.** Mengurutkan berdasarkan nama saja
+  menyisakan semua baris bernama sama dalam urutan yang bebas diubah MySQL
+  antar-kueri, sehingga baris 16 halaman 2 bisa jadi baris 1 halaman 1 dan
+  tabel kehilangan baris sambil tampak lengkap. `id` ditambahkan supaya urutannya
+  total, dan hanya sebagai pemutus seri — placed **terakhir**, setelah sort.
+- **Urutan bawaan bertahan.** Tanpa kunci sort, urutan bawaan list tidak
+  berubah. Beberapa test lama sudah mengassert urutan itu, dan mereka adalah
+  buktinya.
+
+Butir ketiga ini juga menemukan satu bug implementasi: urutan bawaan
+pertama-tama ditulis di rantai query, lalu sort ditambahkan sesudahnya. MySQL
+menyimpan kedua instruksi untuk satu kolom **dalam urutan itu**, jadi
+`orderBy('name')` diikuti `orderBy('name','desc')` akan tetap urut menaik dan
+mengabaikan sort sepenuhnya. Karena itu urutan bawaan kini melaluai
+`applyAdminSort()` sebagai argumen, bukan dikirim terpisah.
+
+### 4. Dua jebakan yang muncul di sini, dan satu yang harus dibaca
+
+**`select()` setelah `withCount()` menghapus hitungan, tanpa error.**kedua
+daftar yang bisa diurutkan menurut kolom relasi memerlukan `leftJoin`, dan
+`withCount('scheduleNotices')` menambahkan hitungannya sebagai ekspresi select
+tambahan — lalu `select('mass_schedules.*')` yang menyusul **mengganti** seluruh
+daftar kolom. Tidak ada error; field-nya tidak ada, dan `whenCounted()` mengubah
+ketiadaan itu menjadi nol. Dialog hapus jadi melaporkan "tidak ada pemberitahuan
+yang menunjuk" selamanya. `select()` harus **sebelum** `withCount()`.
+
+**`import { index as a, index as b }` dari satu modul Wayfinder.** Dua nama
+untuk satu fungsi: TypeScript tidak keberatan, lint tidak keberatan, dan kedua
+menu itu diam-diam menunjuk URL yang sama. "Misa Rutin" di sub-menu membuka
+ringkasan. Hanya E2E yang menangkapnya, dan
+`tests/js/components/app-sidebar.test.tsx` sekarang mengunci lima href-nya —
+sidebar adalah satu tempat di mana href yang salah adalah tujuan yang salah.
+
+**Satu jebakan yang konstan dan belum diperbaiki.** Sortir menguji
+`special-masses.index`, `schedule-notices.index`, `locations.index` dan
+`mass-schedules.list` dengan `?sort=password` dan `?sort=status` — kolom
+turunan yang tidak ada di disk. Keduanya lolos. Yang perlu dibaca: **sortir
+adalah perubahan yang lebih besar daripada yang terlihat di diff-nya**,
+karena setiap query daftar di modul ini ikut berubah.
+
+### @see
+
+- PRD §5.2 (divergensi), AC-MASS-5, ADM-01
+- Roadmap Phase 04 §6.1, §6.6
+- D-38 (dibatalkan sebagian), D-40 (soft delete), D-39 (jebakan Inertia)
+
+---
+
+## D-42 — Kolom `language` dan halaman ringkasan dihapus
+
+**Status:** Accepted · berlaku sejak P04 (lanjutan ketiga) · branch
+`feat/phase-04-mass-schedule`
+
+Dua penghapusan dalam satu keputusan karena keduanya sama-sama permanen
+mengurangi apa yang ada, bukan menambahkan apa yang baru.
+
+### 1. `mass_schedules.language` dihapus, termasuk dari situs publik
+
+Kolomnya nullable dan tidak pernah diisi meaningful. Dihapus lewat **migration
+baru** (`dropColumn`), bukan dengan mengedit migration pembuat tabel: migration
+itu masih menggambarkan seperti apa tabelnya, dan mengeditnya membuat
+`migrate:fresh` berbeda dari setiap database yang sudah menjalaninya.
+
+Blok yang ikut hilang: kolom "Bahasa" di tabel dan kartu, field form, aturan
+validasi, `#[Fillable]`, factory, `DuplicateMassScheduleAction`, `MassScheduleResource`,
+`MassScheduleOptionResource`, `NextMass::$language`, `NextMassResolver`, dan
+**kedua resource publik**.
+
+Yang harus disadari: تعرض bahasa misa **dua resource publik** dan dua komponen
+kartu publik. Menghapus kolom tanpa membersihkan itu akan meninggalkan
+Vue mencari property yang selalu `undefined` — tidak error, hanya tidak pernah
+ditampilkan, jadi tidak ada yang gagal pelan-pelan sampai ada yang mencari.
+
+Yang justru **tidak** boleh terlupa adalah whitelist sorting:
+`'language' => 'mass_schedules.language'` di `MassScheduleController`. Kunci sort
+dimasukkan langsung ke `ORDER BY`, jadi kalau whitelist-nya bertahan sementara
+kolomnya hilang, `?sort=language` yang tersimpan di bookmark atau tautan lama
+menghasilkan SQL ke kolom yang tidak ada — **500**, bukan daftar dengan urutan
+default. `SortTest` punya kasus yang persis menjaga ini.
+
+### 2. Ringkasan modul dihapus, URL-nya jadi pengalihan
+
+Empat angka tanpa tujuan navigasi bukan halaman. Halaman, `index()`, `stats()`,
+`module-stats.tsx`, dan tipe `ModuleStats` semuanya hilang.
+
+URL-nya **tidak** ikut hilang, dan itu inti keputusannya. `/admin/jadwal-misa`
+adalah satu-satunya URL yang disebut PRD §5.2, dan **tujuh** halaman modul
+menunjukinya lewat breadcrumb. Menghapus route akan mengubah ketujuhnya jadi 404.
+Jadi route-nya bertahan sebagai pengalihan ke `mass-schedules.list`: bookmark
+lama tetap bekerja, dan breadcrumb tetap bermakna.
+
+Konsekuensi yang harus diketahui: title row sidebar tidak lagi punya tujuan
+apa pun. Baris itu sudah berupa `<button>` disclosure (D-41), jadi tidak ada
+yang kehilangan navigasi — tetapi `entry.href` **harus tetap ada**, karena ia
+separuh dari perhitungan auto-open grup.
+
+### 3. Yang perlu dikonfirmasi sebelum mengarang
+
+Pertanyaan awal "kenapa tombol Hapus tidak ada di tabel lokasi" sebenarnya
+**bukan bug**. Tombol itu ada; ia sengaja disembunyikan untuk lokasi yang punya
+jadwal atau misa khusus, karena `mass_schedules.location_id` adalah `NOT NULL`
+dengan `ON DELETE RESTRICT` — jadi opsi "lepaskan jadwal dari lokasi" secara
+fisik tidak mungkin, hanya ada tolak atau hapus berantai. Atribut itu
+ditemukan dengan membaca baris `canDelete`, bukan dengan menebak.
+
+Tidak ada perubahan kode untuk bagian ini, hanya catatan supaya pertanyaan yang
+sama tidak muncul lagi.

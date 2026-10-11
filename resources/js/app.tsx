@@ -7,20 +7,14 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth';
 import PublicLayout from '@/layouts/public';
 import SettingsLayout from '@/layouts/settings/layout';
+import { pageName } from '@/lib/page-name';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 /**
  * Pages live at `features/<audience>/<feature>/pages/`, and the Inertia name is
- * derived from that path by `pageName()` below. Two shapes:
- *
- *   features/admin/akun/pages/profile.tsx      -> 'admin/akun/profile'
- *   features/admin/dashboard/pages/index.tsx    -> 'admin/dashboard'
- *   features/public/auth/pages/login.tsx       -> 'public/auth/login'
- *   features/public/beranda/pages/index.tsx    -> 'public/beranda'
- *
- * `index.tsx` means the feature itself rather than a page named "index", which
- * is what keeps the file path from repeating the URL for single-page features.
+ * derived from that path by `pageName()` — which lives in its own module so that
+ * a test can import the rule without booting this file's side effects.
  *
  * This resolver is written by hand because the plugin cannot do it.
  * `@inertiajs/vite` injects its own resolver when `createInertiaApp` has neither
@@ -39,22 +33,6 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pageModules = import.meta.glob<{ default: ComponentType }>(
     './features/*/*/pages/**/*.tsx',
 );
-
-function pageName(path: string): string | null {
-    const segments = path.replace(/^\.\/features\//, '').split('/');
-
-    if (segments.length < 4 || segments[2] !== 'pages') {
-        return null;
-    }
-
-    const [audience, feature] = segments;
-    const file = (segments[segments.length - 1] ?? '').replace(/\.tsx$/, '');
-    const nested = segments.slice(3, -1);
-
-    return file === 'index'
-        ? `${audience}/${feature}`
-        : [audience, feature, ...nested, file].join('/');
-}
 
 const pagesByName = Object.fromEntries(
     Object.entries(pageModules).flatMap(([path, load]) => {

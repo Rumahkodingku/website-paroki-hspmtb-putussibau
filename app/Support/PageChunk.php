@@ -10,15 +10,26 @@ use Illuminate\Support\Str;
  *
  * A page's name encodes its path inside a feature:
  *
- *   'admin/akun/profile'  →  features/admin/akun/pages/profile.tsx
- *   'admin/dashboard'     →  features/admin/dashboard/pages/index.tsx
- *   'public/auth/login'   →  features/public/auth/pages/login.tsx
- *   'public/beranda'      →  features/public/beranda/pages/index.tsx
+ *   'admin/akun/profile'       →  features/admin/akun/pages/profile.tsx
+ *   'admin/dashboard'          →  features/admin/dashboard/pages/index.tsx
+ *   'public/auth/login'        →  features/public/auth/pages/login.tsx
+ *   'public/beranda'           →  features/public/beranda/pages/index.tsx
+ *   'admin/jadwal-misa/lokasi/index'
+ *                              →  features/admin/jadwal-misa/pages/lokasi/index.tsx
  *
  * The first two segments are the audience and the feature, and whatever is left
- * is the path below `pages/`. An empty remainder means `index.tsx`, which is
- * what lets a single-page feature drop the redundant segment its URL carries
- * without renaming the page.
+ * is the path below `pages/` — all of it, with one exception: an empty
+ * remainder means `index.tsx`, which is what lets a single-page feature drop the
+ * redundant segment its URL carries without renaming the page.
+ *
+ * That exception is scoped to the feature root on purpose. A page inside a
+ * folder keeps its folder in the name, so `pages/lokasi/index.tsx` answers to
+ * 'admin/jadwal-misa/lokasi/index' and not to a shorter name for the same file.
+ * Reading it the other way — stripping the folder and calling the file after the
+ * folder — would need the name to resolve to two different paths, and two names
+ * would have to share one file. Nothing else in the application would need it:
+ * 'admin/jadwal-misa/lokasi/tambah' and 'admin/jadwal-misa/lokasi/ubah' are
+ * already plain paths sitting in the same folder.
  *
  * Because the name fully determines the path, this needs no wildcard search at
  * all. An earlier version globbed across the audience and feature segments on
@@ -38,15 +49,25 @@ use Illuminate\Support\Str;
  * JavaScript.
  *
  * JavaScript derives the same mapping in the other direction in
- * resources/js/app.tsx, turning each globbed path into a name. Both sides read
- * the filesystem rather than sharing a table, so there is nothing to keep in
- * step — at the cost of implementing the index rule twice, which is why
- * PageChunkTest asserts the two agree on every page in the application.
+ * resources/js/lib/page-name.ts, turning each globbed path into a name. Both
+ * sides read the filesystem rather than sharing a table, so there is nothing to
+ * keep in step — at the cost of implementing the index rule twice, which is why
+ * ArchitectureTest asserts the two agree on every page in the application.
  *
  * @see docs/DECISIONS.md D-30
  */
 final class PageChunk
 {
+    /**
+     * Directories that may sit below `pages/` and hold UI rather than a page.
+     *
+     * A form component living beside the pages that use it is a reasonable
+     * layout, and `pages/lokasi/components/` keeps that grouping local. The
+     * pattern above matches those files too, so each one would otherwise be
+     * registered as a page under a name no controller ever asks for.
+     */
+    private const NON_PAGE_DIRECTORIES = ['components'];
+
     /**
      * The source path of a page chunk, relative to the project root.
      *
@@ -119,11 +140,26 @@ final class PageChunk
 
             $rest = $matches['rest'];
 
+            if (self::isBelowNonPageDirectory($rest)) {
+                continue;
+            }
+
             $pages[$rest === 'index'
                 ? $matches['audience'].'/'.$matches['feature']
                 : $matches['audience'].'/'.$matches['feature'].'/'.$rest] = $relative;
         }
 
         return $pages;
+    }
+
+    private static function isBelowNonPageDirectory(string $rest): bool
+    {
+        foreach (explode('/', $rest) as $segment) {
+            if (in_array($segment, self::NON_PAGE_DIRECTORIES, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
