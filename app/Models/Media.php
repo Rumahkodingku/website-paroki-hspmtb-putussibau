@@ -99,6 +99,26 @@ class Media extends Model
     }
 
     /**
+     * The stored path of a variant, on the disk it actually lives on.
+     *
+     * Separate from url() because a column should hold a path and not a URL.
+     * posts.featured_image and events.poster_path store this, and the resources
+     * turn it into a URL at render time — a stored URL would bake in the host,
+     * which breaks the moment the site moves to a domain of its own.
+     *
+     * Null for the original: it lives on a private disk and is not reachable, so
+     * there is no path worth keeping either.
+     */
+    public function variantPath(?string $variant = null): ?string
+    {
+        if ($variant === null) {
+            return null;
+        }
+
+        return $this->variants->firstWhere('name', $variant)?->path;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

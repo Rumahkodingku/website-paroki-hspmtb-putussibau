@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-    ChoiceSelect,
-    Field,
-} from '@/features/admin/jadwal-misa/components/form-fields';
+import { ChoiceSelect, Field } from '@/components/form-fields';
 
 /*
  * The admin's shared select, on the project's Radix Select rather than a bare

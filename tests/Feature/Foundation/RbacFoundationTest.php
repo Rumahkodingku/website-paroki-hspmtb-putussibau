@@ -53,7 +53,8 @@ test('the foundation permissions are seeded with resource.action names', functio
     // Verbatim from Phase 01 10.4, plus admin.access added in P06 as the gate for
     // /admin/* (D-19), plus the media trio added in P10 for the upload
     // endpoints (D-24), plus the twelve Jadwal Misa permissions added with the
-    // module in Phase 04 (D-36).
+    // module in Phase 04 (D-36), plus the twelve Berita & Agenda permissions
+    // added with the module in Phase 05 (D-43).
     //
     // Single words on purpose. The regex below is /^[a-z]+\.[a-z]+$/, and
     // `mass-schedules.view` would fail it — so loosening the rule to allow
@@ -76,6 +77,21 @@ test('the foundation permissions are seeded with resource.action names', functio
         'posts.create',
         'posts.update',
         'posts.delete',
+
+        'postcategories.view',
+        'postcategories.create',
+        'postcategories.update',
+        'postcategories.delete',
+
+        'events.view',
+        'events.create',
+        'events.update',
+        'events.delete',
+
+        'eventcategories.view',
+        'eventcategories.create',
+        'eventcategories.update',
+        'eventcategories.delete',
 
         'locations.view',
         'locations.create',

@@ -49,7 +49,7 @@ class MediaController extends Controller
      * sizes inside the request is what makes an upload time out, and a timed-out
      * upload tells the uploader nothing about whether it worked.
      */
-    public function store(StoreMediaRequest $request): RedirectResponse
+    public function store(StoreMediaRequest $request): RedirectResponse|JsonResponse
     {
         $upload = $request->file('file');
 
@@ -75,6 +75,35 @@ class MediaController extends Controller
         // Dispatched after the row exists, and outside any transaction, so a
         // worker can never pick the job up before the commit it depends on.
         GenerateImageVariants::dispatch($media->getKey());
+
+        /*
+         * Two responses from one endpoint, chosen by what the caller asks for.
+         *
+         * Until Phase 05 nothing in the interface uploaded anything, so the
+         * redirect below was the whole of it. The article form and the agenda
+         * form now upload from inside a page, and a redirect would navigate the
+         * admin away from the form they are halfway through — so the picker
+         * asks for JSON and gets the row id back to poll.
+         *
+         * The redirect stays because it is the right answer for a plain form
+         * post, and D-24's promise that the browsing UI arrives with the first
+         * module that needs it is now that module.
+         *
+         * @see docs/DECISIONS.md D-24, D-46
+         */
+        if ($request->expectsJson()) {
+            return response()->json([
+                'media' => [
+                    'id' => $media->getKey(),
+                    'status' => $media->status->value,
+                    'error_message' => $media->error_message,
+                    'alt_text' => $media->alt_text,
+                    'width' => $media->width,
+                    'height' => $media->height,
+                    'variants' => [],
+                ],
+            ], 201);
+        }
 
         Inertia::flash('toast', [
             'type' => 'success',

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Link, type InertiaLinkProps } from '@inertiajs/react';
 import {
+    CalendarClock,
     CalendarDays,
     ChevronRight,
     Download,
+    Globe,
     Images,
     LayoutGrid,
+    ListChecks,
     Mail,
-    Newspaper,
     Settings,
     Sparkles,
     UserCog,
@@ -42,6 +44,10 @@ import { index as locationsIndex } from '@/routes/locations';
 import { index as specialMassesIndex } from '@/routes/special-masses';
 import { index as scheduleNoticesIndex } from '@/routes/schedule-notices';
 import { edit as editProfile } from '@/routes/profile';
+import { list as postsList } from '@/routes/posts';
+import { index as postCategoriesIndex } from '@/routes/post-categories';
+import { list as eventsList } from '@/routes/events';
+import { index as eventCategoriesIndex } from '@/routes/event-categories';
 
 import { useCurrentUrl } from '@/hooks/use-current-url';
 
@@ -61,10 +67,6 @@ const CONTENT_ENTRIES: Entry[] = [
         icon: CalendarDays,
         children: [
             {
-                title: 'Lokasi',
-                href: locationsIndex(),
-            },
-            {
                 title: 'Misa Rutin',
                 href: massSchedulesList(),
             },
@@ -78,8 +80,17 @@ const CONTENT_ENTRIES: Entry[] = [
             },
         ],
     },
-    { title: 'Berita', icon: Newspaper },
-    { title: 'Agenda', icon: CalendarDays },
+    { title: 'Berita', href: postsList(), icon: Globe },
+    { title: 'Agenda', href: eventsList(), icon: CalendarClock },
+    {
+        title: 'Master Data',
+        icon: ListChecks,
+        children: [
+            { title: 'Lokasi', href: locationsIndex() },
+            { title: 'Kategori Berita', href: postCategoriesIndex() },
+            { title: 'Kategori Agenda', href: eventCategoriesIndex() },
+        ],
+    },
     { title: 'Pelayanan', icon: Sparkles },
     { title: 'Komunitas', icon: Users },
     { title: 'Galeri', icon: Images },

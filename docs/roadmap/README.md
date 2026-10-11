@@ -148,59 +148,36 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 4 — Mass Schedule
+### Phase 5 — Berita & Agenda
 
-Phase ini membangun modul Jadwal Misa: empat tabel (`locations`,
-`mass_schedules`, `special_masses`, `schedule_notices`), CRUD admin di empat URL
-PRD §5.2, halaman publik `/jadwal-misa`, dan `NextMassResolver` (MASS-08).
+Phase ini membangun dua modul publik: **Berita & Artikel** (`post_categories`,
+`posts`) dan **Agenda Kegiatan** (`event_categories`, `events`), dengan CRUD
+admin di empat URL PRD §5.2 plus dua halaman kategori, halaman publik
+`/berita` dan `/agenda`, unduhan `.ics`, dan command
+`posts:publish-scheduled`.
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-04-mass-schedule.md
-plan-implementation/plan-phase-04-mass-schedule.md
+roadmap/phase-05-news-&-agenda.md
+plan-implementation/plan-phase-05-news-agenda.md
 ```
 
-Phase 1 sampai Phase 3 selesai lebih dahulu. Keputusan Phase 04 tercatat di
-`docs/DECISIONS.md` D-34 sampai D-38.
+Phase 1 sampai Phase 4 selesai lebih dahulu. Keputusan Phase 05 tercatat di
+`docs/DECISIONS.md` D-43 sampai D-47.
 
-Setelah Phase 4 selesai:
+> **Isi modul belum ada.** Tabel dan form-nya ada; artikel dan kegiatan resmi
+> paroki belum. Tidak ada seeder konten untuk Fase 05 — kategori saja yang
+> diisi, dan itu pun oleh seeder idempotent. Lihat D-34 untuk prinsip yang sama
+> pada Jadwal Misa.
+
+Setelah Phase 5 selesai:
 
 ```text
-Phase 4
+Phase 5
    ↓
-Phase 5 — News & Agenda
+Phase 6
 ```
-
-> **Isi modul belum ada.** Tabel dan form-nya ada; lokasi dan jadwal resmi paroki
-> belum. `MassScheduleDemoSeeder` sengaja hanya membuat satu lokasi placeholder
-> tanpa jadwal — lihat D-34.
 
 ---
 
-## Important Distinction
-
-**Roadmap phase ≠ workstream/task di dalam phase.**
-
-Contoh:
-
-```text
-PHASE 1 — Project Foundation
-│
-├── Baseline & Environment
-├── Laravel Foundation
-├── Database Foundation
-├── Docker
-├── RBAC Foundation
-├── Inertia + React Foundation
-├── UI Foundation
-├── Storage & Media
-├── Queue / Cache / Scheduler
-├── Testing
-├── Git Workflow
-└── Documentation
-```
-
-Item-item di atas adalah **scope/workstream internal Phase 1**, bukan phase baru.
-
-Dengan demikian, struktur proyek tetap memiliki **12 phase utama (Phase 0–11)**, sementara setiap file `phase-XX-*.md` menjelaskan pekerjaan detail dari satu phase tersebut.

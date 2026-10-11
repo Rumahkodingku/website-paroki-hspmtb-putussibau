@@ -71,11 +71,19 @@ test('the schedule does not invoke the scheduler from inside itself', function (
         ->not->toContain('schedule:work');
 });
 
-test('no business command is scheduled during phase 01', function () {
-    // Roadmap section 25 defers PublishScheduledPosts to Phase 02 and says so
-    // explicitly.
-    expect(scheduleListing())->not->toContain('posts:publish')
-        ->not->toContain('PublishScheduledPosts');
+test('scheduled publishing runs every minute', function () {
+    // This assertion used to be the other way round: Phase 01 recorded that no
+    // business command was scheduled yet, because roadmap section 25 deferred
+    // PublishScheduledPosts. Phase 05 built it, so the prohibition became a
+    // description of what had been true rather than a rule, and a test that
+    // describes the past fails the moment the past changes.
+    //
+    // What replaces it is the part that is still true. Every minute, and not
+    // hourly on the hour: an article dated 08:00 has to be public at 08:00, and
+    // hourly is up to 59 minutes late.
+    expect(scheduleListing())
+        ->toContain('posts:publish-scheduled')
+        ->toContain('* * * * *');
 });
 
 test('schedule:list reports the scheduled task', function () {

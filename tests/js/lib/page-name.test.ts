@@ -75,8 +75,11 @@ describe('pageName', () => {
 
     it('ignores a path that is not a page at all', () => {
         expect(pageName('./components/app-sidebar.tsx')).toBeNull();
+        // A components/ directory inside a feature is the same trap one level
+        // down: the path matches the pages glob until the components segment
+        // is checked.
         expect(
-            pageName('./features/admin/jadwal-misa/components/data-table.tsx'),
+            pageName('./features/admin/jadwal-misa/components/columns.tsx'),
         ).toBeNull();
     });
 });

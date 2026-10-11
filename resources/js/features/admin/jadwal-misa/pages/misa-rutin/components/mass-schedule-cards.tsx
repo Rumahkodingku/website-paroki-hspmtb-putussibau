@@ -1,5 +1,5 @@
 import { Text } from '@/components/text';
-import { StatusBadge } from '../../../components/list-parts';
+import { StatusBadge } from '@/components/list-parts';
 import { formatWibTime } from '@/lib/datetime';
 import { formatDayName } from '@/lib/datetime';
 import type { MassScheduleRow } from '../../../types';

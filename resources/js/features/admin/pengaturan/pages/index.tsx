@@ -28,11 +28,9 @@ import type {
  * actually visits.
  */
 const RichTextEditor = lazy(() =>
-    import('@/features/admin/pengaturan/components/rich-text-editor').then(
-        (module) => ({
-            default: module.RichTextEditor,
-        }),
-    ),
+    import('@/components/rich-text-editor').then((module) => ({
+        default: module.RichTextEditor,
+    })),
 );
 
 /** Keeps the tab panel from collapsing while the editor chunk is in flight. */
