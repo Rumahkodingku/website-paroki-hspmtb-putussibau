@@ -1602,7 +1602,7 @@ NotFound : /jadwal-misa?q=<rusak> tidak 422
 | `NFR-SEO` title + description + OG                        | `Seo` yang ada; **tanpa head key baru**                                    |
 | `ADM-01` admin responsif                                  | kartu di `< md`                                                            |
 | `ADM-02` pesan validasi Bahasa Indonesia                  | `messages()` + `lang/id/validation.php` + `lang/id/mass-schedule.php`      |
-| `ADM-05` soft delete                                      | ⚠️ **Divergensi** — D-34 §1                                                |
+| `ADM-05` soft delete                                      | ✅ **Terpenuhi** — D-40 (ditambahkan setelah plan ini selesai)                   |
 | `AUTH-R1` guard `/admin/*`                                | 4 Policy + FormRequest + `EnsureAdminAccess` + F-2                         |
 | `AUTH-R6` penamaan permission                             | D-36                                                                       |
 
@@ -1642,7 +1642,8 @@ bunyinya ada di [§5.16](#516-0416-dokumentasi).
 
 | ID       | Divergensi                                                                                                          | Dampak                                                                      |
 | -------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **D-34** | Tanpa soft delete (PRD §9.5 + ADM-05); `slug`+`notes` tanpa `sort_order`; `schedule_notices` mengikuti roadmap §4.4 | ADM-05 **belum** terpenuhi untuk tabel konten ini sampai ada endpoint hapus |
+| **D-34** | Tanpa soft delete (PRD §9.5 + ADM-05); `slug`+`notes` tanpa `sort_order`; `schedule_notices` mengikuti roadmap §4.4 | Bagian 1 **digantikan D-40**; bagian 2 dan 3 tetap berlaku |
+| **D-40** | Soft delete untuk keempat tabel, empat `Route::delete`, empat permission `*.delete`, generated column pada dua unique index | Roadmap §5.6 dilanggar eksplisit; ADM-05 kini terpenuhi |
 | **D-35** | XC-C1 SHOULD ditunda                                                                                                | Tidak ada invalidasi cache yang perlu ditulis — dan tidak bisa salah        |
 | **D-36** | 12 permission satu kata                                                                                             | Mengunci `RbacFoundationTest.php:80` pada pola nama tanpa `-`               |
 | **D-37** | `is_active` field form, bukan endpoint                                                                              | `AdminAccessTest.$adminPages` tidak bertambah untuk route toggle            |
@@ -1741,6 +1742,46 @@ ketiganya tercatat di tempat kodenya berada:
 | "9 `JsonResource`" | Butuh satu trait `ResolvesNestedResources`: `whenLoaded()` mengembalikan `null` untuk relasi yang dimuat tetapi kosong, dan me-resolve `null` itu adalah error, bukan field yang absen |
 | "`has('regularMasses', 0)` counts an empty list" | A `JsonResource` serialises as `{"data": [...]}`, so an empty list counted as **one** element. Two assertions were passing without checking anything |
 | "2 enum" | Three: `MassKind` became necessary once the tie-break in MASS-08 step 4 had to be observable by a test |
+
+## 4.5 Lanjutan setelah Phase 04 — sub-menu, tabel, dan sorting (D-41)
+
+Tiga perubahan UI yang berpasangan: sidebar mendapat sub-menu, keempat daftar
+memakai `components/ui/table.tsx` di atas `@tanstack/react-table`, dan sorting
+dipindah ke server.
+
+Yang harus diketahui siapa pun yang menyentuh skema atau navigasi:
+
+- **Divergensi PRD §5.2.** `/admin/jadwal-misa` kini hanya ringkasan; daftar
+  Misa Rutin pindah ke `/admin/jadwal-misa/misa-rutin`. Ini membatalkan bagian
+  D-38 yang menahan URL lama, dan tercatat di D-41.
+- **Empat kartu pintasan dihapus** — sub-menu menggantikannya.
+- **Redirection setelah simpan** ke `mass-schedules.list`, bukan ringkasan.
+- **v9 TanStack bukan v8.** `useTable` + `tableFeatures`, dan
+  `<FlexRender cell={…} />`, bukan `flexRender(cell)`.
+- **Halaman mengecil** dari 348–451 baris menjadi 50–265; kolom, kartu, dan
+  aksi baris pindah ke komponen sendiri.
+
+## 4.4 Lanjutan setelah Phase 04 — soft delete (D-40)
+
+Rencana ini selesai tanpa endpoint hapus, dan ADM-05 tercatat sebagai
+divergensi di D-34 §1. Soft delete kemudian ditambahkan sebagai pekerjaan
+susulan: `deleted_at` di keempat tabel, empat `Route::delete`, empat
+permission `*.delete`, satu dialog konfirmasi bersama, dan
+`tests/Feature/MassSchedule/DeleteTest.php` (32 test).
+
+Bagian yang tidak boleh dilupakan siapa pun yang menyentuh skema:
+
+- **Generated column pada dua unique index.** `locations.slug` dan
+  `mass_schedules(location_id, day_of_week, start_time)` gained
+  `active_marker = IF(deleted_at IS NULL, 1, NULL)`. Menambahkan `deleted_at`
+  ke index akan lebih buruk — MySQL menganggap NULL berbeda, jadi MASS-06
+  berhenti berlaku.
+- **`Rule::unique()` perlu `->withoutTrashed()`** di dua tempat.
+- **`replicate()` menyalin kolom generated** dan MySQL menolaknya dengan error
+  3105; `DuplicateMassScheduleAction` harus melewati `active_marker`.
+- **`withCount()` pada relasi soft-delete** perlu
+  `->withoutGlobalScope(SoftDeletingScope::class)`, kalau tidak hitungan
+  "Target terhapus" selalu nol.
 
 Dan tiga bug yang **tidak** ada di rencana ini, yang tidak bisa ditangkap test
 Pest mana pun dan baru terlihat di browser. Semuanya sudah diperbaiki dan
