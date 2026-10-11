@@ -31,7 +31,6 @@ class NextMassResource extends JsonResource
             'kind' => $this->kind->value,
             'starts_at' => $this->startsAtInDisplayTimezone()->toIso8601String(),
             'name' => $this->name,
-            'language' => $this->language,
             // Resolved rather than handed over as a resource: a nested resource
             // inside an already-resolved array keeps its {"data": ...} envelope,
             // which is how nextMass.location.name becomes

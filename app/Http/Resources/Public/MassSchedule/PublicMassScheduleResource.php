@@ -31,7 +31,6 @@ class PublicMassScheduleResource extends JsonResource
             'day_of_week' => $this->day_of_week->value,
             'start_time' => substr($this->start_time, 0, 5),
             'name' => $this->name,
-            'language' => $this->language,
             'notes' => $this->notes,
             'location' => $this->nested(PublicLocationResource::class, $this->whenLoaded('location')),
         ];

@@ -40,7 +40,6 @@ trait MassScheduleValidationRules
             // the shape <input type="time"> produces.
             'start_time' => ['required', 'string', 'date_format:H:i'],
             'name' => ['required', 'string', 'max:150'],
-            'language' => ['nullable', 'string', 'max:50'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'is_active' => ['required', 'boolean'],
         ];
@@ -59,11 +58,17 @@ trait MassScheduleValidationRules
 
         return [
             'required',
+            // withoutTrashed() because a soft-deleted row still sits in the
+            // table and would otherwise hold the slot (D-40). The index was
+            // rebuilt with a generated column so that a deleted schedule frees
+            // its slot; without this the rule would say "already taken" for a
+            // slot the database is now perfectly willing to accept.
             Rule::unique('mass_schedules')
                 ->where('location_id', $input['location_id'] ?? null)
                 ->where('day_of_week', $input['day_of_week'] ?? null)
                 ->where('start_time', $this->timeForDatabase($input['start_time'] ?? null))
-                ->ignore($ignore?->getKey()),
+                ->ignore($ignore?->getKey())
+                ->withoutTrashed(),
         ];
     }
 

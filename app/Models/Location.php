@@ -9,18 +9,26 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
  * A place where masses are celebrated: the parish church, a stasi, or a chapel.
  *
- * Locations are never deleted, only deactivated. PRD 7.3 admin says
- * "nonaktifkan, tidak hapus", roadmap 5.6 forbids a delete endpoint, and 4.5
- * requires that a location with schedules cannot be removed. is_active is
- * therefore the whole lifecycle: MASS-03 requires new schedules to point at an
- * active one, and MASS-07 requires the schedules behind a deactivated location
- * to disappear from the public site.
+ * Two ways to take a location off the site, and they are not the same thing.
+ * Deactivating is the everyday one and the only one a secretary needs: PRD 7.3
+ * admin says "nonaktifkan, tidak hapus", MASS-03 requires new schedules to
+ * point at an active location, and MASS-07 requires the schedules behind a
+ * deactivated one to disappear from the public site.
+ *
+ * Deleting is the other, added later and reserved for super admins — see D-40,
+ * which superseded D-34 section 1 and closed the ADM-05 divergence. It is a
+ * soft delete, so the row and its slug survive in the table; the deletion is
+ * simply hidden from every query. Roadmap 4.5 still holds and is enforced in
+ * LocationController::destroy(): a location with schedules or special masses
+ * cannot be deleted, because both of those tables point here ON DELETE
+ * RESTRICT.
  *
  * @property int $id
  * @property string $name
@@ -34,6 +42,7 @@ use Illuminate\Support\Collection;
  * @property bool $is_active
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read Collection<int, MassSchedule> $massSchedules
  * @property-read Collection<int, SpecialMass> $specialMasses
  * @property-read Collection<int, ScheduleNotice> $scheduleNotices
@@ -53,6 +62,8 @@ class Location extends Model
 {
     /** @use HasFactory<LocationFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * @return HasMany<MassSchedule, $this>

@@ -122,7 +122,6 @@ class NextMassResolver
             $candidates[] = NextMass::regular(
                 startsAt: $this->nextOccurrence($schedule, $moment),
                 name: $schedule->name,
-                language: $schedule->language,
                 location: $schedule->location,
                 massScheduleId: $schedule->getKey(),
             );

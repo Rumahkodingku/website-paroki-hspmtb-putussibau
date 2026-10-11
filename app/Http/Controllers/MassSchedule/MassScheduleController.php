@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MassSchedule;
 
 use App\Actions\MassSchedule\DuplicateMassScheduleAction;
 use App\Concerns\MassScheduleFormMeta;
+use App\Concerns\SortsAdminList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassSchedule\DuplicateMassScheduleRequest;
 use App\Http\Requests\MassSchedule\StoreMassScheduleRequest;
@@ -12,8 +13,6 @@ use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Http\Resources\MassSchedule\MassScheduleResource;
 use App\Models\Location;
 use App\Models\MassSchedule;
-use App\Models\ScheduleNotice;
-use App\Models\SpecialMass;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -42,11 +41,17 @@ use Inertia\Response;
 class MassScheduleController extends Controller
 {
     use MassScheduleFormMeta;
+    use SortsAdminList;
 
     /**
-     * The module summary and the recurring-mass list.
+     * The recurring-mass list.
+     *
+     * Filtering and sorting both live in the URL rather than in component
+     * state, per ARCHITECTURE.md Part B section 6: a shareable admin URL
+     * survives a reload for free, and the back button steps through changes the
+     * way an admin expects.
      */
-    public function index(Request $request): Response
+    public function misaRutin(Request $request): Response
     {
         Gate::authorize('viewAny', MassSchedule::class);
 
@@ -56,36 +61,66 @@ class MassScheduleController extends Controller
 
         $massSchedules = MassSchedule::query()
             ->with('location')
+            // Joined rather than filtered through whereHas because "Lokasi" is a
+            // sortable column and ORDER BY a joined column is not something
+            // whereHas can express. Many-to-one, so no row is duplicated.
+            ->leftJoin('locations', 'locations.id', '=', 'mass_schedules.location_id')
+            // Before withCount(), not after. withCount() adds its count as an
+            // extra select expression, and a later select() replaces the whole
+            // list — so putting this below the counts drops them silently and
+            // the delete dialog reads an absent field as "nothing points here".
+            // Nothing fails; the number is simply always zero.
+
             // Grouped by day with Sunday first, because the public page groups
             // them that way and an admin comparing the two should not have to
             // remember which order this one used.
             ->when($search !== '', fn (Builder $query) => $query
                 ->where(function (Builder $inner) use ($search): void {
-                    $inner->where('name', 'like', "%{$search}%")
-                        ->orWhereHas('location', fn (Builder $locations) => $locations
-                            ->where('name', 'like', "%{$search}%"));
+                    $inner->where('mass_schedules.name', 'like', "%{$search}%")
+                        ->orWhere('locations.name', 'like', "%{$search}%");
                 }))
-            ->when($locationId !== '', fn (Builder $query) => $query->where('location_id', $locationId))
+            ->select('mass_schedules.*')
+            ->when($locationId !== '', fn (Builder $query) => $query->where('mass_schedules.location_id', $locationId))
             // Anything other than 'active' or 'inactive' is left alone rather
             // than defaulted, so a stray ?status= is not silently a filter.
             ->when(in_array($status, ['active', 'inactive'], true),
-                fn (Builder $query) => $query->where('is_active', $status === 'active'))
-            ->orderBy('day_of_week')
-            ->orderBy('start_time')
-            ->paginate(15)
+                fn (Builder $query) => $query->where('mass_schedules.is_active', $status === 'active'))
+            // How many notices point here, so the delete dialog can say what
+            // stops being published. See D-40.
+            ->withCount('scheduleNotices');
+
+        $massSchedules = $this->applyAdminSort(
+            $massSchedules,
+            $request,
+            [
+                'name' => 'mass_schedules.name',
+                'day_of_week' => 'mass_schedules.day_of_week',
+                'start_time' => 'mass_schedules.start_time',
+                'location' => 'locations.name',
+                'is_active' => 'mass_schedules.is_active',
+            ],
+            // Grouped by day with Sunday first, because the public page groups
+            // them that way and an admin comparing the two should not have to
+            // remember which order this one used.
+            [
+                ['mass_schedules.day_of_week', 'asc'],
+                ['mass_schedules.start_time', 'asc'],
+            ],
+        )->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/jadwal-misa', [
+        return Inertia::render('admin/jadwal-misa/misa-rutin/index', [
             'massSchedules' => MassScheduleResource::collection($massSchedules),
             'locations' => array_values(
                 LocationOptionResource::collection($this->activeLocations())->resolve()
             ),
-            'stats' => self::stats(),
             ...$this->formMeta(),
             'filters' => [
                 'search' => $search,
                 'location_id' => $locationId,
                 'status' => $status,
+                'sort' => $request->string('sort')->toString(),
+                'direction' => $request->string('direction')->toString(),
             ],
         ]);
     }
@@ -112,7 +147,7 @@ class MassScheduleController extends Controller
     {
         MassSchedule::create($request->massSchedulePayload());
 
-        return to_route('mass-schedules.index')
+        return to_route('mass-schedules.list')
             ->with('success', __('Jadwal misa rutin berhasil ditambahkan.'));
     }
 
@@ -143,7 +178,7 @@ class MassScheduleController extends Controller
     {
         $massSchedule->update($request->massSchedulePayload());
 
-        return to_route('mass-schedules.index')
+        return to_route('mass-schedules.list')
             ->with('success', __('Jadwal misa rutin berhasil diperbarui.'));
     }
 
@@ -178,23 +213,27 @@ class MassScheduleController extends Controller
             return back()->with('error', __('Sudah ada jadwal pada lokasi, hari, dan jam tersebut.'));
         }
 
-        return to_route('mass-schedules.index')
+        return to_route('mass-schedules.list')
             ->with('success', __('Jadwal berhasil diduplikasi ke lokasi tujuan.'));
     }
 
     /**
-     * The four numbers the summary shows.
+     * Delete a recurring mass, softly.
      *
-     * @return array{active_mass_schedules: int, active_locations: int, upcoming_special_masses: int, visible_notices: int}
+     * Nothing blocks this one: a mass schedule has no children of its own. What
+     * can be pointing at it is a notice, and that does not stop the delete -
+     * the notice keeps its foreign key and simply stops appearing on the public
+     * page, because its target is gone (D-40). The admin list shows a badge for
+     * exactly that case so it is not a silent loss.
      */
-    public static function stats(): array
+    public function destroy(MassSchedule $massSchedule): RedirectResponse
     {
-        return [
-            'active_mass_schedules' => MassSchedule::query()->active()->count(),
-            'active_locations' => Location::query()->active()->count(),
-            'upcoming_special_masses' => SpecialMass::query()->upcoming()->count(),
-            'visible_notices' => ScheduleNotice::query()->currentlyVisible()->count(),
-        ];
+        Gate::authorize('delete', $massSchedule);
+
+        $massSchedule->delete();
+
+        return to_route('mass-schedules.list')
+            ->with('success', __('Jadwal misa rutin berhasil dihapus.'));
     }
 
     /**

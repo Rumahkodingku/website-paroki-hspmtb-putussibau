@@ -41,7 +41,6 @@ export type PublicMassSchedule = {
     /** "07:30" — a wall clock, never a datetime (PRD D-02). */
     start_time: string;
     name: string;
-    language: string | null;
     notes: string | null;
     location: PublicLocation;
 };
@@ -71,7 +70,6 @@ export type NextMass = {
     /** ISO 8601 with an offset, already in the display timezone. */
     starts_at: string;
     name: string;
-    language: string | null;
     location: PublicLocation;
 };
 

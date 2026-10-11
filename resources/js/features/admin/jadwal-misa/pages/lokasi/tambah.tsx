@@ -8,20 +8,8 @@ import {
 import {
     LocationForm,
     emptyLocationFormData,
-} from '../../components/location-form';
+} from './components/location-form';
 import type { FormMeta } from '../../types';
-
-/*
- * /admin/lokasi/tambah — the create form.
- *
- * The form component is shared with the edit page, so this file is only the
- * page: the props it needs, the endpoint it posts to, and the layout it sits
- * in. ARCHITECTURE.md Part B section 3 says a page is thin on purpose.
- *
- * Imports reach two levels up because the component lives at the feature root
- * while the page lives at pages/lokasi/ — the same shape as
- * features/admin/akun/pages/profile.tsx importing from components/.
- */
 
 type Props = Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'types'>;
 
@@ -30,9 +18,13 @@ export default function Create({ labels, hints, statuses, types }: Props) {
         <>
             <Head title="Tambah Lokasi" />
 
-            <Heading title="Tambah Lokasi" variant="small" />
-
             <div className="p-6">
+                <Heading
+                    title="Tambah Lokasi"
+                    description="Tambahkan lokasi jadwal misa disini"
+                    variant="default"
+                />
+
                 <LocationForm
                     initial={emptyLocationFormData()}
                     labels={labels}

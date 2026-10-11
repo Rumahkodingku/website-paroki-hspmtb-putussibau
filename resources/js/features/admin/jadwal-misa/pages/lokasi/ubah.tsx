@@ -10,31 +10,13 @@ import {
 import {
     LocationForm,
     type LocationFormInstance,
-} from '../../components/location-form';
+} from './components/location-form';
 import type { FormMeta, LocationRow } from '../../types';
-
-/*
- * /admin/lokasi/{location}/ubah — the edit form.
- *
- * One thing happens here that the shared form does not: a save that would
- * switch an active location off while its schedules are still active asks
- * first (MASS-07).
- *
- * The dialog is a courtesy, not the guarantee. If the browser never asked, those
- * schedules would still stop being published — Location::scopeActive and
- * MassSchedule::scopeActive decide that on the server, which is what makes
- * MASS-07 hold for a request that skipped this form entirely. The dialog exists
- * so the admin is not surprised, not so the rule is enforced.
- *
- * is_active is an ordinary field rather than a separate endpoint (D-6): nothing
- * is deleted in this module, so deactivating is the whole lifecycle.
- */
 
 type Props = {
     location: LocationRow;
 } & Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'types'>;
 
-/** The submitted callback, held so the dialog can run it on confirmation. */
 type PendingSubmit = { submit: () => void };
 
 export default function Edit({
@@ -51,11 +33,13 @@ export default function Edit({
 
     return (
         <>
-            <Head title={`Ubah ${location.name}`} />
-
-            <Heading title={`Ubah ${location.name}`} variant="small" />
+            <Head title={`Ubah Data Lokasi`} />
 
             <div className="p-6">
+                <Heading
+                    title={`Ubah Data Lokasi`}
+                    description={`Lengkapi form untuk update data lokasi ${location.name}`}
+                />
                 <LocationForm
                     initial={{
                         name: location.name,

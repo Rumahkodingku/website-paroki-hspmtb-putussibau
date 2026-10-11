@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -27,11 +28,11 @@ use Illuminate\Support\Collection;
  * @property DayOfWeek $day_of_week
  * @property string $start_time
  * @property string $name
- * @property string|null $language
  * @property string|null $notes
  * @property bool $is_active
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read Location $location
  * @property-read Collection<int, ScheduleNotice> $scheduleNotices
  */
@@ -40,7 +41,6 @@ use Illuminate\Support\Collection;
     'day_of_week',
     'start_time',
     'name',
-    'language',
     'notes',
     'is_active',
 ])]
@@ -48,6 +48,8 @@ class MassSchedule extends Model
 {
     /** @use HasFactory<MassScheduleFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * @return BelongsTo<Location, $this>

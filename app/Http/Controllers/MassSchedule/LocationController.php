@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\MassSchedule;
 
 use App\Concerns\MassScheduleFormMeta;
+use App\Concerns\SortsAdminList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassSchedule\StoreLocationRequest;
 use App\Http\Requests\MassSchedule\UpdateLocationRequest;
@@ -15,22 +16,11 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Admin CRUD for locations, at /admin/lokasi.
- *
- * There is no destroy method and no delete route. PRD 7.3 says the admin
- * "nonaktifkan, tidak hapus", roadmap 5.6 forbids a permanent-delete endpoint
- * while deactivation covers the need, and roadmap 4.5 forbids removing a
- * location that still has schedules. is_active is the whole lifecycle. See
- * D-34.
- */
 class LocationController extends Controller
 {
     use MassScheduleFormMeta;
+    use SortsAdminList;
 
-    /**
-     * The location list.
-     */
     public function index(Request $request): Response
     {
         Gate::authorize('viewAny', Location::class);
@@ -39,32 +29,43 @@ class LocationController extends Controller
         $status = $request->string('status')->toString();
 
         $locations = Location::query()
-            // active_schedules_count is what MASS-07's confirmation dialog reads.
-            // Counting it here rather than in the resource keeps the query in one
-            // place and the payload in the other.
             ->withCount(['massSchedules as active_schedules_count' => fn (Builder $query) => $query
                 ->where('is_active', true)])
+            ->withCount('massSchedules')
+            ->withCount('specialMasses')
+            ->withCount('scheduleNotices')
             ->when($search !== '', fn (Builder $query) => $query
-                ->where('name', 'like', "%{$search}%"))
-            ->when(in_array($status, ['active', 'inactive'], true),
-                fn (Builder $query) => $query->where('is_active', $status === 'active'))
-            ->orderBy('name')
-            ->paginate(15)
+                ->where('locations.name', 'like', "%{$search}%"))
+            ->when(
+                in_array($status, ['active', 'inactive'], true),
+                fn (Builder $query) => $query->where('locations.is_active', $status === 'active')
+            );
+
+        $locations = $this->applyAdminSort(
+            $locations,
+            $request,
+            [
+                'name' => 'locations.name',
+                'slug' => 'locations.slug',
+                'type' => 'locations.type',
+                'is_active' => 'locations.is_active',
+            ],
+            [['locations.name', 'asc']],
+        )->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/jadwal-misa/lokasi', [
+        return Inertia::render('admin/jadwal-misa/lokasi/index', [
             'locations' => LocationResource::collection($locations),
             ...$this->formMeta(),
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'sort' => $request->string('sort')->toString(),
+                'direction' => $request->string('direction')->toString(),
             ],
         ]);
     }
 
-    /**
-     * The create form.
-     */
     public function create(): Response
     {
         Gate::authorize('create', Location::class);
@@ -72,9 +73,6 @@ class LocationController extends Controller
         return Inertia::render('admin/jadwal-misa/lokasi/tambah', $this->formMeta());
     }
 
-    /**
-     * Store a new location.
-     */
     public function store(StoreLocationRequest $request): RedirectResponse
     {
         Location::create($request->locationPayload());
@@ -83,9 +81,6 @@ class LocationController extends Controller
             ->with('success', __('Lokasi berhasil ditambahkan.'));
     }
 
-    /**
-     * The edit form.
-     */
     public function edit(Location $location): Response
     {
         Gate::authorize('update', $location);
@@ -96,21 +91,62 @@ class LocationController extends Controller
         ]);
     }
 
-    /**
-     * Save a location.
-     *
-     * is_active travels in the payload rather than having its own endpoint
-     * (D-6). The consequence worth knowing: turning a location off is an ordinary
-     * update, so the confirmation MASS-07 asks for is a frontend concern. The
-     * backend guarantee is not the dialog — it is that MassSchedule::scopeActive
-     * and Location::scopeActive hide the location and its schedules from the
-     * public page whatever the client does.
-     */
     public function update(UpdateLocationRequest $request, Location $location): RedirectResponse
     {
         $location->update($request->locationPayload());
 
         return to_route('locations.index')
             ->with('success', __('Lokasi berhasil diperbarui.'));
+    }
+
+    public function destroy(Location $location): RedirectResponse
+    {
+        Gate::authorize('delete', $location);
+
+        $schedules = $location->massSchedules()->count();
+        $specialMasses = $location->specialMasses()->count();
+
+        if ($schedules > 0 || $specialMasses > 0) {
+            return to_route('locations.index')->withErrors([
+                'location' => $this->occupiedMessage($schedules, $specialMasses),
+            ]);
+        }
+
+        $location->delete();
+
+        return to_route('locations.index')
+            ->with('success', __('Lokasi berhasil dihapus.'));
+    }
+
+    /**
+     * The refusal, naming what is in the way.
+     *
+     * Two separate counts because an admin who is told "this location has
+     * schedules" and then finds a special mass as well has learned nothing they
+     * can act on.
+     */
+    private function occupiedMessage(int $schedules, int $specialMasses): string
+    {
+        $parts = [];
+
+        if ($schedules > 0) {
+            $parts[] = trans_choice(
+                '{1} :count jadwal misa rutin|[2,*] :count jadwal misa rutin',
+                $schedules,
+                ['count' => $schedules]
+            );
+        }
+
+        if ($specialMasses > 0) {
+            $parts[] = trans_choice(
+                '{1} :count misa khusus|[2,*] :count misa khusus',
+                $specialMasses,
+                ['count' => $specialMasses]
+            );
+        }
+
+        return __('Lokasi tidak dapat dihapus karena masih memiliki :items. Hapus atau nonaktifkan isinya terlebih dahulu.', [
+            'items' => implode(' dan ', $parts),
+        ]);
     }
 }

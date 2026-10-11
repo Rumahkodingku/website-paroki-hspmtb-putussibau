@@ -43,7 +43,12 @@ trait LocationValidationRules
                 'string',
                 'alpha_dash',
                 'max:180',
-                Rule::unique('locations', 'slug')->ignore($ignore?->getKey()),
+                // withoutTrashed() for the reason in MassScheduleValidationRules:
+                // a deleted location keeps its slug in the table, and reusing
+                // that slug is legitimate now. See D-40.
+                Rule::unique('locations', 'slug')
+                    ->ignore($ignore?->getKey())
+                    ->withoutTrashed(),
             ],
             'type' => ['required', Rule::enum(LocationType::class)],
             'address' => ['nullable', 'string', 'max:2000'],

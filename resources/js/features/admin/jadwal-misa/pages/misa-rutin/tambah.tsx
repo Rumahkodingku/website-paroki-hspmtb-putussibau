@@ -8,12 +8,8 @@ import {
 import {
     MassScheduleForm,
     emptyMassScheduleFormData,
-} from '../../components/mass-schedule-form';
+} from './components/mass-schedule-form';
 import type { FormMeta, LocationOption } from '../../types';
-
-/*
- * /admin/jadwal-misa/tambah — the create form for a recurring mass.
- */
 
 type Props = Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'days'> & {
     locations: LocationOption[];
@@ -30,9 +26,12 @@ export default function Create({
         <>
             <Head title="Tambah Jadwal Misa Rutin" />
 
-            <Heading title="Tambah Jadwal Misa Rutin" variant="small" />
-
             <div className="p-6">
+                <Heading
+                    title="Tambah Jadwal Misa Rutin"
+                    description="Lengkapi form untuk menambahkan jadwal misa rutin"
+                />
+
                 <MassScheduleForm
                     initial={emptyMassScheduleFormData()}
                     labels={labels}

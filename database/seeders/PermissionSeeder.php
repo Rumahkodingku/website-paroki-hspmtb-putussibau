@@ -74,25 +74,33 @@ class PermissionSeeder extends Seeder
          * on purpose; doing it by accident while adding a module is not one.
          * See D-36.
          *
-         * No delete ability, for the reason there is no delete endpoint. A
-         * permission guarding a route that does not exist is the exact thing
-         * D-24 criticises.
+         *
+         * The delete abilities came with the soft-delete endpoints added in
+         * D-40, which also closed the ADM-05 divergence D-34 section 1 had
+         * accepted. They are what makes deletion a super-admin-only action
+         * without hard-coding a role check into four policies: super_admin is
+         * the only role on the MVP, so today the two are the same, and the day a
+         * second role exists this is the line to move. See D-36.
          */
         'locations.view',
         'locations.create',
         'locations.update',
+        'locations.delete',
 
         'massschedules.view',
         'massschedules.create',
         'massschedules.update',
+        'massschedules.delete',
 
         'specialmasses.view',
         'specialmasses.create',
         'specialmasses.update',
+        'specialmasses.delete',
 
         'schedulenotices.view',
         'schedulenotices.create',
         'schedulenotices.update',
+        'schedulenotices.delete',
     ];
 
     /**

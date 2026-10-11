@@ -21,7 +21,6 @@ function mass(overrides: Partial<PublicMassSchedule> = {}): PublicMassSchedule {
         day_of_week: 0,
         start_time: '07:30',
         name: 'Misa Minggu Pagi',
-        language: null,
         notes: null,
         location: {
             id: 1,
@@ -71,14 +70,6 @@ describe('MassScheduleCard', () => {
 
     it('shows the location name', () => {
         expect(renderCard()).toHaveTextContent('Gereja Paroki');
-    });
-
-    it('shows the language when the mass is not in Indonesian', () => {
-        expect(renderCard({ language: 'Latin' })).toHaveTextContent('Latin');
-    });
-
-    it('leaves no dangling separator when there is no language', () => {
-        expect(renderCard().textContent).not.toContain('·');
     });
 
     it('shows the notes when the parish wrote any', () => {

@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import type { LocationType } from '../types';
+import type { LocationType } from '../../../types';
 import {
     ActiveSwitch,
     ChoiceSelect,
@@ -7,18 +7,8 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from './form-fields';
+} from '../../../components/form-fields';
 
-/*
- * The location form, shared by the create and edit pages.
- *
- * Shared because the two must accept exactly the same payload: a form the create
- * page accepts and the edit page rejects is a record that can be added and never
- * corrected. The submit handler is passed in rather than the endpoint, so this
- * component does not know which of the two it is rendering.
- */
-
-/** The useForm handle a submit handler receives. */
 export type LocationFormInstance = ReturnType<typeof useForm<LocationFormData>>;
 
 export type LocationFormData = {
@@ -72,9 +62,6 @@ export function LocationForm({
 
     return (
         <form
-            // noValidate: the browser's own bubbles would swallow the submit
-            // and the Indonesian messages from the server would never appear.
-            // See D-39.
             noValidate
             onSubmit={(event) => {
                 event.preventDefault();
@@ -88,11 +75,13 @@ export function LocationForm({
                         id="location-name"
                         label={labels.name ?? 'Nama lokasi'}
                         error={form.errors.name}
+                        required
                     >
                         <FormInput
                             id="location-name"
                             value={form.data.name}
                             onChange={(value) => form.setData('name', value)}
+                            placeholder="Masukkan nama lokasi misa"
                             required
                         />
                     </Field>
@@ -103,11 +92,13 @@ export function LocationForm({
                     label={labels.slug ?? 'Slug'}
                     hint={hints.slug}
                     error={form.errors.slug}
+                    required
                 >
                     <FormInput
                         id="location-slug"
                         value={form.data.slug}
                         onChange={(value) => form.setData('slug', value)}
+                        placeholder="Masukkan slug disini"
                         required
                     />
                 </Field>
@@ -117,6 +108,7 @@ export function LocationForm({
                     label={labels.type ?? 'Jenis lokasi'}
                     hint={hints.type}
                     error={form.errors.type}
+                    required
                 >
                     <ChoiceSelect
                         id="location-type"
@@ -133,19 +125,18 @@ export function LocationForm({
                         id="location-address"
                         label={labels.address ?? 'Alamat'}
                         error={form.errors.address}
+                        required
                     >
                         <FormTextarea
                             id="location-address"
                             rows={2}
                             value={form.data.address}
                             onChange={(value) => form.setData('address', value)}
+                            placeholder="Masukkan alamat lokasi misa"
                         />
                     </Field>
                 </div>
 
-                {/* The pairing error is reported on both fields: the backend
-                    rejects the pair, and an admin who only filled latitude has
-                    to be told where the missing half is. */}
                 <Field
                     id="location-latitude"
                     label={labels.latitude ?? 'Lintang'}
@@ -157,6 +148,7 @@ export function LocationForm({
                         inputMode="decimal"
                         value={form.data.latitude}
                         onChange={(value) => form.setData('latitude', value)}
+                        placeholder="Masukkan lokasi lintang"
                     />
                 </Field>
 
@@ -171,6 +163,7 @@ export function LocationForm({
                         inputMode="decimal"
                         value={form.data.longitude}
                         onChange={(value) => form.setData('longitude', value)}
+                        placeholder="Masukkan lokasi bujur disini"
                     />
                 </Field>
 
@@ -180,6 +173,7 @@ export function LocationForm({
                         label={labels.maps_url ?? 'URL Google Maps'}
                         hint={hints.maps_url}
                         error={form.errors.maps_url}
+                        required
                     >
                         <FormInput
                             id="location-maps-url"
@@ -188,6 +182,7 @@ export function LocationForm({
                             onChange={(value) =>
                                 form.setData('maps_url', value)
                             }
+                            placeholder="Masukkan URL Google Maps disini"
                         />
                     </Field>
                 </div>
@@ -203,6 +198,7 @@ export function LocationForm({
                             rows={2}
                             value={form.data.notes}
                             onChange={(value) => form.setData('notes', value)}
+                            placeholder="Masukkan catatan tambahan disini"
                         />
                     </Field>
                 </div>
@@ -212,8 +208,7 @@ export function LocationForm({
                 id="location-active"
                 checked={form.data.is_active}
                 onChange={(checked) => form.setData('is_active', checked)}
-                activeLabel={statuses.active ?? 'Aktif'}
-                inactiveLabel={statuses.inactive ?? 'Nonaktif'}
+                activeLabel={statuses.active ?? 'Aktifkan lokasi'}
             />
 
             <FormActions

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\MassSchedule;
 
 use App\Concerns\MassScheduleFormMeta;
+use App\Concerns\SortsAdminList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassSchedule\StoreScheduleNoticeRequest;
 use App\Http\Requests\MassSchedule\UpdateScheduleNoticeRequest;
@@ -15,6 +16,7 @@ use App\Models\MassSchedule;
 use App\Models\ScheduleNotice;
 use App\Models\SpecialMass;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -35,6 +37,7 @@ use Inertia\Response;
 class ScheduleNoticeController extends Controller
 {
     use MassScheduleFormMeta;
+    use SortsAdminList;
 
     public function index(Request $request): Response
     {
@@ -51,19 +54,57 @@ class ScheduleNoticeController extends Controller
                     ->orWhere('message', 'like', "%{$search}%")))
             ->when(in_array($status, ['draft', 'scheduled', 'visible', 'expired'], true),
                 fn (Builder $query) => $this->applyStatus($query, $status))
+            // Three correlated counts rather than eager loading the targets
+            // withTrashed(). The relation would have to come back as null for a
+            // deleted row, which is indistinguishable from a notice that never
+            // had a target - and this list exists to tell those two apart
+            // (D-40). Counting is also one index lookup per row instead of three
+            // hydrated models.
+            //
+            // withoutGlobalScope() is the load-bearing part. withCount() builds
+            // the subquery from the relation, and the relation carries
+            // SoftDeletingScope - so deleted rows are already excluded by the
+            // time whereNotNull('deleted_at') runs and every count came back
+            // zero. Asking the scope to stand down first is what makes this a
+            // question about deleted rows at all.
+            ->withCount(['location as trashed_location_count' => fn (Builder $query) => $query
+                ->withoutGlobalScope(SoftDeletingScope::class)
+                ->whereNotNull('deleted_at')])
+            ->withCount(['massSchedule as trashed_mass_schedule_count' => fn (Builder $query) => $query
+                ->withoutGlobalScope(SoftDeletingScope::class)
+                ->whereNotNull('deleted_at')])
+            ->withCount(['specialMass as trashed_special_mass_count' => fn (Builder $query) => $query
+                ->withoutGlobalScope(SoftDeletingScope::class)
+                ->whereNotNull('deleted_at')]);
+        // Newest window first: the notice an admin just wrote is the one
+        // they are looking for.
+
+        $notices = $this->applyAdminSort(
+            $notices,
+            $request,
+            [
+                'title' => 'schedule_notices.title',
+                'starts_at' => 'schedule_notices.starts_at',
+                'ends_at' => 'schedule_notices.ends_at',
+                'is_active' => 'schedule_notices.is_active',
+            ],
             // Newest window first: the notice an admin just wrote is the one
-            // they are looking for.
-            ->orderByDesc('starts_at')
-            ->paginate(15)
+            // they are looking for. 'status' is a derived column (MASS-05 puts
+            // a notice in one of four states from three booleans), so there is
+            // nothing to sort it by and it is absent from the whitelist too.
+            [['schedule_notices.starts_at', 'desc']],
+        )->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/jadwal-misa/pemberitahuan', [
+        return Inertia::render('admin/jadwal-misa/pemberitahuan/index', [
             'notices' => ScheduleNoticeResource::collection($notices),
             'targets' => $this->targets(),
             ...$this->formMeta(),
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'sort' => $request->string('sort')->toString(),
+                'direction' => $request->string('direction')->toString(),
             ],
         ]);
     }
@@ -127,6 +168,22 @@ class ScheduleNoticeController extends Controller
                 ->whereNotNull('ends_at')
                 ->where('ends_at', '<', $now),
         };
+    }
+
+    /**
+     * Delete a notice.
+     *
+     * The only one of the four with no dependents at all, which is why it is
+     * also the only one that needs no warning about anything following it.
+     */
+    public function destroy(ScheduleNotice $scheduleNotice): RedirectResponse
+    {
+        Gate::authorize('delete', $scheduleNotice);
+
+        $scheduleNotice->delete();
+
+        return to_route('schedule-notices.index')
+            ->with('success', __('Pemberitahuan berhasil dihapus.'));
     }
 
     /**

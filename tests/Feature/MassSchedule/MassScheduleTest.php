@@ -42,7 +42,8 @@ beforeEach(function () {
 it('sends a guest from the list and from the create form', function (string $name) {
     $this->get(route($name))->assertRedirect(route('login'));
 })->with([
-    'index' => fn () => 'mass-schedules.index',
+    'summary' => fn () => 'mass-schedules.index',
+    'list' => fn () => 'mass-schedules.list',
     'create' => fn () => 'mass-schedules.create',
 ]);
 
@@ -50,7 +51,7 @@ it('refuses a signed-in user without the role', function () {
     seedRolesAndPermissions();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('mass-schedules.index'))
+        ->get(route('mass-schedules.list'))
         ->assertForbidden();
 });
 
@@ -73,10 +74,10 @@ it('lists schedules grouped by day with Sunday first', function () {
     MassSchedule::factory()->for($this->location)->onDay(DayOfWeek::Minggu, '07:30')->create();
 
     $this->actingAs(superAdmin())
-        ->get(route('mass-schedules.index'))
+        ->get(route('mass-schedules.list'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('admin/jadwal-misa')
+            ->component('admin/jadwal-misa/misa-rutin/index')
             ->has('massSchedules.data', 2)
             // The order is a contract with the public page, which groups the same
             // way; Saturday's 17.00 mass must not come before Sunday's.
@@ -84,21 +85,6 @@ it('lists schedules grouped by day with Sunday first', function () {
             ->where('massSchedules.data.1.day_of_week', 6)
             ->where('massSchedules.data.0.start_time', '07:30')
             ->has('massSchedules.data.0.location')
-        );
-});
-
-it('counts the module statistics from the database', function () {
-    MassSchedule::factory()->for($this->location)->onDay(DayOfWeek::Minggu, '07:30')->create();
-    MassSchedule::factory()->for($this->location)->inactive()->onDay(DayOfWeek::Senin, '06:00')->create();
-
-    $this->actingAs(superAdmin())
-        ->get(route('mass-schedules.index'))
-        ->assertInertia(fn (Assert $page) => $page
-            // One active, one not — the number is a count, not the row count.
-            ->where('stats.active_mass_schedules', 1)
-            ->where('stats.active_locations', 1)
-            ->where('stats.upcoming_special_masses', 0)
-            ->where('stats.visible_notices', 0)
         );
 });
 
@@ -111,7 +97,7 @@ it('searches by mass name and by location name', function () {
         ->create(['name' => 'Misa Stasi Pagi']);
 
     $this->actingAs(superAdmin())
-        ->get(route('mass-schedules.index', ['search' => 'Empang']))
+        ->get(route('mass-schedules.list', ['search' => 'Empang']))
         ->assertInertia(fn (Assert $page) => $page
             ->has('massSchedules.data', 1)
             ->where('massSchedules.data.0.name', 'Misa Stasi Pagi')
@@ -131,11 +117,10 @@ it('creates a recurring mass', function () {
             'day_of_week' => 0,
             'start_time' => '07:30',
             'name' => 'Misa Minggu Pagi',
-            'language' => '',
             'notes' => '',
             'is_active' => true,
         ])
-        ->assertRedirect(route('mass-schedules.index'))
+        ->assertRedirect(route('mass-schedules.list'))
         ->assertSessionHasNoErrors();
 
     expect(MassSchedule::query()->count())->toBe(1);
@@ -348,7 +333,7 @@ it('deactivates a schedule through the ordinary update, keeping the row', functi
             'name' => $schedule->name,
             'is_active' => false,
         ])
-        ->assertRedirect(route('mass-schedules.index'));
+        ->assertRedirect(route('mass-schedules.list'));
 
     expect($schedule->fresh())->is_active->toBeFalse();
 

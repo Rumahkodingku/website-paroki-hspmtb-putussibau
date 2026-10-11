@@ -1,6 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { formatWibTime } from '@/lib/datetime';
-import type { DayOfWeek, LocationOption } from '../types';
+import type { DayOfWeek, LocationOption } from '../../../types';
 import {
     ActiveSwitch,
     ChoiceSelect,
@@ -8,18 +7,8 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from './form-fields';
+} from '../../../components/form-fields';
 
-/*
- * The recurring-mass form, shared by the create and edit pages.
- *
- * The time field is type="time", so the browser hands over "HH:MM" and nothing
- * else has to parse a clock. What is deliberately absent is any timezone: the
- * value is a wall clock (PRD D-02), and the form says so next to the field so
- * nobody later "fixes" it by adding a date.
- */
-
-/** The useForm handle a submit handler receives. */
 export type MassScheduleFormInstance = ReturnType<
     typeof useForm<MassScheduleFormData>
 >;
@@ -29,7 +18,6 @@ export type MassScheduleFormData = {
     day_of_week: string;
     start_time: string;
     name: string;
-    language: string;
     notes: string;
     is_active: boolean;
 };
@@ -40,7 +28,6 @@ export function emptyMassScheduleFormData(): MassScheduleFormData {
         day_of_week: '0',
         start_time: '07:30',
         name: '',
-        language: '',
         notes: '',
         is_active: true,
     };
@@ -75,9 +62,6 @@ export function MassScheduleForm({
 
     return (
         <form
-            // noValidate: the browser's own bubbles would swallow the submit
-            // and the Indonesian messages from the server would never appear.
-            // See D-39.
             noValidate
             onSubmit={(event) => {
                 event.preventDefault();
@@ -147,19 +131,6 @@ export function MassScheduleForm({
                     />
                 </Field>
 
-                <Field
-                    id="schedule-language"
-                    label={labels.language ?? 'Bahasa'}
-                    hint={hints.language}
-                    error={form.errors.language}
-                >
-                    <FormInput
-                        id="schedule-language"
-                        value={form.data.language}
-                        onChange={(value) => form.setData('language', value)}
-                    />
-                </Field>
-
                 <div className="md:col-span-2">
                     <Field
                         id="schedule-notes"
@@ -181,7 +152,6 @@ export function MassScheduleForm({
                 checked={form.data.is_active}
                 onChange={(checked) => form.setData('is_active', checked)}
                 activeLabel={statuses.active ?? 'Aktif'}
-                inactiveLabel={statuses.inactive ?? 'Nonaktif'}
             />
 
             <FormActions
@@ -200,14 +170,6 @@ export function MassScheduleForm({
                     ) : null
                 }
             />
-
-            {/* What the schedule will look like once saved, so a wall-clock time
-                is confirmed in the same format a visitor will read it. */}
-            {form.data.start_time ? (
-                <p className="text-sm text-muted-foreground">
-                    {formatWibTime(form.data.start_time)}
-                </p>
-            ) : null}
         </form>
     );
 }
