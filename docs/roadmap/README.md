@@ -45,8 +45,8 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 0**  | Product Scope & Initial Preparation       | ✅ Done    |
 | **Phase 1**  | Project Foundation                        | ✅ Done    |
 | **Phase 2**  | Authentication & Admin Foundation         | ✅ Done    |
-| **Phase 3**  | Design System & Public Website Shell      | 🟡 Current |
-| **Phase 4**  | Mass Schedule                             | ⚪ Planned |
+| **Phase 3**  | Design System & Public Website Shell      | ✅ Done    |
+| **Phase 4**  | Mass Schedule                             | ✅ Done    |
 | **Phase 5**  | News & Agenda                             | ⚪ Planned |
 | **Phase 6**  | Parish Profile & Services                 | ⚪ Planned |
 | **Phase 7**  | Communities                               | ⚪ Planned |
@@ -148,29 +148,33 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 3 — Design System & Public Website Shell
+### Phase 4 — Mass Schedule
 
-Phase ini membangun shell antarmuka publik: design token HSPMTB, komponen
-bersama, navigasi yang bisa diklik, route publik PRD §5.1 sebagai placeholder,
-dan fondasi SEO. Modul bisnis belum disentuh.
+Phase ini membangun modul Jadwal Misa: empat tabel (`locations`,
+`mass_schedules`, `special_masses`, `schedule_notices`), CRUD admin di empat URL
+PRD §5.2, halaman publik `/jadwal-misa`, dan `NextMassResolver` (MASS-08).
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-03-design-system-&-public-website-shell.md
-plan-implementation/plan-phase-03-design-system-public-website-shell.md
+roadmap/phase-04-mass-schedule.md
+plan-implementation/plan-phase-04-mass-schedule.md
 ```
 
-Phase 1 dan Phase 2 selesai lebih dahulu. Keputusan Phase 03 tercatat di
-`docs/DECISIONS.md` D-31.
+Phase 1 sampai Phase 3 selesai lebih dahulu. Keputusan Phase 04 tercatat di
+`docs/DECISIONS.md` D-34 sampai D-38.
 
-Setelah Phase 3 selesai:
+Setelah Phase 4 selesai:
 
 ```text
-Phase 3
+Phase 4
    ↓
-Phase 4 — Mass Schedule
+Phase 5 — News & Agenda
 ```
+
+> **Isi modul belum ada.** Tabel dan form-nya ada; lokasi dan jadwal resmi paroki
+> belum. `MassScheduleDemoSeeder` sengaja hanya membuat satu lokasi placeholder
+> tanpa jadwal — lihat D-34.
 
 ---
 

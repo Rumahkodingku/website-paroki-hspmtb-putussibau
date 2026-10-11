@@ -4,6 +4,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use App\Providers\AppServiceProvider;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Permission;
@@ -113,7 +114,13 @@ test('the full chain produces the documented permission set', function () {
     $this->seed(DatabaseSeeder::class);
 
     expect(Role::query()->pluck('name')->all())->toBe([AppServiceProvider::SUPER_ADMIN])
-        ->and(Permission::query()->count())->toBe(15)
+        // Counted from the seeder rather than written down, because this number
+        // moves every time a module ships its permissions — Phase 04 added twelve
+        // for Jadwal Misa — and a hard-coded 15 here is a test that fails for an
+        // unrelated reason. PermissionSeeder::expectedCount() exists for exactly
+        // this. The names themselves are pinned in RbacFoundationTest.
+        ->and(Permission::query()->count())
+        ->toBe(app(PermissionSeeder::class)->expectedCount())
         ->and(Permission::query()->pluck('name')->all())->toContain(
             'admin.access',
             'settings.update',
@@ -142,7 +149,13 @@ test('seeding the full chain twice does not duplicate anything', function () {
 
     expect(User::query()->count())->toBe(1)
         ->and(Role::query()->count())->toBe(1)
-        ->and(Permission::query()->count())->toBe(15)
+        // Counted from the seeder rather than written down, because this number
+        // moves every time a module ships its permissions — Phase 04 added twelve
+        // for Jadwal Misa — and a hard-coded 15 here is a test that fails for an
+        // unrelated reason. PermissionSeeder::expectedCount() exists for exactly
+        // this. The names themselves are pinned in RbacFoundationTest.
+        ->and(Permission::query()->count())
+        ->toBe(app(PermissionSeeder::class)->expectedCount())
         ->and(SiteSetting::query()->count())->toBe(2);
 });
 
@@ -162,7 +175,13 @@ test('the full chain succeeds with no admin credentials configured', function ()
 
     expect(User::query()->count())->toBe(0)
         // The rest of the chain still ran.
-        ->and(Permission::query()->count())->toBe(15)
+        // Counted from the seeder rather than written down, because this number
+        // moves every time a module ships its permissions — Phase 04 added twelve
+        // for Jadwal Misa — and a hard-coded 15 here is a test that fails for an
+        // unrelated reason. PermissionSeeder::expectedCount() exists for exactly
+        // this. The names themselves are pinned in RbacFoundationTest.
+        ->and(Permission::query()->count())
+        ->toBe(app(PermissionSeeder::class)->expectedCount())
         ->and(SiteSetting::query()->count())->toBe(2);
 });
 

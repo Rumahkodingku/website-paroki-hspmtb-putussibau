@@ -59,6 +59,48 @@ class PermissionSeeder extends Seeder
         'posts.create',
         'posts.update',
         'posts.delete',
+
+        /*
+         * Jadwal Misa, added with the module in Phase 04.
+         *
+         * Three abilities per resource rather than one `mass-schedule.*` set,
+         * because D-18 and D-24 both argue that a permission nothing reads is
+         * worse than no permission at all: a named resource is what a future
+         * editor role could be granted one module at a time.
+         *
+         * All single words, deliberately. RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/, and `mass-schedules.view` would
+         * not. Relaxing that test to allow hyphens would be a small thing to do
+         * on purpose; doing it by accident while adding a module is not one.
+         * See D-36.
+         *
+         *
+         * The delete abilities came with the soft-delete endpoints added in
+         * D-40, which also closed the ADM-05 divergence D-34 section 1 had
+         * accepted. They are what makes deletion a super-admin-only action
+         * without hard-coding a role check into four policies: super_admin is
+         * the only role on the MVP, so today the two are the same, and the day a
+         * second role exists this is the line to move. See D-36.
+         */
+        'locations.view',
+        'locations.create',
+        'locations.update',
+        'locations.delete',
+
+        'massschedules.view',
+        'massschedules.create',
+        'massschedules.update',
+        'massschedules.delete',
+
+        'specialmasses.view',
+        'specialmasses.create',
+        'specialmasses.update',
+        'specialmasses.delete',
+
+        'schedulenotices.view',
+        'schedulenotices.create',
+        'schedulenotices.update',
+        'schedulenotices.delete',
     ];
 
     /**
