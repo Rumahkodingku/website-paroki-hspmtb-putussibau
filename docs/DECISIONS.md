@@ -3113,9 +3113,9 @@ validasi, `#[Fillable]`, factory, `DuplicateMassScheduleAction`, `MassScheduleRe
 `MassScheduleOptionResource`, `NextMass::$language`, `NextMassResolver`, dan
 **kedua resource publik**.
 
-Yang harus disadari: تعرض bahasa misa **dua resource publik** dan dua komponen
-kartu publik. Menghapus kolom tanpa membersihkan itu akan meninggalkan
-Vue mencari property yang selalu `undefined` — tidak error, hanya tidak pernah
+Yang harus disadari: nama bahasa ada di dua resource publik dan di dua komponen
+kartu publik. Menghapus kolom tanpa membersihkan semuanya akan meninggalkan Vue
+mencari property yang selalu `undefined` — tidak error, hanya tidak pernah
 ditampilkan, jadi tidak ada yang gagal pelan-pelan sampai ada yang mencari.
 
 Yang justru **tidak** boleh terlupa adalah whitelist sorting:
@@ -3152,3 +3152,356 @@ ditemukan dengan membaca baris `canDelete`, bukan dengan menebak.
 
 Tidak ada perubahan kode untuk bagian ini, hanya catatan supaya pertanyaan yang
 sama tidak muncul lagi.
+
+---
+
+## D-43 — Empat tabel, satu migrasi, dan tidak ada `community_id`
+
+**Konteks.** PRD §5.2 menyebut "Komunitas" sebagai modul tersendiri, dan
+beberapa pembaca mengira artikel dan kegiatan punya kolom `community_id`.
+Implementasi Phase 05 tidak membuatnya, dan ini keputusan, bukan kelalaian.
+
+**Keputusan.** Satu file migrasi
+`2026_10_11_082807_create_news_and_agenda_tables.php` membuat
+`post_categories`, `posts`, `event_categories`, `events` — semuanya dalam satu
+`up()`, dan **tanpa** `community_id` di `posts` maupun `events`.
+
+**Alasan.**
+
+1. Modul Komunitas belum ada. Tabelnya belum ada, policy-nya belum ada,
+   bentuk datanya belum ada. Menambahkan kolom FK ke tabel yang belum ada
+   berarti menebak bentuk datanya — dan tebakan yang dikunci oleh skema tidak
+   murah diubah nanti.
+2. Yang diketahui kebutuhan sebenarnya adalah "kegiatan ini milikPagung/desa/
+   lingkungan mana", dan itu **bukan** relasi ke entitas Komunitas; ia atribut
+   teks pada kegiatan; hubungannya dengan entitas Komunitas dibahas ketika
+   tabel itu benar-benar ada.
+3. Kunci skema lebih mahal daripada kolom tambahan. Kalau ternyata memang butuh
+   relasi, menambahkannya adalah migrasi baru yang tidak merusak apa pun;
+   sedangkan mencrumskannya berarti menyusun ulang empat tabel yang sudah ada
+   isinya.
+
+**Konsekuensi yang harus diketahui.** `Post` dan `Event` tidak punya relasi
+`community`. Kalau modul Komunitas dibangun dan butuh backlink ke artikel, itu
+pekerjaan Fase berikutnya, bukan yang diuncate di sini.
+
+---
+
+## D-44 — Slag unik lintas soft-delete untuk Berita dan Agenda
+
+**Konteks.** D-40 membangun indeks unik Jadwal Misa dengan kolom hasil
+`active_marker`, supaya baris yang soft-delete **melepaskan** slot-nya dan
+`Rule::unique()` memakai `->withoutTrashed()`. Phase 05 butuh pilihan yang
+berlawanan, dan kedua-duanya benar untuk modul masing-masing.
+
+**Keputusan.** `posts.slug` dan `events.slug` memakai indeks unik **polos**,
+dan `Rule::unique()` keduanya **tanpa** `withoutTrashed()`. Slag yang pernah
+dipakai artikel atau kegiatan yang sudah dihapus **tidak pernah dipakai lagi**.
+
+**Alasan.** Route publik detail mengikat berdasarkan slug:
+`/berita/{post:slug}` dan `/agenda/{event:slug}`. Kalau dua baris menjawab satu
+slug, pengikatan itu ambigu, dan URL yang sudah dibuku orang akan mulai
+menunjuk ke artikel atau kegiatan yang berbeda. Ini kebalikan dari
+`mass_schedules`, yang tidak punya route publik per jadwal — hanya filter daftar
+— sehingga melepas slotnya aman.
+
+**Konsekuensi yang harus diketahui.** Dua tabel ini **sengaja** berbeda dari
+`mass_schedules` dan `locations` di@@@@
+atas alasan yang sama. `EventTest` punya test bernama *"does not free the slug
+once removed"* yang mengunci perbedaan ini; `MassScheduleTest` mengunci yang
+sebaliknya. Kalau seseorang membuat modul berikutnya yang punya route publik per
+baris, aturan yang benar adalah **yang kedua**, dan itu harus ditulis di test-nya
+dari awal.
+
+Dua keputusan kecil lain yang diambil bersama D-44:
+
+- **Kategori** berita dan agenda mengikuti `location` / `mass_schedules`, yaitu
+  soft-delete **melepas** slug-nya. Halaman publik kategori tidak ada, jadi
+  tidak ada binding yang bisa ambigu.
+- **`is_published` pada `events`** adalah switch editorial harian, terpisah dari
+  `status`. EVT-08 meminta kegiatan yang dibatalkan tetap tampil di kalender
+  publik dengan keterangannya — jadi "diumumkan" dan "berlangsung" adalah dua
+  pertanyaan berbeda, dan `PublishedBadge` ada karenaExperience membaca baris
+  yang sama dan menghitunginya sebagai satu.
+
+---
+
+## D-45 — Slug berita/agenda tidak bisa dipakai ulang; kategori bisa
+
+Lihat D-44. Entrinya sendiri karena referenced dari `PostValidationRules` dan
+`EventValidationRules`, yang keduanya menuliskan alasannya di komentar dan
+menunjuk ke sini.
+
+---
+
+## D-46 — Dua berkas boleh memakai `dangerouslySetInnerHTML`, bukan satu
+
+**Konteks.** `ArchitectureTest` mengklaim `rich-text.tsx` adalah satu-satunya
+tempat React menyuntik HTML mentah. Phase 05 menambah JSON-LD untuk halaman
+detail agenda, dan JSON-LD tidak bisa ditulis tanpa `dangerouslySetInnerHTML`.
+
+**Keputusan.** Test-nya diganti menjadi **daftar putih dua berkas**:
+`resources/js/components/rich-text.tsx` dan
+`resources/js/features/public/agenda/components/event-json-ld.tsx`.
+
+**Alasan.** React meng-escape_children, dan blok JSON-LD yang ter-escape bukan
+JSON-LD yang valid — jadi `<script type="application/ld+json">` tidak bisa
+dibangun dengan cara lain. Isinya `JSON.stringify()` dari prop bertipe yang
+dikirim server, bukan HTML dari penyimpanan, jadi `HtmlSanitizer` tidak berlaku
+dan tidak ada yang perlu dilindungi di sini.
+
+Daftarnya ditulis eksplisit, bukan dengan pola, supaya menambahkan berkas ketiga
+menjadi suntingan yang disengaja di test dan bukan hal yang lolos diam-diam.
+Larangan tanpa pengecualian hanya membuat data terstruktur mustahil dikirim,
+dan itu cara aturan seperti ini dihapus alih-alih dipatuhi.
+
+**Konsekuensi yang harus diketahui.** JSON-LD ini hanya ada di dokumen
+setelah React hydrate, karena Inertia SSR dimatikan (D-26). Crawler yang
+menjalankan JavaScript membacanya; yang tidak, tidak melihat data terstruktur
+apa pun. Berbeda dengan tag Open Graph yang_statis per situs dan karena itu
+digandakan di `resources/views/app.blade.php`, isi JSON-LD berbeda per
+kegiatan sehingga menggandakannya berarti menarik data kegiatan ke view Blade
+tanpa hasil yang lebih baik dari yang sudah diambil Google.
+
+---
+
+## D-47 — Sidebar: Lokasi pindah ke Master Data, Berita dan Agenda tetap datar
+
+**Konteks.** Phase 04 menaruh `Lokasi` sebagai anak pertama grup Jadwal Misa.
+Setelah Agenda dibangun, jelas bahwa sebuah ruangan juga dipakai kegiatan —
+sehingga listing-nya di bawah Jadwal Misa mengklaim kepemilikan yang tidak
+dimilikinya.
+
+**Keputusan.**
+
+1. Grup baru **Master Data** memegang `Lokasi`, `Kategori Berita`, dan
+   `Kategori Agenda` — tiga tabel referensi yang diisi sekali lalu jarang
+   dipikirkan lagi.
+2. `Berita` dan `Agenda` menjadi **tautan datar** ke daftar masing-masing, bukan
+   grup.
+3. Grup Master Data **tidak punya `href`** — tidak ada halaman
+   `/admin/master-data`, dan menunjuk grup ke URL yang 404 adalah kegagalan yang
+   justru dihindari `app-sidebar.test.tsx`.
+
+**Alasan untuk (2).** Versi pertamanya membuat keduanya grup dengan satu anak,
+dan itu tautan dengan dua klik tambahan. Yang lebih buruk, "Kategori Berita"
+muncul di dua grup sekaligus — label yang sama dua kali di satu sidebar, yang
+justru ditolak test sidebar. Karena itu kategori ditarik sepenuhnya ke Master
+Data. Menu root `/admin/berita` dan `/admin/agenda` tetap bekerja sebagai
+redirect ke daftar, dan tetap menjadi URL PRD §5.2 yang ditunjuk setiap
+breadcrumb.
+
+**Konsekuensi yang harus diketahui.** Mengubah isi sidebar berarti mengubah
+`tests/js/components/app-sidebar.test.tsx` **dan** `tests/e2e/master-data.spec.ts`
+bersamaan. Keduanya menguji href, bukan hanya keberadaan menu, jadi perubahan
+navigasi selalu terlihat sebagai kegagalan test.
+
+**Direvisi oleh D-48.** Grup sidebar saja tidak cukup. Lokasi, Kategori Berita,
+dan Kategori Agenda juga pindah URL, file, dan (untuk Lokasi) controller. Lihat
+D-48.
+
+---
+
+## D-48 — Master Data: satu feature, satu prefix, dan satu bug yang tidak
+## pernah terlihat sampai ada yang mengkliknya
+
+**Konteks.** D-47 menyatukan tiga tabel referensi di sidebar. Itu menyelesaikan
+navigasi dan meninggalkan sisanya: Lokasi masih `features/admin/jadwal-misa/
+pages/lokasi/` dengan URL `/admin/jadwal-misa/lokasi`, dan kedua tabel kategori
+masih dua feature dengan dua prefix. Tiga pengelompokan berbeda untuk satu jenis
+hal.
+
+**Keputusan.**
+
+1. Ketiganya menjadi satu feature, `features/admin/master-data/`, dengan satu
+   prefix URL `/admin/master-data/{lokasi,kategori-berita,kategori-agenda}`.
+2. **Nama route tidak berubah** (`locations.*`, `post-categories.*`,
+   `event-categories.*`). Hanya URI.
+3. URL lama dipertahankan sebagai redirect 302.
+4. Hanya `LocationController` yang pindah namespace, ke
+   `App\Http\Controllers\MasterData\`.
+
+### 1. Kenapa nama route tidak ikut berubah
+
+89 test Pest memanggil `route()` alih-alih menulis URL. Nama yang tidak bergerak
+adalah nama yang tidak perlu dipikirkan siapa pun: tidak ada satu pun test itu
+yang perlu disentuh, dan tidak ada kode yang harus tahu URL-nya berubah.
+
+Yang harus menulis URL secara literal hanya `ArchitectureTest` (dua path
+halaman), `page-name.test.ts`, E2E, dan test sidebar. Itu daftar yang bisa
+dihitung, bukan daftar yang harus dicari.
+
+### 2. Kenapa hanya `LocationController`
+
+Lokasi benar-benar keluar dari modul Jadwal Misa: TIDAK ada layar Jadwal Misa
+yang memilikinya lagi, dan sebuah ruangan dipakai kegiatan agenda sama
+banyaknya dengan misa.
+
+Dua controller kategori **tidak** ikut. Berita tetap memiliki kategorinya;
+Agenda tetap memiliki kategorinya. Yang berubah adalah **URL navigasi**, bukan
+kepemilikan domain, dan routing bukan kepemilikan. Memindahkan keduanya akan
+mengosongkan `News\` dari controller kategorinya supaya URL-nya seragam — itu
+menukar satu ketidakkonsistenan nama dengan satu ketidakkonsistenan yang lebih
+besar.
+
+Satu sisa yang diterima: `LocationController` memakai trait
+`App\Concerns\MassScheduleFormMeta`, yang namanya sekarang tidak lagi cocok.
+Trait itu dipakai tiga controller lain di `MassSchedule\`, jadi mengganti
+namanya adalah empat suntingan demi kosmetik. Dibuang dari cakupan, dan dicatat
+di sini supaya bukan kejutan.
+
+### 3. `Route::redirect()` wajib punya nama
+
+Bukan dokumentasi, ini load-bearing. Redirect tanpa nama tidak punya controller
+untuk Wayfinder memfilenya, sehingga ia mendarat di modul yang dihasilkan untuk
+route bernama yang di-redirect-*dari*-nya, dan menghasilkan `export const index`
+dua kali. Build mati dengan *"Identifier 'index' has already been declared"*.
+
+Semuanya diberi nama `legacy.*` supaya menghasilkan file sendiri. Test
+`no route name is declared twice` ada karena bentuk kegagalan yang sama bisa
+datang dari arah lain: route kategori lama pernah tertinggal di berkas Berita dan
+Agenda setelah yang baru ditambahkan ke berkas Master Data.
+Laravel tidak mengeluh — registrasi terakhir menang — sehingga satu-satunya
+tempat itu terlihat adalah modul hasil generate dan build yang menolak selesai.
+
+### 4. Bug yang ditemukan: nama component tidak cocok
+
+**Gejala.** Mengklik "Kategori Berita" dan "Kategori Agenda" di sidebar tidak
+melakukan apa pun. Tidak pindah, tidak ada error, tidak ada loading.
+
+**Penyebab.** Controller mengirim Inertia `admin/kategori-berita/index`;
+frontend mendaftarkan berkas itu sebagai `admin/kategori-berita`. Aturan di
+`pageName()` membuang `index` di **akar feature** dan mempertahankannya **satu
+folder di bawahnya**:
+
+```
+features/admin/berita/pages/index.tsx             -> admin/berita          (index dibuang)
+features/admin/jadwal-misa/pages/lokasi/index.tsx -> admin/jadwal-misa/lokasi/index
+```
+
+Kategori dulu ada di `features/admin/kategori-berita/pages/index.tsx`, yaitu di
+akar feature — jadi namanya `admin/kategori-berita`. Controller meminta
+`admin/kategori-berita/index`. Kedua sisi konsisten sendiri-sendiri dan tidak
+ada yang membandingkannya.
+
+Server bahagia: `PageChunk::source()` membangun path dari nama, berkasnya ada,
+respons 200 dengan component yang belum pernah didengar sisi klien. Inertia
+melempar *"Page not found"* di console dan **tinggal di halaman lama** — itulah
+sebabnya kliknya tampak tidak melakukan apa pun.
+
+Bug yang sama membuat dua layar lain tidak bisa dibuka: daftar admin Berita
+(`admin/berita/index`) dan daftar admin Agenda (`admin/agenda/index`).
+
+**Kenapa dua test yang ada tidak menangkapnya.**
+
+- `a page keeps its folder in the name` bertanya "apakah nama ini
+  menghasilkan path?" — dan untuk kedua sisi jawabannya ya.
+- Test bahwa frontend dan Blade melihat berkas yang sama bertanya "apakah
+  finder melihat semua berkas?" — juga ya.
+
+Tidak ada yang bertanya **"apakah nama yang dikirim controller termasuk nama
+yang didaftarkan frontend?"**, dan itu pertanyaan yang berbeda.
+
+**Perbaikannya.** Setelah pindah, ketiga tabel berada di
+`master-data/pages/<nama>/`, jadi `index` dipertahankan dan namanya
+`admin/master-data/<nama>/index` — cocok persis dengan URL-nya. Struktur baru
+menyelesaikannya, bukan tambalan.
+
+**Test yang menutupnya.** `every page a controller asks for is a page the
+frontend registers` — menelusuri setiap `Inertia::render()` di
+`app/Http/Controllers`, lalu memastikan namanya ada di `PageChunk::all()`.
+Dijalankan pertama kali, test ini langsung menemukan dua halaman rusak yang
+belum dilaporkan (`admin/berita/index` dan `admin/agenda/index`).
+
+### 5. E2E: menguji href bukanlah menguji tautan
+
+E2E yang ada menguji ketiga link ini dengan `toHaveAttribute('href', ...)` —
+dan href-nya memang selalu benar. Itu celah yang membuat bug ini bisa hidup:
+sebuah sidebar yang sub-link-nya tidak bisa diklik akan lulus setiap test yang
+berhenti di atribut.
+
+`tests/e2e/master-data.spec.ts` menetapkan aturannya: setiap tautan di grup
+Master Data diuji href-nya **lalu diklik**, dan URL-nya diperiksa sesudahnya.
+Assertion-nya juga mengecek konten yang hanya dirender halaman tujuan, supaya
+navigasi yang mendarat di tempat lain gagal alih-alih lulus lewat redirect.
+
+### 6. Konsekuensi lain
+
+- `LocationRow` pindah ke `master-data/types/location.ts`;
+  `PostCategoryRow` dan `EventCategoryRow` ikut ke sana.
+- `LocationType` naik ke `types/location.ts` — ia dipakai dua feature (Master
+  Data dan filter Jadwal Misa), dan ARCHITECTURE.md Part B §4 melarang satu
+  feature mengimpor feature lain.
+- `StatusBadge` naik dari `jadwal-misa/components/list-parts.tsx` ke
+  `components/list-parts.tsx` karena kini punya konsumen di dua feature.
+- `RowActions<T>` naik ke `components/data-table.tsx` karena empat column
+  builder lintas dua feature memakainya.
+- `locationColumns` pindah ke `master-data/pages/lokasi/components/`.
+  `jadwal-misa/components/columns.tsx` menyisakan tiga builder miliknya.
+- Helper E2E `pilih()` dan `buatLokasi()` pindah ke
+  `tests/e2e/support/admin-forms.ts`, karena lebih dari satu spec memakainya.
+- Test `judul modul hanya membuka sub-menu, modul lewat breadcrumb` di
+  `mass-schedule.spec.ts` diperbaiki: ia bersandar pada breadcrumb halaman
+  **Lokasi** yang kebetulan berbunyi "Jadwal Misa", dan setelah Lokasi pindah
+  breadcrumb itu berbunyi "Master Data".
+
+---
+
+## D-49 — Semua route kembali ke satu `routes/web.php`
+
+**Konteks.** Sampai Phase 05 selesai, `routes/` berisi enam berkas:
+`web.php`, `settings.php`, `mass-schedule.php`, `news.php`, `agenda.php`, dan
+`console.php`. Pola ini meniru `settings.php` dari starter kit Laravel: tiap
+modul meng-`require` berkasnya sendiri dari bawah `web.php`.
+
+**Keputusan.** Kelimanya digabung ke `routes/web.php`. `console.php` tetap —
+itu bukan routing, itu berkas console routes yang di-`require`
+`bootstrap/app.php::withRouting(commands:)`, dan Laravel memang menunggunya.
+
+**Alasan.** Yang tadinya masuk akal (satu berkas per modul, gampang ditemukan)
+berhenti membayar dirinya sendiri pada modul ketiga:
+
+- Setiap berkas modul dibuka dengan mendeklarasikan ulang empat middleware layer
+  yang sama dan prefix `admin` yang sama. Empat blok identik, masing-masing
+  dengan satu baris yang benar-benar berbeda.
+- Pertanyaan "URL apa saja yang dimiliki `/admin`?" tidak bisa dijawab dari satu
+  tempat. Jawabannya tersebar di lima berkas yang harus dibaca **dalam urutan
+  `require`** untuk dipahami — dan urutan itu sendiri tidak terlihat dari mana
+  pun kecuali dari lima baris di bawah `web.php`.
+- Karena Laravel mencocokkan route berurutan, urutan pendaftaran adalah
+  perilaku, bukan kerapian. Menyembunyikannya di balik rantai `require` membuat
+  satu-satunya tempat aturan itu terlihat justru yang paling mudah terlewat.
+
+**Yang harus diketahui.** Penggabungan ini **tidak mengubah satu route pun**.
+Diperiksa dengan membandingkan `php artisan route:list` sebelum dan sesudah —
+method, URI, nama, dan middleware, 117 route, identik. Itu memang bentuk
+verifikasi yang benar untuk perubahan seperti ini: hasil akhirnya harus sama
+persis, dan cara membuktikannya adalah mendiffnya, bukan membaca ulang.
+
+Dua hal yang sengaja dipertahankan karena mengubahnya akan mengubah perilaku:
+
+1. **Urutan deklarasi.** `/agenda/{event:slug}/ics` sebelum
+   `/agenda/{event:slug}`, dan `/admin/berita/{post}/ubah` sebelum
+   `.../pratinjau`. Keduanya dikomentari di tempatnya.
+2. **Redirect `legacy.*` tetap DI LUAR grup middleware.** Sebelumnya mereka
+   berada di luar karena `master-data.php` mendeklarasikannya setelah grup.
+   Kalau mereka dipindah ke dalam grup, tamu yang mengikuti tautan lama akan
+   langsung dikirim ke halaman login alih-alih menerima 302 lebih dulu —
+   dan `LocationRedirectTest` menguji justru yang pertama.
+
+Dua hal yang dibiarkan apa adanya meski terlihat aneh, karena di luar cakupan:
+
+- `/admin/akun` mengirim `Location: profile` (relatif), bukan path absolut.
+  Itu perilaku sebelum penggabungan dan tetap sama sesudahnya. Kalau suatu saat
+  diperbaiki, itu keputusan tersendiri.
+- `Route::redirect('/akun', 'profile')` dipertahankan dengan tujuan relatif
+  yang sama persis, supaya tidak ada yang bergeser tanpa sengaja.
+
+**Konsekuensi untuk fase berikutnya.** Modul baru menambahkan route-nya ke
+`web.php` di bagiannya sendiri, bukan membuat berkas baru. Kalau suatu hari
+jumlahnya membuat berkas ini tidak terbaca lagi, membelahnya kembali adalah
+keputusan yang sah — tetapi harus disertai alasan yang lebih kuat daripada
+"starter kit melakukannya begitu", karena itu justru alasan pemisahan
+sebelumnya.
+
+@see D-48 untuk alasan redirect diberi nama `legacy.*`

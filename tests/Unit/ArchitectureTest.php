@@ -435,6 +435,69 @@ test('no frontend directory imports one that does not exist', function () {
 |
 */
 
+test('every page a controller asks for is a page the frontend registers', function () {
+    // The bug this test was written for.
+    //
+    // Both category screens answered 200, rendered the right props, and could
+    // not be opened. The controller asked Inertia for
+    // "admin/kategori-berita/index"; the frontend had registered that file
+    // under "admin/kategori-berita", because pageName() drops `index` at a
+    // feature's root and keeps it one folder down. The server was perfectly
+    // happy — PageChunk::source() built a path out of the name, the file was
+    // there, and the response carried a component nobody on the client had ever
+    // heard of. Clicking the menu item did nothing: no navigation, no error
+    // banner, nothing in the network tab.
+    //
+    // Two earlier tests should have caught it and did not, because both asked
+    // the wrong question. "Does this name resolve to a file?" is not the
+    // question; the file resolves either way. "Does the finder see every file?"
+    // is also not it. The question is whether the name a controller sends is
+    // one of the names the frontend registered, and nothing in the suite asked
+    // it.
+    //
+    // Every render is a string literal in every controller (asserted below), so
+    // this can be a scan rather than a request per controller.
+    $registered = array_keys(PageChunk::all());
+
+    $asked = [];
+
+    foreach (File::allFiles(app_path('Http/Controllers')) as $file) {
+        preg_match_all(
+            "/Inertia::render\(\s*'([^']+)'/",
+            $file->getContents(),
+            $matches,
+        );
+
+        foreach ($matches[1] as $name) {
+            $asked[$name] = Str::after($file->getRealPath(), base_path().'/');
+        }
+    }
+
+    expect($asked)->not->toBeEmpty();
+
+    expect(
+        array_keys(array_diff_key($asked, array_flip($registered)))
+    )->toBe([]);
+});
+
+test('every controller renders a literal page name', function () {
+    // The scan above reads string literals out of the source, so a controller
+    // that built its component name some other way would be silently skipped
+    // and the test beside it would quietly pass without covering that page.
+    // Thirty-three renders are literals today; this is what keeps it that way.
+    foreach (File::allFiles(app_path('Http/Controllers')) as $file) {
+        if (! str_contains($file->getContents(), 'Inertia::render(')) {
+            continue;
+        }
+
+        preg_match_all('/Inertia::render\(([^)]*)/', $file->getContents(), $calls);
+
+        foreach ($calls[1] as $call) {
+            expect(trim($call))->toStartWith("'");
+        }
+    }
+});
+
 test('a page keeps its folder in the name', function () {
     // The layout that broke: a page with sub-pages moved into its own folder, so
     // pages/lokasi/index.tsx sits beside pages/lokasi/tambah.tsx. The file moved
@@ -444,10 +507,12 @@ test('a page keeps its folder in the name', function () {
     //
     // A real page of this feature, not a fixture: an invented path would pass
     // whether or not the finder works.
-    expect(PageChunk::source('admin/jadwal-misa/lokasi/index'))
-        ->toBe('resources/js/features/admin/jadwal-misa/pages/lokasi/index.tsx')
-        ->and(PageChunk::source('admin/jadwal-misa/lokasi/tambah'))
-        ->toBe('resources/js/features/admin/jadwal-misa/pages/lokasi/tambah.tsx');
+    // Lokasi moved to Master Data; the rule is unchanged and the path is the
+    // new one (D-48).
+    expect(PageChunk::source('admin/master-data/lokasi/index'))
+        ->toBe('resources/js/features/admin/master-data/pages/lokasi/index.tsx')
+        ->and(PageChunk::source('admin/master-data/lokasi/tambah'))
+        ->toBe('resources/js/features/admin/master-data/pages/lokasi/tambah.tsx');
 });
 
 test('components below pages are not pages', function () {
@@ -461,7 +526,7 @@ test('components below pages are not pages', function () {
 
     // And the inverse must hold, or the filter is doing the work of hiding a
     // page rather than a component.
-    expect(PageChunk::source('admin/jadwal-misa/lokasi/index'))->not->toBeNull();
+    expect(PageChunk::source('admin/master-data/lokasi/index'))->not->toBeNull();
 });
 
 test('the page finder finds every page file in the application', function () {
@@ -582,19 +647,43 @@ test('html is sanitized in the request layer', function () {
     expect('App\Http\Requests')->toUse(['App\Services\HtmlSanitizer']);
 });
 
-test('only the error page renders sanitized html on the frontend', function () {
+test('only two files inject raw html on the frontend, and each for its own reason', function () {
     // The frontend counterpart of the rule above: React must not inject raw
     // HTML anywhere else, because the only thing making it safe is the
     // sanitizer having run on the way into storage.
+    //
+    // Two files are allowed, and the list is spelled out rather than pattern
+    // matched so that adding a third has to be a deliberate edit here:
+    //
+    //   rich-text.tsx renders HTML that came out of the sanitizer.
+    //   event-json-ld.tsx renders JSON.stringify() output into a
+    //   <script type="application/ld+json">. React has no other way to write
+    //   that tag — its children are escaped, and an escaped JSON-LD block is
+    //   not valid JSON-LD. The content is a serialization of typed props from
+    //   the server, not stored HTML, so the sanitizer does not apply to it and
+    //   there is nothing here for the sanitizer to protect.
+    //
+    // A blanket `str_contains('dangerouslySetInnerHTML')` ban would make the
+    // structured data impossible to ship, which is how a rule like this gets
+    // deleted rather than obeyed.
+    //
+    // @see docs/DECISIONS.md D-46
+    $allowed = [
+        'resources/js/components/rich-text.tsx',
+        'resources/js/features/public/agenda/components/event-json-ld.tsx',
+    ];
+
     $offenders = [];
 
     foreach (File::allFiles(resource_path('js')) as $file) {
-        if (str_contains($file->getFilename(), 'rich-text.tsx')) {
+        if (! str_contains($file->getContents(), 'dangerouslySetInnerHTML')) {
             continue;
         }
 
-        if (str_contains($file->getContents(), 'dangerouslySetInnerHTML')) {
-            $offenders[] = Str::after($file->getRealPath(), base_path().'/');
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+
+        if (! in_array($relative, $allowed, true)) {
+            $offenders[] = $relative;
         }
     }
 

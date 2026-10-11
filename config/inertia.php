@@ -70,8 +70,11 @@ return [
          */
         'paths' => [
             resource_path('js/features/admin/akun/pages'),
+            resource_path('js/features/admin/agenda/pages'),
+            resource_path('js/features/admin/berita/pages'),
             resource_path('js/features/admin/dashboard/pages'),
             resource_path('js/features/admin/jadwal-misa/pages'),
+            resource_path('js/features/admin/master-data/pages'),
             resource_path('js/features/admin/pengaturan/pages'),
             resource_path('js/features/public/agenda/pages'),
             resource_path('js/features/public/auth/pages'),

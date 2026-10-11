@@ -7,7 +7,7 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from '../../../components/form-fields';
+} from '@/components/form-fields';
 
 export type ScheduleNoticeFormInstance = ReturnType<
     typeof useForm<ScheduleNoticeFormData>

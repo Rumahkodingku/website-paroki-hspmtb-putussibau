@@ -36,16 +36,21 @@ use Illuminate\Support\Facades\Route;
  * which point a missing slug 404s by itself and XC-E3 is satisfied for that
  * module. Removing the row is part of that work, not after it.
  *
+ * Berita and Agenda left this list in Phase 05, together with the three tests
+ * that asserted the placeholder behaviour and the four that covered the .ics
+ * stub. What replaced them is not here but in the modules that own it:
+ * tests/Feature/News/PublicPostPageTest.php,
+ * tests/Feature/Agenda/PublicEventPageTest.php and
+ * tests/Feature/Agenda/IcsTest.php.
+ *
  * @return array<string, array{0: string, 1: string, 2: string}>
  */
 function placeholderDetailRoutes(): array
 {
     return [
-        'berita' => ['/berita/contoh-artikel', 'public/berita/show', 'Fase 4'],
-        'agenda' => ['/agenda/contoh-agenda', 'public/agenda/show', 'Fase 4'],
-        'pelayanan' => ['/pelayanan/contoh-pelayanan', 'public/pelayanan/show', 'Fase 5'],
-        'komunitas' => ['/komunitas/contoh-komunitas', 'public/komunitas/show', 'Fase 5'],
-        'galeri' => ['/galeri/contoh-album', 'public/galeri/show', 'Fase 6'],
+        'pelayanan' => ['/pelayanan/contoh-pelayanan', 'public/pelayanan/show', 'Fase 6'],
+        'komunitas' => ['/komunitas/contoh-komunitas', 'public/komunitas/show', 'Fase 7'],
+        'galeri' => ['/galeri/contoh-album', 'public/galeri/show', 'Fase 8'],
     ];
 }
 
@@ -57,33 +62,20 @@ it('still answers for a detail route, so navigation never lands on a 404', funct
         ->assertInertia(fn ($page) => $page->component($component));
 })->with('placeholder detail routes');
 
-/**
- * The gap, stated as a test rather than as prose.
- *
- * This asserts the placeholder behaviour rather than the behaviour the PRD wants,
- * because it is the honest description of what is true today. When the Berita
- * phase replaces this route, this test fails - and the fix is to delete it in the
- * same change, which is the whole point of writing it down.
- */
-it('answers 200 for any well-formed slug, which is the gap D-31 records', function () {
-    $response = $this->get('/berita/slug-yang-tidak-pernah-dibuat');
-
-    $response->assertOk();
-
-    // And it is honest about being empty: the slug is echoed into the page, so a
-    // reviewer can see this is a shell rather than a published article.
-    expect($response->viewData('page')['component'])
-        ->toBe('public/berita/show');
-});
-
-it('passes the slug through to the page as a prop', function () {
-    $this->get('/berita/slug-yang-dipakai')
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('public/berita/show')
-            ->where('slug', 'slug-yang-dipakai')
-        );
-});
+/*
+| XC-E3, one module at a time.
+|
+| Berita and Agenda answer 404 for a slug nobody published. That is the whole of
+| XC-E3 for those two URLs, and it is asserted where the module lives rather
+| than here — this file exists to track what has NOT been done yet, and a
+| statement that something has been done belongs with the thing that did it.
+*/
+it('answers 404 for a published-module slug rather than 200 for anything', function (string $url) {
+    $this->get($url)->assertNotFound();
+})->with([
+    'berita' => ['/berita/slug-yang-tidak-pernah-dibuat'],
+    'agenda' => ['/agenda/slug-yang-tidak-pernah-dibuat'],
+]);
 
 it('rejects anything that is not a clean slug', function (string $path) {
     $this->get($path)->assertNotFound();
@@ -93,54 +85,6 @@ it('rejects anything that is not a clean slug', function (string $path) {
     'dot in the path' => ['/berita/feed.json'],
     'slash' => ['/berita/a/b'],
 ]);
-
-describe('the .ics endpoint', function () {
-    it('responds with a calendar content type', function () {
-        $response = $this->get('/agenda/contoh-agenda/ics');
-
-        $response->assertOk()
-            ->assertHeader('Content-Type', 'text/calendar; charset=utf-8');
-    });
-
-    /**
-     * A syntactically valid VCALENDAR with no event in it. That combination is
-     * the point: a calendar app opens it, finds nothing, and says so. What this
-     * route must never do is emit a VEVENT, because inventing a start and an end
-     * in WIB is Agenda business logic and a fabricated date in a parishioner's
-     * calendar is exactly the kind of invented parish data AGENTS.md forbids.
-     */
-    it('returns a valid calendar that contains no fabricated event', function () {
-        $body = (string) $this->get('/agenda/contoh-agenda/ics')
-            ->assertOk()
-            ->getContent();
-
-        expect($body)
-            ->toStartWith('BEGIN:VCALENDAR')
-            ->toContain('VERSION:2.0')
-            ->toContain('CALSCALE:GREGORIAN')
-            ->toContain('END:VCALENDAR')
-            ->not->toContain('BEGIN:VEVENT')
-            ->not->toContain('BEGIN:VTIMEZONE')
-            ->toContain('[ISI:');
-    });
-
-    /**
-     * RFC 5545 requires CRLF. A calendar written with bare LF is rejected by
-     * several clients without saying why, which is the kind of bug that only
-     * shows up once a parishioner has already downloaded the file.
-     */
-    it('uses CRLF line endings', function () {
-        $body = (string) $this->get('/agenda/contoh-agenda/ics')
-            ->assertOk()
-            ->getContent();
-
-        expect($body)->toContain("\r\n");
-    });
-
-    it('does not accept a slug that is not one', function () {
-        $this->get('/agenda/Bukan-Slug/ics')->assertNotFound();
-    });
-});
 
 describe('the download endpoint', function () {
     it('responds as an attachment rather than a page', function () {

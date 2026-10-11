@@ -61,6 +61,37 @@ class PermissionSeeder extends Seeder
         'posts.delete',
 
         /*
+         * Berita & Agenda, added with the module in Phase 05.
+         *
+         * `posts.*` was already here from Phase 01 with nothing reading it; the
+         * policy that reads it arrives with PostPolicy. The three sets below are
+         * the ones this module adds.
+         *
+         * Categories have their own abilities rather than riding on
+         * `posts.*`. Deleting a category is a different act from deleting an
+         * article — it is refused outright while anything uses it — and the day
+         * an editor role exists it is the first distinction they will want.
+         *
+         * Single words for the reason D-36 gives: RbacFoundationTest asserts
+         * every permission matches /^[a-z]+\.[a-z]+$/, and `postcategories.view`
+         * satisfies it where `post-categories.view` would not.
+         */
+        'postcategories.view',
+        'postcategories.create',
+        'postcategories.update',
+        'postcategories.delete',
+
+        'events.view',
+        'events.create',
+        'events.update',
+        'events.delete',
+
+        'eventcategories.view',
+        'eventcategories.create',
+        'eventcategories.update',
+        'eventcategories.delete',
+
+        /*
          * Jadwal Misa, added with the module in Phase 04.
          *
          * Three abilities per resource rather than one `mass-schedule.*` set,

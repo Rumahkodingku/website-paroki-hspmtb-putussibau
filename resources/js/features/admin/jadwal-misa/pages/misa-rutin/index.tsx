@@ -9,18 +9,18 @@ import {
     index as massSchedulesIndex,
     list as massSchedulesList,
 } from '@/routes/mass-schedules';
-import { DataTable } from '../../components/data-table';
+import { DataTable } from '@/components/data-table';
 import { massScheduleColumns } from '../../components/columns';
-import { DeleteDialog } from '../../components/delete-dialog';
+import { DeleteDialog } from '@/components/delete-dialog';
 import {
     ListEmpty,
     ListHeader,
     ListToolbar,
     ResetFilters,
-} from '../../components/list-parts';
+} from '@/components/list-parts';
 import { MassScheduleCards } from './components/mass-schedule-cards';
-import { RowActions } from '../../components/row-actions';
-import { TablePagination } from '../../components/table-pagination';
+import { RowActions } from '@/components/row-actions';
+import { ListPagination } from '@/components/list-pagination';
 import type { FormMeta, LocationOption, MassScheduleRow } from '../../types';
 import type { Paginated } from '@/types';
 
@@ -184,7 +184,7 @@ export default function MisaRutin({
                     />
                 </div>
 
-                <TablePagination
+                <ListPagination
                     meta={massSchedules.meta}
                     previous={massSchedules.links.prev}
                     next={massSchedules.links.next}

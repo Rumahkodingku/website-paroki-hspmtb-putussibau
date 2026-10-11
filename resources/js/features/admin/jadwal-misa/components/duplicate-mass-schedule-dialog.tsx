@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Text } from '@/components/text';
-import { ChoiceSelect } from './form-fields';
+import { ChoiceSelect } from '@/components/form-fields';
 import type { LocationOption } from '../types';
 
 type Props = {

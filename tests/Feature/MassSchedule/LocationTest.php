@@ -47,7 +47,7 @@ it('lets a super admin through', function () {
     $this->actingAs(superAdmin())
         ->get(route('locations.index'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('admin/jadwal-misa/lokasi/index'));
+        ->assertInertia(fn (Assert $page) => $page->component('admin/master-data/lokasi/index'));
 });
 
 /*
@@ -68,7 +68,7 @@ it('lists locations with the active schedule count MASS-07 warns about', functio
     $this->actingAs(superAdmin())
         ->get(route('locations.index'))
         ->assertInertia(fn (Assert $page) => $page
-            ->component('admin/jadwal-misa/lokasi/index')
+            ->component('admin/master-data/lokasi/index')
             ->has('locations.data', 1)
             // The inactive one must not be counted: the dialog says how many
             // schedules will stop being published, and an inactive one already
@@ -341,7 +341,7 @@ it('renders the edit form with the location', function () {
         ->get(route('locations.edit', $location))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('admin/jadwal-misa/lokasi/ubah')
+            ->component('admin/master-data/lokasi/ubah')
             ->where('location.name', 'Gereja Paroki')
             // The form's Indonesian labels come from the language file rather
             // than a second copy in TypeScript.

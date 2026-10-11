@@ -9,18 +9,18 @@ import {
     edit as editSpecialMass,
     index as specialMassesIndex,
 } from '@/routes/special-masses';
-import { DataTable } from '../../components/data-table';
+import { DataTable } from '@/components/data-table';
 import { specialMassColumns } from '../../components/columns';
-import { DeleteDialog } from '../../components/delete-dialog';
+import { DeleteDialog } from '@/components/delete-dialog';
 import {
     ListEmpty,
     ListHeader,
     ListToolbar,
     ResetFilters,
-} from '../../components/list-parts';
-import { RowActions } from '../../components/row-actions';
+} from '@/components/list-parts';
+import { RowActions } from '@/components/row-actions';
 import { SpecialMassCards } from './components/special-mass-cards';
-import { TablePagination } from '../../components/table-pagination';
+import { ListPagination } from '@/components/list-pagination';
 import type { SpecialMassRow } from '../../types';
 import type { Paginated } from '@/types';
 
@@ -156,7 +156,7 @@ export default function Index({ specialMasses, filters }: Props) {
                     />
                 </div>
 
-                <TablePagination
+                <ListPagination
                     meta={specialMasses.meta}
                     previous={specialMasses.links.prev}
                     next={specialMasses.links.next}
