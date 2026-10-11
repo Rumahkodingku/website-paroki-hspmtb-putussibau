@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\MassSchedule;
 
 use App\Concerns\MassScheduleFormMeta;
+use App\Concerns\SortsAdminList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassSchedule\StoreSpecialMassRequest;
 use App\Http\Requests\MassSchedule\UpdateSpecialMassRequest;
@@ -32,6 +33,7 @@ use Inertia\Response;
 class SpecialMassController extends Controller
 {
     use MassScheduleFormMeta;
+    use SortsAdminList;
 
     /**
      * The special-mass list.
@@ -45,22 +47,41 @@ class SpecialMassController extends Controller
 
         $specialMasses = SpecialMass::query()
             ->with('location')
+            // Joined so "Lokasi" can be a sortable column; see the note in
+            // MassScheduleController::misaRutin(). Many-to-one, no duplication.
+            ->leftJoin('locations', 'locations.id', '=', 'special_masses.location_id')
+            ->select('special_masses.*')
             ->when($search !== '', fn (Builder $query) => $query
-                ->where('title', 'like', "%{$search}%"))
+                ->where('special_masses.title', 'like', "%{$search}%"))
             ->when(in_array($status, ['upcoming', 'past', 'inactive'], true), function (Builder $query) use ($status): void {
                 match ($status) {
-                    'inactive' => $query->where('is_active', false),
+                    'inactive' => $query->where('special_masses.is_active', false),
                     // 'past' is a filter over what exists, not a separate
                     // record set: the rows are all still there.
-                    'past' => $query->where('start_at', '<', now()),
-                    default => $query->where('start_at', '>=', now())->where('is_active', true),
+                    'past' => $query->where('special_masses.start_at', '<', now()),
+                    default => $query->where('special_masses.start_at', '>=', now())
+                        ->where('special_masses.is_active', true),
                 };
             })
-            ->orderBy('start_at')
-            ->paginate(15)
+            // How many notices point here, so the delete dialog can say what
+            // stops being published. See D-40.
+            ->withCount('scheduleNotices');
+
+        $specialMasses = $this->applyAdminSort(
+            $specialMasses,
+            $request,
+            [
+                'title' => 'special_masses.title',
+                'start_at' => 'special_masses.start_at',
+                'end_at' => 'special_masses.end_at',
+                'location' => 'locations.name',
+                'is_active' => 'special_masses.is_active',
+            ],
+            [['special_masses.start_at', 'asc']],
+        )->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/jadwal-misa/misa-khusus', [
+        return Inertia::render('admin/jadwal-misa/misa-khusus/index', [
             'specialMasses' => SpecialMassResource::collection($specialMasses),
             'locations' => array_values(
                 LocationOptionResource::collection($this->activeLocations())->resolve()
@@ -69,6 +90,8 @@ class SpecialMassController extends Controller
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'sort' => $request->string('sort')->toString(),
+                'direction' => $request->string('direction')->toString(),
             ],
         ]);
     }
@@ -112,6 +135,25 @@ class SpecialMassController extends Controller
 
         return to_route('special-masses.index')
             ->with('success', __('Misa khusus berhasil diperbarui.'));
+    }
+
+    /**
+     * Delete a one-off mass, softly.
+     *
+     * Past masses are not protected: MASS-02 says a passed mass stops being
+     * listed, not that it is untouchable, and a super admin clearing out last
+     * year's entries is a real job. Deactivate first when the intent is to keep
+     * it off the site rather than remove it - that distinction is the whole
+     * reason both verbs exist.
+     */
+    public function destroy(SpecialMass $specialMass): RedirectResponse
+    {
+        Gate::authorize('delete', $specialMass);
+
+        $specialMass->delete();
+
+        return to_route('special-masses.index')
+            ->with('success', __('Misa khusus berhasil dihapus.'));
     }
 
     /**

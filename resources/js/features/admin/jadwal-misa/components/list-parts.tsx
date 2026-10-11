@@ -3,22 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { NoticeStatus } from '../types';
 
-/*
- * The four shared pieces of every list screen.
- *
- * They are here rather than in components/ because this module has four list
- * screens and nothing outside it uses them: ARCHITECTURE.md Part B section 1.1
- * puts a component in the app-level folder once two *features* need it, and one
- * feature needing it four times is still one.
- */
-
-/**
- * Active or inactive.
- *
- * The word is the accessible part. Roadmap 6.6 requires status not to be
- * distinguished by colour alone, and a coloured dot on its own is exactly that —
- * a visitor who cannot tell red from green reads it as decoration.
- */
 export function StatusBadge({ active }: { active: boolean }) {
     return (
         <Badge variant={active ? 'default' : 'secondary'}>
@@ -27,9 +11,6 @@ export function StatusBadge({ active }: { active: boolean }) {
     );
 }
 
-/**
- * Where a notice stands, derived from is_active and its display window (MASS-05).
- */
 export function NoticeStatusBadge({ status }: { status: NoticeStatus }) {
     const label: Record<NoticeStatus, string> = {
         draft: 'Nonaktif',
@@ -45,9 +26,6 @@ export function NoticeStatusBadge({ status }: { status: NoticeStatus }) {
     );
 }
 
-/**
- * The list screen's header: a title, the count, and the add button.
- */
 export function ListHeader({
     title,
     description,
@@ -112,12 +90,6 @@ export function ListToolbar({
     );
 }
 
-/**
- * The empty state every list falls back to (XC-E1).
- *
- * Always a sentence and never blank space: a list with nothing in it has to say
- * so, and "no data" is not a message a parish secretary can act on.
- */
 export function ListEmpty({
     title,
     description,
@@ -139,7 +111,6 @@ export function ListEmpty({
     );
 }
 
-/** A filter dropdown in the toolbar. */
 export function FilterSelect({
     id,
     value,
@@ -170,13 +141,6 @@ export function FilterSelect({
     );
 }
 
-/**
- * A button that clears every active filter.
- *
- * Rendered only when something is set: a reset button on an unfiltered list is
- * a control that does nothing, and roadmap 7.2 asks for the action "bila
- * diperlukan".
- */
 export function ResetFilters({ onReset }: { onReset: () => void }) {
     return (
         <button

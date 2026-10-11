@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import type { NoticeTargets } from '../types';
+import type { NoticeTargets } from '../../../types';
 import {
     ActiveSwitch,
     ChoiceSelect,
@@ -7,22 +7,8 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from './form-fields';
+} from '../../../components/form-fields';
 
-/*
- * The schedule-notice form, shared by the create and edit pages.
- *
- * The target picker is the interesting part. A notice may point at a location, a
- * recurring schedule or a special mass — or at nothing, which means everyone.
- * Exactly one, and the three are mutually exclusive: a notice naming both a
- * location and a schedule inside it has no single meaning, and the banner would
- * have to guess which reading the parish meant.
- *
- * Choosing one clears the other two, so the rule is visible in the form rather
- * than only in the error an admin sees after submitting it.
- */
-
-/** The useForm handle a submit handler receives. */
 export type ScheduleNoticeFormInstance = ReturnType<
     typeof useForm<ScheduleNoticeFormData>
 >;
@@ -30,15 +16,6 @@ export type ScheduleNoticeFormInstance = ReturnType<
 export type ScheduleNoticeFormData = {
     title: string;
     message: string;
-    /**
-     * "location:3", "schedule:7", "special:2" or "" for a general notice.
-     *
-     * One field rather than three selects: three would let an admin see two
-     * targets chosen while the server rejects the combination. The three
-     * nullable columns below are what it decodes to on submit, and they are part
-     * of the type so Inertia's `errors` knows their names — the backend reports
-     * the exclusivity failure on a column, not on `target`.
-     */
     target: string;
     location_id: string;
     mass_schedule_id: string;
@@ -62,7 +39,6 @@ export function emptyScheduleNoticeFormData(): ScheduleNoticeFormData {
     };
 }
 
-/** The three target kinds, encoded so one select can offer all of them. */
 function targetOptions(targets: NoticeTargets) {
     return [
         ...targets.locations.map((location) => ({
@@ -80,11 +56,6 @@ function targetOptions(targets: NoticeTargets) {
     ];
 }
 
-/**
- * "schedule:12" as the three nullable columns it stands for.
- *
- * Exported so an edit form can rebuild `target` from a stored notice.
- */
 export function targetToColumns(target: string) {
     const [kind, id] = target.split(':');
 
@@ -95,7 +66,6 @@ export function targetToColumns(target: string) {
     };
 }
 
-/** The inverse: which target a stored notice's columns name. */
 export function columnsToTarget(notice: {
     location_id: number | null;
     mass_schedule_id: number | null;
@@ -145,9 +115,6 @@ export function ScheduleNoticeForm({
 
     return (
         <form
-            // noValidate: the browser's own bubbles would swallow the submit
-            // and the Indonesian messages from the server would never appear.
-            // See D-39.
             noValidate
             onSubmit={(event) => {
                 event.preventDefault();
@@ -262,7 +229,6 @@ export function ScheduleNoticeForm({
                 checked={form.data.is_active}
                 onChange={(checked) => form.setData('is_active', checked)}
                 activeLabel={statuses.active ?? 'Aktif'}
-                inactiveLabel={statuses.inactive ?? 'Nonaktif'}
             />
 
             <FormActions

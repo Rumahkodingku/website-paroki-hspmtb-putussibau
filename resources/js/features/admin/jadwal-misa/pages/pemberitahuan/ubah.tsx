@@ -10,17 +10,8 @@ import {
     ScheduleNoticeForm,
     columnsToTarget,
     type ScheduleNoticeFormData,
-} from '../../components/schedule-notice-form';
+} from './components/schedule-notice-form';
 import type { FormMeta, NoticeTargets, ScheduleNoticeRow } from '../../types';
-
-/*
- * /admin/pemberitahuan-jadwal/{schedule_notice}/ubah — the edit form.
- *
- * The stored notice's three nullable columns are folded back into the single
- * `target` value the picker works with, so an edit form opens showing what was
- * saved rather than an empty picker that would silently clear the target on the
- * first save.
- */
 
 type Props = {
     notice: ScheduleNoticeRow;
@@ -65,11 +56,14 @@ export default function Edit({
 
     return (
         <>
-            <Head title={`Ubah ${notice.title}`} />
-
-            <Heading title={`Ubah ${notice.title}`} variant="small" />
+            <Head title={`Ubah data pemberitahuan`} />
 
             <div className="p-6">
+                <Heading
+                    title={`Ubah data pemberitahuan`}
+                    description={`Lengkapi form untuk update data pemberitahuan ${notice.title}`}
+                />
+
                 <ScheduleNoticeForm
                     initial={initial}
                     labels={labels}

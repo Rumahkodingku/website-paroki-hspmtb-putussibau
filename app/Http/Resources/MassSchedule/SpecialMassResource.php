@@ -35,8 +35,12 @@ class SpecialMassResource extends JsonResource
             'notes' => $this->notes,
             'is_active' => $this->is_active,
             'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
+            // How many notices point here, which the delete dialog reports as
+            // what would stop being published. See D-40.
+            'schedule_notices_count' => $this->whenCounted('scheduleNotices'),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
+                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
             ],
         ];
     }

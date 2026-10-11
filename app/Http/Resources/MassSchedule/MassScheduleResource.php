@@ -36,12 +36,15 @@ class MassScheduleResource extends JsonResource
             'day_of_week' => $this->day_of_week->value,
             'start_time' => substr($this->start_time, 0, 5),
             'name' => $this->name,
-            'language' => $this->language,
             'notes' => $this->notes,
             'is_active' => $this->is_active,
             'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
+            // How many notices point here, which the delete dialog reports as
+            // what would stop being published. See D-40.
+            'schedule_notices_count' => $this->whenCounted('scheduleNotices'),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
+                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
             ],
         ];
     }

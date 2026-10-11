@@ -64,9 +64,7 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
 
                     {nextMass.kind === 'rutin' ? (
                         <Text as="p" variant="caption" color="muted">
-                            {['Jadwal rutin mingguan', nextMass.language]
-                                .filter(Boolean)
-                                .join(' · ')}
+                            Jadwal rutin mingguan
                         </Text>
                     ) : (
                         <Text as="p" variant="caption" color="muted">

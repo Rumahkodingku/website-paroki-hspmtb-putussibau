@@ -8,18 +8,8 @@ import {
 import {
     SpecialMassForm,
     specialMassFormDataFrom,
-} from '../../components/special-mass-form';
+} from './components/special-mass-form';
 import type { FormMeta, LocationOption, SpecialMassRow } from '../../types';
-
-/*
- * /admin/misa-khusus/{special_mass}/ubah — the edit form.
- *
- * The two datetimes arrive as UTC and are rendered into the form in WIB, which
- * is the wall clock the admin originally typed. Doing that conversion with an
- * explicit zone rather than the device's is D-01's whole point: an admin whose
- * laptop is set to another timezone would otherwise see the mass moved by the
- * difference.
- */
 
 type Props = {
     specialMass: SpecialMassRow;
@@ -38,11 +28,13 @@ export default function Edit({
 
     return (
         <>
-            <Head title={`Ubah ${specialMass.title}`} />
-
-            <Heading title={`Ubah ${specialMass.title}`} variant="small" />
+            <Head title={`Ubah data misa khusus`} />
 
             <div className="p-6">
+                <Heading
+                    title={`Ubah data misa khusus`}
+                    description={`Lengkapi form untuk update data ${specialMass.title}`}
+                />
                 <SpecialMassForm
                     initial={specialMassFormDataFrom(
                         specialMass,

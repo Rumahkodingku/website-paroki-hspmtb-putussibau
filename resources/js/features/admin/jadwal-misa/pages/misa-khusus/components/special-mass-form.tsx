@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { toDateTimeLocalValue } from '@/lib/datetime';
-import type { LocationOption } from '../types';
+import type { LocationOption } from '../../../types';
 import {
     ActiveSwitch,
     ChoiceSelect,
@@ -8,19 +8,8 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
-} from './form-fields';
+} from '../../../components/form-fields';
 
-/*
- * The special-mass form, shared by the create and edit pages.
- *
- * The datetime fields are filled in Asia/Pontianak and posted as UTC. The
- * conversion happens once, in toDateTimeLocalValue() when the form loads an
- * existing record, and once on the server in the form request's
- * prepareForValidation(). Nothing here does timezone arithmetic, because a
- * datetime converted twice is a datetime moved by the offset (D-01).
- */
-
-/** The useForm handle a submit handler receives. */
 export type SpecialMassFormInstance = ReturnType<
     typeof useForm<SpecialMassFormData>
 >;
@@ -72,9 +61,6 @@ export function SpecialMassForm({
 
     return (
         <form
-            // noValidate: the browser's own bubbles would swallow the submit
-            // and the Indonesian messages from the server would never appear.
-            // See D-39.
             noValidate
             onSubmit={(event) => {
                 event.preventDefault();
@@ -180,7 +166,6 @@ export function SpecialMassForm({
                 checked={form.data.is_active}
                 onChange={(checked) => form.setData('is_active', checked)}
                 activeLabel={statuses.active ?? 'Aktif'}
-                inactiveLabel={statuses.inactive ?? 'Nonaktif'}
             />
 
             <FormActions
@@ -192,12 +177,6 @@ export function SpecialMassForm({
     );
 }
 
-/**
- * An existing special mass as the edit form needs it.
- *
- * Both datetimes come back as UTC with an offset and are rendered in WIB for the
- * input, which is what an admin typed in the first place.
- */
 export function specialMassFormDataFrom(
     row: {
         location_id: number;

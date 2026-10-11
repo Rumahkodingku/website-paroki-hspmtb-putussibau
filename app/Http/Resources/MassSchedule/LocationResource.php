@@ -42,8 +42,16 @@ class LocationResource extends JsonResource
             // Absent rather than zero when the count was not loaded, so the
             // admin UI can tell "no schedules" from "we did not look".
             'active_schedules_count' => $this->whenCounted('active_schedules'),
+            // What stands in the way of a delete, so the dialog can name it
+            // before the server refuses. whenCounted for the same reason as
+            // above: on a page that did not count, the field is absent rather
+            // than a misleading zero. See D-40.
+            'mass_schedules_count' => $this->whenCounted('massSchedules'),
+            'special_masses_count' => $this->whenCounted('specialMasses'),
+            'schedule_notices_count' => $this->whenCounted('scheduleNotices'),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
+                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
             ],
         ];
     }

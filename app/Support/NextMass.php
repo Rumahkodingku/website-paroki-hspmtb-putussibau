@@ -26,7 +26,6 @@ final readonly class NextMass
         public MassKind $kind,
         public CarbonImmutable $startsAt,
         public string $name,
-        public ?string $language,
         public Location $location,
         public ?int $massScheduleId = null,
         public ?int $specialMassId = null,
@@ -40,7 +39,6 @@ final readonly class NextMass
     public static function regular(
         CarbonImmutable $startsAt,
         string $name,
-        ?string $language,
         Location $location,
         int $massScheduleId,
     ): self {
@@ -48,7 +46,6 @@ final readonly class NextMass
             kind: MassKind::Rutin,
             startsAt: $startsAt,
             name: $name,
-            language: $language,
             location: $location,
             massScheduleId: $massScheduleId,
             specialMassId: null,
@@ -57,9 +54,6 @@ final readonly class NextMass
 
     /**
      * Build the candidate for a one-off mass.
-     *
-     * A special mass has no language column, so language is null rather than an
-     * argument that would always have to be passed as null.
      */
     public static function special(
         CarbonImmutable $startsAt,
@@ -71,7 +65,6 @@ final readonly class NextMass
             kind: MassKind::Khusus,
             startsAt: $startsAt,
             name: $title,
-            language: null,
             location: $location,
             massScheduleId: null,
             specialMassId: $specialMassId,

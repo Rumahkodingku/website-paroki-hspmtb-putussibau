@@ -4,22 +4,6 @@ import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
 import type { Paginated } from '@/types';
 
-/*
- * The paginator for this module's four list screens.
- *
- * It reads the `links` array Laravel already produced rather than composing
- * page numbers from the current one, for the reason types/pagination.ts gives:
- * meta.links is the window Laravel decided to show, each entry carries its own
- * url, and reconstructing them would mean re-implementing that decision.
- *
- * `meta.links` (with the url on each entry) is the shape Inertia needs for a
- * partial reload; `links.prev` and `links.next` are used for the two arrows.
- *
- * It lives in the feature rather than components/ because one feature needs it
- * and nothing outside does — ARCHITECTURE.md Part B section 1.1 puts a component
- * at app level once two *features* use it.
- */
-
 type Props = {
     meta: Paginated<unknown>['meta'];
     previous: string | null;

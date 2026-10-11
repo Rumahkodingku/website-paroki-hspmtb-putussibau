@@ -8,16 +8,8 @@ import {
 import {
     ScheduleNoticeForm,
     emptyScheduleNoticeFormData,
-} from '../../components/schedule-notice-form';
+} from './components/schedule-notice-form';
 import type { FormMeta, NoticeTargets } from '../../types';
-
-/*
- * /admin/pemberitahuan-jadwal/tambah — the create form for a notice.
- *
- * The target picker's options arrive from the server: locations, schedules and
- * upcoming special masses are each a query, and rebuilding them in the browser
- * would mean shipping the parish's whole schedule to render one dropdown.
- */
 
 type Props = Pick<
     FormMeta,
@@ -37,9 +29,11 @@ export default function Create({
         <>
             <Head title="Tambah Pemberitahuan" />
 
-            <Heading title="Tambah Pemberitahuan" variant="small" />
-
             <div className="p-6">
+                <Heading
+                    title="Tambah Pemberitahuan"
+                    description="Lengkapi form untuk menambahkan pemberitahuan baru"
+                />
                 <ScheduleNoticeForm
                     initial={emptyScheduleNoticeFormData()}
                     labels={labels}

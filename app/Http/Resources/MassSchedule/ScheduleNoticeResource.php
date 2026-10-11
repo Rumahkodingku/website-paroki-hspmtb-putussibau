@@ -5,6 +5,7 @@ namespace App\Http\Resources\MassSchedule;
 use App\Models\ScheduleNotice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\MissingValue;
 
 /**
  * A notice as the admin list needs it.
@@ -44,10 +45,61 @@ class ScheduleNoticeResource extends JsonResource
             'location' => $this->nested(LocationOptionResource::class, $this->whenLoaded('location')),
             'mass_schedule' => $this->nested(MassScheduleOptionResource::class, $this->whenLoaded('massSchedule')),
             'special_mass' => $this->nested(SpecialMassOptionResource::class, $this->whenLoaded('specialMass')),
+            // True when this notice names a target that has since been soft
+            // deleted. The relations above are loaded withTrashed() precisely so
+            // this can be told apart from a notice that never had a target;
+            // without it the two look identical and the first has quietly
+            // stopped appearing on the public page. See D-40.
+            'target_deleted' => $this->targetDeleted(),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
+                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
             ],
         ];
+    }
+
+    /**
+     * Whether the target this notice names has been deleted.
+     *
+     * Read from the three counts rather than the relations, because a trashed
+     * row is excluded from the relation and a null relation cannot tell "the
+     * target was deleted" from "this notice was never aimed at anything".
+     *
+     * whenCounted, not a plain zero: on a page that did not count, the field is
+     * absent rather than a false that would show a badge which is not there.
+     */
+    protected function targetDeleted(): ?bool
+    {
+        $counts = [
+            'location_id' => 'trashed_location_count',
+            'mass_schedule_id' => 'trashed_mass_schedule_count',
+            'special_mass_id' => 'trashed_special_mass_count',
+        ];
+
+        $seen = false;
+
+        foreach ($counts as $column => $alias) {
+            if ($this->{$column} === null) {
+                continue;
+            }
+
+            // whenCounted() hands back a MissingValue on a page that did not
+            // count, and that object cannot be compared to an integer - it has
+            // to be recognised, not coerced.
+            $count = $this->whenCounted($alias);
+
+            if ($count instanceof MissingValue) {
+                continue;
+            }
+
+            $seen = true;
+
+            if ($count > 0) {
+                return true;
+            }
+        }
+
+        return $seen ? false : null;
     }
 
     /**

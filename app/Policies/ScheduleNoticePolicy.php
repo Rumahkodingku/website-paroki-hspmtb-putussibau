@@ -35,4 +35,17 @@ class ScheduleNoticePolicy
     {
         return $user->can('schedulenotices.update');
     }
+
+    /**
+     * Deletion is a soft delete, and it is reserved for super admins.
+     *
+     * Nothing else guards it: there is no delete ability to fall through, no
+     * second role to compare against, and the migration writes deleted_at
+     * rather than removing the row. Which is exactly why the permission has to
+     * be real - see D-40.
+     */
+    public function delete(User $user, ScheduleNotice $model): bool
+    {
+        return $user->can('schedulenotices.delete');
+    }
 }

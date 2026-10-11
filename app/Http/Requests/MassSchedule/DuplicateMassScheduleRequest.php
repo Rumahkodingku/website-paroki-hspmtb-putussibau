@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 /**
  * Validates copying a recurring mass to another location.
  *
- * The request carries only the destination. Day, time, name, language and notes
+ * The request carries only the destination. Day, time, name and notes
  * come from the source record, so asking for them again would mean the form could
  * contradict the schedule it claims to be copying.
  *

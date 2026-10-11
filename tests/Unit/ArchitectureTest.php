@@ -435,6 +435,35 @@ test('no frontend directory imports one that does not exist', function () {
 |
 */
 
+test('a page keeps its folder in the name', function () {
+    // The layout that broke: a page with sub-pages moved into its own folder, so
+    // pages/lokasi/index.tsx sits beside pages/lokasi/tambah.tsx. The file moved
+    // and the name followed it, which is why nothing but this class needs to
+    // know — a name that no longer resolves has to be caught by a test rather
+    // than by a page the reader cannot open.
+    //
+    // A real page of this feature, not a fixture: an invented path would pass
+    // whether or not the finder works.
+    expect(PageChunk::source('admin/jadwal-misa/lokasi/index'))
+        ->toBe('resources/js/features/admin/jadwal-misa/pages/lokasi/index.tsx')
+        ->and(PageChunk::source('admin/jadwal-misa/lokasi/tambah'))
+        ->toBe('resources/js/features/admin/jadwal-misa/pages/lokasi/tambah.tsx');
+});
+
+test('components below pages are not pages', function () {
+    // A form component kept beside the pages that use it matches the pages/
+    // pattern, so without a filter each one is registered under a name no
+    // controller asks for — and the architecture tests that walk the page list
+    // start asserting on them.
+    foreach (array_keys(PageChunk::all()) as $name) {
+        expect(explode('/', $name))->not->toContain('components');
+    }
+
+    // And the inverse must hold, or the filter is doing the work of hiding a
+    // page rather than a component.
+    expect(PageChunk::source('admin/jadwal-misa/lokasi/index'))->not->toBeNull();
+});
+
 test('the page finder finds every page file in the application', function () {
     // Inertia's own FileViewFinder was replaced with App\Support\PageFinder,
     // because it can only concatenate a directory with a name. That replacement

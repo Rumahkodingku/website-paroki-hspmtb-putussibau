@@ -51,7 +51,6 @@ export function MassScheduleCard({ mass, dayLabels }: Props) {
 
                 <Text as="p" variant="caption" color="muted">
                     {mass.location.name}
-                    {mass.language ? ` · ${mass.language}` : ''}
                 </Text>
 
                 {mass.notes ? (

@@ -31,7 +31,6 @@ class MassScheduleFactory extends Factory
             // reads this string directly.
             'start_time' => '07:30:00',
             'name' => 'Misa '.fake()->randomElement(['Pagi', 'Pukul 07.30', 'I']),
-            'language' => null,
             'notes' => null,
             'is_active' => true,
         ];

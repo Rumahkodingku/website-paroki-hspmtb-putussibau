@@ -17,7 +17,6 @@ function mass(overrides: Partial<NextMass> = {}): NextMass {
         kind: 'rutin',
         starts_at: '2026-10-04T07:30:00+07:00',
         name: 'Misa Minggu Pagi',
-        language: null,
         location: {
             id: 1,
             name: 'Gereja Paroki',
@@ -59,19 +58,11 @@ describe('NextMassCard with a resolved mass', () => {
     });
 
     it('says a special mass is special', () => {
-        renderCard(
-            mass({ kind: 'khusus', name: 'Misa Natal', language: null }),
-        );
+        renderCard(mass({ kind: 'khusus', name: 'Misa Natal' }));
 
         expect(screen.getByText('Misa Natal')).toBeInTheDocument();
         expect(screen.getByText(/Misa khusus/)).toBeInTheDocument();
         expect(screen.queryByText(/Jadwal rutin/)).toBeNull();
-    });
-
-    it('shows the language beside the recurring label', () => {
-        renderCard(mass({ language: 'Latin' }));
-
-        expect(screen.getByText(/Jadwal rutin/)).toHaveTextContent('Latin');
     });
 
     it('names the location', () => {

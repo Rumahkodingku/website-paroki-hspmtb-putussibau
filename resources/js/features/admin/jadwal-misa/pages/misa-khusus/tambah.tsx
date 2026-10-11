@@ -8,12 +8,8 @@ import {
 import {
     SpecialMassForm,
     emptySpecialMassFormData,
-} from '../../components/special-mass-form';
+} from './components/special-mass-form';
 import type { FormMeta, LocationOption } from '../../types';
-
-/*
- * /admin/misa-khusus/tambah — the create form for a one-off mass.
- */
 
 type Props = Pick<FormMeta, 'labels' | 'hints' | 'statuses' | 'days'> & {
     locations: LocationOption[];
@@ -24,9 +20,11 @@ export default function Create({ labels, hints, statuses, locations }: Props) {
         <>
             <Head title="Tambah Misa Khusus" />
 
-            <Heading title="Tambah Misa Khusus" variant="small" />
-
             <div className="p-6">
+                <Heading
+                    title="Tambah Misa Khusus"
+                    description="Lengkapi form untuk menambahkan misa khusus baru"
+                />
                 <SpecialMassForm
                     initial={emptySpecialMassFormData()}
                     labels={labels}

@@ -34,7 +34,6 @@ beforeEach(function () {
         ->onDay(DayOfWeek::Minggu, '07:30')
         ->create([
             'name' => 'Misa Minggu Pagi',
-            'language' => 'Latin',
             'notes' => 'Dengan koir.',
         ]);
 
@@ -73,7 +72,7 @@ it('copies the schedule to another location', function () {
         ->post(route('mass-schedules.duplicate', $this->source), [
             'location_id' => $this->target->getKey(),
         ])
-        ->assertRedirect(route('mass-schedules.index'))
+        ->assertRedirect(route('mass-schedules.list'))
         ->assertSessionHasNoErrors();
 
     expect(MassSchedule::query()->count())->toBe(2);
@@ -85,7 +84,6 @@ it('copies the schedule to another location', function () {
     expect($copy->day_of_week)->toBe(DayOfWeek::Minggu)
         ->and($copy->start_time)->toBe('07:30:00')
         ->and($copy->name)->toBe('Misa Minggu Pagi')
-        ->and($copy->language)->toBe('Latin')
         ->and($copy->notes)->toBe('Dengan koir.');
 });
 

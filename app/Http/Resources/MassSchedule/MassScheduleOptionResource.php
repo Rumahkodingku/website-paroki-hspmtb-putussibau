@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * A recurring mass, reduced to what a notice's picker shows.
  *
  * Separate from MassScheduleResource because this one is embedded in a list of
- * notices: shipping every schedule's notes, language and active flag for every
+ * notices: shipping every schedule's notes and active flag for every
  * row of the notice table would be a payload nobody reads.
  *
  * @mixin MassSchedule

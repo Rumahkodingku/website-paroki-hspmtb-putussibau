@@ -35,19 +35,30 @@ class DuplicateMassScheduleAction
      * slipped past the form request — two admins saving at once — raises a
      * QueryException here, and the controller turns it into a sentence.
      *
-     * @param  array{name?: string|null, language?: string|null, notes?: string|null, is_active?: bool}  $overrides
+     * @param  array{name?: string|null, notes?: string|null, is_active?: bool}  $overrides
      */
     public function handle(MassSchedule $source, Location $target, array $overrides = []): MassSchedule
     {
         return DB::transaction(function () use ($source, $target, $overrides): MassSchedule {
-            // replicate() with no argument copies every column except the
-            // primary key and the timestamps, which is exactly what roadmap 5.7
-            // asks for. Its one parameter is a list of attributes to *skip*,
+            // replicate()'s one parameter is a list of attributes to *skip*,
             // not values to set — passing location_id there would exclude the
             // column and leave the copy pointing at the source's location, so
-            // the unique index on (location_id, day_of_week, start_time) would
-            // reject it and the copy would appear to do nothing.
-            $copy = $source->replicate();
+            // the unique index would reject it and the copy would appear to do
+            // nothing.
+            //
+            // Called with no argument it copies every column except the key and
+            // the timestamps, which is what roadmap 5.7 asks for, but "every
+            // column" now includes two it must not carry:
+            //
+            //   active_marker  a generated column. Sending it is rejected by
+            //     MySQL outright - error 3105, "the value specified for
+            //     generated column is not allowed" - so the duplicate endpoint
+            //     returned a 500 rather than a copy.
+            //   deleted_at     a copy of a deleted schedule is a live schedule,
+            //     not a second deleted one. It is always null on a source that
+            //     route model binding could find, but copying the column rather
+            //     than clearing it would be relying on that.
+            $copy = $source->replicate(['active_marker', 'deleted_at']);
 
             $copy->location_id = $target->getKey();
 

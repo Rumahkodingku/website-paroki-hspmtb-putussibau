@@ -52,7 +52,16 @@ export type LocationRow = {
      * number, and showing 0 for "we did not look" would understate the impact.
      */
     active_schedules_count?: number;
-    can: { update: boolean };
+    /**
+     * What stands in the way of deleting this location. Absent when the list
+     * did not count them, same reason as above: the delete dialog states a
+     * number the server then enforces, and a 0 that means "we did not look"
+     * would promise a delete that is about to be refused.
+     */
+    mass_schedules_count?: number;
+    special_masses_count?: number;
+    schedule_notices_count?: number;
+    can: { update: boolean; delete: boolean };
 };
 
 /** MassScheduleResource */
@@ -63,11 +72,12 @@ export type MassScheduleRow = {
     /** "07:30" — a wall clock, never a datetime (PRD D-02). */
     start_time: string;
     name: string;
-    language: string | null;
     notes: string | null;
     is_active: boolean;
     location: LocationOption;
-    can: { update: boolean };
+    /** Notices that point here, and would stop being published. */
+    schedule_notices_count?: number;
+    can: { update: boolean; delete: boolean };
 };
 
 /** SpecialMassResource */
@@ -81,7 +91,9 @@ export type SpecialMassRow = {
     notes: string | null;
     is_active: boolean;
     location: LocationOption;
-    can: { update: boolean };
+    /** Notices that point here, and would stop being published. */
+    schedule_notices_count?: number;
+    can: { update: boolean; delete: boolean };
 };
 
 /** MassScheduleOptionResource */
@@ -116,15 +128,13 @@ export type ScheduleNoticeRow = {
     location: LocationOption | null;
     mass_schedule: MassScheduleOption | null;
     special_mass: SpecialMassOption | null;
-    can: { update: boolean };
-};
-
-/** MassScheduleController::stats() */
-export type ModuleStats = {
-    active_mass_schedules: number;
-    active_locations: number;
-    upcoming_special_masses: number;
-    visible_notices: number;
+    /**
+     * True when this notice names a target that has been deleted. Null on a
+     * page that did not count, which is the same distinction as the counts
+     * above: unknown is not false.
+     */
+    target_deleted?: boolean | null;
+    can: { update: boolean; delete: boolean };
 };
 
 /** What the notice form's target picker offers. */
