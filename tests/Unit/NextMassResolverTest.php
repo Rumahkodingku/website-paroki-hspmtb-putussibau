@@ -284,11 +284,14 @@ it('ignores an inactive location\'s masses (MASS-07)', function () {
 });
 
 it('ignores a special mass that has already passed (MASS-02)', function () {
+    // Freeze first. past() reads now(), so a factory built before the clock
+    // moves is dated relative to the real day and the mass the test calls
+    // "already passed" can land after the frozen one.
+    atWib('2026-10-05 08:00');
+
     $location = Location::factory()->create();
 
     SpecialMass::factory()->for($location)->past()->create();
-
-    atWib('2026-10-05 08:00');
 
     expect(resolveNextMass())->toBeNull();
 });

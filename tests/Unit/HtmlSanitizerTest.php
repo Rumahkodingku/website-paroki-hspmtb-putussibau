@@ -114,6 +114,13 @@ test('safe html is preserved', function (string $html, string $expected) {
         '<table><tbody><tr><td colspan="2">Gabung</td></tr></tbody></table>',
         '<table><tbody><tr><td colspan="2">Gabung</td></tr></tbody></table>',
     ],
+    'strike' => ['<p><s>Coret</s></p>', '<p><s>Coret</s></p>'],
+    'inline code' => ['<p><code>npm install</code></p>', '<p><code>npm install</code></p>'],
+    'code block' => ['<pre><code>echo 1;</code></pre>', '<pre><code>echo 1;</code></pre>'],
+    'highlight' => ['<p><mark>Sorot</mark></p>', '<p><mark>Sorot</mark></p>'],
+    'superscript' => ['<p>x<sup>2</sup></p>', '<p>x<sup>2</sup></p>'],
+    'subscript' => ['<p>H<sub>2</sub>O</p>', '<p>H<sub>2</sub>O</p>'],
+    'horizontal rule' => ['<p>a</p><hr><p>b</p>', '<p>a</p><hr /><p>b</p>'],
 ]);
 
 test('an external link keeps its href and gains noopener noreferrer', function () {
@@ -150,6 +157,51 @@ test('a published image variant survives with a relative src', function () {
     // from breaking the next time a rich text field is saved.
     expect($this->sanitizer->clean('<img src="/storage/media/variants/abc.webp" alt="Misa" />'))
         ->toBe('<img src="/storage/media/variants/abc.webp" alt="Misa" />');
+});
+
+/*
+|--------------------------------------------------------------------------
+| D-50 - inline style, restricted to text-align
+|--------------------------------------------------------------------------
+|
+| Alignment is the only presentational feature allowed into stored HTML, and it
+| arrives as an inline style. Symfony cannot filter CSS properties, so the
+| sanitizer keeps exactly one declaration and drops the rest; these are the
+| tests that hold that line.
+|
+*/
+
+test('text alignment survives with four allowed values', function (string $align) {
+    expect($this->sanitizer->clean('<p style="text-align: '.$align.'">Teks</p>'))
+        ->toBe('<p style="text-align: '.$align.'">Teks</p>');
+})->with(['left', 'center', 'right', 'justify']);
+
+test('every css declaration other than text-align is dropped', function () {
+    expect($this->sanitizer->clean('<p style="text-align: center; position: fixed; top: 0; background: url(https://evil.test/x)">Teks</p>'))
+        ->toBe('<p style="text-align: center">Teks</p>');
+});
+
+test('an attribute left with no text-align is removed entirely', function () {
+    expect($this->sanitizer->clean('<p style="position: fixed">Teks</p>'))
+        ->toBe('<p>Teks</p>')
+        ->and($this->sanitizer->clean('<p style="x">Teks</p>'))
+        ->toBe('<p>Teks</p>');
+});
+
+test('an encoded or decorated alignment value does not survive', function () {
+    // A value that only renders as "left" after entity decoding must not match,
+    // or the literal-text comparison the restriction relies on is meaningless.
+    expect($this->sanitizer->clean('<p style="text-align: le&#102;t">Teks</p>'))
+        ->toBe('<p>Teks</p>')
+        ->and($this->sanitizer->clean('<p style="text-align: left /*x*/">Teks</p>'))
+        ->toBe('<p>Teks</p>');
+});
+
+test('text alignment is not allowed on a tag the allowlist did not grant it', function () {
+    // style rides on p and the headings; a table cell has it too, but a link
+    // does not, and granting style there would widen the surface for nothing.
+    expect($this->sanitizer->clean('<a href="https://ok.test" style="text-align:center">x</a>'))
+        ->not->toContain('style=');
 });
 
 /*
@@ -230,12 +282,13 @@ test('plain text extraction collapses whitespace', function () {
 |
 */
 
-test('the allowlist is exactly the tags the prd lists', function () {
+test('the allowlist is exactly the tags the prd lists plus the d-50 editor set', function () {
     expect(array_keys((array) config('html.elements')))
         ->toBe([
-            'p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li',
+            'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 'mark', 'sup',
+            'sub', 'hr', 'ul', 'ol', 'li',
             'h2', 'h3', 'h4', 'blockquote', 'a', 'img', 'figure', 'figcaption',
-            'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'table', 'colgroup', 'col', 'thead', 'tbody', 'tr', 'th', 'td',
         ]);
 });
 
@@ -244,7 +297,9 @@ test('the allowlist grants an element no attributes it did not name', function (
 
     expect($elements['a'])->toBe(['href', 'target', 'rel'])
         ->and($elements['img'])->toBe(['src', 'alt'])
-        ->and($elements['p'])->toBe([]);
+        // style is the one presentational attribute allowed, and only on the
+        // block elements, where HtmlSanitizer narrows it to text-align. See D-50.
+        ->and($elements['p'])->toBe(['style']);
 });
 
 test('the sanitizer blocks unknown tags instead of dropping them', function () {

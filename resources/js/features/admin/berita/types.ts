@@ -22,6 +22,8 @@ export type PostRow = {
     /** Sanitized HTML. Only ever rendered back into the editor. */
     content: string;
     featured_image: string | null;
+    /** featured_image resolved to a browser URL, for the picker's preview. */
+    featured_image_url: string | null;
     image_alt: string | null;
     scripture_reference: string | null;
     status: PostStatus;
