@@ -81,7 +81,7 @@ class HtmlSanitizer
     private function blockElementsToSpaces(string $html): string
     {
         return (string) preg_replace(
-            '#<\/?(p|br|div|h[1-6]|ul|ol|li|blockquote|figure|figcaption|table|thead|tbody|tr|td|th)\b[^>]*>#i',
+            '#<\/?(p|br|div|h[1-6]|ul|ol|li|blockquote|figure|figcaption|pre|hr|table|thead|tbody|tr|td|th)\b[^>]*>#i',
             ' ',
             $html,
         );
@@ -128,6 +128,7 @@ class HtmlSanitizer
     private function normalise(string $html): string
     {
         $html = $this->stripRawTextElements($html);
+        $html = $this->restrictTextAlignment($html);
 
         $html = (string) preg_replace('/<\s*h1(\s[^>]*)?>/i', '<h2$1>', $html);
         $html = (string) preg_replace('/<\s*\/\s*h1\s*>/i', '</h2>', $html);
@@ -138,6 +139,44 @@ class HtmlSanitizer
         $html = (string) preg_replace('/<\s*i(\s[^>]*)?>/i', '<em$1>', $html);
 
         return (string) preg_replace('/<\s*\/\s*i\s*>/i', '</em>', $html);
+    }
+
+    /**
+     * Keep text-align on a style attribute and throw the rest of the CSS away.
+     *
+     * D-50 allows a style attribute for text alignment, and text alignment only.
+     * Symfony cannot filter CSS properties — it allows or drops the attribute as
+     * a whole (its W3C reference marks style unsafe) — so the restriction has to
+     * happen here, before the allowlist gets a look at it. Without this, every
+     * rich text field in the application accepts arbitrary inline CSS, which is
+     * a UI-redressing and request-exfiltration surface, not a styling feature.
+     *
+     * Only a declaration that is exactly `text-align: <one of four values>` is
+     * kept. Anything else in the attribute is discarded, and an attribute left
+     * with no declarations is removed entirely, so `<p style="x">` becomes
+     * `<p>` exactly as it did before. The four values are compared as literal
+     * text, so an entity-encoded or otherwise decorated value does not match and
+     * does not survive.
+     *
+     * @see docs/DECISIONS.md D-50
+     */
+    private function restrictTextAlignment(string $html): string
+    {
+        return (string) preg_replace_callback(
+            '/\sstyle\s*=\s*(["\'])(.*?)\1/is',
+            function (array $matches): string {
+                $kept = [];
+
+                foreach (explode(';', $matches[2]) as $declaration) {
+                    if (preg_match('/^\s*text-align\s*:\s*(left|center|right|justify)\s*$/i', $declaration, $align) === 1) {
+                        $kept[] = 'text-align: '.strtolower($align[1]);
+                    }
+                }
+
+                return $kept === [] ? '' : ' style="'.implode('; ', $kept).'"';
+            },
+            $html,
+        );
     }
 
     /**

@@ -7,40 +7,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
-|--------------------------------------------------------------------------
-| Design tokens
-|--------------------------------------------------------------------------
-|
-| Every colour here comes from docs/DESIGN.md. The `semantic:` block of that
-| document maps the shadcn variable names onto the HSPMTB palette, which is
-| why the values are literal hex rather than the OKLCH values the shadcn
-| default ships. DESIGN.md records that the brand colours were approximated
-| from the supplied logo, so keeping the documented value verbatim matters more
-| than matching a colour space.
-|
-| Two rules govern how this file may be extended:
-|
-|   1. Application components use the semantic utilities (bg-primary,
-|      text-muted-foreground, border-border). Brand utilities (bg-navy,
-|      text-gold) exist for surfaces DESIGN.md names explicitly. DESIGN.md
-|      forbids arbitrary values such as bg-[#AB020E] in components.
-|
-|   2. Spacing needs no custom tokens. DESIGN.md asks for a 4/8/12/16/24/32/
-|      48/80/112 scale and Tailwind's default already produces exactly those
-|      values as p-1, p-2, p-3, p-4, p-6, p-8, p-12, p-20 and p-28.
-|
-| Dark mode is not derived. DESIGN.md v1.1 defines it: fourteen dark-* colours,
-| a semantic.dark block, and the rule "Do not use HSPMTB Navy as the global
-| page background". Every value in the .dark block below is one of them, with no
-| color-mix() anywhere.
-|
-| @see docs/DESIGN.md
-| @see docs/DECISIONS.md D-22
-| @see docs/DECISIONS.md D-32
-
-*/
-
 @theme {
     /*
      * Typography. SF Pro is not licensed for web distribution, so per
@@ -520,6 +486,13 @@
  *
  * The elements matched here are exactly config/html.php's allowlist, so nothing
  * needs styling for a tag the sanitizer would have removed anyway.
+ *
+ * The heading steps mirror the mapping components/text.tsx decided for h1-h4
+ * (h1 display-lg, h2 display-md, h3 tagline, h4 body-strong). They were all
+ * text-body-strong here once, which is 17px: the document outline carried no
+ * visual hierarchy at all and picking H2 in the editor changed nothing on
+ * screen. There is no h1 rule because the allowlist has no h1 - h1 is the page
+ * title. See D-51.
  */
 @layer components {
     .rich-text {
@@ -531,15 +504,47 @@
     }
 
     .rich-text h2 {
-        @apply mt-8 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+        @apply mt-8 font-display text-display-md text-balance first:mt-0;
     }
 
     .rich-text h3 {
-        @apply mt-6 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+        @apply mt-6 font-display text-tagline first:mt-0;
     }
 
     .rich-text h4 {
-        @apply mt-6 text-body-strong font-semibold tracking-[-0.374px] first:mt-0;
+        @apply mt-6 text-body-strong first:mt-0;
+    }
+
+    .rich-text s {
+        @apply line-through;
+    }
+
+    .rich-text code {
+        @apply rounded-sm bg-muted px-1.5 py-0.5 font-mono text-caption;
+    }
+
+    .rich-text pre {
+        @apply overflow-x-auto rounded-md bg-navy-dark p-4 text-caption text-white;
+    }
+
+    .rich-text pre code {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
+    .rich-text mark {
+        @apply rounded-sm bg-gold/40 px-0.5;
+    }
+
+    .rich-text sup {
+        @apply align-super text-caption;
+    }
+
+    .rich-text sub {
+        @apply align-sub text-caption;
+    }
+
+    .rich-text hr {
+        @apply my-6 border-hairline;
     }
 
     .rich-text ul {
@@ -595,6 +600,18 @@
 
     .rich-text th {
         @apply bg-muted text-body-strong font-semibold;
+    }
+
+    .rich-text .tiptap {
+        border: none;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .rich-text .tiptap:focus {
+        border: none;
+        outline: none;
+        box-shadow: none;
     }
 }
 

@@ -28,6 +28,11 @@ import {
     PublishedBadge,
 } from '../components/event-status-badge';
 import { CopyIcon, Loader } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Props = {
     events: Paginated<EventRow>;
@@ -157,22 +162,30 @@ export default function Index({
         },
         {
             id: 'actions',
-            header: () => <span className="sr-only">Aksi</span>,
+            header: 'Aksi',
             cell: ({ row }) => (
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-start gap-4">
                     {row.original.can.duplicate ? (
-                        <button
-                            type="button"
-                            onClick={() => duplicate(row.original)}
-                            disabled={duplicating === row.original.id}
-                            className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
-                        >
-                            {duplicating === row.original.id ? (
-                                <Loader className="ml-1 inline h-4 w-4" />
-                            ) : (
-                                <CopyIcon className="ml-1 inline h-4 w-4" />
-                            )}
-                        </button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="button"
+                                    onClick={() => duplicate(row.original)}
+                                    disabled={duplicating === row.original.id}
+                                    className="cursor-pointer rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
+                                >
+                                    {duplicating === row.original.id ? (
+                                        <Loader className="ml-1 inline h-4 w-4" />
+                                    ) : (
+                                        <CopyIcon className="ml-1 inline h-4 w-4" />
+                                    )}
+                                </button>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                                <p>Copy Agenda</p>
+                            </TooltipContent>
+                        </Tooltip>
                     ) : null}
                     <RowActions
                         canUpdate={row.original.can.update}
