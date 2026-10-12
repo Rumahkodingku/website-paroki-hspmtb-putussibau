@@ -25,6 +25,8 @@ export type EventRow = {
     /** Resolved server-side: the master location wins over the free text (EVT-06). */
     location_name: string | null;
     poster_path: string | null;
+    /** poster_path resolved to a browser URL, for the picker's preview. */
+    poster_url: string | null;
     poster_alt: string | null;
     status: EventStatus;
     is_published: boolean;

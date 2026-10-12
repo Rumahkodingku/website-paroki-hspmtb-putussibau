@@ -25,6 +25,11 @@ import type { Option } from '@/types/news-agenda';
 import type { PostFilters, PostFormMeta, PostRow } from '../types';
 import { PinnedBadge, PostStatusBadge } from '../components/post-status-badge';
 import { Eye } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Props = {
     posts: Paginated<PostRow>;
@@ -138,17 +143,25 @@ export default function Index({
         },
         {
             id: 'actions',
-            header: () => <span className="sr-only">Aksi</span>,
+            header: 'Aksi',
             cell: ({ row }) => (
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-start gap-4">
                     {row.original.can.preview ? (
-                        <Link
-                            href={previewPost(row.original.id)}
-                            prefetch
-                            className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-                        >
-                            <Eye className="mr-1 inline h-4 w-4" />
-                        </Link>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Link
+                                    href={previewPost(row.original.id)}
+                                    prefetch
+                                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                >
+                                    <Eye className="mr-1 inline h-4 w-4" />
+                                </Link>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                                <p>Lihat Preview</p>
+                            </TooltipContent>
+                        </Tooltip>
                     ) : null}
                     <RowActions
                         canUpdate={row.original.can.update}

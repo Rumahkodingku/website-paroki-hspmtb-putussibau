@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\MassSchedule;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -402,6 +403,23 @@ it('updates an activity', function () {
         ->assertRedirect();
 
     expect($event->fresh()->title)->toBe('Judul baru');
+});
+
+it('sends the poster as a browser url for the picker', function () {
+    $event = Event::factory()->create([
+        'poster_path' => 'media/variants/4/large.webp',
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get(route('events.edit', $event))
+        ->assertInertia(fn ($page) => $page
+            // The path stays the stored contract; the URL is what <img> reads.
+            ->where('event.poster_path', 'media/variants/4/large.webp')
+            ->where(
+                'event.poster_url',
+                Storage::disk('public')->url('media/variants/4/large.webp'),
+            )
+        );
 });
 
 it('does not change the start when only the title changed', function () {

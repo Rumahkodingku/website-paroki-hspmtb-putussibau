@@ -7,6 +7,7 @@ use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * An activity as the admin list and edit form need it.
@@ -35,6 +36,10 @@ class EventResource extends JsonResource
             'location_id' => $this->location_id,
             'location_name' => $this->displayLocationName(),
             'poster_path' => $this->poster_path,
+            // Path stays the stored contract; the URL is what the image picker's
+            // preview reads. Resolving it here mirrors PublicEventResource and
+            // keeps the /storage convention on the server.
+            'poster_url' => $this->posterUrl(),
             'poster_alt' => $this->poster_alt,
             'status' => $this->status->value,
             'is_published' => $this->is_published,
@@ -50,5 +55,21 @@ class EventResource extends JsonResource
                 'duplicate' => $request->user()?->can('update', $this->resource) ?? false,
             ],
         ];
+    }
+
+    /**
+     * The poster path as a browser URL, or null when there is none.
+     *
+     * poster_path holds a path on the variant disk, so a value pasted into an
+     * <img> would resolve relative to the admin URL the form is on. Resolving it
+     * here mirrors PublicEventResource.
+     */
+    private function posterUrl(): ?string
+    {
+        if ($this->poster_path === null || trim($this->poster_path) === '') {
+            return null;
+        }
+
+        return Storage::disk((string) config('media.variant_disk'))->url($this->poster_path);
     }
 }

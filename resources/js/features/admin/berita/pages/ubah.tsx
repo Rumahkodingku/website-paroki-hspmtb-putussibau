@@ -69,7 +69,7 @@ export default function Edit({
                     statuses={statuses}
                     statusChoices={postStatusChoices}
                     categories={postCategories}
-                    currentImage={post.featured_image}
+                    currentImage={post.featured_image_url}
                     displayTimezone={displayTimezone}
                     submitLabel="Simpan perubahan"
                     onSubmit={(form: PostFormInstance) =>
