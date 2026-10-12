@@ -8,6 +8,7 @@ use App\Models\PostCategory;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -237,6 +238,10 @@ it('stamps published_at with now when publishing without a date', function () {
 });
 
 it('reads a WIB publication date as WIB and stores UTC', function () {
+    // Pinned: the scheduled date below has to be in the future, and a test that
+    // uses the real clock stops being future the day the calendar catches up.
+    Carbon::setTestNow('2026-10-11 09:00:00');
+
     $this->actingAs(superAdmin())
         ->post(route('posts.store'), validPost([
             'status' => PostStatus::Published->value,
@@ -246,6 +251,8 @@ it('reads a WIB publication date as WIB and stores UTC', function () {
 
     expect(Post::query()->firstOrFail()->published_at?->toIso8601String())
         ->toBe('2026-10-12T02:00:00+00:00');
+
+    Carbon::setTestNow();
 });
 
 it('leaves a draft with no publication date', function () {
@@ -415,7 +422,26 @@ it('sends the record to the edit form and nothing else', function () {
             ->component('admin/berita/ubah')
             ->where('post.id', $post->getKey())
             ->where('post.title', 'Artikel')
+            // No image means no URL, not the storage root.
+            ->where('post.featured_image_url', null)
             ->has('postCategories')
+        );
+});
+
+it('sends the featured image as a browser url for the picker', function () {
+    $post = Post::factory()->create([
+        'featured_image' => 'media/variants/9/large.webp',
+    ]);
+
+    $this->actingAs(superAdmin())
+        ->get(route('posts.edit', $post))
+        ->assertInertia(fn (Assert $page) => $page
+            // The path stays the stored contract; the URL is what <img> reads.
+            ->where('post.featured_image', 'media/variants/9/large.webp')
+            ->where(
+                'post.featured_image_url',
+                Storage::disk('public')->url('media/variants/9/large.webp'),
+            )
         );
 });
 

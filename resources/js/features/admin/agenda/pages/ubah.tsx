@@ -82,7 +82,7 @@ export default function Edit({
                     statusChoices={eventStatusChoices}
                     categories={eventCategories}
                     locations={locations}
-                    currentPoster={event.poster_path}
+                    currentPoster={event.poster_url}
                     displayTimezone={displayTimezone}
                     submitLabel="Simpan perubahan"
                     onSubmit={(form: EventFormInstance) =>

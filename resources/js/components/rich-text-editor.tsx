@@ -1,15 +1,37 @@
-import { useEffect, useState } from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { useEffect, useRef, useState } from 'react';
+import { EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Highlight from '@tiptap/extension-highlight';
+import Superscript from '@tiptap/extension-superscript';
+import Subscript from '@tiptap/extension-subscript';
+import TextAlign from '@tiptap/extension-text-align';
+import Image from '@tiptap/extension-image';
+import { TableKit } from '@tiptap/extension-table';
 import {
+    AlignCenter,
+    AlignJustify,
+    AlignLeft,
+    AlignRight,
     Bold,
+    Code,
+    CodeXml,
+    Columns3,
+    Highlighter,
+    ImagePlus,
     Italic,
     Link as LinkIcon,
     List,
     ListOrdered,
+    Minus,
     Quote,
     Redo2,
     RemoveFormatting,
+    Rows3,
+    Strikethrough,
+    Subscript as SubscriptIcon,
+    Superscript as SuperscriptIcon,
+    Table as TableIcon,
+    Trash2,
     Underline as UnderlineIcon,
     Undo2,
     Unlink,
@@ -23,39 +45,23 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-/*
- * Rich text editor, Phase 01 section 23 (Workstream 18).
- *
- * This is a foundation, not an article editor. PRD D-14 chose Tiptap and the
- * roadmap says paragraph, heading, bold, italic, underline, lists, blockquote
- * and link, so those are what is here. Image and table are deliberately absent:
- * image needs the media picker that P10 built as a pipeline but never gave a
- * user interface, and a table button that inserts a table the sanitizer will
- * strip is worse than no button at all. Phase 01 section 23 asks for those two
- * "bila dibutuhkan", and they are not needed yet.
- *
- * Two configurations matter more than the toolbar:
- *
- * Heading levels are 2 to 4 because config/html.php allows h2, h3 and h4 and no
- * h1. h1 is the page title and belongs to the layout. Leaving level 1 on would
- * offer a button whose entire output the server deletes or rewrites, which is a
- * confusing thing to hand an administrator.
- *
- * code, codeBlock, strike and horizontalRule are switched off for the same
- * reason from the other direction: StarterKit enables all four by default and
- * none of them is on the allowlist, so an editor that could produce them would
- * be producing content the server silently destroys.
- *
- * The server is the boundary regardless. Anything posted here is sanitized by
- * UpdateSettingsRequest before it is stored, because the editor being in the
- * browser is not a guarantee about the request body. This component is a
- * convenience, not a control.
- *
- * @see docs/DECISIONS.md D-25
- */
+import { Text } from '@/components/text';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useMediaUpload } from '@/hooks/use-media-upload';
 
 type RichTextEditorProps = {
     /** Sanitized HTML as stored. */
@@ -63,11 +69,6 @@ type RichTextEditorProps = {
     onChange: (html: string) => void;
     id?: string;
     disabled?: boolean;
-    /**
-     * Names the toolbar for assistive technology. Unset, it reads "Alat
-     * pemformat teks"; pass the field label when the form around it already
-     * provides one.
-     */
     label?: string;
 };
 
@@ -79,13 +80,6 @@ type ToolbarButtonProps = {
     disabled?: boolean;
 };
 
-/**
- * One toolbar control.
- *
- * aria-pressed rather than a visual style alone: a screen reader announces the
- * state of a toggle button, and a toolbar where bold looks identical whether or
- * not the current selection is bold is unusable without sight.
- */
 function ToolbarButton({
     label,
     icon: Icon,
@@ -94,18 +88,53 @@ function ToolbarButton({
     disabled = false,
 }: ToolbarButtonProps) {
     return (
-        <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={label}
-            aria-pressed={active}
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={label}
+                    aria-pressed={active}
+                    disabled={disabled}
+                    onClick={onClick}
+                    className={
+                        active ? 'bg-accent text-accent-foreground' : undefined
+                    }
+                >
+                    <Icon />
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
+    );
+}
+
+function ToolbarDivider() {
+    return <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />;
+}
+
+function HeadingButton({
+    label,
+    text,
+    onClick,
+    active,
+    disabled,
+}: {
+    label: string;
+    text: string;
+    onClick: () => void;
+    active: boolean;
+    disabled: boolean;
+}) {
+    return (
+        <ToolbarButton
+            label={label}
+            icon={() => <span className="text-xs font-bold">{text}</span>}
+            active={active}
             disabled={disabled}
             onClick={onClick}
-            className={active ? 'bg-accent text-accent-foreground' : undefined}
-        >
-            <Icon />
-        </Button>
+        />
     );
 }
 
@@ -119,27 +148,46 @@ export function RichTextEditor({
     const [linkDialogOpen, setLinkDialogOpen] = useState(false);
     const [linkValue, setLinkValue] = useState('');
 
+    const [imageDialogOpen, setImageDialogOpen] = useState(false);
+    const [imageAlt, setImageAlt] = useState('');
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const imageUpload = useMediaUpload();
+
     const editor = useEditor({
-        // Renders on the server first so the sanitized HTML is already in the
-        // document when it hydrates. That avoids a flash of an empty editor on
-        // every page that has one.
         immediatelyRender: false,
         editable: !disabled,
         content: value,
         extensions: [
             StarterKit.configure({
-                heading: { levels: [2, 3, 4] },
-                // Not on the allowlist; see the note at the top of this file.
-                code: false,
-                codeBlock: false,
-                strike: false,
-                horizontalRule: false,
+                heading: {
+                    levels: [2, 3, 4],
+                },
+
                 link: {
                     openOnClick: false,
-                    // The server forces rel="noopener noreferrer" on every link,
-                    // but a new tab opened from the editor preview should behave
-                    // the same way.
-                    HTMLAttributes: { rel: 'noopener noreferrer' },
+                    HTMLAttributes: {
+                        rel: 'noopener noreferrer',
+                    },
+                },
+            }),
+            Highlight.configure({
+                multicolor: false,
+            }),
+
+            Superscript,
+            Subscript,
+            TextAlign.configure({
+                types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
+            }),
+
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            }),
+
+            TableKit.configure({
+                table: {
+                    resizable: false,
                 },
             }),
         ],
@@ -148,10 +196,45 @@ export function RichTextEditor({
         },
     });
 
-    // The form owns the value, so a reset() or a server round trip has to be
-    // able to push a new value into the editor. Comparing against getHTML()
-    // rather than the incoming prop is what stops this from resetting the
-    // cursor on every keystroke: getHTML() is what onChange last emitted.
+    const state = useEditorState({
+        editor,
+        selector: ({ editor: current }) => {
+            if (current === null) {
+                return null;
+            }
+
+            const align =
+                (['left', 'center', 'right', 'justify'] as const).find(
+                    (value) => current.isActive({ textAlign: value }),
+                ) ?? null;
+
+            return {
+                isBold: current.isActive('bold'),
+                isItalic: current.isActive('italic'),
+                isUnderline: current.isActive('underline'),
+                isStrike: current.isActive('strike'),
+                isCode: current.isActive('code'),
+                isHighlight: current.isActive('highlight'),
+                isSuperscript: current.isActive('superscript'),
+                isSubscript: current.isActive('subscript'),
+                isParagraph: current.isActive('paragraph'),
+                isH2: current.isActive('heading', { level: 2 }),
+                isH3: current.isActive('heading', { level: 3 }),
+                isH4: current.isActive('heading', { level: 4 }),
+                isBulletList: current.isActive('bulletList'),
+                isOrderedList: current.isActive('orderedList'),
+                isBlockquote: current.isActive('blockquote'),
+                isCodeBlock: current.isActive('codeBlock'),
+                isLink: current.isActive('link'),
+                isInTable: current.isActive('table'),
+                align,
+                canUndo: current.can().undo(),
+                canRedo: current.can().redo(),
+                href: current.getAttributes('link').href as string | undefined,
+            };
+        },
+    });
+
     useEffect(() => {
         if (editor && editor.getHTML() !== value) {
             editor.commands.setContent(value, { emitUpdate: false });
@@ -162,21 +245,13 @@ export function RichTextEditor({
         editor?.setEditable(!disabled);
     }, [editor, disabled]);
 
-    const currentHref = editor?.getAttributes('link').href as
-        | string
-        | undefined;
-
     const openLinkDialog = () => {
-        setLinkValue(currentHref ?? '');
+        setLinkValue(state?.href ?? '');
         setLinkDialogOpen(true);
     };
 
     const applyLink = (href: string) => {
         const trimmed = href.trim();
-
-        // An empty value is how a link is removed here. The alternative is a
-        // separate dialog mode for removing, which is a button that already
-        // exists below.
         if (trimmed === '') {
             editor?.chain().focus().extendMarkRange('link').unsetLink().run();
 
@@ -191,138 +266,393 @@ export function RichTextEditor({
             .run();
     };
 
-    if (!editor) {
+    const openImageDialog = () => {
+        imageUpload.reset();
+        setImageAlt('');
+        setImageDialogOpen(true);
+    };
+
+    const handleImageFile = async (file: File) => {
+        const media = await imageUpload.upload(file, { altText: imageAlt });
+
+        if (media === null) {
+            return;
+        }
+
+        const src =
+            media.variants.find((variant) => variant.name === 'large')?.url ??
+            media.variants.find((variant) => variant.name === 'medium')?.url ??
+            media.variants[0]?.url;
+
+        if (src !== undefined && src !== null) {
+            editor?.chain().focus().setImage({ src, alt: imageAlt }).run();
+        }
+
+        setImageDialogOpen(false);
+        imageUpload.reset();
+    };
+
+    if (!editor || state === null) {
         return <div className="min-h-40" aria-busy="true" />;
     }
 
+    const setAlign = (align: 'left' | 'center' | 'right' | 'justify') =>
+        editor.chain().focus().setTextAlign(align).run();
+
     return (
         <div className="grid gap-2">
-            <div
-                role="toolbar"
-                aria-label={label ?? 'Alat pemformat teks'}
-                className="flex flex-wrap items-center gap-1 rounded-t-md border border-input bg-muted/40 p-1"
-            >
-                <ToolbarButton
-                    label="Tebal"
-                    icon={Bold}
-                    active={editor.isActive('bold')}
-                    disabled={disabled}
-                    onClick={() => editor.chain().focus().toggleBold().run()}
-                />
-                <ToolbarButton
-                    label="Miring"
-                    icon={Italic}
-                    active={editor.isActive('italic')}
-                    disabled={disabled}
-                    onClick={() => editor.chain().focus().toggleItalic().run()}
-                />
-                <ToolbarButton
-                    label="Garis bawah"
-                    icon={UnderlineIcon}
-                    active={editor.isActive('underline')}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleUnderline().run()
-                    }
-                />
-
-                <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />
-
-                <ToolbarButton
-                    label="Subjudul 2"
-                    icon={() => <span className="text-xs font-bold">H2</span>}
-                    active={editor.isActive('heading', { level: 2 })}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleHeading({ level: 2 }).run()
-                    }
-                />
-                <ToolbarButton
-                    label="Subjudul 3"
-                    icon={() => <span className="text-xs font-bold">H3</span>}
-                    active={editor.isActive('heading', { level: 3 })}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleHeading({ level: 3 }).run()
-                    }
-                />
-                <ToolbarButton
-                    label="Paragraf biasa"
-                    icon={() => <span className="text-xs">P</span>}
-                    active={editor.isActive('paragraph')}
-                    disabled={disabled}
-                    onClick={() => editor.chain().focus().setParagraph().run()}
-                />
-
-                <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />
-
-                <ToolbarButton
-                    label="Daftar berbutir"
-                    icon={List}
-                    active={editor.isActive('bulletList')}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleBulletList().run()
-                    }
-                />
-                <ToolbarButton
-                    label="Daftar bernomor"
-                    icon={ListOrdered}
-                    active={editor.isActive('orderedList')}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleOrderedList().run()
-                    }
-                />
-                <ToolbarButton
-                    label="Kutipan"
-                    icon={Quote}
-                    active={editor.isActive('blockquote')}
-                    disabled={disabled}
-                    onClick={() =>
-                        editor.chain().focus().toggleBlockquote().run()
-                    }
-                />
-
-                <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />
-
-                <ToolbarButton
-                    label="Sisipkan tautan"
-                    icon={LinkIcon}
-                    active={editor.isActive('link')}
-                    disabled={disabled}
-                    onClick={openLinkDialog}
-                />
-                {editor.isActive('link') ? (
+            <TooltipProvider>
+                <div
+                    role="toolbar"
+                    aria-label={label ?? 'Alat pemformat teks'}
+                    className="flex flex-wrap items-center gap-1 rounded-t-md border border-input bg-muted/40 p-1"
+                >
                     <ToolbarButton
-                        label="Hapus tautan"
-                        icon={Unlink}
+                        label="Tebal"
+                        icon={Bold}
+                        active={state.isBold}
                         disabled={disabled}
-                        onClick={() => editor.chain().focus().unsetLink().run()}
+                        onClick={() =>
+                            editor.chain().focus().toggleBold().run()
+                        }
                     />
-                ) : null}
-                <ToolbarButton
-                    label="Hapus format"
-                    icon={RemoveFormatting}
-                    disabled={disabled}
-                    onClick={() => editor.chain().focus().unsetAllMarks().run()}
-                />
+                    <ToolbarButton
+                        label="Miring"
+                        icon={Italic}
+                        active={state.isItalic}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleItalic().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Garis bawah"
+                        icon={UnderlineIcon}
+                        active={state.isUnderline}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleUnderline().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Coret"
+                        icon={Strikethrough}
+                        active={state.isStrike}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleStrike().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Kode sebaris"
+                        icon={Code}
+                        active={state.isCode}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleCode().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Sorot"
+                        icon={Highlighter}
+                        active={state.isHighlight}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleHighlight().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Superskrip"
+                        icon={SuperscriptIcon}
+                        active={state.isSuperscript}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleSuperscript().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Subskrip"
+                        icon={SubscriptIcon}
+                        active={state.isSubscript}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleSubscript().run()
+                        }
+                    />
 
-                <span aria-hidden="true" className="mx-1 h-6 w-px bg-border" />
+                    <ToolbarDivider />
 
-                <ToolbarButton
-                    label="Urungkan"
-                    icon={Undo2}
-                    disabled={disabled || !editor.can().undo()}
-                    onClick={() => editor.chain().focus().undo().run()}
-                />
-                <ToolbarButton
-                    label="Ulangi"
-                    icon={Redo2}
-                    disabled={disabled || !editor.can().redo()}
-                    onClick={() => editor.chain().focus().redo().run()}
-                />
-            </div>
+                    <HeadingButton
+                        label="Paragraf biasa"
+                        text="P"
+                        active={state.isParagraph}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().setParagraph().run()
+                        }
+                    />
+                    <HeadingButton
+                        label="Subjudul 2"
+                        text="H2"
+                        active={state.isH2}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor
+                                .chain()
+                                .focus()
+                                .toggleHeading({ level: 2 })
+                                .run()
+                        }
+                    />
+                    <HeadingButton
+                        label="Subjudul 3"
+                        text="H3"
+                        active={state.isH3}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor
+                                .chain()
+                                .focus()
+                                .toggleHeading({ level: 3 })
+                                .run()
+                        }
+                    />
+                    <HeadingButton
+                        label="Subjudul 4"
+                        text="H4"
+                        active={state.isH4}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor
+                                .chain()
+                                .focus()
+                                .toggleHeading({ level: 4 })
+                                .run()
+                        }
+                    />
+
+                    <ToolbarDivider />
+
+                    <ToolbarButton
+                        label="Rata kiri"
+                        icon={AlignLeft}
+                        active={state.align === 'left'}
+                        disabled={disabled}
+                        onClick={() => setAlign('left')}
+                    />
+                    <ToolbarButton
+                        label="Rata tengah"
+                        icon={AlignCenter}
+                        active={state.align === 'center'}
+                        disabled={disabled}
+                        onClick={() => setAlign('center')}
+                    />
+                    <ToolbarButton
+                        label="Rata kanan"
+                        icon={AlignRight}
+                        active={state.align === 'right'}
+                        disabled={disabled}
+                        onClick={() => setAlign('right')}
+                    />
+                    <ToolbarButton
+                        label="Rata kiri kanan"
+                        icon={AlignJustify}
+                        active={state.align === 'justify'}
+                        disabled={disabled}
+                        onClick={() => setAlign('justify')}
+                    />
+
+                    <ToolbarDivider />
+
+                    <ToolbarButton
+                        label="Daftar berbutir"
+                        icon={List}
+                        active={state.isBulletList}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleBulletList().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Daftar bernomor"
+                        icon={ListOrdered}
+                        active={state.isOrderedList}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleOrderedList().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Kutipan"
+                        icon={Quote}
+                        active={state.isBlockquote}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleBlockquote().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Blok kode"
+                        icon={CodeXml}
+                        active={state.isCodeBlock}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().toggleCodeBlock().run()
+                        }
+                    />
+                    <ToolbarButton
+                        label="Garis pemisah"
+                        icon={Minus}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().setHorizontalRule().run()
+                        }
+                    />
+
+                    <ToolbarDivider />
+
+                    <ToolbarButton
+                        label="Sisipkan tautan"
+                        icon={LinkIcon}
+                        active={state.isLink}
+                        disabled={disabled}
+                        onClick={openLinkDialog}
+                    />
+                    {state.isLink ? (
+                        <ToolbarButton
+                            label="Hapus tautan"
+                            icon={Unlink}
+                            disabled={disabled}
+                            onClick={() =>
+                                editor.chain().focus().unsetLink().run()
+                            }
+                        />
+                    ) : null}
+                    <ToolbarButton
+                        label="Sisipkan gambar"
+                        icon={ImagePlus}
+                        disabled={disabled}
+                        onClick={openImageDialog}
+                    />
+
+                    <DropdownMenu>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label="Tabel"
+                                        disabled={disabled}
+                                        className={
+                                            state.isInTable
+                                                ? 'bg-accent text-accent-foreground'
+                                                : undefined
+                                        }
+                                    >
+                                        <TableIcon />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Tabel</TooltipContent>
+                        </Tooltip>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuItem
+                                onSelect={() =>
+                                    editor
+                                        .chain()
+                                        .focus()
+                                        .insertTable({
+                                            rows: 3,
+                                            cols: 3,
+                                            withHeaderRow: true,
+                                        })
+                                        .run()
+                                }
+                            >
+                                <TableIcon />
+                                Sisipkan tabel
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                disabled={!state.isInTable}
+                                onSelect={() =>
+                                    editor.chain().focus().addRowAfter().run()
+                                }
+                            >
+                                <Rows3 />
+                                Tambah baris
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                disabled={!state.isInTable}
+                                onSelect={() =>
+                                    editor.chain().focus().deleteRow().run()
+                                }
+                            >
+                                <Rows3 />
+                                Hapus baris
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                disabled={!state.isInTable}
+                                onSelect={() =>
+                                    editor
+                                        .chain()
+                                        .focus()
+                                        .addColumnAfter()
+                                        .run()
+                                }
+                            >
+                                <Columns3 />
+                                Tambah kolom
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                disabled={!state.isInTable}
+                                onSelect={() =>
+                                    editor.chain().focus().deleteColumn().run()
+                                }
+                            >
+                                <Columns3 />
+                                Hapus kolom
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                disabled={!state.isInTable}
+                                onSelect={() =>
+                                    editor.chain().focus().deleteTable().run()
+                                }
+                            >
+                                <Trash2 />
+                                Hapus tabel
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <ToolbarButton
+                        label="Hapus format"
+                        icon={RemoveFormatting}
+                        disabled={disabled}
+                        onClick={() =>
+                            editor.chain().focus().unsetAllMarks().run()
+                        }
+                    />
+
+                    <ToolbarDivider />
+
+                    <ToolbarButton
+                        label="Urungkan"
+                        icon={Undo2}
+                        disabled={disabled || !state.canUndo}
+                        onClick={() => editor.chain().focus().undo().run()}
+                    />
+                    <ToolbarButton
+                        label="Ulangi"
+                        icon={Redo2}
+                        disabled={disabled || !state.canRedo}
+                        onClick={() => editor.chain().focus().redo().run()}
+                    />
+                </div>
+            </TooltipProvider>
 
             <EditorContent
                 editor={editor}
@@ -380,6 +710,92 @@ export function RichTextEditor({
                             }}
                         >
                             Sisipkan
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Sisipkan gambar</DialogTitle>
+                        <DialogDescription>
+                            Unggah gambar, lalu gambar akan disisipkan pada
+                            posisi kursor setelah diproses.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor={`${id ?? 'rich-text'}-image-alt`}>
+                            Teks alternatif
+                        </Label>
+                        <Input
+                            id={`${id ?? 'rich-text'}-image-alt`}
+                            type="text"
+                            maxLength={255}
+                            placeholder="Contoh: Suasana acara di halaman depan Gereja Paroki"
+                            value={imageAlt}
+                            onChange={(event) =>
+                                setImageAlt(event.target.value)
+                            }
+                        />
+                    </div>
+
+                    <input
+                        ref={imageInputRef}
+                        id={`${id ?? 'rich-text'}-image-file`}
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        className="sr-only"
+                        onChange={(event) => {
+                            const file = event.target.files?.[0];
+
+                            if (file) {
+                                void handleImageFile(file);
+                            }
+
+                            event.target.value = '';
+                        }}
+                    />
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        disabled={imageUpload.uploading}
+                        onClick={() => imageInputRef.current?.click()}
+                    >
+                        {imageUpload.uploading ? 'Memproses…' : 'Pilih gambar'}
+                    </Button>
+
+                    {imageUpload.uploading ? (
+                        <Text
+                            as="p"
+                            variant="caption"
+                            color="muted"
+                            role="status"
+                        >
+                            Gambar sedang diproses menjadi beberapa ukuran.
+                        </Text>
+                    ) : null}
+
+                    {imageUpload.failed ? (
+                        <Text
+                            as="p"
+                            variant="caption"
+                            color="danger"
+                            role="alert"
+                        >
+                            {imageUpload.failed}
+                        </Text>
+                    ) : null}
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setImageDialogOpen(false)}
+                        >
+                            Tutup
                         </Button>
                     </DialogFooter>
                 </DialogContent>

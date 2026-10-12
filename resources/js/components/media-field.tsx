@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/form-fields';
 import { Text } from '@/components/text';
-import type { MediaState } from '@/types/news-agenda';
+import { useMediaUpload } from '@/hooks/use-media-upload';
 
 /*
  * The image picker.
@@ -12,16 +12,14 @@ import type { MediaState } from '@/types/news-agenda';
  * no grid of every image the parish has ever uploaded, because that is a
  * different feature and D-24 leaves it as one.
  *
- * The flow is upload → wait → choose, and the wait is the part that matters.
- * An upload is queued (XC-M1), so a media row exists for a moment with no
- * variants on disk. Storing that id would publish an image that 404s, so the
- * form only accepts `ready` — the same condition the server's rule on media_id
- * checks, which is why both ends agree rather than the browser being the only
- * place the rule exists.
+ * The upload and the wait live in use-media-upload because the rich text
+ * editor's image button needs exactly the same flow. What is left here is the
+ * field: if this fails, the editor still works.
  *
- * Polling rather than a socket: the alternative for this codebase would be a
- * websocket nobody has deployed. A setInterval at 1.5s that stops the moment
- * the status settles is a smaller thing to reason about and to stop working.
+ * A picked file shows immediately through a local object URL, before the
+ * server has processed it. The upload is queued (XC-M1), so the processed
+ * variant does not exist for a moment; without the local preview the admin
+ * stares at an empty box and uploads the same picture twice.
  */
 
 type Props = {
@@ -35,16 +33,13 @@ type Props = {
     altError?: string;
     mediaId: number | null;
     onMediaChange: (mediaId: number | null) => void;
-    /** Absolute or site-relative URL of the image currently stored. */
+    /** Browser URL of the image currently stored. */
     currentUrl: string | null;
     /** Whatever else the form posts, so the same picker edits both. */
     fieldName: string;
     /** Shown when the article or activity has no image at all. */
     emptyHint: string;
 };
-
-/** How often to ask whether the upload has finished. */
-const POLL_MS = 1500;
 
 export function MediaField({
     id,
@@ -61,137 +56,52 @@ export function MediaField({
     emptyHint,
 }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [uploading, setUploading] = useState(false);
-    const [state, setState] = useState<MediaState | null>(null);
-    const [failed, setFailed] = useState<string | null>(null);
+    const { state, uploading, failed, upload } = useMediaUpload();
 
-    // The poll is a ref, not a state, so restarting it on every render does
-    // not restart the timer. A useEffect that depends on `state` and sets an
-    // interval depending on `state` is a loop that only shows up on a slow
-    // connection.
-    const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    // A local object URL, while the upload is in flight. Kept in a ref as well
+    // so the old one can be revoked without a state updater side effect.
+    const [localPreview, setLocalPreview] = useState<string | null>(null);
+    const localPreviewRef = useRef<string | null>(null);
+
+    const replaceLocalPreview = (url: string | null) => {
+        if (
+            localPreviewRef.current !== null &&
+            localPreviewRef.current !== url
+        ) {
+            URL.revokeObjectURL(localPreviewRef.current);
+        }
+
+        localPreviewRef.current = url;
+        setLocalPreview(url);
+    };
 
     useEffect(() => {
         return () => {
-            if (pollRef.current !== null) {
-                clearTimeout(pollRef.current);
+            if (localPreviewRef.current !== null) {
+                URL.revokeObjectURL(localPreviewRef.current);
             }
         };
     }, []);
 
-    const pollUntilSettled = (nextMediaId: number, attempt = 0) => {
-        // A hard ceiling. The job retries three times with a backoff
-        // (config/media.tries), so an upload that is going to fail has failed by
-        // then; a poller that never stops is a request every 1.5s until the tab
-        // closes.
-        if (attempt > 80) {
-            setUploading(false);
-            setFailed(
-                'Pemrosesan gambar terlalu lama. Muat ulang halaman untuk melihat hasilnya.',
-            );
+    const handleFile = async (file: File) => {
+        replaceLocalPreview(URL.createObjectURL(file));
 
-            return;
+        const media = await upload(file, { altText: altValue, fieldName });
+
+        if (media) {
+            onMediaChange(media.id);
         }
 
-        pollRef.current = setTimeout(async () => {
-            try {
-                const response = await fetch(`/admin/media/${nextMediaId}`, {
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`status ${response.status}`);
-                }
-
-                const payload = (await response.json()) as {
-                    media: MediaState;
-                };
-
-                setState(payload.media);
-
-                if (payload.media.status === 'failed') {
-                    setUploading(false);
-                    setFailed(
-                        payload.media.error_message ??
-                            'Gambar gagal diproses. Coba unggah ulang.',
-                    );
-
-                    return;
-                }
-
-                if (payload.media.status === 'ready') {
-                    setUploading(false);
-                    onMediaChange(nextMediaId);
-
-                    return;
-                }
-
-                pollUntilSettled(nextMediaId, attempt + 1);
-            } catch {
-                setUploading(false);
-                setFailed(
-                    'Status gambar tidak dapat dibaca. Coba muat ulang halaman.',
-                );
-            }
-        }, POLL_MS);
+        // The processed variant (or the failure state) has taken over.
+        replaceLocalPreview(null);
     };
 
-    const upload = async (file: File) => {
-        setUploading(true);
-        setFailed(null);
-
-        const body = new FormData();
-        body.append('file', file);
-        body.append('alt_text', altValue);
-        body.append(fieldName, '1');
-
-        try {
-            const response = await fetch('/admin/media', {
-                method: 'POST',
-                body,
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    // Exactly what Inertia's own XHR client sends: the
-                    // XSRF-TOKEN cookie, echoed back in the X-XSRF-TOKEN
-                    // header. A <input type="file"> is not an Inertia form, so
-                    // nothing attaches it for us — and a missing header here is
-                    // a 419 on every upload, which reads as "the file is broken".
-                    'X-XSRF-TOKEN': xsrfToken() ?? '',
-                },
-                credentials: 'same-origin',
-            });
-
-            if (!response.ok) {
-                const payload = (await response.json().catch(() => null)) as {
-                    message?: string;
-                } | null;
-
-                throw new Error(payload?.message ?? 'Unggahan ditolak.');
-            }
-
-            const payload = (await response.json()) as { media: MediaState };
-
-            setState(payload.media);
-            pollUntilSettled(payload.media.id);
-        } catch (error) {
-            setUploading(false);
-            setFailed(
-                error instanceof Error
-                    ? error.message
-                    : 'Gambar gagal diunggah.',
-            );
-        }
-    };
-
-    const preview =
+    const serverPreview =
         state?.variants.find((variant) => variant.name === 'medium')?.url ??
         state?.variants[0]?.url ??
         currentUrl;
 
+    const preview = localPreview ?? serverPreview;
     const hasImage = preview !== null && preview !== undefined;
 
     return (
@@ -231,7 +141,7 @@ export function MediaField({
                                 const file = event.target.files?.[0];
 
                                 if (file) {
-                                    void upload(file);
+                                    void handleFile(file);
                                 }
 
                                 // Cleared so re-picking the same file fires
@@ -309,16 +219,4 @@ export function MediaField({
             </Field>
         </div>
     );
-}
-
-/**
- * The CSRF token, read from the cookie Laravel sets.
- *
- * @see node_modules/@inertiajs/core — its XhrHttpClient reads the same cookie
- * and sends the same header, which is why this is not a second convention.
- */
-function xsrfToken(): string | null {
-    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
-
-    return match ? decodeURIComponent(match[1]) : null;
 }

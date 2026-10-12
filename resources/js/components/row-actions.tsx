@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { InertiaLinkProps } from '@inertiajs/react';
 import { Pencil, Trash } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export type RowActionsProps = {
     canUpdate: boolean;
@@ -22,26 +23,40 @@ export function RowActions({
     return (
         <div className="flex items-center justify-start gap-4">
             {canUpdate && updateHref ? (
-                <Link
-                    href={updateHref}
-                    aria-label="Ubah"
-                    title="Ubah"
-                    className="rounded-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-                >
-                    <Pencil className="size-4" aria-hidden="true" />
-                </Link>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Link
+                            href={updateHref}
+                            aria-label="Ubah"
+                            className="cursor-pointer rounded-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                        >
+                            <Pencil className="size-4" aria-hidden="true" />
+                        </Link>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                        <p>Ubah</p>
+                    </TooltipContent>
+                </Tooltip>
             ) : null}
 
             {canDelete ? (
-                <button
-                    type="button"
-                    onClick={onDelete}
-                    aria-label="Hapus"
-                    title="Hapus"
-                    className="rounded-sm text-red-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-                >
-                    <Trash className="size-4" aria-hidden="true" />
-                </button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            aria-label="Hapus"
+                            className="cursor-pointer rounded-sm text-red-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                        >
+                            <Trash className="size-4" aria-hidden="true" />
+                        </button>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                        <p>Hapus</p>
+                    </TooltipContent>
+                </Tooltip>
             ) : null}
         </div>
     );

@@ -1012,6 +1012,10 @@ Word atau Google Docs tidak boleh bisa menyuntikkan layout atau CSS. Catatan:
 Filament mengizinkan `style` lewat sanitizer-nya, tapi karena CSS di dalamnya
 tidak diparsing — itu alasan menelantarkannya di sini.
 
+> **Diperbarui D-50.** `style` kini diizinkan pada elemen blok, tetapi hanya
+> untuk `text-align`; setiap deklarasi lain dibuang **sebelum** allowlist
+> berlaku. `class` dan `id` tetap dilarang.
+
 `img` hanya boleh `src` dan `alt`. `width`/`height` memang cara menghindari
 layout shift, tapi juga cara markup mengklaim ukuran yang tidak dimiliki, dan
 modul media sudah tahu dimensi asli setiap gambar yang diterbitkan.
@@ -1083,6 +1087,10 @@ Konfigurasi yang lebih penting dari toolbar-nya:
 **Image dan table sengaja tidak ada.** Image butuh image picker dari P10 yang
 tidak pernah dibangun (D-24 §1); roadmap §23 memang mengatakan "bila
 dibutuhkan". Tabel tidak dibutuhkan modul Fase 2 mana pun.
+
+> **Diperbarui D-50.** Keempat tag di atas kini aktif, dan image serta table ada,
+> setelah allowlist diperluas. Image memakai pipeline media yang kini memiliki
+> pickernya.
 
 Editor dimuat lewat `React.lazy`. Radix tidak mount tab yang tidak aktif, jadi
 import lazy cukup untuk mengeluarkan Tiptap dari chunk pengaturan: **438 kB
@@ -3505,3 +3513,137 @@ keputusan yang sah — tetapi harus disertai alasan yang lebih kuat daripada
 sebelumnya.
 
 @see D-48 untuk alasan redirect diberi nama `legacy.*`
+
+---
+
+## D-50 — Editor Tiptap penuh, `style` dibatasi `text-align`, dan pratinjau gambar
+
+**Status:** Accepted · branch `fix/media-preview-rich-text-editor`
+
+Laporan pengguna menemukan dua bug dan satu permintaan: pratinjau gambar tidak
+muncul setelah unggah, UI editor tidak berubah saat toolbar dipakai, dan toolbar
+editor terlalu minim. Ketiganya diperbaiki sekaligus karena satu perubahan
+allowlist menyentuh ketiganya.
+
+### 1. Bug pratinjau: symlink `public/storage` dan path yang bukan URL
+
+Ada **dua** sebab, keduanya harus dibereskan:
+
+1. **`public/storage` tidak ada.** Variant ditulis ke `storage/app/public/...`
+   dan disajikan lewat `/storage/...`, tetapi `composer setup` tidak pernah
+   menjalankan `storage:link`. File-nya ada di disk dan URL-nya 403, jadi
+   pratinjau (dan setiap gambar publik) rusak. `php artisan storage:link`
+   ditambahkan ke `composer setup` supaya tidak terulang.
+2. **Form ubah mengirim path, bukan URL.** `PostResource::featured_image` dan
+   `EventResource::poster_path` berisi `media/variants/1/large.webp`, dan
+   `ubah.tsx` menyerahkannya ke prop `currentUrl` yang didokumentasikan sebagai
+   URL — sehingga `<img src="media/...">` diselesaikan relatif terhadap
+   `/admin/...`. Kedua resource kini menambahkan `featured_image_url` /
+   `poster_url` yang di-resolve `Storage::disk(config('media.variant_disk'))`,
+   sama seperti resource publik. Path aslinya tetap dikirim karena itu kontrak
+   kolom.
+
+Pratinjau lokal (`URL.createObjectURL`) ditambahkan di `MediaField`, supaya
+berkas yang baru dipilih langsung terlihat sebelum job selesai — bukan kotak
+kosong yang membuat admin mengunggah dua kali.
+
+### 2. Bug reaktivitas: `useEditor` v3 tidak re-render per transaksi
+
+Di Tiptap v3 `useEditor` default `shouldRerenderOnTransaction: false`. Toolbar
+membaca `editor.isActive(...)` saat render, jadi nilainya dihitung sekali dan
+beku: formatnya benar-benar diterapkan, tetapi tombolnya tidak pernah menyala.
+Perbaikannya adalah `useEditorState` dengan satu selector untuk seluruh
+permukaan reaktif toolbar (mark, heading, alignment, tabel, undo/redo, href
+tautan). `shouldRerenderOnTransaction: true` sengaja **tidak** dipakai — itu
+perilaku lama yang akan dihapus.
+
+### 3. Toolbar lengkap, dan allowlist diperluas mengikutinya
+
+Aturan yang dipegang: editor tidak boleh bisa menghasilkan tag yang dihapus
+sanitizer. Karena itu memperluas toolbar mengharuskan memperluas
+`config/html.php`:
+
+- Tambahan: `s`, `code`, `pre`, `mark`, `sup`, `sub`, `hr`, `colgroup`, `col`.
+  Ini melewati minimum PRD §22, jadi dicatat di sini sebagai divergensi resmi.
+- Toolbar: strikethrough, kode sebaris, sorot, blok kode, garis pemisah,
+  super/subskrip, H4, tabel (sisip + baris/kolom), gambar lewat picker media,
+  dan perataan teks.
+- Paket baru: `@tiptap/extension-{highlight,superscript,subscript,text-align,image,table}`.
+- Gaya elemen baru ditambahkan ke `.rich-text` di `app.css` dengan token yang ada.
+
+Image dan upload/poll berbagi satu hook, `hooks/use-media-upload.ts`; `MediaField`
+dan dialog gambar editor sama-sama memakainya, supaya aturan "hanya simpan saat
+`ready`" tinggal di satu tempat.
+
+### 4. `style` hanya untuk `text-align`
+
+Perataan teks Tiptap selalu keluar sebagai inline `style`. Symfony
+**tidak** memfilter properti CSS — W3C reference-nya menandai `style` sebagai
+tidak aman, dan attribute itu diterima atau ditolak utuh. Maka pembatasannya
+dilakukan sendiri di `HtmlSanitizer::restrictTextAlignment()`, **sebelum**
+sanitizer Symfony berjalan:
+
+- Hanya deklarasi yang persis `text-align: left|center|right|justify` yang
+  dipertahankan; nilai yang di-encode entitas atau dihias komentar tidak cocok
+  dan ikut dibuang.
+- Attribute yang tidak menyisakan deklarasi dihapus seluruhnya, jadi
+  `<p style="x">` tetap menjadi `<p>` seperti sebelumnya.
+- `style` hanya diberikan ke `p`, `h2`, `h3`, `h4`, `blockquote`, `li`, `th`,
+  `td` — bukan ke `a` atau `img`.
+
+`class` dan `id` tetap dilarang: allowlist `class` tidak bisa dibatasi nilainya,
+dan di aplikasi Tailwind sebuah `class` sembarang (mis. `fixed inset-0`) sama
+berbahayanya dengan CSS inline.
+
+### 5. Yang tidak dilakukan
+
+- Tidak memakai `shouldRerenderOnTransaction` (perilaku lama yang dihapus).
+- Tidak mengizinkan `class`/`id`, dan tidak mengizinkan properti CSS selain
+  `text-align`.
+- Tidak mengubah kontrak path tersimpan (`featured_image`, `poster_path`); URL
+  adalah field tambahan untuk pratinjau.
+
+### 6. Test
+
+- `HtmlSanitizerTest`: daftar tripwire diperbarui, tag baru diuji survive, dan
+  enam kasus baru untuk pembatasan `text-align` (empat nilai, deklarasi lain
+  dibuang, attribute kosong dihapus, nilai ter-encode ditolak, `style` tidak
+  boleh di `a`).
+- `PostTest`/`EventTest`: `featured_image_url`/`poster_url` di-resolve, dan null
+  saat tidak ada gambar.
+- Vitest: tombol toolbar menyala setelah mark aktif (regresi reaktivitas), dan
+  `MediaField` menampilkan object URL lokal sebelum server menjawab.
+- Playwright `editor-media.spec.ts`: klik Tebal → `aria-pressed` menjadi true
+  dan `<strong>` muncul; pilih berkas → `[data-test="media-preview"] img`
+  muncul dengan `src` `blob:`.
+
+@see D-25 untuk allowlist dan alasan sanitizer ada
+
+---
+
+## D-51 — Skala heading rich text mengikuti `Text` h1–h4
+
+**Status:** Accepted · branch `fix/media-preview-rich-text-editor`
+
+`.rich-text h2`, `h3`, dan `h4` semuanya dipetakan ke `text-body-strong` (17px)
+di `app.css`. Akibatnya outline dokumen tidak punya hierarki visual sama sekali:
+memilih H2 di editor mengubah tag menjadi `<h2>` tetapi ukurannya tetap sama
+dengan body, sehingga terlihat seperti toolbar yang tidak bekerja.
+
+`components/text.tsx` sudah menetapkan pemetaan level heading yang benar untuk
+seluruh aplikasi: `h1` display-lg, `h2` display-md, `h3` tagline, `h4`
+body-strong. `.rich-text` hanya belum pernah disamakan dengannya. Keputusan ini
+hanya menyelaraskan, bukan memilih skala baru:
+
+- `.rich-text h2` → `text-display-md` (34px)
+- `.rich-text h3` → `text-tagline` (21px)
+- `.rich-text h4` → `text-body-strong` (17px)
+
+Tidak ada aturan `h1` karena allowlist tidak punya `h1`; h1 adalah judul halaman
+dan toolbar berhenti di H4 (D-25, D-50). Sanitizer tetap mempromosikan `<h1>`
+hasil paste menjadi `<h2>`.
+
+`tests/e2e/editor-media.spec.ts` mengunci regresinya: setelah menekan H2,
+`font-size` dari `<h2>` harus lebih besar daripada teks body.
+
+@see D-25, D-50 untuk allowlist dan editor penuh

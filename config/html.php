@@ -37,9 +37,18 @@ return [
     | relying on that means the admin sees something in the editor and something
     | different after a round trip.
     |
-    | Note what is absent. There is no class, no id and no style, so pasted
-    | Word or Google Docs markup cannot smuggle layout or CSS into the page, and
-    | there is no <code>, <pre>, <s> or <hr> because the PRD does not list them.
+    | D-50 widened this list beyond the PRD minimum: s, code, pre, mark, sup,
+    | sub and hr, so the editor's toolbar can offer a full set of marks and
+    | blocks rather than a toolbar half of whose buttons the server silently
+    | undoes. colgroup and col come with the table extension.
+    |
+    | style is allowed on the block elements, and only there, for text
+    | alignment. It is not trusted: HtmlSanitizer strips every declaration
+    | except text-align with one of four values before this file's rules are
+    | even applied, so no other CSS survives. That is why style appears here
+    | while class and id still do not — a class allowlist would let a pasted
+    | "fixed inset-0" through, and there is no equivalent restriction.
+    |
     | The editor is configured to match this file; see
     | resources/js/components/rich-text-editor.tsx.
     |
@@ -51,28 +60,37 @@ return [
     */
 
     'elements' => [
-        'p' => [],
+        'p' => ['style'],
         'br' => [],
         'strong' => [],
         'em' => [],
         'u' => [],
+        's' => [],
+        'code' => [],
+        'pre' => [],
+        'mark' => [],
+        'sup' => [],
+        'sub' => [],
+        'hr' => [],
         'ul' => [],
         'ol' => [],
         'li' => [],
-        'h2' => [],
-        'h3' => [],
-        'h4' => [],
-        'blockquote' => [],
+        'h2' => ['style'],
+        'h3' => ['style'],
+        'h4' => ['style'],
+        'blockquote' => ['style'],
         'a' => ['href', 'target', 'rel'],
         'img' => ['src', 'alt'],
         'figure' => [],
         'figcaption' => [],
         'table' => [],
+        'colgroup' => [],
+        'col' => [],
         'thead' => [],
         'tbody' => [],
         'tr' => [],
-        'th' => ['colspan', 'rowspan', 'scope'],
-        'td' => ['colspan', 'rowspan'],
+        'th' => ['colspan', 'rowspan', 'scope', 'style'],
+        'td' => ['colspan', 'rowspan', 'style'],
     ],
 
     /*
