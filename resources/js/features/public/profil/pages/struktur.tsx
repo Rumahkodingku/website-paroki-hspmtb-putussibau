@@ -1,29 +1,111 @@
+import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
+import { Seo } from '@/components/seo';
+import { Text } from '@/components/text';
+import { ProfileSubNav } from '../components/profile-subnav';
+import { OrganizationChart } from '../components/organization-chart';
+import type { PublicBoardPeriod } from '../types';
 
-/*
- * /profil/struktur - one static Profile sub-page.
- *
- * Phase 03 placeholder. PRD 5.1 gives each of these its own URL so a bookmarked
- * link keeps working, which is why they are separate pages rather than one page
- * behind a query parameter.
- *
- * Roadmap section 10 permits a placeholder public route for navigation testing
- * and forbids everything else: no query, no props, no business rules, no fake
- * content.
- *
- * The sub-navigation tying these five pages together - DESIGN.md
- * components.ProfileSubNav - arrives with the Profile phase, when there is
- * content to navigate. The breadcrumb is the only hierarchy here for now.
- */
-export default function Struktur() {
+type Props = {
+    periods: PublicBoardPeriod[];
+};
+
+export default function Struktur({ periods }: Props) {
+    const active = periods.find((period) => period.is_active) ?? periods[0];
+    const archive = periods.filter((period) => period.id !== active?.id);
+
     return (
-        <PublicSection>
-            <SectionHeading
-                eyebrow="Profil"
-                title="[ISI: Struktur Kepengurusan]"
-                description="[ISI: periode dan anggota pengurus yang sedang berjalan. Aturan satu periode aktif dan persetujuan tampil kontak berasal dari PRD 7.2.]"
+        <>
+            <Seo
+                title="Struktur Kepengurusan"
+                description="Susunan kepengurusan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau per periode."
             />
-        </PublicSection>
+
+            <Head title="Struktur Kepengurusan" />
+
+            <ProfileSubNav />
+
+            <PublicSection>
+                <div className="space-y-12">
+                    <SectionHeading
+                        eyebrow="Profil"
+                        title="Struktur Kepengurusan"
+                        description="Susunan pengurus paroki per periode."
+                    />
+
+                    {!active ? (
+                        <Text
+                            as="p"
+                            variant="body"
+                            color="muted"
+                            className="rounded-lg border border-dashed border-hairline p-6"
+                        >
+                            Struktur kepengurusan belum dipublikasikan.
+                        </Text>
+                    ) : (
+                        <section
+                            aria-labelledby="periode-aktif"
+                            className="space-y-6"
+                        >
+                            <div>
+                                <Text as="h2" variant="h3" id="periode-aktif">
+                                    {active.name}
+                                </Text>
+                                <Text
+                                    as="p"
+                                    variant="caption-strong"
+                                    color="danger"
+                                >
+                                    Periode aktif · {active.start_year ?? '?'}–
+                                    {active.end_year ?? 'sekarang'}
+                                </Text>
+                                {active.description ? (
+                                    <Text
+                                        as="p"
+                                        variant="body"
+                                        color="muted"
+                                        className="mt-2 max-w-2xl"
+                                    >
+                                        {active.description}
+                                    </Text>
+                                ) : null}
+                            </div>
+
+                            <OrganizationChart members={active.members} />
+                        </section>
+                    )}
+
+                    {archive.length > 0 ? (
+                        <section className="space-y-8 border-t border-divider-soft pt-10">
+                            <Text as="h2" variant="h3">
+                                Arsip periode
+                            </Text>
+
+                            {archive.map((period) => (
+                                <div key={period.id} className="space-y-4">
+                                    <div>
+                                        <Text as="h3" variant="h4">
+                                            {period.name}
+                                        </Text>
+                                        <Text
+                                            as="p"
+                                            variant="caption"
+                                            color="muted"
+                                        >
+                                            {period.start_year ?? '?'}–
+                                            {period.end_year ?? 'sekarang'}
+                                        </Text>
+                                    </div>
+                                    <OrganizationChart
+                                        members={period.members}
+                                    />
+                                </div>
+                            ))}
+                        </section>
+                    ) : null}
+                </div>
+            </PublicSection>
+        </>
     );
 }

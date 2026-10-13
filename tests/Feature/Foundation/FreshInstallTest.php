@@ -36,9 +36,19 @@ use Spatie\Permission\Models\Role;
 | transaction that dropping the schema would destroy along with the isolation
 | between tests.
 |
-| @see docs/DECISIONS.md D-14, D-17, D-27
+| @see docs/DECISIONS.md D-14, D-17, D-27, D-53
 |
 */
+
+/*
+| The chain these tests exercise is the bare install, so demo content is turned
+| off here and on purpose: with it on, the "no credentials" cases would see the
+| demo author and the "twice" case would count two users. The demo is covered by
+| DemoContentSeederTest, which turns the flag back on. See D-53.
+*/
+beforeEach(function () {
+    config(['demo.enabled' => false]);
+});
 
 /**
  * Fill in the bootstrap credentials the way a configured .env would.

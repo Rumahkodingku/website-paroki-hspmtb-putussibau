@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\News;
+namespace App\Http\Controllers\MasterData;
 
 use App\Concerns\PostFormMeta;
 use App\Concerns\SortsAdminList;

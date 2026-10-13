@@ -59,10 +59,16 @@ class AppE2ePrepare extends Command
         // Seeded before migrating so that DatabaseSeeder's SuperAdminSeeder
         // finds the credentials in config rather than skipping, which is the
         // same path a fresh installation takes (see D-17).
+        //
+        // Demo content is turned off here: DatabaseSeeder would otherwise fill
+        // this database with sample articles, masses and profiles, and the
+        // specs would then run against a site that is not the one they expect.
+        // A developer's own `migrate:fresh --seed` still gets the demo. See D-53.
         config([
             'admin.name' => config('e2e.admin.name'),
             'admin.email' => config('e2e.admin.email'),
             'admin.password' => config('e2e.admin.password'),
+            'demo.enabled' => false,
         ]);
 
         $this->call('migrate:fresh', ['--seed' => true, '--force' => true]);
