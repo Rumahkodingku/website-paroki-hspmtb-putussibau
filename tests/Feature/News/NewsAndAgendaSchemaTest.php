@@ -287,9 +287,12 @@ it('seeds the five activity categories PRD 9.7 names, with a valid hex each', fu
 });
 
 it('leaves no content behind after seeding', function () {
-    // D-34's rule, applied here too: a migrate:fresh --seed that leaves a
-    // plausible-looking article or activity behind is how invented parish data
-    // gets shipped. Only categories are reference data.
+    // The base chain seeds only reference data (categories): a bare
+    // `migrate:fresh --seed` leaves no article or activity behind. Demo content
+    // is a separate, flag-guarded seeder (D-53) and is turned off here so this
+    // still asserts the base chain.
+    config(['demo.enabled' => false]);
+
     $this->seed();
 
     expect(Post::count())->toBe(0)

@@ -21,9 +21,11 @@ PHASE 3  — Design System & Public Website Shell
     ↓
 PHASE 4  — Mass Schedule
     ↓
-PHASE 5  — News & Agenda
+PHASE 5  — News & Agenda (DONE)
     ↓
-PHASE 6  — Parish Profile & Services
+PHASE 6A — Parish Profile (Profil Paroki)
+    ↓
+PHASE 6B — Parish Services (Pelayanan)
     ↓
 PHASE 7  — Communities
     ↓
@@ -47,8 +49,9 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 2**  | Authentication & Admin Foundation         | ✅ Done    |
 | **Phase 3**  | Design System & Public Website Shell      | ✅ Done    |
 | **Phase 4**  | Mass Schedule                             | ✅ Done    |
-| **Phase 5**  | News & Agenda                             | ⚪ Planned |
-| **Phase 6**  | Parish Profile & Services                 | ⚪ Planned |
+| **Phase 5**  | News & Agenda                             | ✅ Done    |
+| **Phase 6A** | Parish Profile (Profil Paroki)             | 🚧 Active  |
+| **Phase 6B** | Parish Services (Pelayanan)                | ⚪ Planned |
 | **Phase 7**  | Communities                               | ⚪ Planned |
 | **Phase 8**  | Gallery, Download & Contact               | ⚪ Planned |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
@@ -69,6 +72,7 @@ roadmap/
 ├── phase-03-design-system-public-website-shell.md
 ├── phase-04-mass-schedule.md
 ├── phase-05-news-agenda.md
+├── phase-6A-parish-profile.md
 ├── phase-06-parish-profile-services.md
 ├── phase-07-communities.md
 ├── phase-08-gallery-download-contact.md
@@ -148,35 +152,40 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 5 — Berita & Agenda
+### Phase 6A — Profil Paroki (Parish Profile)
 
-Phase ini membangun dua modul publik: **Berita & Artikel** (`post_categories`,
-`posts`) dan **Agenda Kegiatan** (`event_categories`, `events`), dengan CRUD
-admin di empat URL PRD §5.2 plus dua halaman kategori, halaman publik
-`/berita` dan `/agenda`, unduhan `.ics`, dan command
-`posts:publish-scheduled`.
+Phase ini membangun modul **Profil Paroki**: profil utama (singleton),
+sejarah (narasi + linimasa), wilayah pelayanan (singleton narasi), pastor
+(identitas + riwayat penugasan), dan struktur kepengurusan (periode +
+anggota). Admin panel berada di `/admin/profil/*` dan halaman publik dinamis
+di `/profil`, `/profil/sejarah`, `/profil/wilayah`, `/profil/pastor`, dan
+`/profil/struktur`.
+
+**Visi & Misi tidak termasuk** dalam Phase 6A dan route/halaman/link-nya
+dihapus (D-52). Phase 6B (Pelayanan) dikerjakan terpisah.
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-05-news-&-agenda.md
-plan-implementation/plan-phase-05-news-agenda.md
+roadmap/phase-6A-parish-profile.md
+plan-implementation/plan-phase-06a-parish-profile.md
 ```
 
-Phase 1 sampai Phase 4 selesai lebih dahulu. Keputusan Phase 05 tercatat di
-`docs/DECISIONS.md` D-43 sampai D-47.
+Phase 1 sampai Phase 5 selesai lebih dahulu. Keputusan Phase 6A tercatat di
+`docs/DECISIONS.md` D-52 ke atas.
 
-> **Isi modul belum ada.** Tabel dan form-nya ada; artikel dan kegiatan resmi
-> paroki belum. Tidak ada seeder konten untuk Fase 05 — kategori saja yang
-> diisi, dan itu pun oleh seeder idempotent. Lihat D-34 untuk prinsip yang sama
-> pada Jadwal Misa.
+> **Isi modul belum ada.** Tabel dan form-nya ada; data resmi paroki (sejarah,
+> pastor, pengurus, wilayah) belum. Tidak ada seeder konten — hanya struktur
+> kosong. Lihat D-34 untuk prinsip yang sama pada Jadwal Misa.
 
-Setelah Phase 5 selesai:
+Setelah Phase 6A selesai:
 
 ```text
-Phase 5
+Phase 5 (Done)
    ↓
-Phase 6
+Phase 6A (Active)
+   ↓
+Phase 6B
 ```
 
 ---

@@ -11,13 +11,13 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and forty-three permissions. That is not an oversight: the PRD puts
+One role and sixty-one permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
 Four verbs per entity — `view`, `create`, `update`, `delete` — and no
-permission for anything a module does not have an endpoint for. Two things are
-absent on purpose:
+permission for anything a module does not have an endpoint for. Three things
+are absent on purpose:
 
 - There is no `posts.preview` or `events.duplicate`. Both exist as endpoints,
   and both are gated on `update`, because they write. See
@@ -25,6 +25,11 @@ absent on purpose:
 - There is no `posts.publish` or `events.publish`. Publishing is `is_published`
   on the row, an ordinary field of the update form, not a separate act — the
   same decision as D-37 for `is_active`.
+- The parish profile and the service-area narrative are singletons, so they
+  carry only `parishprofiles.view` and `parishprofiles.update`. There is no
+  create or delete endpoint for a row that must always be exactly one, and the
+  service area rides on the profile's pair rather than growing a sixth group
+  (D-52).
 
 | Group | Permissions |
 | --- | --- |
@@ -41,6 +46,11 @@ absent on purpose:
 | Post categories | `postcategories.view`, `postcategories.create`, `postcategories.update`, `postcategories.delete` |
 | Events | `events.view`, `events.create`, `events.update`, `events.delete` |
 | Event categories | `eventcategories.view`, `eventcategories.create`, `eventcategories.update`, `eventcategories.delete` |
+| Parish profile / service area | `parishprofiles.view`, `parishprofiles.update` |
+| Parish history | `parishhistories.view`, `parishhistories.create`, `parishhistories.update`, `parishhistories.delete` |
+| Pastors (and their assignments) | `pastors.view`, `pastors.create`, `pastors.update`, `pastors.delete` |
+| Board periods | `boardperiods.view`, `boardperiods.create`, `boardperiods.update`, `boardperiods.delete` |
+| Board members | `boardmembers.view`, `boardmembers.create`, `boardmembers.update`, `boardmembers.delete` |
 
 The role:
 

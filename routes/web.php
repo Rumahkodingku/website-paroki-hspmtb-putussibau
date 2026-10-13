@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Agenda\EventCategoryController;
 use App\Http\Controllers\Agenda\EventController;
 use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
@@ -8,12 +7,21 @@ use App\Http\Controllers\MassSchedule\MassScheduleController;
 use App\Http\Controllers\MassSchedule\PublicMassScheduleController;
 use App\Http\Controllers\MassSchedule\ScheduleNoticeController;
 use App\Http\Controllers\MassSchedule\SpecialMassController;
+use App\Http\Controllers\MasterData\EventCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
+use App\Http\Controllers\MasterData\PostCategoryController;
 use App\Http\Controllers\Media\MediaController;
-use App\Http\Controllers\News\PostCategoryController;
 use App\Http\Controllers\News\PostController;
 use App\Http\Controllers\News\PostPreviewController;
 use App\Http\Controllers\News\PublicPostController;
+use App\Http\Controllers\Profil\ParishBoardMemberController;
+use App\Http\Controllers\Profil\ParishBoardPeriodController;
+use App\Http\Controllers\Profil\ParishHistoryItemController;
+use App\Http\Controllers\Profil\ParishProfileController;
+use App\Http\Controllers\Profil\ParishServiceAreaController;
+use App\Http\Controllers\Profil\PastorAssignmentController;
+use App\Http\Controllers\Profil\PastorController;
+use App\Http\Controllers\Profil\PublicParishProfileController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\SettingsController;
@@ -33,12 +41,11 @@ use Inertia\Inertia;
 
 Route::inertia('/', 'public/beranda')->name('home');
 
-Route::inertia('/profil', 'public/profil')->name('profil.index');
-Route::inertia('/profil/sejarah', 'public/profil/sejarah')->name('profil.sejarah');
-Route::inertia('/profil/visi-misi', 'public/profil/visi-misi')->name('profil.visiMisi');
-Route::inertia('/profil/wilayah', 'public/profil/wilayah')->name('profil.wilayah');
-Route::inertia('/profil/pastor', 'public/profil/pastor')->name('profil.pastor');
-Route::inertia('/profil/struktur', 'public/profil/struktur')->name('profil.struktur');
+Route::get('/profil', [PublicParishProfileController::class, 'index'])->name('profil.index');
+Route::get('/profil/sejarah', [PublicParishProfileController::class, 'sejarah'])->name('profil.sejarah');
+Route::get('/profil/wilayah', [PublicParishProfileController::class, 'wilayah'])->name('profil.wilayah');
+Route::get('/profil/pastor', [PublicParishProfileController::class, 'pastor'])->name('profil.pastor');
+Route::get('/profil/struktur', [PublicParishProfileController::class, 'struktur'])->name('profil.struktur');
 
 Route::get('/jadwal-misa', [PublicMassScheduleController::class, 'index'])->name('jadwal-misa.index');
 
@@ -231,6 +238,64 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::get('/master-data/kategori-agenda/{event_category}/ubah', [EventCategoryController::class, 'edit'])->name('event-categories.edit');
         Route::patch('/master-data/kategori-agenda/{event_category}', [EventCategoryController::class, 'update'])->name('event-categories.update');
         Route::delete('/master-data/kategori-agenda/{event_category}', [EventCategoryController::class, 'destroy'])->name('event-categories.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Profil Paroki
+         * ------------------------------------------------------------------
+         |
+         | Route names never collide with the public `profil.*` set (D-49): the
+         | admin side uses `parish-*` / `pastors.*` / `board-*`. The module root
+         | is a named redirect to the first section, because there is no overview
+         | page (D-52). Every redirect must be named or Wayfinder fails to build.
+         |
+         */
+        Route::get('/profil', fn () => to_route('parish-profile.edit'))->name('parish-profile.index');
+
+        // Informasi Profil
+        Route::get('/profil/informasi', [ParishProfileController::class, 'edit'])->name('parish-profile.edit');
+        Route::put('/profil/informasi', [ParishProfileController::class, 'update'])->name('parish-profile.update');
+
+        // Sejarah Paroki
+        Route::get('/profil/sejarah', [ParishHistoryItemController::class, 'index'])->name('parish-histories.index');
+        Route::get('/profil/sejarah/tambah', [ParishHistoryItemController::class, 'create'])->name('parish-histories.create');
+        Route::post('/profil/sejarah', [ParishHistoryItemController::class, 'store'])->name('parish-histories.store');
+        Route::get('/profil/sejarah/{history_item}/ubah', [ParishHistoryItemController::class, 'edit'])->name('parish-histories.edit');
+        Route::patch('/profil/sejarah/{history_item}', [ParishHistoryItemController::class, 'update'])->name('parish-histories.update');
+        Route::delete('/profil/sejarah/{history_item}', [ParishHistoryItemController::class, 'destroy'])->name('parish-histories.destroy');
+
+        // Wilayah Pelayanan
+        Route::get('/profil/wilayah', [ParishServiceAreaController::class, 'edit'])->name('parish-service-area.edit');
+        Route::put('/profil/wilayah', [ParishServiceAreaController::class, 'update'])->name('parish-service-area.update');
+
+        // Pastor Paroki
+        Route::get('/profil/pastor', [PastorController::class, 'index'])->name('pastors.index');
+        Route::get('/profil/pastor/tambah', [PastorController::class, 'create'])->name('pastors.create');
+        Route::post('/profil/pastor', [PastorController::class, 'store'])->name('pastors.store');
+        Route::get('/profil/pastor/{pastor}/ubah', [PastorController::class, 'edit'])->name('pastors.edit');
+        Route::patch('/profil/pastor/{pastor}', [PastorController::class, 'update'])->name('pastors.update');
+        Route::delete('/profil/pastor/{pastor}', [PastorController::class, 'destroy'])->name('pastors.destroy');
+
+        Route::post('/profil/pastor/{pastor}/penugasan', [PastorAssignmentController::class, 'store'])->name('pastor-assignments.store');
+        Route::get('/profil/pastor/{pastor}/penugasan/{assignment}/ubah', [PastorAssignmentController::class, 'edit'])->name('pastor-assignments.edit');
+        Route::patch('/profil/pastor/{pastor}/penugasan/{assignment}', [PastorAssignmentController::class, 'update'])->name('pastor-assignments.update');
+        Route::delete('/profil/pastor/{pastor}/penugasan/{assignment}', [PastorAssignmentController::class, 'destroy'])->name('pastor-assignments.destroy');
+        Route::post('/profil/pastor/{pastor}/penugasan/{assignment}/aktifkan', [PastorAssignmentController::class, 'activate'])->name('pastor-assignments.activate');
+
+        // Struktur Kepengurusan
+        Route::get('/profil/struktur', [ParishBoardPeriodController::class, 'index'])->name('board-periods.index');
+        Route::get('/profil/struktur/periode/tambah', [ParishBoardPeriodController::class, 'create'])->name('board-periods.create');
+        Route::post('/profil/struktur/periode', [ParishBoardPeriodController::class, 'store'])->name('board-periods.store');
+        Route::get('/profil/struktur/periode/{period}/ubah', [ParishBoardPeriodController::class, 'edit'])->name('board-periods.edit');
+        Route::patch('/profil/struktur/periode/{period}', [ParishBoardPeriodController::class, 'update'])->name('board-periods.update');
+        Route::delete('/profil/struktur/periode/{period}', [ParishBoardPeriodController::class, 'destroy'])->name('board-periods.destroy');
+        Route::post('/profil/struktur/periode/{period}/aktifkan', [ParishBoardPeriodController::class, 'activate'])->name('board-periods.activate');
+
+        Route::get('/profil/struktur/periode/{period}/anggota/tambah', [ParishBoardMemberController::class, 'create'])->name('board-members.create');
+        Route::post('/profil/struktur/periode/{period}/anggota', [ParishBoardMemberController::class, 'store'])->name('board-members.store');
+        Route::get('/profil/struktur/periode/{period}/anggota/{member}/ubah', [ParishBoardMemberController::class, 'edit'])->name('board-members.edit');
+        Route::patch('/profil/struktur/periode/{period}/anggota/{member}', [ParishBoardMemberController::class, 'update'])->name('board-members.update');
+        Route::delete('/profil/struktur/periode/{period}/anggota/{member}', [ParishBoardMemberController::class, 'destroy'])->name('board-members.destroy');
 
         /*
          * ------------------------------------------------------------------

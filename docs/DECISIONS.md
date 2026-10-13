@@ -3647,3 +3647,96 @@ hasil paste menjadi `<h2>`.
 `font-size` dari `<h2>` harus lebih besar daripada teks body.
 
 @see D-25, D-50 untuk allowlist dan editor penuh
+
+---
+
+## D-52 — Phase 6A Profil Paroki: schema, scope, dan divergensi dari PRD
+
+**Status:** Accepted · branch `feat/phase-06a-parish-profile`
+
+Phase 6A membangun modul Profil Paroki (`docs/roadmap/phase-6A-parish-profile.md`).
+Audit dan keputusan tercatat lengkap di
+`docs/plan-implementation/plan-phase-06a-parish-profile.md` §1. Ringkasan
+keputusan yang mengikat:
+
+1. **Visi & Misi dihapus total.** Route `profil.visiMisi`, halaman
+   `features/public/profil/pages/visi-misi.tsx`, tautan di
+   `parish-footer.tsx`, dan entri di `PublicRoutesTest` /
+   `PublicPlaceholderRoutesTest` dihapus. Roadmap §3.2/§6A-88/§6A-139 melarang
+   Visi & Misi di dalam Phase 6A. Ini **menyimpang dari PRD §5.1/§7.2** yang
+   masih mendaftarkannya; PRD tidak diedit di tengah fase.
+2. **Profil utama adalah tabel singleton `parish_profiles`**, bukan
+   `parish_profile_sections` key-value (PRD §9.4) dan bukan site settings.
+   Narasi sejarah disimpan pada kolom `history_description`, sehingga
+   key-value generik tidak dibutuhkan dan pintu visi/misi tidak terbuka lagi.
+3. **Pastor memakai dua tabel** `pastors` + `pastor_assignments`
+   (roadmap §6.3), bukan satu tabel `clergy` (PRD §9.4). Satu orang dapat
+   memiliki beberapa periode penugasan dan riwayat tidak terhapus.
+4. **Periode disimpan sebagai tahun** `unsignedSmallInteger`, bukan tanggal
+   penuh, untuk menghindari mengarang tanggal yang tidak diketahui.
+5. **Wilayah pelayanan memakai tabel singleton `parish_service_areas`**
+   (satu narasi + peta), bukan hierarki wilayah/stasi/lingkungan. PRD
+   menegaskan hierarki wilayah dikelola modul Komunitas Phase 7 dan hanya
+   ditampilkan di sini.
+6. **`is_active`/`is_current` (operasional) + `is_published` (visibilitas
+   publik)** dipakai bersama, sesuai pembedaan arti roadmap §7. `is_published`
+   adalah tambahan di luar PRD §9.4.
+7. **Kontak pengurus (`phone`/`show_contact`) tidak disimpan**, menyimpang dari
+   PRD PROF-03 demi roadmap §6A-124 (tidak mempublikasikan data pribadi tanpa
+   persetujuan).
+8. **FK `parish_board_members.parish_board_period_id` = `cascadeOnDelete`.**
+   Dialog hapus periode menyebut jumlah anggota.
+9. **Tidak ada halaman overview admin.** Root `/admin/profil` adalah redirect
+   bernama (mis. `parish-profile.index`) ke halaman Informasi Profil; sidebar
+   menampilkan submenu langsung. Menyimpang dari roadmap §9.2/§6A-44…49.
+10. **Permission mengikuti pola `entity.verb` satu kata:** `parishprofiles.*`
+    (hanya `view`/`update` karena singleton; `parish_service_areas` memakai
+    `parishprofiles.view`/`parishprofiles.update`), `parishhistories.*`,
+    `pastors.*` (termasuk penugasan), `boardperiods.*`, `boardmembers.*`.
+11. **Nama route admin tidak menabrak route publik `profil.*`** yang sudah ada;
+    dipakai prefix `parish-*` (D-48 §3, D-49).
+
+Seeder tidak mengisi satu pun data sejarah/pastor/jabatan/wilayah nyata; tabel
+tetap kosong sampai paroki mengisi melalui admin (prinsip D-34).
+
+@see `docs/roadmap/phase-6A-parish-profile.md`, `docs/plan-implementation/plan-phase-06a-parish-profile.md`
+
+---
+
+## D-53 — Seed data contoh untuk pratinjau (divergensi sadar dari D-14)
+
+**Status:** Accepted · branch `feat/phase-06a-parish-profile`
+
+D-14 mengosongkan `DatabaseSeeder` dari data fabrikasi. Atas permintaan pemilik
+proyek, `DatabaseSeeder` sekarang memanggil `DemoContentSeeder` agar
+`migrate:fresh --seed` menghasilkan situs yang bisa langsung dilihat: jadwal
+misa, artikel, agenda, dan seluruh modul Profil Paroki terisi data contoh.
+
+Isi dan aturannya:
+
+1. **Ini data contoh, bukan data paroki.** Semua nilai adalah karangan untuk
+   pratinjau UI. Tidak ada nomor telepon, alamat, koordinat, atau nama pejabat
+   gereja yang nyata; `location.latitude/longitude`, `maps_url`, dan kontak
+   dibiarkan kosong.
+2. **Idempoten.** Setiap baris dibuat dengan `updateOrCreate` berkunci stabil
+   (slug/nama/tahun), jadi menjalankan seeder berulang mengedit, bukan
+   menduplikasi.
+3. **Satu gambar untuk semua slot.** `public/images.jpg` disalin ke disk privat
+   sebagai `media/originals/dummy-paroki.jpg` lalu diproses lewat pipeline
+   `ImageProcessor` yang sama seperti unggahan biasa, sehingga path varian dan
+   URL-nya identik dengan hasil unggahan nyata.
+4. **Guard E2E.** `config/demo.php` menyediakan `demo.enabled`
+   (`DEMO_SEED`, default `true`). `app:e2e:prepare` menetapkannya `false`
+   sebelum `migrate:fresh --seed`, sehingga database Playwright tetap kosong
+   dan deterministik. `composer setup` memakai `migrate --force` tanpa
+   `--seed`, jadi tidak ikut terisi.
+5. **Akun penulis contoh.** `posts.author_id` adalah FK wajib, jadi seeder
+   membuat akun `redaksi-demo@example.test` (tidak dapat login karena kata
+   sandinya acak). Akun ini bukan paroki dan tidak boleh dipakai di produksi.
+
+Konsekuensi pada media: resource Profil memakai `Media::url($variant)` yang
+membaca relasi `variants`. Karena strict mode melarang lazy-load, seluruh
+controller yang mengirim `*_url` kini meng-eager-load `*.variants`; tanpa itu,
+gambar yang terisi akan melempar lazy-loading violation.
+
+@see docs/DECISIONS.md D-14, D-24, D-52

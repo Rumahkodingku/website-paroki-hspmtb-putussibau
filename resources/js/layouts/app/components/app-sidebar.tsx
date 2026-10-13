@@ -48,6 +48,11 @@ import { list as postsList } from '@/routes/posts';
 import { index as postCategoriesIndex } from '@/routes/post-categories';
 import { list as eventsList } from '@/routes/events';
 import { index as eventCategoriesIndex } from '@/routes/event-categories';
+import { edit as editParishProfile } from '@/routes/parish-profile';
+import { index as parishHistoriesIndex } from '@/routes/parish-histories';
+import { edit as editServiceArea } from '@/routes/parish-service-area';
+import { index as pastorsIndex } from '@/routes/pastors';
+import { index as boardPeriodsIndex } from '@/routes/board-periods';
 
 import { useCurrentUrl } from '@/hooks/use-current-url';
 
@@ -60,7 +65,18 @@ type Entry = {
 
 const CONTENT_ENTRIES: Entry[] = [
     { title: 'Beranda', icon: Sparkles },
-    { title: 'Profil', icon: Users },
+    {
+        title: 'Profil Paroki',
+        href: editParishProfile(),
+        icon: Users,
+        children: [
+            { title: 'Informasi Profil', href: editParishProfile() },
+            { title: 'Sejarah Paroki', href: parishHistoriesIndex() },
+            { title: 'Wilayah Pelayanan', href: editServiceArea() },
+            { title: 'Pastor Paroki', href: pastorsIndex() },
+            { title: 'Struktur Kepengurusan', href: boardPeriodsIndex() },
+        ],
+    },
     {
         title: 'Jadwal Misa',
         href: massSchedulesIndex(),

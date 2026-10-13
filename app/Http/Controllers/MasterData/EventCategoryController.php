@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Agenda;
+namespace App\Http\Controllers\MasterData;
 
 use App\Concerns\EventFormMeta;
 use App\Concerns\SortsAdminList;

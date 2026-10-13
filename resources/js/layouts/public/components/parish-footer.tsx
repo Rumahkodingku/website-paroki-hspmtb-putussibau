@@ -18,7 +18,6 @@ import {
     pastor,
     sejarah,
     struktur,
-    visiMisi,
     wilayah,
 } from '@/routes/profil';
 
@@ -47,7 +46,6 @@ const PROFIL_PAROKI: FooterGroup = {
     title: 'Profil Paroki',
     links: [
         { label: 'Sejarah', href: sejarah() },
-        { label: 'Visi & Misi', href: visiMisi() },
         { label: 'Wilayah Pelayanan', href: wilayah() },
         { label: 'Pastor', href: pastor() },
         { label: 'Struktur Kepengurusan', href: struktur() },

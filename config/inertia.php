@@ -76,6 +76,7 @@ return [
             resource_path('js/features/admin/jadwal-misa/pages'),
             resource_path('js/features/admin/master-data/pages'),
             resource_path('js/features/admin/pengaturan/pages'),
+            resource_path('js/features/admin/profil/pages'),
             resource_path('js/features/public/agenda/pages'),
             resource_path('js/features/public/auth/pages'),
             resource_path('js/features/public/beranda/pages'),
