@@ -32,7 +32,6 @@ const EXPECTED_LINKS: Record<string, string> = {
     Download: '/download',
     'Halaman kontak': '/kontak',
     Sejarah: '/profil/sejarah',
-    'Visi & Misi': '/profil/visi-misi',
     'Wilayah Pelayanan': '/profil/wilayah',
     Pastor: '/profil/pastor',
     'Struktur Kepengurusan': '/profil/struktur',

@@ -132,6 +132,44 @@ class PermissionSeeder extends Seeder
         'schedulenotices.create',
         'schedulenotices.update',
         'schedulenotices.delete',
+
+        /*
+         * Profil Paroki, added with the module in Phase 6A (D-52).
+         *
+         * The profile and the service-area narrative are singletons, so they
+         * have only view/update — there is no create or delete endpoint for a
+         * row that must always be exactly one. The service area therefore reads
+         * parishprofiles.view / parishprofiles.update rather than growing a
+         * sixth group.
+         *
+         * History, pastors (with their assignments), board periods and board
+         * members are ordinary CRUD and carry all four verbs.
+         *
+         * All single words, per D-36: RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/.
+         */
+        'parishprofiles.view',
+        'parishprofiles.update',
+
+        'parishhistories.view',
+        'parishhistories.create',
+        'parishhistories.update',
+        'parishhistories.delete',
+
+        'pastors.view',
+        'pastors.create',
+        'pastors.update',
+        'pastors.delete',
+
+        'boardperiods.view',
+        'boardperiods.create',
+        'boardperiods.update',
+        'boardperiods.delete',
+
+        'boardmembers.view',
+        'boardmembers.create',
+        'boardmembers.update',
+        'boardmembers.delete',
     ];
 
     /**

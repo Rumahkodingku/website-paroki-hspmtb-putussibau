@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
             PostCategorySeeder::class,
             EventCategorySeeder::class,
             SuperAdminSeeder::class,
+            // Sample content for looking at the screens. Guarded by
+            // config('demo.enabled'), which app:e2e:prepare turns off so the
+            // Playwright database stays bare. See D-53.
+            DemoContentSeeder::class,
         ]);
     }
 }

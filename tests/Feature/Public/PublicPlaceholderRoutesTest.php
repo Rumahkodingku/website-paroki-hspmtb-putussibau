@@ -136,7 +136,6 @@ it('names every placeholder route in the route table', function () {
     $expected = [
         'profil.index',
         'profil.sejarah',
-        'profil.visiMisi',
         'profil.wilayah',
         'profil.pastor',
         'profil.struktur',

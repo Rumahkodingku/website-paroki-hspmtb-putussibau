@@ -37,6 +37,15 @@ const MASTER_DATA_SUB_MENU = [
     ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
 ] as const;
 
+/** Profil Paroki was a disabled row until Phase 6A gave it a module. */
+const PROFIL_PAROKI_SUB_MENU = [
+    ['Informasi Profil', '/admin/profil/informasi'],
+    ['Sejarah Paroki', '/admin/profil/sejarah'],
+    ['Wilayah Pelayanan', '/admin/profil/wilayah'],
+    ['Pastor Paroki', '/admin/profil/pastor'],
+    ['Struktur Kepengurusan', '/admin/profil/struktur'],
+] as const;
+
 /**
  * AppSidebar is a fragment of the shell, not a page. Two providers sit above
  * it in the real tree — TooltipProvider in app.tsx and SidebarProvider inside
@@ -68,7 +77,7 @@ function renderSidebar(url = '/admin') {
 async function renderSidebarWithGroupsOpen(url = '/admin') {
     renderSidebar(url);
 
-    for (const title of ['Jadwal Misa', 'Master Data']) {
+    for (const title of ['Jadwal Misa', 'Master Data', 'Profil Paroki']) {
         const button = screen.queryByRole('button', { name: title });
 
         if (button?.getAttribute('aria-expanded') === 'false') {
@@ -234,6 +243,59 @@ describe('AppSidebar — Master Data', () => {
             screen.getAllByRole('link', { name: 'Kategori Agenda' }),
         ).toHaveLength(1);
         expect(screen.getAllByRole('link', { name: 'Lokasi' })).toHaveLength(1);
+    });
+});
+
+describe('AppSidebar — Profil Paroki', () => {
+    it.each(PROFIL_PAROKI_SUB_MENU)('links %s to %s', async (title, href) => {
+        await renderSidebarWithGroupsOpen('/admin');
+
+        expect(screen.getByRole('link', { name: title })).toHaveAttribute(
+            'href',
+            href,
+        );
+    });
+
+    it('gives every child its own URL', async () => {
+        await renderSidebarWithGroupsOpen('/admin');
+
+        const hrefs = PROFIL_PAROKI_SUB_MENU.map(([title]) =>
+            screen.getByRole('link', { name: title }).getAttribute('href'),
+        );
+
+        expect(new Set(hrefs).size).toBe(hrefs.length);
+    });
+
+    it('is a disclosure and not a link', () => {
+        // There is no overview page; the module root redirects, and a group
+        // pointing at a redirect is exactly the failure this file guards.
+        renderSidebar('/admin');
+
+        expect(
+            screen.queryByRole('link', { name: 'Profil Paroki' }),
+        ).toBeNull();
+        expect(
+            screen.getByRole('button', { name: 'Profil Paroki' }),
+        ).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('opens itself when the admin is already inside the module', () => {
+        renderSidebar('/admin/profil/sejarah');
+
+        expect(
+            screen.getByRole('button', { name: 'Profil Paroki' }),
+        ).toHaveAttribute('aria-expanded', 'true');
+        expect(
+            screen.getByRole('link', { name: 'Sejarah Paroki' }),
+        ).toBeVisible();
+    });
+
+    it('stays shut when the admin is somewhere else entirely', () => {
+        renderSidebar('/admin/berita/daftar');
+
+        expect(
+            screen.getByRole('button', { name: 'Profil Paroki' }),
+        ).toHaveAttribute('aria-expanded', 'false');
     });
 });
 
