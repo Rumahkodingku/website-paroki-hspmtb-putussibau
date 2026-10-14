@@ -30,11 +30,12 @@ const JADWAL_MISA_SUB_MENU = [
     ['Pemberitahuan', '/admin/jadwal-misa/pemberitahuan-jadwal'],
 ] as const;
 
-/** Master Data took Lokasi in Phase 05 and is the second group. */
+/** Master Data took Lokasi in Phase 05 and Kategori Pelayanan in Phase 06B. */
 const MASTER_DATA_SUB_MENU = [
     ['Lokasi', '/admin/master-data/lokasi'],
     ['Kategori Berita', '/admin/master-data/kategori-berita'],
     ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
+    ['Kategori Pelayanan', '/admin/master-data/kategori-pelayanan'],
 ] as const;
 
 /** Profil Paroki was a disabled row until Phase 6A gave it a module. */
@@ -316,6 +317,21 @@ describe('AppSidebar — Berita and Agenda', () => {
     });
 });
 
+describe('AppSidebar — Pelayanan', () => {
+    it('links straight to the service list', () => {
+        // Phase 06B gave Pelayanan a module. It is a flat link, not a group: the
+        // list is the destination the sidebar item should open, and there is no
+        // overview page to sit between them (D-54).
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Pelayanan' })).toHaveAttribute(
+            'href',
+            '/admin/pelayanan',
+        );
+        expect(screen.queryByRole('button', { name: 'Pelayanan' })).toBeNull();
+    });
+});
+
 describe('AppSidebar — modules with no route yet', () => {
     it('does not link them', () => {
         renderSidebar('/admin');
@@ -327,7 +343,6 @@ describe('AppSidebar — modules with no route yet', () => {
         // written for.
         expect(screen.queryByRole('link', { name: 'Galeri' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Komunitas' })).toBeNull();
-        expect(screen.queryByRole('link', { name: 'Pelayanan' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Kontak' })).toBeNull();
     });
 });

@@ -127,6 +127,16 @@ test('the foundation permissions are seeded with resource.action names', functio
         'boardmembers.create',
         'boardmembers.update',
         'boardmembers.delete',
+
+        'services.view',
+        'services.create',
+        'services.update',
+        'services.delete',
+
+        'servicecategories.view',
+        'servicecategories.create',
+        'servicecategories.update',
+        'servicecategories.delete',
     ];
 
     expect(Permission::query()->pluck('name')->sort()->values()->all())

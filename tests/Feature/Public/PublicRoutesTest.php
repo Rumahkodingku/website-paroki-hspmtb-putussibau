@@ -62,6 +62,10 @@ dataset('public pages', fn (): array => [
  * Phase 05 did the same for /berita and /agenda, which is why they left this
  * list. Their props are asserted by the modules that own them.
  *
+ * Phase 06B did the same for /pelayanan: it now queries active services and
+ * groups them, so it left this list too. Its props are asserted by
+ * tests/Feature/Pelayanan/PublicServicePageTest.php.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
@@ -72,7 +76,6 @@ dataset('public pages', fn (): array => [
  */
 dataset('placeholder pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
-    '/pelayanan' => ['/pelayanan', 'public/pelayanan'],
     '/komunitas' => ['/komunitas', 'public/komunitas'],
     '/galeri' => ['/galeri', 'public/galeri'],
     '/kontak' => ['/kontak', 'public/kontak'],

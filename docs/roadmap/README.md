@@ -50,8 +50,8 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 3**  | Design System & Public Website Shell      | ✅ Done    |
 | **Phase 4**  | Mass Schedule                             | ✅ Done    |
 | **Phase 5**  | News & Agenda                             | ✅ Done    |
-| **Phase 6A** | Parish Profile (Profil Paroki)             | 🚧 Active  |
-| **Phase 6B** | Parish Services (Pelayanan)                | ⚪ Planned |
+| **Phase 6A** | Parish Profile (Profil Paroki)             | ✅ Done    |
+| **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ⚪ Planned |
 | **Phase 8**  | Gallery, Download & Contact               | ⚪ Planned |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
@@ -152,40 +152,43 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 6A — Profil Paroki (Parish Profile)
+### Phase 6B — Parish Services (Pelayanan)
 
-Phase ini membangun modul **Profil Paroki**: profil utama (singleton),
-sejarah (narasi + linimasa), wilayah pelayanan (singleton narasi), pastor
-(identitas + riwayat penugasan), dan struktur kepengurusan (periode +
-anggota). Admin panel berada di `/admin/profil/*` dan halaman publik dinamis
-di `/profil`, `/profil/sejarah`, `/profil/wilayah`, `/profil/pastor`, dan
-`/profil/struktur`.
+Phase ini membangun modul **Pelayanan**: master kategori layanan, enam layanan
+MVP (`baptis-bayi`, `baptis-dewasa`, `komuni-pertama`, `krisma`, `pernikahan`,
+`perminyakan-orang-sakit`), persyaratan, prosedur, FAQ, jadwal/biaya, kontak per
+layanan, dan opsi Google Form. Admin panel berada di `/admin/pelayanan` dan
+`/admin/master-data/kategori-pelayanan`; halaman publik dinamis di `/pelayanan`
+dan `/pelayanan/{slug}`.
 
-**Visi & Misi tidak termasuk** dalam Phase 6A dan route/halaman/link-nya
-dihapus (D-52). Phase 6B (Pelayanan) dikerjakan terpisah.
+Kategori layanan dinormalisasi dari ENUM PRD ke tabel master `service_categories`
+(D-54). Kontak global tetap satu sumber di Pengaturan Situs; `document_service`
+ditunda ke Phase 8.
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-6A-parish-profile.md
-plan-implementation/plan-phase-06a-parish-profile.md
+roadmap/phase-6B-parish-service.md
+plan-implementation/plan-phase-06b-parish-service.md
 ```
 
-Phase 1 sampai Phase 5 selesai lebih dahulu. Keputusan Phase 6A tercatat di
-`docs/DECISIONS.md` D-52 ke atas.
+Phase 1 sampai Phase 6A selesai lebih dahulu. Keputusan Phase 6B tercatat di
+`docs/DECISIONS.md` D-54.
 
-> **Isi modul belum ada.** Tabel dan form-nya ada; data resmi paroki (sejarah,
-> pastor, pengurus, wilayah) belum. Tidak ada seeder konten — hanya struktur
-> kosong. Lihat D-34 untuk prinsip yang sama pada Jadwal Misa.
+> **Engineering complete; konten belum.** Tabel, CRUD, halaman publik, validasi,
+> dan test ada. Enam layanan di-seed **nonaktif** tanpa `form_url` dan tanpa
+> syarat/prosedur/FAQ — konten resmi (syarat, prosedur, biaya, jadwal, nomor
+> kontak darurat, URL Google Form) harus diisi dan divalidasi paroki sebelum
+> layanan diaktifkan. Lihat D-34/D-54.
 
-Setelah Phase 6A selesai:
+Setelah Phase 6B selesai:
 
 ```text
-Phase 5 (Done)
+Phase 6A (Done)
    ↓
-Phase 6A (Active)
+Phase 6B (Done — engineering complete)
    ↓
-Phase 6B
+Phase 7 — Communities
 ```
 
 ---
