@@ -50,7 +50,12 @@ test.describe('sidebar Master Data', () => {
         });
 
         const hrefs = await Promise.all(
-            ['Lokasi', 'Kategori Berita', 'Kategori Agenda'].map((title) =>
+            [
+                'Lokasi',
+                'Kategori Berita',
+                'Kategori Agenda',
+                'Kategori Pelayanan',
+            ].map((title) =>
                 sidebar
                     .getByRole('link', { name: title, exact: true })
                     .getAttribute('href'),
@@ -74,6 +79,7 @@ test.describe('sidebar Master Data', () => {
             ['Lokasi', '/admin/master-data/lokasi'],
             ['Kategori Berita', '/admin/master-data/kategori-berita'],
             ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
+            ['Kategori Pelayanan', '/admin/master-data/kategori-pelayanan'],
         ] as const) {
             await expect(
                 sidebar.getByRole('link', { name: title, exact: true }),
@@ -134,6 +140,22 @@ test.describe('sidebar Master Data', () => {
         await expect(page).toHaveURL(/\/admin\/master-data\/kategori-agenda$/);
         await expect(
             page.getByRole('heading', { name: 'Kategori Agenda' }),
+        ).toBeVisible();
+    });
+
+    test('klik Kategori Pelayanan benar-benar membuka halamannya', async ({
+        page,
+    }) => {
+        await page
+            .getByRole('navigation', { name: 'Navigasi utama' })
+            .getByRole('link', { name: 'Kategori Pelayanan', exact: true })
+            .click();
+
+        await expect(page).toHaveURL(
+            /\/admin\/master-data\/kategori-pelayanan$/,
+        );
+        await expect(
+            page.getByRole('heading', { name: 'Kategori Pelayanan' }),
         ).toBeVisible();
     });
 

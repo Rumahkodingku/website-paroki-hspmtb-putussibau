@@ -10,10 +10,16 @@ use App\Http\Controllers\MassSchedule\SpecialMassController;
 use App\Http\Controllers\MasterData\EventCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
 use App\Http\Controllers\MasterData\PostCategoryController;
+use App\Http\Controllers\MasterData\ServiceCategoryController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\News\PostController;
 use App\Http\Controllers\News\PostPreviewController;
 use App\Http\Controllers\News\PublicPostController;
+use App\Http\Controllers\Pelayanan\PublicServiceController;
+use App\Http\Controllers\Pelayanan\ServiceController;
+use App\Http\Controllers\Pelayanan\ServiceFaqController;
+use App\Http\Controllers\Pelayanan\ServiceRequirementController;
+use App\Http\Controllers\Pelayanan\ServiceStepController;
 use App\Http\Controllers\Profil\ParishBoardMemberController;
 use App\Http\Controllers\Profil\ParishBoardPeriodController;
 use App\Http\Controllers\Profil\ParishHistoryItemController;
@@ -64,8 +70,8 @@ Route::get('/agenda/{event:slug}', [PublicEventController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('agenda.show');
 
-Route::inertia('/pelayanan', 'public/pelayanan')->name('pelayanan.index');
-Route::get('/pelayanan/{slug}', fn (string $slug) => Inertia::render('public/pelayanan/show', ['slug' => $slug]))
+Route::get('/pelayanan', [PublicServiceController::class, 'index'])->name('pelayanan.index');
+Route::get('/pelayanan/{service:slug}', [PublicServiceController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('pelayanan.show');
 
@@ -239,6 +245,14 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::patch('/master-data/kategori-agenda/{event_category}', [EventCategoryController::class, 'update'])->name('event-categories.update');
         Route::delete('/master-data/kategori-agenda/{event_category}', [EventCategoryController::class, 'destroy'])->name('event-categories.destroy');
 
+        // Kategori Pelayanan — Master Data since D-54 (was a PRD ENUM).
+        Route::get('/master-data/kategori-pelayanan', [ServiceCategoryController::class, 'index'])->name('service-categories.index');
+        Route::get('/master-data/kategori-pelayanan/tambah', [ServiceCategoryController::class, 'create'])->name('service-categories.create');
+        Route::post('/master-data/kategori-pelayanan', [ServiceCategoryController::class, 'store'])->name('service-categories.store');
+        Route::get('/master-data/kategori-pelayanan/{service_category}/ubah', [ServiceCategoryController::class, 'edit'])->name('service-categories.edit');
+        Route::patch('/master-data/kategori-pelayanan/{service_category}', [ServiceCategoryController::class, 'update'])->name('service-categories.update');
+        Route::delete('/master-data/kategori-pelayanan/{service_category}', [ServiceCategoryController::class, 'destroy'])->name('service-categories.destroy');
+
         /*
          * ------------------------------------------------------------------
          * Profil Paroki
@@ -340,6 +354,46 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::delete('/agenda/{event}', [EventController::class, 'destroy'])->name('events.destroy');
         Route::post('/agenda/{event}/duplikat', [EventController::class, 'duplicate'])
             ->name('events.duplicate');
+
+        /*
+         * ------------------------------------------------------------------
+         * Pelayanan
+         * ------------------------------------------------------------------
+         |
+         | `/admin/pelayanan` renders the list itself — there is no overview and
+         | no redirect, because roadmap 6B-041 wants the sidebar item to open the
+         | list directly (D-54).
+         |
+         | The requirement, step and FAQ endpoints are nested under a service and
+         | gated on `services.update` through ServicePolicy; they have no
+         | permission group of their own. The reorder endpoints are POST for the
+         | same reason Phase 04's duplicate endpoint is: a mutation is never a GET.
+         |
+         */
+        Route::get('/pelayanan', [ServiceController::class, 'index'])->name('services.index');
+        Route::get('/pelayanan/tambah', [ServiceController::class, 'create'])->name('services.create');
+        Route::post('/pelayanan', [ServiceController::class, 'store'])->name('services.store');
+        Route::get('/pelayanan/{service}/ubah', [ServiceController::class, 'edit'])->name('services.edit');
+        Route::patch('/pelayanan/{service}', [ServiceController::class, 'update'])->name('services.update');
+        Route::delete('/pelayanan/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+
+        // Persyaratan
+        Route::post('/pelayanan/{service}/persyaratan', [ServiceRequirementController::class, 'store'])->name('service-requirements.store');
+        Route::post('/pelayanan/{service}/persyaratan/urutkan', [ServiceRequirementController::class, 'reorder'])->name('service-requirements.reorder');
+        Route::patch('/pelayanan/{service}/persyaratan/{requirement}', [ServiceRequirementController::class, 'update'])->name('service-requirements.update');
+        Route::delete('/pelayanan/{service}/persyaratan/{requirement}', [ServiceRequirementController::class, 'destroy'])->name('service-requirements.destroy');
+
+        // Prosedur
+        Route::post('/pelayanan/{service}/prosedur', [ServiceStepController::class, 'store'])->name('service-steps.store');
+        Route::post('/pelayanan/{service}/prosedur/urutkan', [ServiceStepController::class, 'reorder'])->name('service-steps.reorder');
+        Route::patch('/pelayanan/{service}/prosedur/{step}', [ServiceStepController::class, 'update'])->name('service-steps.update');
+        Route::delete('/pelayanan/{service}/prosedur/{step}', [ServiceStepController::class, 'destroy'])->name('service-steps.destroy');
+
+        // FAQ
+        Route::post('/pelayanan/{service}/faq', [ServiceFaqController::class, 'store'])->name('service-faqs.store');
+        Route::post('/pelayanan/{service}/faq/urutkan', [ServiceFaqController::class, 'reorder'])->name('service-faqs.reorder');
+        Route::patch('/pelayanan/{service}/faq/{faq}', [ServiceFaqController::class, 'update'])->name('service-faqs.update');
+        Route::delete('/pelayanan/{service}/faq/{faq}', [ServiceFaqController::class, 'destroy'])->name('service-faqs.destroy');
     });
 
 /*

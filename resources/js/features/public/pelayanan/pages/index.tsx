@@ -1,22 +1,71 @@
+import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
+import { Seo } from '@/components/seo';
+import { Text } from '@/components/text';
+import { PublicServiceCard } from '../components/service-card';
+import type { PublicServiceGroup } from '../types';
 
-/*
- * /pelayanan - Phase 03 placeholder.
- *
- * Roadmap section 10 permits a placeholder public route for navigation testing
- * and forbids everything else: no query, no props, no business rules, no fake
- * content. The real Pelayanan page arrives in Fase 5, along with the model, the
- * resource and the scoping rules PRD 7.6 specifies.
- */
-export default function Pelayanan() {
+type Props = {
+    groups: PublicServiceGroup[];
+    hasServices: boolean;
+};
+
+export default function PelayananIndex({ groups, hasServices }: Props) {
     return (
-        <PublicSection>
-            <SectionHeading
-                eyebrow="Pelayanan"
-                title="[ISI: Pelayanan]"
-                description="[ISI: indeks layanan sakramen beserta syarat, langkah, dan FAQ. Modul Pelayanan dibangun pada Fase 5.]"
+        <>
+            <Seo
+                title="Pelayanan"
+                description="Informasi syarat, prosedur, dan cara mendaftar pelayanan sakramen dan pastoral di Paroki HSPMTB Putussibau."
             />
-        </PublicSection>
+
+            <Head title="Pelayanan" />
+
+            <PublicSection>
+                <SectionHeading
+                    eyebrow="Pelayanan"
+                    title="Pelayanan Sakramen & Pastoral"
+                    description="Informasi syarat, prosedur, dan cara mendaftar untuk pelayanan sakramen dan pastoral di paroki."
+                />
+
+                {!hasServices ? (
+                    <Text
+                        as="p"
+                        variant="body"
+                        color="muted"
+                        className="mt-10 rounded-lg border border-dashed border-hairline p-6"
+                    >
+                        Belum ada layanan yang dipublikasikan. Silakan kembali
+                        lagi nanti.
+                    </Text>
+                ) : (
+                    <div className="mt-12 space-y-14">
+                        {groups.map((group) => (
+                            <section
+                                key={group.id}
+                                aria-labelledby={`group-${group.id}`}
+                            >
+                                <Text
+                                    as="h2"
+                                    variant="h3"
+                                    id={`group-${group.id}`}
+                                >
+                                    {group.name}
+                                </Text>
+
+                                <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                    {group.services.map((service) => (
+                                        <PublicServiceCard
+                                            key={service.id}
+                                            service={service}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        ))}
+                    </div>
+                )}
+            </PublicSection>
+        </>
     );
 }
