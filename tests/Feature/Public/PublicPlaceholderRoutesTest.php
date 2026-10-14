@@ -48,7 +48,9 @@ use Illuminate\Support\Facades\Route;
 function placeholderDetailRoutes(): array
 {
     return [
-        'pelayanan' => ['/pelayanan/contoh-pelayanan', 'public/pelayanan/show', 'Fase 6'],
+        // Pelayanan left this list in Phase 06B, replaced by a route with model
+        // binding. Its 404 behaviour is asserted in
+        // tests/Feature/Pelayanan/PublicServicePageTest.php. See D-54.
         'komunitas' => ['/komunitas/contoh-komunitas', 'public/komunitas/show', 'Fase 7'],
         'galeri' => ['/galeri/contoh-album', 'public/galeri/show', 'Fase 8'],
     ];

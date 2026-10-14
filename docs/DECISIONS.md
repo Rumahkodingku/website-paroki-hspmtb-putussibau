@@ -3733,6 +3733,18 @@ Isi dan aturannya:
 5. **Akun penulis contoh.** `posts.author_id` adalah FK wajib, jadi seeder
    membuat akun `redaksi-demo@example.test` (tidak dapat login karena kata
    sandinya acak). Akun ini bukan paroki dan tidak boleh dipakai di produksi.
+6. **Pelayanan (Phase 06B).** `DemoContentSeeder` juga mengisi ketiga
+   `service_categories` (deskripsi + ikon), keenam `services` (ringkasan,
+   pengantar HTML, jadwal, biaya, kontak, `form_url` yang valid-secara-aturan
+   tetapi jelas contoh, dan status), serta ketiga tabel anaknya
+   (`service_requirements`, `service_steps`, `service_faqs`). Keenam layanan
+   **diaktifkan hanya di lapisan demo** agar `/pelayanan` dan detailnya bisa
+   ditinjau, dan keempat kondisi CTA PRD 7.6 diwakili (form terbuka, form
+   ditutup, tanpa form, darurat). Konten diturunkan dari PRD Lampiran A sebagai
+   contoh. Ini **melengkapi pembalikan D-5 untuk lapisan demo saja**:
+   `ServiceSeeder` tetap men-seed keenam layanan nonaktif tanpa `form_url`
+   (D-54), `ServiceSeederTest` tidak berubah, dan `app:e2e:prepare` tetap
+   mematikan demo sehingga database Playwright bersih.
 
 Konsekuensi pada media: resource Profil memakai `Media::url($variant)` yang
 membaca relasi `variants`. Karena strict mode melarang lazy-load, seluruh
@@ -3740,3 +3752,97 @@ controller yang mengirim `*_url` kini meng-eager-load `*.variants`; tanpa itu,
 gambar yang terisi akan melempar lazy-loading violation.
 
 @see docs/DECISIONS.md D-14, D-24, D-52
+
+---
+
+## D-54 — Phase 6B Pelayanan: schema, flag publikasi, dan penundaan dokumen
+
+**Status:** Accepted · branch `feat/phase-06b-parish-service`
+
+Phase 6B membangun Modul Pelayanan (`docs/roadmap/phase-6B-parish-service.md`,
+disusun di `docs/plan-implementation/plan-phase-06b-parish-service.md`). Audit
+codebase dilakukan terhadap `main` pada commit `6b98aed`. Ringkasan keputusan
+yang mengikat:
+
+1. **Kategori layanan dinormalisasi dari ENUM ke tabel master
+   `service_categories`.** PRD §9.8 (dan §Lampiran C) mendefinisikan
+   `services.category` sebagai ENUM `('inisiasi','perkawinan','orang_sakit')`,
+   sedangkan roadmap 6B §3.3/§6.1 mewajibkan kategori dikelola lewat Master Data
+   (halaman `Kategori Pelayanan`). Schema sekarang memakai
+   `services.service_category_id` FK → `service_categories.id`
+   (`restrictOnDelete`). **Tidak** ada enum dan FK yang hidup berdampingan;
+   enum tidak dipertahankan. Ini **menyimpang dari PRD** dan PRD tidak diedit di
+   tengah fase (aturan repo). Kategori di-seed 3: `inisiasi`, `perkawinan`,
+   `orang-sakit`.
+
+2. **Slug kategori memakai tanda hubung `orang-sakit`,** bukan `orang_sakit`
+   seperti enum PRD. Kategori adalah data yang dikelola admin, bukan enum kode,
+   dan roadmap §6.1 menyebut slug `orang-sakit`.
+
+3. **`is_active` adalah satu-satunya flag publikasi layanan.** PRD §9.8 dan
+   roadmap 6B §6.2/§7.1 tidak mengenal `is_published`. Modul 6A memakai
+   `is_active` (operasional) **dan** `is_published` (visibilitas), tetapi
+   dokumen fase 6B yang mengikat di sini, jadi `services`/`service_categories`
+   **tidak** punya `is_published`. Layanan baru selalu `is_active = false`;
+   publik = `is_active = true` dan `deleted_at IS NULL`.
+
+4. **Slug layanan tetap unik saat soft delete** — mengikuti `posts`/`events`
+   (D-45), **bukan** `locations`/`mass_schedules` (D-40). Route publik
+   `/pelayanan/{service:slug}` bind by slug, jadi dua baris yang menjawab satu
+   slug membuat binding ambigu. Karena itu `services` **tidak** memakai generated
+   column `active_marker`, dan `Rule::unique()` pada slug **tanpa**
+   `->withoutTrashed()`.
+
+5. **Soft delete hanya pada `services` dan `service_categories`; tabel anak
+   (requirements/steps/faqs) hard delete** dengan FK `cascadeOnDelete`.
+
+6. **`document_service` ditunda ke Phase 8.** Tabel `documents` belum ada dan
+   roadmap 6B §6.6/6B-073 mengizinkan penundaan. Phase 6B **tidak** membuat
+   migrasi pivot, tabel dokumen, atau modul Download alternatif. Tab "Dokumen
+   Terkait" tidak dibuat; integrasi dicatat sebagai dependency.
+
+7. **Permission: `services.*` + `servicecategories.*` saja** (4 verb masing-masing,
+   total 8; 61 → 69). Tabel anak (requirements/steps/faqs) **tidak** punya grup
+   permission sendiri; endpoint-nya diotorisasi lewat `ServicePolicy`
+   (`services.update`) karena tidak ada halaman daftar mandiri untuk anak
+   (RBAC.md §4). Mengikuti pola penugasan pastor yang ikut `pastors.*`.
+
+8. **Route admin root `/admin/pelayanan` merender Daftar Pelayanan langsung**
+   (nama route `services.index`), bukan redirect pola D-42. Roadmap 6B-041
+   memintanya sebagai tujuan langsung item sidebar; tidak ada halaman overview.
+
+9. **"Terakhir diperbarui" (SVC-03) memakai `$touches = ['service']`** pada tiga
+   model anak, sehingga `services.updated_at` berubah saat anak dibuat, diubah,
+   dihapus, atau diurutkan.
+
+10. **Kontak global tetap satu sumber di `site_settings`.** Fallback kontak
+    layanan: kontak khusus layanan → `site_settings` (`contact_phone`/
+    `contact_whatsapp`) → pesan teks sopan. Tidak ada halaman/tabel/route
+    Kontak kedua (PRD KON-04, AC-SVC-14).
+
+11. **Util normalisasi kontak `App\Support\PhoneNumber`** (`toTel()`,
+    `toWhatsApp()`) dibuat di Phase 6B dan dipakai ulang halaman Kontak Phase 8
+    (PRD KON-01).
+
+12. **Allowlist ikon `config/service-icons.php`** adalah sumber kebenaran key
+    ikon yang valid; `resources/js/components/service-icon.tsx` merender Lucide
+    dengan fallback netral. Admin tidak dapat mengirim kode ikon arbitrary.
+
+13. **`docs/ADMIN_GUIDE.md` tidak dibuat pada Phase 6B** (ditunda atas
+    keputusan pemilik proyek). Dokumentasi yang diperbarui hanya
+    `docs/DECISIONS.md`, `docs/RBAC.md`, dan `docs/roadmap/README.md`.
+
+14. **Form layanan dipecah per tab, bukan satu `<form>` yang membungkus semua
+    tab.** Dialog anak (persyaratan, prosedur, FAQ) di-portal Radix ke `<body>`
+    tetapi tetap keturunan React dari pembukanya; submit di dalam dialog
+    menggelembung lewat React ke `<form>` induk dan mengirim PATCH layanan,
+    bukan store anak. Satu `<form>` per tab skalar (Informasi Umum, Jadwal &
+    Biaya, Kontak & Pendaftaran) memakai instance `useForm` yang sama, sehingga
+    tidak ada form induk untuk digelembungi. Ditemukan dan ditutup oleh
+    `tests/e2e/pelayanan.spec.ts`.
+
+Seeder hanya membuat struktur: 3 kategori dan 6 layanan (nonaktif,
+`form_url = null`). Tidak ada persyaratan/prosedur/FAQ contoh — Lampiran A PRD
+tidak ditampilkan seolah konten resmi (prinsip D-34/D-14).
+
+@see `docs/roadmap/phase-6B-parish-service.md`, `docs/plan-implementation/plan-phase-06b-parish-service.md`, `docs/DECISIONS.md` D-34, D-40, D-45, D-52

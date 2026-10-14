@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers\MasterData;
+
+use App\Concerns\ServiceFormMeta;
+use App\Concerns\SortsAdminList;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Pelayanan\StoreServiceCategoryRequest;
+use App\Http\Requests\Pelayanan\UpdateServiceCategoryRequest;
+use App\Http\Resources\Pelayanan\ServiceCategoryResource;
+use App\Models\ServiceCategory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ServiceCategoryController extends Controller
+{
+    use ServiceFormMeta;
+    use SortsAdminList;
+
+    public function index(Request $request): Response
+    {
+        Gate::authorize('viewAny', ServiceCategory::class);
+
+        $search = $request->string('search')->toString();
+        $status = $request->string('status')->toString();
+
+        $categories = ServiceCategory::query()
+            ->withCount('services')
+            ->when($search !== '', fn (Builder $query) => $query
+                ->where('name', 'like', "%{$search}%"))
+            ->when(
+                in_array($status, ['active', 'inactive'], true),
+                fn (Builder $query) => $query->where('is_active', $status === 'active')
+            );
+
+        $categories = $this->applyAdminSort(
+            $categories,
+            $request,
+            [
+                'name' => 'service_categories.name',
+                'sort_order' => 'service_categories.sort_order',
+                'is_active' => 'service_categories.is_active',
+            ],
+            [['service_categories.sort_order', 'asc']],
+        )->paginate(15)->withQueryString();
+
+        return Inertia::render('admin/master-data/kategori-pelayanan/index', [
+            'categories' => ServiceCategoryResource::collection($categories),
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+                'sort' => $request->string('sort')->toString(),
+                'direction' => $request->string('direction')->toString(),
+            ],
+            ...$this->serviceFormMeta(),
+        ]);
+    }
+
+    public function create(): Response
+    {
+        Gate::authorize('create', ServiceCategory::class);
+
+        return Inertia::render('admin/master-data/kategori-pelayanan/tambah', [
+            ...$this->serviceFormMeta(),
+        ]);
+    }
+
+    public function store(StoreServiceCategoryRequest $request): RedirectResponse
+    {
+        ServiceCategory::create($request->validated());
+
+        return to_route('service-categories.index')
+            ->with('success', __('Kategori pelayanan berhasil ditambahkan.'));
+    }
+
+    public function edit(ServiceCategory $serviceCategory): Response
+    {
+        Gate::authorize('update', $serviceCategory);
+
+        return Inertia::render('admin/master-data/kategori-pelayanan/ubah', [
+            'category' => ServiceCategoryResource::make($serviceCategory)->resolve(),
+            ...$this->serviceFormMeta(),
+        ]);
+    }
+
+    public function update(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory): RedirectResponse
+    {
+        $serviceCategory->update($request->validated());
+
+        return to_route('service-categories.index')
+            ->with('success', __('Kategori pelayanan berhasil diperbarui.'));
+    }
+
+    public function destroy(ServiceCategory $serviceCategory): RedirectResponse
+    {
+        Gate::authorize('delete', $serviceCategory);
+
+        $services = $serviceCategory->services()->withTrashed()->count();
+
+        if ($services > 0) {
+            return to_route('service-categories.index')->withErrors([
+                'category' => __('Kategori tidak dapat dihapus karena masih dipakai :count layanan. Pindahkan layanan tersebut atau nonaktifkan kategorinya.', [
+                    'count' => $services,
+                ]),
+            ]);
+        }
+
+        $serviceCategory->delete();
+
+        return to_route('service-categories.index')
+            ->with('success', __('Kategori pelayanan berhasil dihapus.'));
+    }
+}

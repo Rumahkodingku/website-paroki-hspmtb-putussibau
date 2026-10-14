@@ -170,6 +170,30 @@ class PermissionSeeder extends Seeder
         'boardmembers.create',
         'boardmembers.update',
         'boardmembers.delete',
+
+        /*
+         * Pelayanan, added with the module in Phase 6B (D-54).
+         *
+         * Two groups only. The requirement/step/FAQ endpoints have no list page
+         * of their own — they are tabs inside a service — so they are authorized
+         * through ServicePolicy on `services.update` rather than growing three
+         * permission groups nothing would map to a screen (RBAC.md section 4).
+         *
+         * Categories are a master table, managed from Master Data, so they carry
+         * their own four verbs like locations and the other categories do.
+         *
+         * All single words, per D-36: RbacFoundationTest asserts every permission
+         * matches /^[a-z]+\.[a-z]+$/.
+         */
+        'services.view',
+        'services.create',
+        'services.update',
+        'services.delete',
+
+        'servicecategories.view',
+        'servicecategories.create',
+        'servicecategories.update',
+        'servicecategories.delete',
     ];
 
     /**
