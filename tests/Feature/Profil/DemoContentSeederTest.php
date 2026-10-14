@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Resources\Public\Pelayanan\PublicServiceDetailResource;
 use App\Models\Event;
 use App\Models\MassSchedule;
 use App\Models\Media;
@@ -7,6 +8,11 @@ use App\Models\ParishBoardPeriod;
 use App\Models\ParishProfile;
 use App\Models\PastorAssignment;
 use App\Models\Post;
+use App\Models\Service;
+use App\Models\ServiceCategory;
+use App\Models\ServiceFaq;
+use App\Models\ServiceRequirement;
+use App\Models\ServiceStep;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -40,6 +46,40 @@ it('fills every module with published sample content', function () {
         ->and(MassSchedule::query()->count())->toBeGreaterThan(0);
 });
 
+it('fills and activates the service module for preview', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    $services = Service::query()->active()->get();
+
+    // ServiceSeeder creates the six services inactive; the demo seeder activates
+    // them so /pelayanan is populated. Production never reaches this branch.
+    expect($services)->toHaveCount(6);
+
+    foreach ($services as $service) {
+        expect($service->requirements()->count())->toBeGreaterThan(0)
+            ->and($service->steps()->count())->toBeGreaterThan(0)
+            ->and($service->faqs()->count())->toBeGreaterThan(0);
+    }
+
+    // All four CTA states of PRD 7.6 are represented, so each can be reviewed.
+    $states = $services
+        ->map(fn (Service $service): string => (string) PublicServiceDetailResource::make($service)
+            ->toArray(request())['cta']['state'])
+        ->unique()
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($states)->toBe(['contact', 'emergency', 'form_closed', 'form_open']);
+});
+
+it('gives every category a description and every service a thumbnail', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    expect(ServiceCategory::query()->whereNull('description')->count())->toBe(0)
+        ->and(Service::query()->whereNull('thumbnail_media_id')->count())->toBe(0);
+});
+
 it('keeps exactly one pastor in office and one active period', function () {
     $this->seed(DatabaseSeeder::class);
 
@@ -66,6 +106,10 @@ it('is idempotent across a second run', function () {
         Event::query()->count(),
         MassSchedule::query()->count(),
         Media::query()->count(),
+        Service::query()->count(),
+        ServiceRequirement::query()->count(),
+        ServiceStep::query()->count(),
+        ServiceFaq::query()->count(),
     ];
 
     $this->seed(DatabaseSeeder::class);
@@ -76,6 +120,10 @@ it('is idempotent across a second run', function () {
         Event::query()->count(),
         MassSchedule::query()->count(),
         Media::query()->count(),
+        Service::query()->count(),
+        ServiceRequirement::query()->count(),
+        ServiceStep::query()->count(),
+        ServiceFaq::query()->count(),
     ])->toBe($before);
 });
 

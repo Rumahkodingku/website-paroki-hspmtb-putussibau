@@ -6,6 +6,7 @@ import {
     ChevronRight,
     Download,
     Globe,
+    HandHeart,
     Images,
     LayoutGrid,
     ListChecks,
@@ -48,6 +49,8 @@ import { list as postsList } from '@/routes/posts';
 import { index as postCategoriesIndex } from '@/routes/post-categories';
 import { list as eventsList } from '@/routes/events';
 import { index as eventCategoriesIndex } from '@/routes/event-categories';
+import { index as servicesIndex } from '@/routes/services';
+import { index as serviceCategoriesIndex } from '@/routes/service-categories';
 import { edit as editParishProfile } from '@/routes/parish-profile';
 import { index as parishHistoriesIndex } from '@/routes/parish-histories';
 import { edit as editServiceArea } from '@/routes/parish-service-area';
@@ -105,9 +108,10 @@ const CONTENT_ENTRIES: Entry[] = [
             { title: 'Lokasi', href: locationsIndex() },
             { title: 'Kategori Berita', href: postCategoriesIndex() },
             { title: 'Kategori Agenda', href: eventCategoriesIndex() },
+            { title: 'Kategori Pelayanan', href: serviceCategoriesIndex() },
         ],
     },
-    { title: 'Pelayanan', icon: Sparkles },
+    { title: 'Pelayanan', href: servicesIndex(), icon: HandHeart },
     { title: 'Komunitas', icon: Users },
     { title: 'Galeri', icon: Images },
     { title: 'Kontak', icon: Mail },

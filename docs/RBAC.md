@@ -11,7 +11,7 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and sixty-one permissions. That is not an oversight: the PRD puts
+One role and sixty-nine permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
@@ -22,6 +22,10 @@ are absent on purpose:
 - There is no `posts.preview` or `events.duplicate`. Both exist as endpoints,
   and both are gated on `update`, because they write. See
   `EventResource`'s `can` block for the shape and §4 for why.
+- There is no `servicerequirements.*`, `servicesteps.*` or `servicefaqs.*`.
+  Requirements, steps and FAQs are tabs inside a service and have no list page
+  of their own, so their endpoints are gated on `services.update` through
+  `ServicePolicy` (D-54).
 - There is no `posts.publish` or `events.publish`. Publishing is `is_published`
   on the row, an ordinary field of the update form, not a separate act — the
   same decision as D-37 for `is_active`.
@@ -51,6 +55,8 @@ are absent on purpose:
 | Pastors (and their assignments) | `pastors.view`, `pastors.create`, `pastors.update`, `pastors.delete` |
 | Board periods | `boardperiods.view`, `boardperiods.create`, `boardperiods.update`, `boardperiods.delete` |
 | Board members | `boardmembers.view`, `boardmembers.create`, `boardmembers.update`, `boardmembers.delete` |
+| Services | `services.view`, `services.create`, `services.update`, `services.delete` |
+| Service categories | `servicecategories.view`, `servicecategories.create`, `servicecategories.update`, `servicecategories.delete` |
 
 The role:
 
