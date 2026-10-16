@@ -3846,3 +3846,403 @@ Seeder hanya membuat struktur: 3 kategori dan 6 layanan (nonaktif,
 tidak ditampilkan seolah konten resmi (prinsip D-34/D-14).
 
 @see `docs/roadmap/phase-6B-parish-service.md`, `docs/plan-implementation/plan-phase-06b-parish-service.md`, `docs/DECISIONS.md` D-34, D-40, D-45, D-52
+
+---
+
+## D-55 — Phase 07 Komunitas: schema, gambar, area, dan navigasi
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+Phase 07 membangun Modul Komunitas (`docs/roadmap/phase-07-communities.md`,
+disusun di `docs/plan-implementation/plan-phase-07-communities.md`). Audit
+codebase dilakukan terhadap `main` pada commit `578182d`. Ringkasan keputusan
+yang mengikat:
+
+1. **Kategori memakai tabel master `community_categories`, bukan
+   `community_types` + `group enum`.** PRD §7.7/§9.9 mendefinisikan
+   `community_types` dengan kolom `group enum('organisasi','doa_pelayanan')`,
+   sedangkan roadmap §1.1/§5.1 mewajibkan `community_categories` dan melarang
+   enum kategori. Kategori adalah data yang dikelola admin. Ini **menyimpang dari
+   PRD** dan PRD tidak diedit di tengah fase (aturan repo).
+
+2. **Logo & thumbnail memakai FK `*_media_id` ke tabel `media`, bukan kolom
+   `logo_path`/`thumbnail_path`.** Roadmap §5.2.3 menyebut kolom string, tetapi
+   seluruh modul terbaru memakai pipeline media: `parish_profiles.logo_media_id`,
+   `pastors.photo_media_id`, `services.thumbnail_media_id`. `communities` memakai
+   `logo_media_id` + `logo_alt` dan `thumbnail_media_id` + `thumbnail_alt`
+   (nullable, `nullOnDelete`), diunggah via `MediaField`, divalidasi
+   `Rule::exists('media','id')->where('status', Ready)`. Ini **divergensi sadar**
+   dari roadmap §5.2.3.
+
+3. **`areas` diperluas dari roadmap §5.3.** Roadmap §5.3 membatasi `type` ke
+   `wilayah`/`lingkungan` tanpa field pengurus; PRD §9.9/Lampiran C menambah
+   `stasi`, `leader_name`, `contact_phone`, `show_contact`, `prayer_schedule`
+   (**catatan:** `prayer_schedule` kemudian dihapus di D-58).
+   Schema mengikuti PRD (enum `AreaType`: `wilayah`/`lingkungan`/`stasi`), dan
+   **menyimpang dari roadmap §5.3**. Hierarki (PRD COM-02): `wilayah`/`stasi`
+   berparent null, `lingkungan` wajib berparent `wilayah` (tidak boleh `stasi`),
+   maksimal dua tingkat, tanpa siklus, `lingkungan` tidak boleh punya anak.
+   Aturan ini divalidasi di server.
+
+4. **(*D-58 terbaru:* field `prayer_schedule` sudah tidak ada.)
+   `leader_name`/`contact_phone`/`prayer_schedule` area dipublikasikan di
+   halaman detail komunitas, dengan privasi server-side.** Roadmap §7 hanya
+   mendefinisikan `/komunitas` dan `/komunitas/{slug}`; tidak ada halaman area
+   publik. Ini **ekstensi sadar** atas roadmap §7: area yang direlasikan ke
+   komunitas dirender di section "Wilayah Pelayanan", menampilkan nama, tipe, dan
+   `prayer_schedule`; `leader_name` + `contact_phone` **dihilangkan dari payload
+   Inertia** bila `show_contact = false` (XC-P1). Menambah AC-COM-14/15/16 dan
+   test privasi area.
+
+5. **Navigasi admin: `Komunitas` adalah link datar ke `/admin/komunitas`;
+   `Kategori Komunitas` dan `Wilayah & Lingkungan` berada di grup Master Data.**
+   Roadmap §6.1 mewajibkan menu Komunitas + submenu Kategori Komunitas di Master
+   Data; Wilayah/Lingkungan tidak disebut dan ditaruh di Master Data bersama
+   tabel referensi lain.
+
+6. **Filter area disertakan di direktori publik** (roadmap §7.1/AC-PUB-04
+   opsional "jika relevan"). Filter kategori + area, divalidasi, query-string
+   dipertahankan saat pagination.
+
+7. **Soft delete pada `communities`, `community_categories`, dan `areas`.** Slug
+   tetap unik lintas soft delete (mengikuti `posts`/`events`/`services`, D-44/D-45),
+   bukan melepas slot seperti `locations`/`mass_schedules` (D-40), karena
+   `/komunitas/{community:slug}` mengikat berdasarkan slug. **Tanpa** generated
+   column `active_marker`; `Rule::unique()` tanpa `->withoutTrashed()`. Tabel
+   anak/pivot `community_area` hard delete (`cascade` dari komunitas).
+
+8. **CTA kontak di detail publik memakai fallback `site_settings`**
+   (`contact_phone`/`contact_whatsapp`), pola Pelayanan D-54 butir 10. Tampil
+   hanya bila nilainya ada; tidak ada nomor palsu.
+
+9. **`published_at` dikelola server dan diisi sekali** saat `is_published`
+   berubah false→true dan masih null, tidak diubah saat unpublish/republish
+   (pola `SavePostAction`, D-9 plan). Field ini tidak ada di rules request.
+
+10. **Seeder hanya demo.** Tidak ada seeder produksi komunitas/kategori/area
+    (roadmap §3.2/§17, prinsip D-34). `DemoContentSeeder` mengisi kategori, area
+    (wilayah/lingkungan/stasi), dan komunitas contoh — tanpa kontak atau nama
+    nyata — dijaga `config('demo.enabled')` (D-53). E2E dan `composer setup`
+    tetap bersih.
+
+11. **Permission: `communities.*` + `communitycategories.*` + `areas.*`** (4 verb
+    masing-masing, total 12; 69 → 81). Semua satu kata (`/^[a-z]+\.[a-z]+$/`).
+    Tabel pivot tidak punya grup tersendiri; relasinya dikelola lewat
+    `communities.update`.
+
+12. **Tidak ada `community_id` pada `posts`/`events`**, tidak ada relasi
+    `Post`/`Event` ke `Community`, dan tidak ada section "berita/agenda terkait"
+    di detail komunitas. Galeri foto komunitas (`community_photos`, album,
+    lightbox) ditunda ke Phase 8. Mengikuti D-43.
+
+@see `docs/roadmap/phase-07-communities.md`, `docs/plan-implementation/plan-phase-07-communities.md`, `docs/DECISIONS.md` D-34, D-43, D-44, D-52, D-53, D-54
+
+---
+
+## D-56 — Wilayah & Lingkungan sebagai halaman hierarkis, di luar Master Data
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** D-55 awalnya menaruh `Wilayah & Lingkungan` sebagai anak grup
+**Master Data** dan menampilkannya sebagai tabel datar dengan kolom Tipe dan
+Wilayah Induk. Saat ditinjau sebagai UX, dua hal jadi jelas: (1) `areas` bukan
+tabel lookup datar seperti Lokasi/Kategori — ia hierarkis dan operasional
+(punya ketua, kontak, jadwal doa, dan dirujuk komunitas); (2) sebuah hierarki
+lebih mudah dibaca sebagai satu tampilan bertingkat daripada tersebar di
+beberapa menu.
+
+**Keputusan.**
+
+1. **Satu resource, satu halaman, tanpa pemecahan menu.** `areas` tetap satu
+   tabel/route/controller. Wilayah/Lingkungan/Stasi **tidak** dipecah menjadi
+   tiga menu terpisah. Hierarkinya memang dua tingkat: `wilayah` dan `stasi`
+   sama-sama top-level, hanya `lingkungan` yang punya induk `wilayah`
+   (D-55 point 3). Memecahnya menjadi tiga menu akan menyiratkan tiga tingkat
+   yang tidak ada dan menggandakan CRUD untuk satu tabel yang sama.
+
+2. **Presentasi hierarkis di halaman indeks.** Daftar menampilkan setiap
+   `wilayah` sebagai baris induk dengan `lingkungan`-nya ter-indentasi di
+   bawahnya, `stasi` pada seksi terpisah, dan `lingkungan` tanpa induk pada
+   seksi pengaman. Ini menggantikan tabel datar D-55; roadmap Phase 07 §6.3
+   memang mengizinkan "tabel hierarkis".
+
+3. **Item sidebar mandiri di luar Master Data.** `Wilayah & Lingkungan` menjadi
+   item flat sendiri (ikon `MapPin`), berdampingan dengan `Komunitas`, bukan
+   anak grup Master Data. URL pindah dari `/admin/master-data/wilayah-lingkungan`
+   ke `/admin/wilayah-lingkungan`, dan halaman berpindah dari feature
+   `admin/master-data` ke `admin/wilayah-lingkungan`. Nama route tetap
+   `areas.*`. Tidak ada redirect URL lama: URL itu dibuat dan diubah di fase
+   yang sama, belum pernah di-commit atau dibagikan.
+
+4. **Pagination dihapus.** Daftar area dimuat utuh (tanpa pagination) karena
+   jumlahnya kecil dan hierarki tidak boleh memisahkan anak dari induknya di
+   halaman berbeda. Filter pencarian/tipe/status tetap server-side. Sorting
+   kolom interaktif dihapus; urutan tetap `sort_order` lalu `name`, dan
+   lingkungan mengikuti induknya.
+
+**Konsekuensi yang harus diketahui.** Nama komponen Inertia berubah:
+`admin/master-data/wilayah-lingkungan/index` → `admin/wilayah-lingkungan`, dan
+tambah/ubah ikut. `AreaTest` dan E2E `master-data.spec.ts` disesuaikan;
+spec baru `tests/e2e/wilayah-lingkungan.spec.ts`. Sejak D-39 prop `areas`
+dikirim sebagai list non-paginasi (`array_values(...->resolve())`), bukan
+`{data: [...]}`.
+
+@see `docs/DECISIONS.md` D-39, D-48, D-55
+
+---
+
+## D-57 — Area (dulu "Stasi & Lingkungan") sebagai modul mandiri, relasi komunitas dilepas, dan halaman publik
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** D-55/D-56 membangun `areas` di dalam modul Komunitas: sebuah
+komunitas dapat memilih beberapa area sebagai "Wilayah Pelayanan", halaman
+admin-nya bernama "Wilayah & Lingkungan", dan area hanya muncul di dalam
+halaman Komunitas. Atas keputusan pemilik proyek, area kini menjadi modul
+tersendiri dan **tidak** terkait komunitas, serta tampil di situs publik.
+
+**Keputusan.**
+
+1. **Relasi komunitas↔area dilepas.** Tabel pivot `community_area` dihapus
+   (migrasi `drop_community_area_table`), `Community::areas()` dan
+   `Area::communities()` dihapus, dan pemilihan area hilang dari form komunitas
+   serta dari halaman publik komunitas (termasuk filter wilayah pada direktori
+   komunitas). Komunitas berdiri sendiri. Ini **menyimpang dari PRD §9.9 /
+   Lampiran C** (D-03) dan PRD tidak diedit di tengah fase.
+
+2. **Modul area mandiri.** Controller, request, dan resource pindah ke
+   namespace `App\Http\Controllers\Area` / `App\Http\Requests\Area` /
+   `App\Http\Resources\Area`; form meta dan copy punya trait serta bahasa
+   sendiri (`AreaFormMeta`, `lang/id/area.php`). Nama tabel/model
+   tetap `Area`/`areas`, permission tetap `areas.*`, dan nama route admin tetap
+   `areas.*`. URL admin berpindah dari `/admin/wilayah-lingkungan` ke
+   `/admin/area`, dan route publik menjadi `/area` dengan nama `area.index` /
+   `area.show` (module Wayfinder `@/routes/area` berdampingan dengan
+   `@/routes/areas` milik admin); label UI menjadi **"Area"** (admin dan
+   publik; sempat pertama "Stasi & Lingkungan", diganti karena "Area" lebih
+   pendek dan
+   sudah sama dengan nama tabel, route, dan permission `areas.*`). Daftar
+   admin adalah **satu tabel yang bisa diurutkan** (D-41), bukan tiga tabel per
+   tipe: urutan default `type, sort_order, name` lewat `SortsAdminList`, dengan
+   whitelist `name`, `type`, `is_active`, `sort_order`. Hubungan anak–induk dibaca
+   dari garis-kiri pada sel Nama dan kolom "Wilayah Induk" — kolom itu sengaja
+   tidak bisa diurutkan karena butuh join. Halaman publik tetap dikelompokkan
+   per tipe; hanya admin yang diratakan.
+
+3. **Lingkungan boleh tanpa induk.** Aturan hierarki PRD COM-02 dilonggarkan:
+   `wilayah` dan `stasi` tetap top-level, dan `lingkungan` boleh top-level
+   **atau** berinduk `wilayah`. Paroki HSPMTB tidak memiliki wilayah, sehingga
+   lingkungan pusatnya berdiri sendiri. Bila induk diisi, ia tetap harus
+   `wilayah` aktif.
+
+4. **Halaman publik baru.** `GET /area` (direktori, dikelompokkan
+   per tipe: stasi, lingkungan, wilayah) dan `GET /area/{area:slug}`
+   (detail). Hanya area `is_active` yang tampil; detail nonaktif/tak dikenal
+   menjawab 404 lewat `Area::resolveRouteBinding`. Detail memuat nama, tipe,
+   deskripsi, ketua, kontak (hanya bila `show_contact`, XC-P1), dan
+   daftar lingkungan anak. **Tidak ada** daftar komunitas. Tidak ada gambar per
+   area (area tidak punya kolom media). Tidak ada pagination — daftar area kecil
+   dan pencarian dilakukan di sisi klien.
+
+5. **Navigasi publik.** Menu **"Area"** ditambahkan di navbar
+   (setelah Komunitas) dan di footer (grup Profil Paroki). Halaman
+   `/profil/wilayah` tetap memuat narasi singleton, dan kini menautkan ke modul
+   baru alih-alih menyebut "modul Komunitas".
+
+**Konsekuensi yang harus diketahui.** `CommunitySchemaTest` kehilangan uji pivot;
+schema area pindah ke `tests/Feature/Area/AreaSchemaTest.php` dan halaman publik
+ke `tests/Feature/Area/PublicAreaPageTest.php`. `AreaTest` pindah ke dua
+assertion baru (lingkungan tanpa induk diterima). Komponen halaman area admin
+berubah nama: `admin/wilayah-lingkungan/*` → `admin/area/*`. E2E
+`wilayah-lingkungan.spec.ts` → `area.spec.ts`.
+
+@see `docs/DECISIONS.md` D-39, D-43, D-55, D-56
+
+---
+
+## D-58 — `prayer_schedule` dihapus dari `areas`
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** PRD §9.9 dan Lampiran C menyebut satu field per area: "jadwal doa
+lingkungan" (`prayer_schedule`). D-55 point 3 mengikutinya ke schema karena PRD
+memintanya. Paroki ternyata tidak memakai jadwal doa per area.
+
+**Keputusan.** Kolom `prayer_schedule` **dihapus sepenuhnya**, bukan
+disembunyikan: migrasi baru `2026_10_18_000000_drop_prayer_schedule_from_areas_table`
+(rollback hanya memulihkan bentuk kolom, isinya hilang — itu jaminan yang jujur
+untuk perubahan skema destruktif), aturan validasi, `AreaResource` dan ketiga
+resource publik, factory, seeder demo, field form admin, kolom tabel admin
+(tabel kini **7 kolom**), kartu direktori publik, halaman detail publik (termasuk
+daftar anak), dan `lang/id/area.php` (semula `stasi-l_toolbar.php`). Nama label di sidebar/navbar/footer, header halaman, dan breadcrumb adalah **"Area"**; copy yang menjelaskan isi ("stasi, wilayah, dan lingkungan") tetap deskriptif.
+
+**Konsekuensi yang harus diketahui.** Ini **divergensi sadar dari PRD §9.9 /
+Lampiran C**; PRD tidak diedit di tengah fase, hanya catatan ini. D-55 point 3
+dan 4 menyebut field tersebut dan ditandai di sana. `AreaSchemaTest` kini
+memastikan kolomnya `false`, supaya tidak kembali diam-diam bersama migrasi
+berikutnya. Kolom `leader_name` dan `contact_phone` **tetap** ada — keduanya
+dipakai untuk kontak ketua pada halaman publik (XC-P1).
+
+@see `docs/DECISIONS.md` D-55, D-57
+
+---
+
+## D-59 — Tautan media sosial per komunitas
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** Proyek meminta kolom media sosial untuk setiap komunitas:
+`facebook`, `instagram`, `tiktok`, `youtube`, dan `website`. Yang terakhir
+berarti **situs milik komunitas itu sendiri** — situs paroki sudah ada di dua
+tempat (`site_settings` dan `parish_profiles.website`), dan tidak boleh tercampur
+dengan milik komunitas.
+
+PRD §9.9 tidak menyebut media sosial per komunitas. Satu-satunya tautan sosial
+yang disebut PRD adalah milik paroki (`social_facebook`, `social_instagram`,
+`social_youtube`, `social_whatsapp_channel` di pengaturan situs, dipakai di
+footer dan halaman kontak). Jadi kolom ini **ekstensi sadar di luar PRD**, dan PRD
+tidak diedit di tengah fase.
+
+**Keputusan.**
+
+1. **Lima kolom, bukan enam.** Tidak ada kolom `url`: ia akan menduplikasi
+   `website`, dan dua nama untuk satu makna adalah cara pasti mengisi kolom yang
+   salah lalu mengira yang lain sudah terisi.
+
+2. **Validasi `url` biasa, maks 255** — meniru `parish_profiles.website`, dengan
+   pesan Indonesia per kolom. Bukan kunci host per platform: `facebook.com`
+   bukan satu-satunya alamat Facebook yang dipakai paroki, dan `fb.me` atau
+   `youtu.be` justru tautan yang benar-benar ditempel orang. Tidak ada permintaan
+   HTTP keluar dari form admin.
+
+3. **Tidak ada switch izin terpisah.** Mengisi tautan adalah bentuk persetujuan
+   publik, sama seperti mengisi deskripsi. `show_contact` tetap governs kontak
+   pribadi, bukan tautan yang komunitas pilih sendiri untuk ditulis.
+
+4. **`socials` dihilangkan seluruhnya saat kosong.** `PublicCommunityDetailResource`
+   mengirim satu grup `label` + `url`, dan **tidak mengirim key-nya sama sekali**
+   bila kelima kolom kosong — perlakuan yang sama dengan `contact`. Halaman
+   publik tidak pernah menerima lima `null` yang harus ditafsirkan.
+
+5. **Label ikut dikirim**, bukan dibaca lagi dari string domain di React.
+   Halaman publik merender satu daftar; menebak platform dari URL adalah tebakan
+   yang seharusnya terjadi di server.
+
+6. **Tempat di UI.** Tab admin ketujuh, "Media Sosial", berisi lima `FormInput`
+   bertipe `url` dengan placeholder berplatform; di halaman detail publik, seksi
+   "Media Sosial" (`surface="soft"`) disembunyikan bila `socials` tidak ada.
+   Tautan keluar memakai `target="_blank" rel="noopener noreferrer"`, sama
+   seperti tombol WhatsApp di halaman itu.
+
+**Konsekuensi yang harus diketahui.** Migrasi baru
+`2026_10_18_000001_add_social_links_to_communities_table` — yang
+`create_community_tables` sudah dijalankan di mana-mana tidak disentuh. Form
+komunitas kini tujuh tab, dan `TAB_FIELDS` di orkestratornya memuat lima field
+baru supaya badge error dan lompat-ke-tab ikut menghitungnya. Tidak ada
+permission baru, jadi `docs/RBAC.md` tidak berubah.
+
+@see `docs/DECISIONS.md` D-55, D-57, D-58
+
+---
+
+---
+
+## D-60 — Visi dan misi komunitas jadi rich text
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** Visi dan misi adalah dua pernyataan yang biasanya ditulis dengan
+penekanan: kalimat pengantar tebal, daftar, sesekali tautan ke dokumen. Dua
+`textarea` memaksa admin meniru semua itu dengan asterisk dan baris baru.
+
+**Keputusan.**
+
+1. **Editor Tiptap penuh** (`components/rich-text-editor.tsx`) menggantikan dua
+   textarea pada tab Profil Komunitas. Field ini **tidak** memakai `Field`
+   seperti field lain: `Field` merender `Label` yang terikat ke `htmlFor`,
+   sedangkan badan editor adalah `div contenteditable` — label seperti itu tidak
+   memberi apa-apa ke pembaca layar, sementara editor sudah membawa nama
+   aksesibelnya sendiri lewat prop `label`. Pola ini mengikuti
+   `pelayanan/components/tab-informasi-umum.tsx`.
+
+2. **Sanitasi di server, di akhir `prepareCommunityInput()`.** `vision` dan
+   `mission` melewati `HtmlSanitizer` dengan allowlist `config/html.php`.
+   Panggilan diletakkan **setelah** `merge($input)` terakhir, bukan sebelumnya:
+   sanitasi lebih dulu akan menulis nilai bersih lalu ditimpa lagi dua baris
+   kemudian oleh nilai asal yang hanya di-trim, dan gejalanya terbaca sebagai
+   "sanitasi tidak melakukan apa-apa" bukan sebagai merge yang hilang.
+
+3. **Editor yang dikosongkan menjadi `null`.** Tiptap tidak mengirim string
+   kosong untuk dokumen kosong, melainkan `<p></p>`. Nilai itu truthy, jadi
+   halaman publik akan menggambar heading "Visi" di atas apa pun tidak ada.
+   `isBlankMarkup()` mencocokkan **hanya** pembungkus paragraf kosong — dokumen
+   yang hanya berisi gambar adalah `<p><img ...></p>` dan tidak cocok, jadi visi
+   berbentuk satu gambar tetap tersimpan. Memakai `toPlainText()` di sini akan
+   membuang gambar itu.
+
+4. **Halaman publik merender lewat `RichText`.** `components/rich-text.tsx` adalah
+   satu-satunya tempat `dangerouslySetInnerHTML` di repo, dan allowlist-nya
+   (`config/html.php`) tidak berubah — tidak ada tag baru yang diizinkan.
+
+5. **Batas `max:5000` tetap**, dan diukur pada markup yang tersimpan, bukan pada
+   teks yang dilihat admin.
+
+**Yang tidak berubah.** `description`, `meeting_schedule`, `eligibility`, dan
+`joining_info` tetap plain text: tidak ada permintaan rich text untuk mereka, dan
+mencampur dua jenis penyimpanan dalam satu form adalah cara agar renderernya
+lupa membedakan keduanya.
+
+@see `docs/DECISIONS.md` D-25, D-46, D-50, D-55, D-59
+
+---
+
+## D-61 — Alamat dan titik peta untuk area
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** Empat kolom baru di `areas`: `address`, `latitude`, `longitude`,
+`maps_url`, dengan koordinat opsional. Modul `locations` sudah menyimpan keempatnya
+sejak Fase 04, jadi pertanyaannya bukan "apa bentuknya" melainkan "apakah dua
+modul boleh berbeda bentuk".
+
+**Keputusan.**
+
+1. **Salin, jangan karang ulang.** Tipe kolom (`string(2000)`, `string(2048)`,
+   `decimal(10,7)`), cast `decimal:7`, aturan rentang, pesan, dan atribut
+   semuanya diambil apa adanya dari `locations`. Dua modul yang sama-sama
+   menyimpan koordinat harus menyimpannya dengan cara yang sama; aturan yang
+   ditulis untuk satu diam-diam tidak berlaku untuk yang lain.
+
+2. **Pasangan koordinat wajib berdua.** Satu setengah dari pasangan ditolak,
+   karena angka tunggal tidak bisa membangun tautan peta. Diperiksa di dalam
+   closure `after()` — satu-satunya tempat aman untuk menambahkan error aturan
+   lintas field, karena `Validator::passes()` mengosongkan message bag di awal,
+   sehingga error yang ditambahkan saat validator masih dibangun akan terhapus
+   sebelum aturan berjalan. Catatan yang sama sudah berdiri di
+   `LocationValidationRules`.
+
+3. **`Area::mapsUrl()`** meniru `Location::mapsUrl()`: `maps_url` menang, kalau
+   tidak pasangan koordinat, kalau tidak `null`. Alamat tidak pernah dipakai
+   menyusun tautan — alamat separuh menghasilkan tautan ke gedung yang salah,
+   lebih buruk daripada tidak ada tombol.
+
+4. **Publik mengirim alamat dan tautan jadi, bukan koordinat mentah.** Resource
+   publik memakai `Area::mapsUrl()`, persis seperti `PublicLocationResource`,
+   sehingga React tidak perlu tahu apakah pasangan koordinat ada. Koordinat bukan
+   data pribadi, tetapi halaman juga tidak membutuhkannya.
+
+5. **Tanpa switch izin.** Alamat adalah tempat, bukan orang; `show_contact`
+   tetap governs nama ketua dan nomor teleponnya. PRD NFR-PRIV melarang
+   menampilkan data pribadi tanpa persetujuan, dan ini bukan data pribadi.
+
+6. **Satu blok bertitled di form, bukan tab baru.** Form admin area masih datar,
+   dan keempat field ini masuk sebagai blok "Lokasi dan Peta" berisi alamat,
+   lintang, bujur, dan tautan peta. Merestrukturisasi form itu menjadi bertab
+   adalah pekerjaan tersendiri dan tidak diminta di sini.
+
+**Divergensi dari PRD.** PRD §9.9 tidak menyebut alamat maupun koordinat untuk
+area — ia hanya memberi `leader_name`, `contact_phone`, dan `show_contact`. Ini
+ekstensi sadar; PRD tidak diedit di tengah fase.
+
+@see `docs/DECISIONS.md` D-55, D-57, D-60
+

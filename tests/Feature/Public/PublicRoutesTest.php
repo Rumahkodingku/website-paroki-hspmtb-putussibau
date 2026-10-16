@@ -46,6 +46,7 @@ dataset('public pages', fn (): array => [
     '/agenda' => ['/agenda', 'public/agenda'],
     '/pelayanan' => ['/pelayanan', 'public/pelayanan'],
     '/komunitas' => ['/komunitas', 'public/komunitas'],
+    '/area' => ['/area', 'public/area'],
     '/galeri' => ['/galeri', 'public/galeri'],
     '/kontak' => ['/kontak', 'public/kontak'],
     '/download' => ['/download', 'public/download'],
@@ -66,6 +67,10 @@ dataset('public pages', fn (): array => [
  * groups them, so it left this list too. Its props are asserted by
  * tests/Feature/Pelayanan/PublicServicePageTest.php.
  *
+ * Phase 07 did the same for /komunitas: it now queries published communities and
+ * renders a directory, so it left this list too. Its props are asserted by
+ * tests/Feature/Komunitas/PublicCommunityDirectoryTest.php.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
@@ -76,7 +81,6 @@ dataset('public pages', fn (): array => [
  */
 dataset('placeholder pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
-    '/komunitas' => ['/komunitas', 'public/komunitas'],
     '/galeri' => ['/galeri', 'public/galeri'],
     '/kontak' => ['/kontak', 'public/kontak'],
     '/download' => ['/download', 'public/download'],
