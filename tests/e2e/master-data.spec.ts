@@ -55,6 +55,7 @@ test.describe('sidebar Master Data', () => {
                 'Kategori Berita',
                 'Kategori Agenda',
                 'Kategori Pelayanan',
+                'Kategori Komunitas',
             ].map((title) =>
                 sidebar
                     .getByRole('link', { name: title, exact: true })
@@ -80,6 +81,7 @@ test.describe('sidebar Master Data', () => {
             ['Kategori Berita', '/admin/master-data/kategori-berita'],
             ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
             ['Kategori Pelayanan', '/admin/master-data/kategori-pelayanan'],
+            ['Kategori Komunitas', '/admin/master-data/kategori-komunitas'],
         ] as const) {
             await expect(
                 sidebar.getByRole('link', { name: title, exact: true }),
@@ -156,6 +158,22 @@ test.describe('sidebar Master Data', () => {
         );
         await expect(
             page.getByRole('heading', { name: 'Kategori Pelayanan' }),
+        ).toBeVisible();
+    });
+
+    test('klik Kategori Komunitas benar-benar membuka halamannya', async ({
+        page,
+    }) => {
+        await page
+            .getByRole('navigation', { name: 'Navigasi utama' })
+            .getByRole('link', { name: 'Kategori Komunitas', exact: true })
+            .click();
+
+        await expect(page).toHaveURL(
+            /\/admin\/master-data\/kategori-komunitas$/,
+        );
+        await expect(
+            page.getByRole('heading', { name: 'Kategori Komunitas' }),
         ).toBeVisible();
     });
 

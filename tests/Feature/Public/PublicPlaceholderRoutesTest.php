@@ -51,7 +51,10 @@ function placeholderDetailRoutes(): array
         // Pelayanan left this list in Phase 06B, replaced by a route with model
         // binding. Its 404 behaviour is asserted in
         // tests/Feature/Pelayanan/PublicServicePageTest.php. See D-54.
-        'komunitas' => ['/komunitas/contoh-komunitas', 'public/komunitas/show', 'Fase 7'],
+        //
+        // Komunitas left this list in Phase 07, replaced by a route with model
+        // binding. Its 404 behaviour is asserted in
+        // tests/Feature/Komunitas/PublicCommunityDetailTest.php. See D-55.
         'galeri' => ['/galeri/contoh-album', 'public/galeri/show', 'Fase 8'],
     ];
 }
@@ -77,6 +80,7 @@ it('answers 404 for a published-module slug rather than 200 for anything', funct
 })->with([
     'berita' => ['/berita/slug-yang-tidak-pernah-dibuat'],
     'agenda' => ['/agenda/slug-yang-tidak-pernah-dibuat'],
+    'komunitas' => ['/komunitas/slug-yang-tidak-pernah-dibuat'],
 ]);
 
 it('rejects anything that is not a clean slug', function (string $path) {

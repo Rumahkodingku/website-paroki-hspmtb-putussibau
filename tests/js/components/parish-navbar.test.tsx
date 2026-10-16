@@ -28,6 +28,7 @@ const MENU = [
     { label: 'Agenda', href: '/agenda' },
     { label: 'Pelayanan', href: '/pelayanan' },
     { label: 'Komunitas', href: '/komunitas' },
+    { label: 'Area', href: '/area' },
     { label: 'Galeri', href: '/galeri' },
     { label: 'Download', href: '/download' },
     { label: 'Kontak', href: '/kontak' },
@@ -155,7 +156,7 @@ describe('ParishNavbar', () => {
             expect(screen.queryByRole('dialog')).toBeNull();
         });
 
-        it('carries the same ten entries as the desktop bar', async () => {
+        it('carries the same entries as the desktop bar', async () => {
             const user = userEvent.setup();
 
             renderWithInertia(<ParishNavbar />);

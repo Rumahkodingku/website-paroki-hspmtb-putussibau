@@ -4,24 +4,6 @@ import { Field } from '@/components/form-fields';
 import { Text } from '@/components/text';
 import { useMediaUpload } from '@/hooks/use-media-upload';
 
-/*
- * The image picker.
- *
- * D-24 said no media library and no picker existed; this is that picker, built
- * for the one field that needed it. It is deliberately not a library: there is
- * no grid of every image the parish has ever uploaded, because that is a
- * different feature and D-24 leaves it as one.
- *
- * The upload and the wait live in use-media-upload because the rich text
- * editor's image button needs exactly the same flow. What is left here is the
- * field: if this fails, the editor still works.
- *
- * A picked file shows immediately through a local object URL, before the
- * server has processed it. The upload is queued (XC-M1), so the processed
- * variant does not exist for a moment; without the local preview the admin
- * stares at an empty box and uploads the same picture twice.
- */
-
 type Props = {
     id: string;
     label: string;
@@ -58,8 +40,6 @@ export function MediaField({
     const inputRef = useRef<HTMLInputElement>(null);
     const { state, uploading, failed, upload } = useMediaUpload();
 
-    // A local object URL, while the upload is in flight. Kept in a ref as well
-    // so the old one can be revoked without a state updater side effect.
     const [localPreview, setLocalPreview] = useState<string | null>(null);
     const localPreviewRef = useRef<string | null>(null);
 
@@ -92,7 +72,6 @@ export function MediaField({
             onMediaChange(media.id);
         }
 
-        // The processed variant (or the failure state) has taken over.
         replaceLocalPreview(null);
     };
 
@@ -144,9 +123,6 @@ export function MediaField({
                                     void handleFile(file);
                                 }
 
-                                // Cleared so re-picking the same file fires
-                                // change again — otherwise an admin who chooses
-                                // the wrong picture twice gets nothing.
                                 event.target.value = '';
                             }}
                         />
@@ -212,6 +188,7 @@ export function MediaField({
                     as="p"
                     variant="caption"
                     color="muted"
+                    className="mt-2"
                 >
                     Dibaca layar pembaca. Isi dengan singkat; gambar tanpa teks
                     alternatif akan terbaca sebagai "gambar" saja.
