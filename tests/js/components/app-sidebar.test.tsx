@@ -30,12 +30,14 @@ const JADWAL_MISA_SUB_MENU = [
     ['Pemberitahuan', '/admin/jadwal-misa/pemberitahuan-jadwal'],
 ] as const;
 
-/** Master Data took Lokasi in Phase 05 and Kategori Pelayanan in Phase 06B. */
+/** Master Data took Lokasi in Phase 05, Kategori Pelayanan in Phase 06B, and
+ * Kategori Komunitas in Phase 07. Wilayah & Lingkungan became its own item. */
 const MASTER_DATA_SUB_MENU = [
     ['Lokasi', '/admin/master-data/lokasi'],
     ['Kategori Berita', '/admin/master-data/kategori-berita'],
     ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
     ['Kategori Pelayanan', '/admin/master-data/kategori-pelayanan'],
+    ['Kategori Komunitas', '/admin/master-data/kategori-komunitas'],
 ] as const;
 
 /** Profil Paroki was a disabled row until Phase 6A gave it a module. */
@@ -332,6 +334,39 @@ describe('AppSidebar — Pelayanan', () => {
     });
 });
 
+describe('AppSidebar — Komunitas', () => {
+    it('links straight to the community list', () => {
+        // Phase 07 gave Komunitas a module. It is a flat link, not a group: the
+        // list is the destination the sidebar item should open (D-55 point 5).
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Komunitas' })).toHaveAttribute(
+            'href',
+            '/admin/komunitas',
+        );
+        expect(screen.queryByRole('button', { name: 'Komunitas' })).toBeNull();
+    });
+});
+
+describe('AppSidebar — Area', () => {
+    it('is its own flat item, not a Master Data child', () => {
+        // Phase 07 moved it out of Master Data, then out of Komunitas entirely
+        // (D-57): the area hierarchy stands alone.
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Area' })).toHaveAttribute(
+            'href',
+            '/admin/area',
+        );
+    });
+
+    it('does not also appear under Master Data', async () => {
+        await renderSidebarWithGroupsOpen('/admin');
+
+        expect(screen.getAllByRole('link', { name: 'Area' })).toHaveLength(1);
+    });
+});
+
 describe('AppSidebar — modules with no route yet', () => {
     it('does not link them', () => {
         renderSidebar('/admin');
@@ -342,7 +377,6 @@ describe('AppSidebar — modules with no route yet', () => {
         // that fails when someone rewords it stops guarding the thing it was
         // written for.
         expect(screen.queryByRole('link', { name: 'Galeri' })).toBeNull();
-        expect(screen.queryByRole('link', { name: 'Komunitas' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Kontak' })).toBeNull();
     });
 });

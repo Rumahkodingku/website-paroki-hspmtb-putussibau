@@ -1,10 +1,12 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ExternalLink } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
 import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
+import { Button } from '@/components/ui/button';
+import { index as areaIndex } from '@/routes/area';
 import { ProfileSubNav } from '../components/profile-subnav';
 import type { PublicServiceArea } from '../types';
 
@@ -71,15 +73,21 @@ export default function Wilayah({ area }: Props) {
                         </a>
                     ) : null}
 
-                    <Text
-                        as="p"
-                        variant="caption"
-                        color="muted"
-                        className="max-w-2xl"
-                    >
-                        Daftar rinci stasi, wilayah, dan lingkungan akan
-                        tersedia melalui modul Komunitas.
-                    </Text>
+                    <div className="flex flex-col items-start gap-3 border-t border-hairline pt-6">
+                        <Text as="p" variant="body" color="muted">
+                            Daftar rinci stasi, wilayah, dan lingkungan beserta
+                            pengurusnya tersedia pada halaman berikut.
+                        </Text>
+                        <Button asChild>
+                            <Link href={areaIndex()}>
+                                Lihat Area
+                                <ExternalLink
+                                    className="size-4"
+                                    aria-hidden="true"
+                                />
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </PublicSection>
         </>

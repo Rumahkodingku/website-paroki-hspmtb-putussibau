@@ -3,10 +3,15 @@
 use App\Http\Controllers\Agenda\EventController;
 use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
+use App\Http\Controllers\Area\AreaController;
+use App\Http\Controllers\Area\PublicAreaController;
+use App\Http\Controllers\Komunitas\CommunityController;
+use App\Http\Controllers\Komunitas\PublicCommunityController;
 use App\Http\Controllers\MassSchedule\MassScheduleController;
 use App\Http\Controllers\MassSchedule\PublicMassScheduleController;
 use App\Http\Controllers\MassSchedule\ScheduleNoticeController;
 use App\Http\Controllers\MassSchedule\SpecialMassController;
+use App\Http\Controllers\MasterData\CommunityCategoryController;
 use App\Http\Controllers\MasterData\EventCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
 use App\Http\Controllers\MasterData\PostCategoryController;
@@ -75,10 +80,15 @@ Route::get('/pelayanan/{service:slug}', [PublicServiceController::class, 'show']
     ->where('slug', '[a-z0-9-]+')
     ->name('pelayanan.show');
 
-Route::inertia('/komunitas', 'public/komunitas')->name('komunitas.index');
-Route::get('/komunitas/{slug}', fn (string $slug) => Inertia::render('public/komunitas/show', ['slug' => $slug]))
+Route::get('/komunitas', [PublicCommunityController::class, 'index'])->name('komunitas.index');
+Route::get('/komunitas/{community:slug}', [PublicCommunityController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('komunitas.show');
+
+Route::get('/area', [PublicAreaController::class, 'index'])->name('area.index');
+Route::get('/area/{area:slug}', [PublicAreaController::class, 'show'])
+    ->where('slug', '[a-z0-9-]+')
+    ->name('area.show');
 
 Route::inertia('/galeri', 'public/galeri')->name('galeri.index');
 Route::get('/galeri/{slug}', fn (string $slug) => Inertia::render('public/galeri/show', ['slug' => $slug]))
@@ -252,6 +262,49 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::get('/master-data/kategori-pelayanan/{service_category}/ubah', [ServiceCategoryController::class, 'edit'])->name('service-categories.edit');
         Route::patch('/master-data/kategori-pelayanan/{service_category}', [ServiceCategoryController::class, 'update'])->name('service-categories.update');
         Route::delete('/master-data/kategori-pelayanan/{service_category}', [ServiceCategoryController::class, 'destroy'])->name('service-categories.destroy');
+
+        // Kategori Komunitas — Master Data since Phase 07 (D-55 point 5).
+        Route::get('/master-data/kategori-komunitas', [CommunityCategoryController::class, 'index'])->name('community-categories.index');
+        Route::get('/master-data/kategori-komunitas/tambah', [CommunityCategoryController::class, 'create'])->name('community-categories.create');
+        Route::post('/master-data/kategori-komunitas', [CommunityCategoryController::class, 'store'])->name('community-categories.store');
+        Route::get('/master-data/kategori-komunitas/{community_category}/ubah', [CommunityCategoryController::class, 'edit'])->name('community-categories.edit');
+        Route::patch('/master-data/kategori-komunitas/{community_category}', [CommunityCategoryController::class, 'update'])->name('community-categories.update');
+        Route::delete('/master-data/kategori-komunitas/{community_category}', [CommunityCategoryController::class, 'destroy'])->name('community-categories.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Komunitas
+         * ------------------------------------------------------------------
+         |
+         | `/admin/komunitas` renders the list itself — a flat sidebar link, no
+         | overview and no redirect (D-55 point 5). The areas a community serves
+         | are edited inside the community form and gated on `communities.update`
+         | through CommunityPolicy; the pivot has no endpoint of its own.
+         |
+         */
+        Route::get('/komunitas', [CommunityController::class, 'index'])->name('communities.index');
+        Route::get('/komunitas/tambah', [CommunityController::class, 'create'])->name('communities.create');
+        Route::post('/komunitas', [CommunityController::class, 'store'])->name('communities.store');
+        Route::get('/komunitas/{community}/ubah', [CommunityController::class, 'edit'])->name('communities.edit');
+        Route::patch('/komunitas/{community}', [CommunityController::class, 'update'])->name('communities.update');
+        Route::delete('/komunitas/{community}', [CommunityController::class, 'destroy'])->name('communities.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Area
+         * ------------------------------------------------------------------
+         |
+         | Its own module, not part of Master Data or Komunitas: the area
+         | hierarchy is operational data with its own public pages (D-57). The
+         | route NAME stays `areas.*`.
+         |
+         */
+        Route::get('/area', [AreaController::class, 'index'])->name('areas.index');
+        Route::get('/area/tambah', [AreaController::class, 'create'])->name('areas.create');
+        Route::post('/area', [AreaController::class, 'store'])->name('areas.store');
+        Route::get('/area/{area}/ubah', [AreaController::class, 'edit'])->name('areas.edit');
+        Route::patch('/area/{area}', [AreaController::class, 'update'])->name('areas.update');
+        Route::delete('/area/{area}', [AreaController::class, 'destroy'])->name('areas.destroy');
 
         /*
          * ------------------------------------------------------------------

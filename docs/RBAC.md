@@ -11,12 +11,12 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and sixty-nine permissions. That is not an oversight: the PRD puts
+One role and eighty-one permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
 Four verbs per entity — `view`, `create`, `update`, `delete` — and no
-permission for anything a module does not have an endpoint for. Three things
+permission for anything a module does not have an endpoint for. Four things
 are absent on purpose:
 
 - There is no `posts.preview` or `events.duplicate`. Both exist as endpoints,
@@ -26,6 +26,9 @@ are absent on purpose:
   Requirements, steps and FAQs are tabs inside a service and have no list page
   of their own, so their endpoints are gated on `services.update` through
   `ServicePolicy` (D-54).
+- There is no `communityareas.*`. The `community_area` pivot was removed in
+  D-57: a community no longer maps to an area, and the area module carries its
+  own `areas.*` group instead.
 - There is no `posts.publish` or `events.publish`. Publishing is `is_published`
   on the row, an ordinary field of the update form, not a separate act — the
   same decision as D-37 for `is_active`.
@@ -57,6 +60,9 @@ are absent on purpose:
 | Board members | `boardmembers.view`, `boardmembers.create`, `boardmembers.update`, `boardmembers.delete` |
 | Services | `services.view`, `services.create`, `services.update`, `services.delete` |
 | Service categories | `servicecategories.view`, `servicecategories.create`, `servicecategories.update`, `servicecategories.delete` |
+| Communities | `communities.view`, `communities.create`, `communities.update`, `communities.delete` |
+| Community categories | `communitycategories.view`, `communitycategories.create`, `communitycategories.update`, `communitycategories.delete` |
+| Areas (wilayah/lingkungan/stasi) | `areas.view`, `areas.create`, `areas.update`, `areas.delete` |
 
 The role:
 
