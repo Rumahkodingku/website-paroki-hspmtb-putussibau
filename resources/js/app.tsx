@@ -8,6 +8,7 @@ import AuthLayout from '@/layouts/auth';
 import PublicLayout from '@/layouts/public';
 import SettingsLayout from '@/layouts/settings/layout';
 import { pageName } from '@/lib/page-name';
+import { UploadConfig } from '@/components/upload/upload-config';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -76,8 +77,10 @@ void createInertiaApp({
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
+                <UploadConfig>
+                    {app}
+                    <Toaster />
+                </UploadConfig>
             </TooltipProvider>
         );
     },

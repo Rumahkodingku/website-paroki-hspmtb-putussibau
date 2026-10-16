@@ -21,6 +21,12 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+
+# This is an npm project (package-lock.json). pnpm-lock.yaml only appears when
+# something shells out to pnpm — `shadcn add` does, via its own pnpm install —
+# and committing it here desynchronises the two lockfiles: CI runs `npm ci`,
+# which fails outright when package.json and package-lock.json disagree.
+pnpm-lock.yaml
 /auth.json
 /.fleet
 /.idea
