@@ -194,6 +194,32 @@ class PermissionSeeder extends Seeder
         'servicecategories.create',
         'servicecategories.update',
         'servicecategories.delete',
+
+        /*
+         * Komunitas, added with the module in Phase 07 (D-55).
+         *
+         * Three groups: the communities themselves, their master categories,
+         * and the area hierarchy (wilayah/lingkungan/stasi). The pivot has no
+         * group of its own — a community's areas are part of editing that
+         * community, so they ride on `communities.update`.
+         *
+         * All single words, per D-36: RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/.
+         */
+        'communities.view',
+        'communities.create',
+        'communities.update',
+        'communities.delete',
+
+        'communitycategories.view',
+        'communitycategories.create',
+        'communitycategories.update',
+        'communitycategories.delete',
+
+        'areas.view',
+        'areas.create',
+        'areas.update',
+        'areas.delete',
     ];
 
     /**

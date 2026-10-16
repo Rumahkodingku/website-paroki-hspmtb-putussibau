@@ -22,6 +22,7 @@ import { index as galeri } from '@/routes/galeri';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
+import { index as areaIndex } from '@/routes/area';
 import { index as profil } from '@/routes/profil';
 
 type NavEntry = {
@@ -38,6 +39,7 @@ const NAV_ENTRIES: NavEntry[] = [
     { label: 'Agenda', href: agenda(), match: 'section' },
     { label: 'Pelayanan', href: pelayanan(), match: 'section' },
     { label: 'Komunitas', href: komunitas(), match: 'section' },
+    { label: 'Area', href: areaIndex(), match: 'section' },
     { label: 'Galeri', href: galeri(), match: 'section' },
     { label: 'Download', href: download(), match: 'section' },
     { label: 'Kontak', href: kontak(), match: 'section' },

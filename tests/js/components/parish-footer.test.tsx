@@ -33,6 +33,7 @@ const EXPECTED_LINKS: Record<string, string> = {
     'Halaman kontak': '/kontak',
     Sejarah: '/profil/sejarah',
     'Wilayah Pelayanan': '/profil/wilayah',
+    Area: '/area',
     Pastor: '/profil/pastor',
     'Struktur Kepengurusan': '/profil/struktur',
 };

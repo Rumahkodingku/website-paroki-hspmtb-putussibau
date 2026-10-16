@@ -11,6 +11,7 @@ import {
     LayoutGrid,
     ListChecks,
     Mail,
+    MapPin,
     Settings,
     Sparkles,
     UserCog,
@@ -51,6 +52,9 @@ import { list as eventsList } from '@/routes/events';
 import { index as eventCategoriesIndex } from '@/routes/event-categories';
 import { index as servicesIndex } from '@/routes/services';
 import { index as serviceCategoriesIndex } from '@/routes/service-categories';
+import { index as communitiesIndex } from '@/routes/communities';
+import { index as communityCategoriesIndex } from '@/routes/community-categories';
+import { index as areasIndex } from '@/routes/areas';
 import { edit as editParishProfile } from '@/routes/parish-profile';
 import { index as parishHistoriesIndex } from '@/routes/parish-histories';
 import { edit as editServiceArea } from '@/routes/parish-service-area';
@@ -109,10 +113,12 @@ const CONTENT_ENTRIES: Entry[] = [
             { title: 'Kategori Berita', href: postCategoriesIndex() },
             { title: 'Kategori Agenda', href: eventCategoriesIndex() },
             { title: 'Kategori Pelayanan', href: serviceCategoriesIndex() },
+            { title: 'Kategori Komunitas', href: communityCategoriesIndex() },
         ],
     },
     { title: 'Pelayanan', href: servicesIndex(), icon: HandHeart },
-    { title: 'Komunitas', icon: Users },
+    { title: 'Komunitas', href: communitiesIndex(), icon: Users },
+    { title: 'Area', href: areasIndex(), icon: MapPin },
     { title: 'Galeri', icon: Images },
     { title: 'Kontak', icon: Mail },
     { title: 'Download', icon: Download },

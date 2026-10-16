@@ -151,6 +151,7 @@ test.describe('situs publik', () => {
             'Agenda',
             'Pelayanan',
             'Komunitas',
+            'Area',
             'Galeri',
             'Download',
             'Kontak',

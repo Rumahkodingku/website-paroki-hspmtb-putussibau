@@ -13,6 +13,7 @@ import { index as galeri } from '@/routes/galeri';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
+import { index as areaIndex } from '@/routes/area';
 import {
     index as profil,
     pastor,
@@ -47,6 +48,7 @@ const PROFIL_PAROKI: FooterGroup = {
     links: [
         { label: 'Sejarah', href: sejarah() },
         { label: 'Wilayah Pelayanan', href: wilayah() },
+        { label: 'Area', href: areaIndex() },
         { label: 'Pastor', href: pastor() },
         { label: 'Struktur Kepengurusan', href: struktur() },
     ],

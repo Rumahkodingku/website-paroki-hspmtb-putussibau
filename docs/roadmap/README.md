@@ -52,7 +52,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 5**  | News & Agenda                             | ✅ Done    |
 | **Phase 6A** | Parish Profile (Profil Paroki)             | ✅ Done    |
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
-| **Phase 7**  | Communities                               | ⚪ Planned |
+| **Phase 7**  | Communities                               | ✅ Done    |
 | **Phase 8**  | Gallery, Download & Contact               | ⚪ Planned |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
@@ -152,43 +152,47 @@ Kemudian lanjut ke phase berikutnya.
 
 ## Current Focus
 
-### Phase 6B — Parish Services (Pelayanan)
+### Phase 7 — Communities (Komunitas)
 
-Phase ini membangun modul **Pelayanan**: master kategori layanan, enam layanan
-MVP (`baptis-bayi`, `baptis-dewasa`, `komuni-pertama`, `krisma`, `pernikahan`,
-`perminyakan-orang-sakit`), persyaratan, prosedur, FAQ, jadwal/biaya, kontak per
-layanan, dan opsi Google Form. Admin panel berada di `/admin/pelayanan` dan
-`/admin/master-data/kategori-pelayanan`; halaman publik dinamis di `/pelayanan`
-dan `/pelayanan/{slug}`.
+Phase ini membangun modul **Komunitas** (master kategori komunitas, profil
+komunitas, logo dan thumbnail, kontak dengan kontrol privasi, serta publikasi)
+dan modul terpisah **Area** (hierarki stasi/wilayah/lingkungan
+beserta pengurusnya). Admin Komunitas berada di `/admin/komunitas` dengan
+Kategori Komunitas di `/admin/master-data/kategori-komunitas`; admin Area
+berada di `/admin/area`. Halaman publik dinamis:
+`/komunitas`, `/komunitas/{slug}`, `/area`, dan
+`/area/{slug}`.
 
-Kategori layanan dinormalisasi dari ENUM PRD ke tabel master `service_categories`
-(D-54). Kontak global tetap satu sumber di Pengaturan Situs; `document_service`
+Kategori dinormalisasi dari `community_types` PRD ke tabel master
+`community_categories` (D-55); logo/thumbnail memakai FK `*_media_id` ke tabel
+`media`, bukan kolom path (divergensi sadar dari roadmap §5.2.3); `areas`
+diperluas dengan `stasi` dan field pengurus (PRD §9.9) dan kini modul mandiri.
+Relasi komunitas↔area dilepas dan halaman publik Area ditambahkan
+(D-57); kontak pengurus dirender publik dengan privasi server-side (XC-P1).
+Tidak ada `community_id` pada `posts`/`events` (D-43), dan galeri komunitas
 ditunda ke Phase 8.
 
 Dokumen implementasi:
 
 ```text
-roadmap/phase-6B-parish-service.md
-plan-implementation/plan-phase-06b-parish-service.md
+roadmap/phase-07-communities.md
+plan-implementation/plan-phase-07-communities.md
 ```
 
-Phase 1 sampai Phase 6A selesai lebih dahulu. Keputusan Phase 6B tercatat di
-`docs/DECISIONS.md` D-54.
+Keputusan Phase 7 tercatat di `docs/DECISIONS.md` D-55, D-56, D-57.
 
 > **Engineering complete; konten belum.** Tabel, CRUD, halaman publik, validasi,
-> dan test ada. Enam layanan di-seed **nonaktif** tanpa `form_url` dan tanpa
-> syarat/prosedur/FAQ — konten resmi (syarat, prosedur, biaya, jadwal, nomor
-> kontak darurat, URL Google Form) harus diisi dan divalidasi paroki sebelum
-> layanan diaktifkan. Lihat D-34/D-54.
-
-Setelah Phase 6B selesai:
+> privasi kontak, dan test ada. Tidak ada seeder produksi: kategori, wilayah,
+> lingkungan, dan profil komunitas harus diisi dan divalidasi paroki sebelum
+> dipublikasikan. `DemoContentSeeder` mengisi contoh (tanpa kontak/nama nyata)
+> hanya saat `demo.enabled`. Lihat D-34/D-53/D-55.
 
 ```text
-Phase 6A (Done)
-   ↓
 Phase 6B (Done — engineering complete)
    ↓
-Phase 7 — Communities
+Phase 7 (Done — engineering complete)
+   ↓
+Phase 8 — Gallery, Download & Contact
 ```
 
 ---
