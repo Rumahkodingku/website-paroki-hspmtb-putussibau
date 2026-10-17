@@ -5,6 +5,9 @@ use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
 use App\Http\Controllers\Area\AreaController;
 use App\Http\Controllers\Area\PublicAreaController;
+use App\Http\Controllers\Galeri\GalleryController;
+use App\Http\Controllers\Galeri\GalleryPhotoController;
+use App\Http\Controllers\Galeri\PublicGalleryController;
 use App\Http\Controllers\Komunitas\CommunityController;
 use App\Http\Controllers\Komunitas\PublicCommunityController;
 use App\Http\Controllers\MassSchedule\MassScheduleController;
@@ -42,7 +45,6 @@ use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,8 +92,8 @@ Route::get('/area/{area:slug}', [PublicAreaController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('area.show');
 
-Route::inertia('/galeri', 'public/galeri')->name('galeri.index');
-Route::get('/galeri/{slug}', fn (string $slug) => Inertia::render('public/galeri/show', ['slug' => $slug]))
+Route::get('/galeri', [PublicGalleryController::class, 'index'])->name('galeri.index');
+Route::get('/galeri/{gallery:slug}', [PublicGalleryController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('galeri.show');
 
@@ -305,6 +307,30 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::get('/area/{area}/ubah', [AreaController::class, 'edit'])->name('areas.edit');
         Route::patch('/area/{area}', [AreaController::class, 'update'])->name('areas.update');
         Route::delete('/area/{area}', [AreaController::class, 'destroy'])->name('areas.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Galeri
+         * ------------------------------------------------------------------
+         |
+         | The album CRUD plus a photo manager screen (D-5, D-65). Every photo
+         | endpoint is gated on `galleries.update` through GalleryAlbumPolicy: a
+         | photo has no list page, so it has no permission group of its own.
+         |
+         */
+        Route::get('/galeri', [GalleryController::class, 'index'])->name('galleries.index');
+        Route::get('/galeri/tambah', [GalleryController::class, 'create'])->name('galleries.create');
+        Route::post('/galeri', [GalleryController::class, 'store'])->name('galleries.store');
+        Route::get('/galeri/{gallery}/ubah', [GalleryController::class, 'edit'])->name('galleries.edit');
+        Route::patch('/galeri/{gallery}', [GalleryController::class, 'update'])->name('galleries.update');
+        Route::delete('/galeri/{gallery}', [GalleryController::class, 'destroy'])->name('galleries.destroy');
+        Route::get('/galeri/{gallery}/foto', [GalleryController::class, 'photos'])->name('galleries.photos');
+
+        Route::post('/galeri/{gallery}/foto', [GalleryPhotoController::class, 'store'])->name('gallery-photos.store');
+        Route::post('/galeri/{gallery}/foto/urutkan', [GalleryPhotoController::class, 'reorder'])->name('gallery-photos.reorder');
+        Route::post('/galeri/{gallery}/foto/sampul', [GalleryPhotoController::class, 'cover'])->name('gallery-photos.cover');
+        Route::patch('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'update'])->name('gallery-photos.update');
+        Route::delete('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'destroy'])->name('gallery-photos.destroy');
 
         /*
          * ------------------------------------------------------------------

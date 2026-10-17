@@ -71,6 +71,10 @@ dataset('public pages', fn (): array => [
  * renders a directory, so it left this list too. Its props are asserted by
  * tests/Feature/Komunitas/PublicCommunityDirectoryTest.php.
  *
+ * Phase 08A did the same for /galeri: it now queries published albums and
+ * renders the directory, so it left this list too. Its props are asserted by
+ * tests/Feature/Galeri/PublicGalleryDirectoryTest.php. See D-65.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
@@ -81,7 +85,6 @@ dataset('public pages', fn (): array => [
  */
 dataset('placeholder pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
-    '/galeri' => ['/galeri', 'public/galeri'],
     '/kontak' => ['/kontak', 'public/kontak'],
     '/download' => ['/download', 'public/download'],
     '/design-system' => ['/design-system', 'public/design-system'],
