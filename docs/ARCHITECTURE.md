@@ -385,6 +385,7 @@ feature; two or more makes it app-level:
 | `heading.tsx` | five pages | `components/` |
 | `text-link.tsx` | three auth pages | `components/` |
 | `text.tsx` | every text element outside `components/ui/` | `components/` |
+| `media-upload-field.tsx` | the article, activity, board member, pastor and community forms | `components/` |
 
 **`components/shared/` is not created yet.** It only means something once two or
 more features need the same thing, and Part A says a directory is created when it

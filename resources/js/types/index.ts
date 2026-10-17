@@ -32,16 +32,36 @@ export type SeoDefaults = {
 };
 
 /**
+ * What an upload is allowed to be, read from `config/media.php` on the server.
+ *
+ * The server validates against that config and so does the browser, which is why
+ * it travels as a shared prop rather than as a number written into a component.
+ * A limit kept in two places drifts, and it drifts quietly: the browser accepts
+ * a file the server then rejects, and the message that comes back talks about
+ * the field rather than about the picker that let the file through.
+ */
+export type MediaLimits = {
+    /** From `media.mime_types`. What the file input's `accept` is built from. */
+    mimeTypes: string[];
+    /** From `media.max_upload_kilobytes`. POST-04's 3 MB, for the article image. */
+    maxUploadKilobytes: number;
+    /** From `media.max_width`. A decompression-bomb ceiling, checked undecoded. */
+    maxWidth: number;
+    /** From `media.max_height`. */
+    maxHeight: number;
+};
+
+/**
  * Props HandleInertiaRequests shares with every page.
  *
  * Kept in one place so a page that needs a shared prop reaches for the same
  * definition instead of declaring its own version of it.
  *
  * `errors` and `flash` are absent on purpose. Inertia supplies `errors` through
- * its own middleware, and flash is delivered by the `flash` DOM event rather
- * than as a page prop, so neither belongs to this contract.
+ * its own middleware, and flash is delivered by the `flash` DOM event rather than
+ * as a page prop, so neither belongs to this contract.
  *
- * @see docs/DECISIONS.md D-21
+ * @see docs/DECISIONS.md D-21, D-62
  */
 export type SharedProps = {
     name: string;
@@ -52,4 +72,5 @@ export type SharedProps = {
     displayTimezone: string;
     sidebarOpen: boolean;
     seo: SeoDefaults;
+    media: MediaLimits;
 };

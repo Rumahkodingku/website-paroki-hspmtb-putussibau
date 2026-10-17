@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { type UploadAdapter, type UploadItem } from '@uploadcn/core';
+import type { ImageOutputType } from '@uploadcn/core/image';
 import {
     Upload as UploadPrimitive,
     useUploadContext,
@@ -22,6 +23,37 @@ interface AvatarUploadProps<TResult> {
     /** Called with the upload result, or `null` when the avatar is removed. */
     onChange?: (item: UploadItem<TResult> | null) => void;
     name?: string;
+    /** What the file input accepts. Default `image/*`. */
+    accept?: string;
+    /**
+     * Encoder output for the cropped square. Default `image/webp`.
+     *
+     * `image/webp` is the wrong answer for a server that accepts JPEG and PNG
+     * only: the admin crops the photo, and the rejected file comes back as a
+     * message about a form field. See docs/DECISIONS.md D-63.
+     */
+    type?: ImageOutputType;
+    /** Maximum size of the original file. Default 10 MB. */
+    maxSize?: number;
+    /** Crop dialog heading. Default `Crop your photo`. */
+    cropTitle?: React.ReactNode;
+    /** Copy for the button that opens the picker when there is no avatar. */
+    uploadLabel?: string;
+    /** Copy for the same button once there is one. */
+    changeLabel?: string;
+    /** Copy for the block's own remove button. */
+    removeLabel?: string;
+    /**
+     * Whether the photo already saved can be removed through this block.
+     *
+     * The queue holds newly picked files, not the saved one, so without this the
+     * block has nothing to remove on a record that has a photo and no new pick.
+     * Only turn it on where a null clears the column: `posts` and `events` read
+     * null as "unchanged". See docs/DECISIONS.md D-62, D-63.
+     */
+    removable?: boolean;
+    /** Line under the buttons. Defaults to the accepted formats. */
+    hint?: React.ReactNode;
     className?: string;
 }
 
@@ -31,6 +63,15 @@ function AvatarUpload<TResult = unknown>({
     size = 512,
     onChange,
     name,
+    accept = 'image/*',
+    type = 'image/webp',
+    maxSize = 10 * 1000 * 1000,
+    cropTitle = 'Crop your photo',
+    uploadLabel = 'Upload photo',
+    changeLabel = 'Change photo',
+    removeLabel = 'Remove',
+    removable = true,
+    hint,
     className,
 }: AvatarUploadProps<TResult>) {
     const crops = useCropQueue();
@@ -43,8 +84,8 @@ function AvatarUpload<TResult = unknown>({
     return (
         <Upload
             adapter={adapter}
-            accept="image/*"
-            maxSize={10 * 1000 * 1000}
+            accept={accept}
+            maxSize={maxSize}
             multiple={false}
             transform={transform}
             onSuccess={onChange}
@@ -56,11 +97,16 @@ function AvatarUpload<TResult = unknown>({
                 <div className="flex gap-2">
                     <UploadTrigger>
                         <CameraIcon data-icon="inline-start" />
-                        {src ? 'Change photo' : 'Upload photo'}
+                        {src ? changeLabel : uploadLabel}
                     </UploadTrigger>
-                    <AvatarRemove onRemove={() => onChange?.(null)} />
+                    <AvatarRemove
+                        label={removeLabel}
+                        stored={src !== null && src !== undefined}
+                        removable={removable}
+                        onRemove={() => onChange?.(null)}
+                    />
                 </div>
-                <AvatarHint />
+                <AvatarHint hint={hint} />
             </div>
             <ImageCropper
                 file={crops.current}
@@ -69,12 +115,12 @@ function AvatarUpload<TResult = unknown>({
                 output={{
                     maxWidth: size,
                     maxHeight: size,
-                    type: 'image/webp',
+                    type,
                     quality: 0.9,
                 }}
                 onCrop={crops.complete}
                 onCancel={crops.skip}
-                title="Crop your photo"
+                title={cropTitle}
             />
         </Upload>
     );
@@ -177,10 +223,24 @@ function AvatarPreview({ fallbackSrc }: { fallbackSrc: string | null }) {
     );
 }
 
-function AvatarRemove({ onRemove }: { onRemove: () => void }) {
+function AvatarRemove({
+    label,
+    stored,
+    removable,
+    onRemove,
+}: {
+    label: string;
+    stored: boolean;
+    removable: boolean;
+    onRemove: () => void;
+}) {
     const item = useAvatarItem();
     const { uploader } = useUploadContext();
-    if (!item) return null;
+
+    // A queued file can always be cancelled. The photo already saved is only
+    // reachable when the form's column can actually be emptied.
+    if (!item && !(stored && removable)) return null;
+
     return (
         <NativeButton
             variant="ghost"
@@ -190,12 +250,12 @@ function AvatarRemove({ onRemove }: { onRemove: () => void }) {
                 onRemove();
             }}
         >
-            Remove
+            {label}
         </NativeButton>
     );
 }
 
-function AvatarHint() {
+function AvatarHint({ hint }: { hint?: React.ReactNode }) {
     const item = useAvatarItem();
     if (item?.status === 'error' || item?.status === 'rejected') {
         return (
@@ -207,7 +267,7 @@ function AvatarHint() {
     }
     return (
         <p className="text-xs text-muted-foreground">
-            JPG, PNG or WebP. Cropped to a square.
+            {hint ?? 'JPG, PNG or WebP. Cropped to a square.'}
         </p>
     );
 }

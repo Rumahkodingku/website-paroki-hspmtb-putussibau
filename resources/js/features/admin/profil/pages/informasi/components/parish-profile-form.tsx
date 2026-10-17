@@ -6,7 +6,7 @@ import {
     FormInput,
     FormTextarea,
 } from '@/components/form-fields';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type { ParishProfileFormData, ParishProfileRow } from '../../../types';
 
@@ -284,36 +284,44 @@ export function ParishProfileForm({
                 <legend className="text-body-strong">Gambar</legend>
 
                 <div className="grid gap-8 md:grid-cols-2">
-                    <MediaField
+                    <MediaUploadField
                         id="profile-logo"
+                        variant="logo"
                         label={labels.logo_media_id ?? 'Logo'}
+                        name={form.data.name}
+                        emptyHint="Belum ada logo."
                         altValue={form.data.logo_alt}
                         onAltChange={(value) => form.setData('logo_alt', value)}
                         altLabel={labels.logo_alt ?? 'Teks alternatif logo'}
-                        mediaId={form.data.logo_media_id}
+                        altError={form.errors.logo_alt}
                         onMediaChange={(id) =>
                             form.setData('logo_media_id', id)
                         }
                         currentUrl={currentLogoUrl}
                         fieldName="logo_media_id"
-                        emptyHint="Belum ada logo."
+                        // Nullable and written straight through, so an empty
+                        // value really removes the logo.
+                        removable
                     />
 
-                    <MediaField
+                    <MediaUploadField
                         id="profile-cover"
+                        variant="image"
+                        aspect={16 / 9}
                         label={labels.cover_media_id ?? 'Gambar sampul'}
+                        emptyHint="Belum ada gambar sampul."
                         altValue={form.data.cover_alt}
                         onAltChange={(value) =>
                             form.setData('cover_alt', value)
                         }
                         altLabel={labels.cover_alt ?? 'Teks alternatif sampul'}
-                        mediaId={form.data.cover_media_id}
+                        altError={form.errors.cover_alt}
                         onMediaChange={(id) =>
                             form.setData('cover_media_id', id)
                         }
                         currentUrl={currentCoverUrl}
                         fieldName="cover_media_id"
-                        emptyHint="Belum ada gambar sampul."
+                        removable
                     />
                 </div>
             </fieldset>

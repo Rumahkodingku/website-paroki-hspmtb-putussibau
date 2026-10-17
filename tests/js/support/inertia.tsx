@@ -6,7 +6,7 @@ import {
     type RenderResult,
 } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
-import type { SharedProps } from '@/types';
+import type { MediaLimits, SharedProps } from '@/types';
 
 /**
  * A real Inertia context for component tests.
@@ -37,6 +37,20 @@ const EMPTY_SEO = {
     ogImage: null,
 } as const;
 
+/**
+ * The upload limits HandleInertiaRequests reads from config/media.php.
+ *
+ * The real values, not a placeholder pair: an uploader that accepts anything in
+ * a test and refuses it in the browser is the mismatch these tests exist to
+ * catch, and a fake limit would hide it.
+ */
+const MEDIA_LIMITS: MediaLimits = {
+    mimeTypes: ['image/jpeg', 'image/png'],
+    maxUploadKilobytes: 3072,
+    maxWidth: 8000,
+    maxHeight: 8000,
+};
+
 /** The shared props a public page receives from HandleInertiaRequests. */
 export function publicPageProps(
     overrides: Partial<SharedProps> = {},
@@ -48,6 +62,7 @@ export function publicPageProps(
         displayTimezone: 'Asia/Pontianak',
         sidebarOpen: true,
         seo: { ...EMPTY_SEO },
+        media: { ...MEDIA_LIMITS },
         ...overrides,
     };
 }

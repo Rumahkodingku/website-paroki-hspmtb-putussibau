@@ -23,6 +23,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import {
+    NativeButton,
     Upload,
     UploadDropzone,
     UploadItemMedia,
@@ -36,13 +37,36 @@ interface LogoUploadProps<TResult> {
     adapter?: UploadAdapter<TResult>;
     /** Use an uploader you created with `useUploader` instead of options. */
     uploader?: Uploader<TResult>;
+    /** Current logo URL, shown until a new one is uploaded. */
+    src?: string | null;
     /** Shown in the placeholder. Default `"Acme"`. */
     name?: string;
     title?: string;
     description?: string;
     /** Default 2 MB. */
     maxSize?: number;
+    /** What the file input accepts. */
+    accept?: string;
+    /**
+     * Offer a control that reports the logo as removed.
+     *
+     * Only honest where a null clears the column. `posts` and `events` treat
+     * null as "unchanged", so there the button would detach nothing. See
+     * docs/DECISIONS.md D-62, D-63.
+     */
+    removable?: boolean;
+    onRemove?: () => void;
     onSuccess?: (item: UploadItemData<TResult>) => void;
+    /** Replaces the card's footer line. */
+    footer?: React.ReactNode;
+    /** Copy for the button that opens the picker. */
+    uploadLabel?: string;
+    /** Copy for the same button once there is a logo. */
+    changeLabel?: string;
+    /** Copy for the remove control. */
+    removeLabel?: string;
+    /** Line shown while there is no logo and nothing was rejected. */
+    emptyLabel?: string;
     className?: string;
 }
 
@@ -53,11 +77,20 @@ interface LogoUploadProps<TResult> {
 function LogoUpload<TResult = unknown>({
     adapter,
     uploader,
+    src = null,
     name = 'Acme',
     title = 'Logo',
     description = 'Shown in the sidebar, emails and invoices.',
     maxSize = 2 * 1000 * 1000,
+    accept = 'image/png,image/svg+xml,image/webp,image/jpeg',
+    removable = false,
+    onRemove,
     onSuccess,
+    footer,
+    uploadLabel = 'Upload logo',
+    changeLabel = 'Replace',
+    removeLabel = 'Remove',
+    emptyLabel = 'Drop a file on the preview, or choose one.',
     className,
 }: LogoUploadProps<TResult>) {
     return (
@@ -66,7 +99,7 @@ function LogoUpload<TResult = unknown>({
                 ? { uploader }
                 : {
                       adapter,
-                      accept: 'image/png,image/svg+xml,image/webp,image/jpeg',
+                      accept,
                       maxFiles: 1,
                       maxSize,
                       onSuccess,
@@ -79,10 +112,23 @@ function LogoUpload<TResult = unknown>({
                     <CardTitle>{title}</CardTitle>
                     <CardDescription>{description}</CardDescription>
                 </CardHeader>
-                <LogoBody name={name} />
+                <LogoBody
+                    name={name}
+                    src={src}
+                    removable={removable}
+                    onRemove={onRemove}
+                    uploadLabel={uploadLabel}
+                    changeLabel={changeLabel}
+                    removeLabel={removeLabel}
+                    emptyLabel={emptyLabel}
+                />
                 <CardFooter className="border-t text-xs text-muted-foreground">
-                    Square SVG or PNG, at least 256 × 256 px. Max{' '}
-                    {maxSize / 1000 / 1000} MB.
+                    {footer ?? (
+                        <>
+                            Square SVG or PNG, at least 256 × 256 px. Max{' '}
+                            {maxSize / 1000 / 1000} MB.
+                        </>
+                    )}
                 </CardFooter>
             </Card>
         </Upload>
@@ -108,7 +154,25 @@ function Placeholder({
     );
 }
 
-function LogoBody({ name }: { name: string }) {
+function LogoBody({
+    name,
+    src,
+    removable,
+    onRemove,
+    uploadLabel,
+    changeLabel,
+    removeLabel,
+    emptyLabel,
+}: {
+    name: string;
+    src: string | null;
+    removable: boolean;
+    onRemove?: () => void;
+    uploadLabel: string;
+    changeLabel: string;
+    removeLabel: string;
+    emptyLabel: string;
+}) {
     const { uploader } = useUploadContext();
     const item = useUploadSelector(uploader, (state) =>
         state.items.find((entry) => entry.status !== 'rejected'),
@@ -116,6 +180,13 @@ function LogoBody({ name }: { name: string }) {
     const rejected = useUploadSelector(uploader, (state) =>
         state.items.find((entry) => entry.status === 'rejected'),
     );
+
+    /*
+     * The queue starts empty on every page load, so without this the card says
+     * "no logo" on a record that has one. `src` is the logo already saved, which
+     * is the only thing the admin can be shown before they replace it.
+     */
+    const stored = src === null ? null : src;
 
     const preview = (tone: 'light' | 'dark') => (
         <div
@@ -128,11 +199,18 @@ function LogoBody({ name }: { name: string }) {
         >
             {item ? (
                 <UploadItemMedia className="size-full border-0 bg-transparent [&_img]:object-contain" />
+            ) : stored ? (
+                <img src={stored} alt="" className="size-full object-contain" />
             ) : (
                 <Placeholder name={name} />
             )}
         </div>
     );
+
+    const clear = () => {
+        uploader.remove();
+        onRemove?.();
+    };
 
     return (
         <UploadItemContext.Provider value={item ?? null}>
@@ -164,18 +242,31 @@ function LogoBody({ name }: { name: string }) {
                                 rejected && 'text-destructive',
                             )}
                         >
-                            {rejected?.issues[0]?.message ??
-                                'Drop a file on the preview, or choose one.'}
+                            {rejected?.issues[0]?.message ?? emptyLabel}
                         </p>
                     )}
                     <div className="flex gap-2">
                         <UploadTrigger variant="outline" size="sm">
-                            {item ? 'Replace' : 'Upload logo'}
+                            {item ? changeLabel : uploadLabel}
                         </UploadTrigger>
                         {item ? (
                             <UploadItemRemove variant="ghost" size="sm">
-                                Remove
+                                {removeLabel}
                             </UploadItemRemove>
+                        ) : null}
+                        {/*
+                         * A stored logo is not in the queue, so the block's own
+                         * remove cannot reach it. This one reports the removal
+                         * to the form instead, which is where the column lives.
+                         */}
+                        {!item && stored && removable ? (
+                            <NativeButton
+                                variant="ghost"
+                                size="sm"
+                                onClick={clear}
+                            >
+                                {removeLabel}
+                            </NativeButton>
                         ) : null}
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import {
     ChoiceSelect,
@@ -353,7 +353,7 @@ export function EventForm({
             <fieldset className="space-y-6">
                 <legend className="text-lg font-semibold">Poster</legend>
 
-                <MediaField
+                <MediaUploadField
                     id="event-media"
                     label={labels.poster_path ?? 'Poster kegiatan'}
                     hint={hints.poster_alt}
@@ -361,11 +361,10 @@ export function EventForm({
                     altError={form.errors.poster_alt}
                     altValue={form.data.poster_alt}
                     onAltChange={(value) => form.setData('poster_alt', value)}
-                    mediaId={form.data.media_id}
                     onMediaChange={(id) => form.setData('media_id', id)}
                     currentUrl={currentPoster}
                     fieldName="poster"
-                    emptyHint="Belum ada poster"
+                    aspect={4 / 5}
                 />
             </fieldset>
 

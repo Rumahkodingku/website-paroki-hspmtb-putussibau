@@ -4245,4 +4245,269 @@ area — ia hanya memberi `leader_name`, `contact_phone`, dan `show_contact`. In
 ekstensi sadar; PRD tidak diedit di tengah fase.
 
 @see `docs/DECISIONS.md` D-55, D-57, D-60
+---
 
+## D-62 — Uploader berita dan agenda memakai komponen uploadcn di atas pipeline `/admin/media`
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** Scaffolding uploadcn sudah ada di repo — `ui/upload.tsx`,
+`ui/image-cropper.tsx`, `hooks/use-crop-queue.ts`, dan blok
+`components/upload/*.tsx` — tetapi belum dipakai satu pun halaman, dan
+`components/upload/upload-config.tsx` memasang adapter
+`s3Adapter({ endpoint: '/api/upload' })`. Route `/api/upload` **tidak ada** di
+aplikasi ini: pipeline-nya adalah `POST /admin/media`, satu baris database, dan
+satu job antrean. Dipakai apa adanya, form berita tidak gagal dengan tampilan
+yang salah. Dropzone, dialog potong, progress bar, dan tombol coba ulang
+semuanya tetap bekerja rapi di sekitar sebuah 404.
+
+**Keputusan.**
+
+1. **Adapter, bukan route.** `lib/media-upload-adapter.ts` membungkus
+   `createAdapter()` dari `@uploadcn/core` lalu meneruskan ke `postMediaFile()`
+   dan `waitForMedia()` di `lib/media-client.ts`. Protokol s3 yang dipakai
+   uploadcn tidak diimplementasikan di server; pipeline yang sudah ada dan sudah
+   diuji tetap satu-satunya jalan. Adapter global di `upload-config.tsx`
+   diganti ke `mediaUploadAdapter`, dan `maxSize` 50 MB pada provider itu
+   dihapus karena tidak pernah berlaku di aplikasi ini.
+
+2. **Satu implementasi poll.** Permintaan HTTP dipindah dari
+   `hooks/use-media-upload.ts` ke `lib/media-client.ts`, dan hook itu memanggilnya.
+   `MediaField` (tujuh form lain, dihapus di D-64) dan dialog sisip-gambar di
+   editor tidak berubah perilakunya; keduanya sekarang berbagi satu
+   `waitForMedia()`. Poll punya plafon 80 percobaan dan menghormati
+   `AbortSignal`, jadi komponen yang ditinggalkan tidak meninggalkan timer yang
+   berdenyut setiap 1,5 detik.
+
+3. **`media_id` hanya dari baris yang sudah `ready`.** Aturan `media_id` di
+   `PostValidationRules` dan `EventValidationRules` hanya menerima `ready`,
+   karena unggahan masuk antrean: baris media ada sebelum varian-variannya ada
+   di disk. Adapter menolak mengembalikan baris yang belum selesai, dan
+   `MediaUploadField` memeriksanya sekali lagi sebelum menulis ke form.
+
+4. **Batas unggah lewat shared prop `media`, bukan konstanta.** `config/media.php`
+   yang memutuskan MIME yang diterima dan ukuran maksimum, dan angkanya dikirim
+   sebagai shared prop dari `HandleInertiaRequests::share()` — pola yang sama
+   dengan `seo` — dengan cerminnya di `types/index.ts`. `MediaUploadField`
+   melempar error yang menyebut D-62 bila prop itu hilang, bukan memakai nilai
+   cadangan. Nilai cadangan adalah jawaban kedua untuk pertanyaan yang sama, dan
+   itulah cara batas 3 MB melenceng jadi 10 MB di satu form saja.
+
+5. **JPEG, bukan WebP.** `compressImage()` memakai `image/webp` sebagai `type`
+   bawaan ketika `compress` aktif, sedangkan `config/media.php` hanya menerima
+   `image/jpeg` dan `image/png`. Tanpa `type="image/jpeg"` yang eksplisit, berkas
+   yang sudah dipotong admin ditolak server dengan pesan tentang sebuah field.
+
+6. **Rasio potong eksplisit, dan tidak ada crop bebas.** Berita 16:9, agenda 4:5.
+   `ImageCropper` punya `aspect = 1` sebagai nilai bawaan dan `react-easy-crop`
+   mewajibkan `aspect: number`, jadi `crop={true}` berarti persegi dan bukan
+   bebas. `ImageUpload` kini menerima `accept`, `title`, `description`,
+   `cropTitle`, `cropDescription`, `itemActions`, dan `children`, semuanya dengan
+   bawaan yang membuat blok itu tetap sama seperti yang dikirim registri.
+
+7. **Gambar yang sudah tersimpan tetap terlihat.** Antrean mulai kosong setiap
+   kali halaman dimuat, jadi uploader yang hanya menampilkan antrean mengatakan
+   "tidak ada gambar" pada artikel yang punya satu, dan admin membacanya sebagai
+   "gambar saya hilang". `MediaUploadField` menampilkan gambar yang sedang
+   dipegang formulir beserta tombol **Ganti gambar**, dirender di dalam konteks
+   `Upload` supaya bisa memakai `UploadTrigger`.
+
+8. **Tidak ada tombol hapus.** `media_id` null berarti "tidak berubah"
+   (`SavePostAction`), jadi mengosongkan antrean tidak melepas gambar dari form
+   yang akan dikirim. Tombol pada tile yang sudah jadi berarti "pilih yang lain",
+   bukan "lupakan" — sampai ada pustaka media yang bisa menghapus baris, tidak
+   ada hapus yang jujur di sini.
+
+9. **Komponen bersama, bukan dua salinan.** `MediaUploadField` dipakai dua
+   feature, jadi ia ada di `components/` (§1.1). `MediaField` lama tidak
+   disentuh pada saat itu — sempat tujuh form (Profil lima, Komunitas,
+   Pelayanan), lalu tinggal lima pemakaian, dan akhirnya dihapus di **D-64**.
+
+**Divergensi dari PRD.** Tidak ada. POST-04 dan XC-M3 tetap dipenuhi oleh
+pipeline yang sama; yang berubah adalah lapisan antarmukanya.
+
+**Utang yang diketahui.** Dialog potong memakai `<dialog>` native dan tombolnya
+berlabel `Cancel` dan `Apply` — bahasa Inggris di dalam admin berbahasa
+Indonesia. Label itu ada di `components/ui/image-cropper.tsx`, yang berasal dari
+registri dan tidak diedit tangan karena aturan AGENTS.md; judul dan deskripsinya
+bisa diterjemahkan lewat prop, label tombolnya tidak. Menembus aturan itu perlu
+keputusan tersendiri.
+
+@see `docs/DECISIONS.md` D-22, D-24, D-25, D-50
+@see `docs/PRD.md` POST-04, XC-M3, HOME-05
+---
+
+## D-63 — `MediaUploadField` bervariant: enam bentuk, tiga di antaranya belum punya backend
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** `components/upload/` menyimpan enam blok uploadcn — `image`,
+`avatar`, `logo`, `gallery`, `document`, `file` — dan sampai sekarang hanya
+`image` yang dipakai, lewat `MediaUploadField` (D-62). Setiap form yang butuh
+gambar lain masih memakai `MediaField` yang lebih tua: tombol, input tersembunyi,
+pratinjau, tanpa crop dan tanpa antrean. Tujuannya satu komponen yang tinggal
+dipilih lewat prop. (Sisa pemakaian `MediaField` itu sendiri dihapus di D-64.)
+
+Yang membatasi bukan selera, melainkan backend. `/admin/media` satu-satunya
+endpoint unggah; `config/media.php` menerima `image/jpeg` dan `image/png` saja;
+`IsProcessableImage` membaca bytes-nya; dan `GenerateImageVariants` dikirim untuk
+**setiap** baris yang ditulis. Tidak ada tempat menyimpan PDF atau dokumen: baris
+`media` selalu berakhir di pipeline gambar. Galeri lebih jauh lagi — ia
+menghasilkan N baris, sedangkan setiap kolom form hanya menampung satu
+`*_media_id`. Endpoint, tabel dan izin untuk keduanya ada di **Phase 8 — Galeri,
+Download & Kontak**, yang di `roadmap/README.md` masih ⚪ Planned dan belum punya
+dokumen fase.
+
+**Keputusan.**
+
+1. **Satu prop `variant`, enam nama.** `MediaUploadField` menjadi facade:
+   `image` (default, dua pemanggil lama tidak berubah), `avatar`, `logo`,
+   `gallery`, `document`, `file`. `variant` dipilih alih-alih `tipe` karena
+   prop lain di komponen ini berbahasa Inggris (`altValue`, `currentUrl`,
+   `fieldName`) dan `document-upload.tsx` sudah memakai nama `variant` untuk
+   hal serupa.
+
+2. **Discriminated union, bukan satu tas properti opsional.** Tiap member hanya
+   membawa prop yang bisa ia pakai: `aspect` cuma di `image` (karena `avatar`
+   mengunci persegi dan `logo` tidak memotong), dan tiga variant tanpa backend
+   hanya membawa `id`/`label`/`hint`. Memberi mereka `onMediaChange` akan
+   mendeskripsikan kontrak yang tidak bisa ditepati — dokumen tidak punya baris
+   di `media`, galeri butuh banyak baris.
+
+3. **Tiga variant dirender sebagai pemberitahuan, bukan pemilih berkas.**
+   `gallery`, `document` dan `file` menampilkan panel "Belum tersedia" dan
+   **tidak** merender `input[type="file"]`. Merender bloknya sekarang berarti
+   menaruh kontrol di layar yang setiap percobaannya berakhir sebagai 422 tentang
+   sebuah field. Ini juga bukan mendahului phase: tidak ada tabel, endpoint atau
+   izin yang dibangun di sini — hanya nama variant dan bentuk callback, sebagai
+   seam yang Phase 8 isi. `onMediaChangeMany(ids: number[])` sudah ada di tipe
+   `gallery` untuk alasan yang sama, dan satu test memastikan tidak ada input
+   berkas yang bocor ke sana.
+
+4. **`removable` opt-in, default `false`,** karena apakah `null` mengosongkan
+   sebuah kolom adalah fakta tentang model, bukan tentang komponen. `posts` dan
+   `events` membaca `null` sebagai "tidak berubah" (`SavePostAction`), jadi di
+   sana tombol hapus akan melepas nol barang. `parish_board_members`,
+   `pastors` dan `communities` menulis `null` apa adanya
+   (`$model->update($validated)`, `SaveCommunityAction::fill`), jadi di tiga form
+   itu tombolnya diaktifkan. Sebelum ini tidak ada cara sama sekali menghapus
+   foto pengurus.
+
+5. **Blok uploadcn boleh diedit untuk prop, bukan untuk menjadi bahasa
+   Indonesia.** `avatar-upload.tsx` kini menerima `accept`, `type`, `maxSize`,
+   `cropTitle`, `hint`, `uploadLabel`, `changeLabel`, `removeLabel` dan
+   `removable`; `logo-upload.tsx` menerima `src`, `accept`, `removable`,
+   `onRemove`, `footer` dan label yang sama. Semua bawaannya tetap seperti yang
+   dikirim registri, dan pemanggil (facade) yang mengirim bahasa Indonesia serta
+   batas nyata dari `config/media.php`.
+
+6. **`type="image/jpeg"` juga wajib untuk avatar.** `avatar-upload.tsx` mengunci
+   `output.type = 'image/webp'` dan `accept = 'image/*'`, dan `logo-upload.tsx`
+   menawarkan SVG dan WebP. Untuk server ini ketiganya berakhir sebagai berkas
+   yang ditolak setelah admin memotongnya — persis jebakan yang D-62 catat untuk
+   `image-upload.tsx`, sekarang di tiga tempat.
+
+7. **`name` tidak pernah diteruskan ke `AvatarUpload`.** `Upload` uploadcn
+   merender input tersembunyi bernama `name` dengan `submit` bawaan `"value"`,
+   jadi `<AvatarUpload name="photo_media_id">` menyuntikkan
+   `<input type="hidden" name="photo_media_id" value="gereja.png">` ke dalam form
+   — dan kolom itu `nullable|integer`, sehingga setiap submit berakhir 422.
+   `LogoUpload` tidak meneruskan `name` ke uploader-nya (hanya untuk inisial
+   placeholder), jadi hanya avatar yang punya jebakan ini.
+
+8. **Gambar yang tersimpan tetap terlihat di setiap variant.** Antrean mulai
+   kosong setiap halaman dimuat, jadi `AvatarUpload` dan `LogoUpload` diberi
+   `src`, dan `logo-upload.tsx` merendernya di kedua pratinjau (terang dan
+   gelap). `logo-upload.tsx` sebelumnya hanya bisa menampilkan berkas yang baru
+   dipilih.
+
+9. **`removable` untuk logo dirender oleh bloknya, bukan facade.** Logo yang
+   tersimpan tidak ada di antrean, sehingga tombol hapus bawaan blok tidak bisa
+   menjangkaunya; `logo-upload.tsx` mendapat satu tombol yang melaporkan
+   penghapusan ke form. Untuk avatar hal yang sama dilakukan `AvatarRemove`.
+   Hanya varian `image` yang memakai tombol di dalam tile facade, karena
+   bloknya memang tidak punya konsep itu.
+
+10. **Perilaku tanpa prop alt dipertahankan.** Ketiga prop alt opsional; bila
+    `altLabel`/`onAltChange` tidak diberikan, tidak ada field teks alternatif
+    yang dirender. Ketika diberikan tanpa `hint`, facade memakai kalimat
+    aksesibilitas yang selama ini dibawa `MediaField`, supaya tiga form yang
+    dikonversi tidak kehilangan panduannya.
+
+**Divergensi dari PRD.** Tidak ada. XC-M5 (alt text pada gambar kunci) tetap
+dipenuhi: field alt masih ada di kelima form, dan sekarang lebih banyak form
+punya tombol hapus.
+
+**Utang yang diketahui.** `logo-upload.tsx` tidak punya dialog potong, jadi
+sebuah logo tidak bisa dipaksa persegi seperti avatar. Label `Cancel`/`Apply`
+pada dialog potong masih berbahasa Inggris (D-62). `lib/media-upload-adapter.ts`
+belum tahu apa-apa tentang berkas non-gambar, dan itu memang urusan Phase 8.
+
+@see `docs/DECISIONS.md` D-22, D-24, D-62
+@see `docs/roadmap/README.md` Phase 8 — Gallery, Download & Contact
+---
+
+## D-64 — `MediaField` dihapus; lima pemakainya pindah ke `MediaUploadField`
+
+**Status:** Accepted · branch `feat/phase-07-communities`
+
+**Konteks.** D-63 membuat `MediaUploadField` bervariant tetapi sengaja membiarkan
+`MediaField` hidup untuk lima pemakaian: logo dan sampul profil paroki, peta
+wilayah pelayanan, thumbnail layanan, dan gambar peristiwa sejarah. Dua picker di
+satu aplikasi berarti dua aturan: `MediaField` menegakkan batas ukuran lewat
+`accept="image/jpeg,image/png"` yang ditulis di komponennya sendiri, sedangkan
+`MediaUploadField` membacanya dari shared prop `media` (D-62). Satu di antaranya
+akan melenceng, dan yang pertama melenceng adalah yang tidak punya test yang
+menahannya.
+
+**Keputusan.**
+
+1. **`MediaField` dan test-nya dihapus**, dan kelima pemakaiannya memakai
+   `MediaUploadField`. Tidak ada shim kompatibilitas: yang tersisa hanyalah lima
+   pemanggil, semuanya di repo ini, dan sebuah shim hanya akan memindahkan
+   pekerjaan ke kemudian hari.
+
+2. **`emptyHint` ditambahkan** ke member `image` dan `logo`. Kelima pemakaian
+   membawa copy yang tidak boleh hilang — dua di antaranya menyampaikan informasi
+   nyata ("Thumbnail bersifat opsional.", "Foto bersifat opsional."), bukan hanya
+   "belum ada". Pada `image` ia menjadi caption yang dirender hanya ketika form
+   tidak membawa gambar **dan** antrean kosong; pada `logo` ia menggantikan
+   `emptyLabel`. Tidak ditambahkan ke `avatar` karena tidak ada pemakainya dan
+   bloknya sudah punya baris keterangan sendiri.
+
+3. **`aspect` menjadi opsional** pada member `image`; tanpa `aspect` tidak ada
+   dialog potong dan tidak ada kalimat tentang potong di dropzone. Alasannya
+   peta wilayah pelayanan: halaman publik merendernya `w-full object-cover`,
+   dan mengunci 16:9 di form berarti memotong jalan dari peta secara sengaja
+   dan tak terlihat. Bentuk yang tidak dibingkai tidak boleh dipaksa masuk
+   bingkai.
+
+4. **Rasio untuk empat yang tersisa:** thumbnail layanan 16:9, karena kartu
+   publiknya memang `aspect-video`; sampul profil 16:9; gambar sejarah 16:9.
+   Logo tidak dipotong — blok `logo-upload.tsx` memang tidak punya dialog potong
+   (D-63).
+
+5. **`removable` diaktifkan pada kelimanya.** `logo_media_id`, `cover_media_id`,
+   `map_media_id`, `thumbnail_media_id` dan `media_id` semuanya nullable dan
+   ditulis apa adanya oleh `create`/`update`/`fill()->save()` dengan
+   `validated()`, tanpa trik "null berarti tidak berubah" seperti `SavePostAction`
+   di posts dan events (D-62). Jadi `null` benar-benar mengosongkan, dan sebelum
+   ini kelima field itu tidak bisa dihapus sama sekali — hanya ditimpa.
+
+6. **Field alt untuk peta dihapus, bukan dibiarkan kosong.** `service-area-form`
+   memanggil `MediaField` dengan `altValue=""`, `altLabel=""` dan
+   `onAltChange={() => undefined}`, yang merender field teks berlabel kosong yang
+   tidak bisa diisi siapa pun dan tidak disimpan ke kolom mana pun — tabel
+   `parish_service_areas` tidak punya kolom alt. `MediaUploadField` tidak
+   merender field alt bila `altLabel`/`onAltChange` tidak diberikan, jadi
+   pemanggilnya cukup tidak memberikannya.
+
+**Divergensi dari PRD.** Tidak ada. XC-M5 tetap dipenuhi di form yang punya kolom
+alt; peta memang tidak pernah punya.
+
+**Utang yang diketahui.** `hooks/use-media-upload.ts` kini punya satu konsumen
+saja (dialog sisip-gambar editor) dan tinggal di `hooks/` alih-alih pindah ke
+dalam editor. Label `Cancel`/`Apply` pada dialog potong masih bahasa Inggris
+(D-62), dan sekarang muncul di lebih banyak form.
+
+@see `docs/DECISIONS.md` D-22, D-24, D-62, D-63

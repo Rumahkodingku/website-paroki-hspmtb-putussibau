@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
 import { RichTextEditor } from '@/components/rich-text-editor';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import {
     ChoiceSelect,
     Field,
@@ -255,7 +255,7 @@ export function PostForm({
             <fieldset className="space-y-6">
                 <legend className="text-lg font-semibold">Gambar utama</legend>
 
-                <MediaField
+                <MediaUploadField
                     id="post-media"
                     label={labels.featured_image ?? 'Gambar utama'}
                     hint={hints.image_alt}
@@ -263,11 +263,10 @@ export function PostForm({
                     altError={form.errors.image_alt}
                     altValue={form.data.image_alt}
                     onAltChange={(value) => form.setData('image_alt', value)}
-                    mediaId={form.data.media_id}
                     onMediaChange={(id) => form.setData('media_id', id)}
                     currentUrl={currentImage}
                     fieldName="featured_image"
-                    emptyHint="Belum ada gambar"
+                    aspect={16 / 9}
                 />
             </fieldset>
 

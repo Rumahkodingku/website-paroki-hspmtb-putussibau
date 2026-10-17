@@ -5,7 +5,7 @@ import {
     FormActions,
     FormInput,
 } from '@/components/form-fields';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type {
     ParishHistoryItemFormData,
@@ -130,19 +130,24 @@ export function HistoryItemForm({
                 </div>
 
                 <div className="md:col-span-2">
-                    <MediaField
+                    <MediaUploadField
                         id="history-image"
+                        variant="image"
+                        aspect={16 / 9}
                         label={labels.media_id ?? 'Gambar'}
+                        emptyHint="Belum ada gambar."
                         altValue={form.data.image_alt}
                         onAltChange={(value) =>
                             form.setData('image_alt', value)
                         }
                         altLabel={labels.image_alt ?? 'Teks alternatif gambar'}
-                        mediaId={form.data.media_id}
+                        altError={form.errors.image_alt}
                         onMediaChange={(id) => form.setData('media_id', id)}
                         currentUrl={currentImageUrl}
                         fieldName="media_id"
-                        emptyHint="Belum ada gambar."
+                        // Nullable and written straight through, so an empty
+                        // value really removes the picture.
+                        removable
                     />
                 </div>
 
