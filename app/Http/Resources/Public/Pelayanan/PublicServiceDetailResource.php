@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Public\Pelayanan;
 
+use App\Http\Resources\Public\Document\PublicDocumentCardResource;
 use App\Models\Service;
 use App\Services\HtmlSanitizer;
 use App\Services\SiteSettingsService;
@@ -67,6 +68,10 @@ class PublicServiceDetailResource extends JsonResource
             'faqs' => $this->whenLoaded(
                 'faqs',
                 fn (): array => PublicServiceFaqResource::collection($this->faqs)->resolve(),
+            ),
+            'documents' => $this->whenLoaded(
+                'documents',
+                fn (): array => PublicDocumentCardResource::collection($this->documents)->resolve(),
             ),
             'updated_at' => $this->updated_at->toIso8601String(),
             'seo' => [

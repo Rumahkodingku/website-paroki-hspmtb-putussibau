@@ -29,7 +29,7 @@ const EXPECTED_LINKS: Record<string, string> = {
     Pelayanan: '/pelayanan',
     Komunitas: '/komunitas',
     Galeri: '/galeri',
-    Download: '/download',
+    Dokumen: '/dokumen',
     'Halaman kontak': '/kontak',
     Sejarah: '/profil/sejarah',
     'Wilayah Pelayanan': '/profil/wilayah',

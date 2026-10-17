@@ -30,7 +30,7 @@ const MENU = [
     { label: 'Komunitas', href: '/komunitas' },
     { label: 'Area', href: '/area' },
     { label: 'Galeri', href: '/galeri' },
-    { label: 'Download', href: '/download' },
+    { label: 'Dokumen', href: '/dokumen' },
     { label: 'Kontak', href: '/kontak' },
 ];
 

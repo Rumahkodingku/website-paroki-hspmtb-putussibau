@@ -17,7 +17,7 @@ import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
 import { index as kontak } from '@/routes/kontak';
-import { index as download } from '@/routes/download';
+import { index as dokumen } from '@/routes/dokumen';
 import { index as galeri } from '@/routes/galeri';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
@@ -41,7 +41,7 @@ const NAV_ENTRIES: NavEntry[] = [
     { label: 'Komunitas', href: komunitas(), match: 'section' },
     { label: 'Area', href: areaIndex(), match: 'section' },
     { label: 'Galeri', href: galeri(), match: 'section' },
-    { label: 'Download', href: download(), match: 'section' },
+    { label: 'Dokumen', href: dokumen(), match: 'section' },
     { label: 'Kontak', href: kontak(), match: 'section' },
 ];
 

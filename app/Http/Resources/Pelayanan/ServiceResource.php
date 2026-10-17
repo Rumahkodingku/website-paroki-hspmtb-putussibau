@@ -51,6 +51,16 @@ class ServiceResource extends JsonResource
                 'id' => $this->serviceCategory->getKey(),
                 'name' => $this->serviceCategory->name,
             ]),
+            'documents' => $this->whenLoaded('documents', fn (): array => $this->documents
+                ->map(fn ($document): array => [
+                    'id' => $document->getKey(),
+                    'title' => $document->title,
+                    'status' => $document->status->value,
+                    'status_label' => $document->status->label(),
+                ])
+                ->values()
+                ->all()),
+            'document_ids' => $this->whenLoaded('documents', fn (): array => $this->documents->pluck('id')->all()),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
                 'delete' => $request->user()?->can('delete', $this->resource) ?? false,

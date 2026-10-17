@@ -21,9 +21,9 @@ use Illuminate\Support\Facades\Route;
 | placeholder that quietly reappears — or a route name that disappears — is
 | still caught.
 |
-| The two file routes are here for the same reason. They are the only endpoints
-| on the site that do not return a screen, and a placeholder that quietly starts
-| returning HTML would break the one client that cares.
+| The download route is now the Dokumen controller's (Phase 08B). The route-table
+| pin below keeps its name, so a placeholder that quietly reappears — or a route
+| name that disappears — is still caught.
 |
 | @see docs/DECISIONS.md D-31, D-65
 |
@@ -66,36 +66,6 @@ it('rejects anything that is not a clean slug', function (string $path) {
     'slash' => ['/berita/a/b'],
 ]);
 
-describe('the download endpoint', function () {
-    it('responds as an attachment rather than a page', function () {
-        $response = $this->get('/download/1/unduh');
-
-        $response->assertOk()
-            ->assertHeader('Content-Type', 'application/octet-stream')
-            ->assertHeader('Content-Disposition', 'attachment; filename="belum-tersedia.txt"');
-    });
-
-    /**
-     * No counter, no filename from the database, no path from storage. The
-     * Download phase owns all three, and a counter incrementing against a
-     * placeholder would put a number in the admin that no download ever earned.
-     */
-    it('returns a placeholder body and nothing resembling a real file', function () {
-        $body = (string) $this->get('/download/1/unduh')
-            ->assertOk()
-            ->getContent();
-
-        expect($body)
-            ->toContain('[ISI: berkas belum tersedia')
-            ->not->toContain('%PDF')
-            ->not->toContain('storage');
-    });
-
-    it('requires a numeric id', function () {
-        $this->get('/download/abc/unduh')->assertNotFound();
-    });
-});
-
 it('does not collide with the section index of the same name', function () {
     // /berita is a section and /berita/{slug} is a detail. If the constraint on
     // the detail ever widened, the index would become unreachable under a single
@@ -131,9 +101,9 @@ it('names every placeholder route in the route table', function () {
         'komunitas.show',
         'galeri.index',
         'galeri.show',
+        'dokumen.index',
+        'dokumen.unduh',
         'kontak.index',
-        'download.index',
-        'download.unduh',
         'design-system.index',
     ];
 

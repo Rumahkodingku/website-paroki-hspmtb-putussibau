@@ -51,7 +51,16 @@ export type ServiceDetail = {
     sort_order: number;
     updated_at: string | null;
     category?: { id: number; name: string };
+    documents: ServiceDocumentOption[];
+    document_ids: number[];
     can: { update: boolean; delete: boolean };
+};
+
+export type ServiceDocumentOption = {
+    id: number;
+    title: string;
+    status: 'draft' | 'published' | 'archived';
+    status_label: string;
 };
 
 /** App\Http\Resources\Pelayanan\ServiceRequirementResource */
@@ -122,4 +131,5 @@ export type ServiceFormData = {
     is_emergency: boolean;
     is_active: boolean;
     sort_order: string;
+    document_ids: number[];
 };

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -105,6 +106,19 @@ class Service extends Model
     public function thumbnailMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'thumbnail_media_id');
+    }
+
+    /**
+     * The documents a visitor may download from this service.
+     *
+     * Only published documents are loaded by the public controller; the pivot
+     * itself may still hold a document that was later archived.
+     *
+     * @return BelongsToMany<Document, $this>
+     */
+    public function documents(): BelongsToMany
+    {
+        return $this->belongsToMany(Document::class);
     }
 
     /**

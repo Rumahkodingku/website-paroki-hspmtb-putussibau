@@ -153,7 +153,7 @@ test.describe('situs publik', () => {
             'Komunitas',
             'Area',
             'Galeri',
-            'Download',
+            'Dokumen',
             'Kontak',
         ];
 

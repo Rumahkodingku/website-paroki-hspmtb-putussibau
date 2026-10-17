@@ -4614,3 +4614,115 @@ berita/agenda/komunitas dan integrasi beranda menyusul di Phase 9.
 @see `docs/DECISIONS.md` D-24, D-36, D-44, D-54, D-55, D-63
 @see `docs/roadmap/phase-8A-galleries.md`
 @see `docs/PRD.md` 7.8, 9.10
+
+---
+
+## D-66 — Modul Dokumen (Phase 8B): pipeline privat, status enum, dan integrasi layanan
+
+**Status:** Accepted · branch `feat/phase-8b-documents`
+
+Phase 8B membangun modul **Dokumen** (`docs/roadmap/phase-8b-documents.md`,
+disusun di `docs/plan-implementation/plan-phase-8b-documents.md`). Audit
+dilakukan terhadap `main` pada commit `3c2c3f1` dan seluruh keputusan produk
+dikonfirmasi pemilik proyek sebelum implementasi. Ringkasan yang mengikat:
+
+1. **Berkas dokumen memakai pipeline terpisah dari Media.** `config/documents.php`
+   menentukan disk privat (`DOCUMENTS_DISK`, default `local`), path `documents`,
+   MIME/ekstensi, dan batas 10 MB. `config/media.php` tidak diubah. Dokumen tidak
+   punya baris `media` dan tidak melewati `GenerateImageVariants`.
+
+2. **Status dokumen adalah enum `draft`/`published`/`archived`.** PRD §9.11
+   menyarankan `is_published bool`, tetapi PRD §9 mengizinkan penyesuaian tipe
+   selama perilakunya terpenuhi, dan roadmap 8B §4.1/§6.1 meminta tiga keadaan.
+   `published_at` diisi sekali saat pertama published dan tidak diterima dari
+   request. Hanya `published` yang tampil publik dan dapat diunduh.
+
+3. **Tidak ada slug dan tidak ada halaman detail dokumen.** Roadmap menyebut slug
+   opsional hanya bila ada halaman detail; PRD tidak memintanya. Route publik
+   adalah `/dokumen` dan `/dokumen/{document}/unduh` (by id). Konsekuensinya tidak
+   ada `resolveRouteBinding` slug dan tidak ada `active_marker`.
+
+4. **Format mengikuti PRD DL-01**: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP;
+   maks 10 MB. finfo melaporkan DOCX/XLSX/PPTX sebagai `application/zip`, jadi
+   `App\Rules\AllowedDocumentFile` memeriksa isi ZIP (`[Content_Types].xml` plus
+   `word/document.xml`/`xl/workbook.xml`/`ppt/presentation.xml`) dan menyimpan
+   MIME kanonik Office. Legacy `.doc/.xls/.ppt` adalah kontainer OLE2; bila
+   libmagic melaporkannya sebagai `application/x-ole-storage` atau
+   `application/CDFV2`, ekstensi menentukan MIME kanonik Office-nya. `.php` yang
+   dinamai `.pdf` tetap ditolak. OOXML membutuhkan `ext-zip`; host juga harus
+   menaikkan `upload_max_filesize` dan `post_max_size` ke minimal 10 MB/12 MB.
+
+5. **Hapus = soft delete baris + hapus file fisik.** Tidak ada UI restore. Pivot
+   `document_service` dilepas dalam transaksi yang sama, file dihapus setelah
+   commit. Replace menyimpan file baru dulu, dan baru menghapus file lama setelah
+   transaksi berhasil serta tidak ada baris lain yang mereferensikannya.
+
+6. **Nama unduhan = slug judul + ekstensi kanonik** (PRD DL-04), bukan nama asli.
+   `original_filename` disimpan hanya sebagai metadata. Respons attachment
+   mengirim `Content-Type` dari `mime_type` kanonik, bukan hasil finfo atas path
+   ZIP, sehingga DOCX/XLSX/PPTX tidak dikirim sebagai `application/zip`. Counter
+   bertambah atomik dengan `DB::table('documents')->increment('download_count')`
+   hanya untuk respons `attachment`; pratinjau `?inline=1` tidak menghitung.
+
+7. **Pratinjau PDF** memakai route unduh yang sama dengan `?inline=1` untuk publik
+   (`published` + PDF) dan route admin `documents.preview` untuk semua status.
+   Tidak ada counter pada keduanya.
+
+8. **Dokumen unggulan** (`is_featured`) tampil sebagai seksi terpisah di `/dokumen`
+   dan badge di kartu. Boleh disimpan pada draf, tetapi hanya berpengaruh publik
+   saat `published`. Seksi unggulan hanya dirender saat halaman tidak sedang
+   mencari atau memfilter, supaya hasil filter tidak tercampur dokumen di luar
+   filter.
+
+9. **`expires_at` hanya peringatan.** Dokumen yang lewat tanggal tetap tampil dan
+   tetap dapat diunduh; badge “Kedaluwarsa” muncul di admin dan publik. Ini
+   mengikuti roadmap §9.1 yang melarang auto-hide tanpa persetujuan.
+
+10. **Integrasi dokumen-layanan menutup penundaan D-54.** Pivot
+    `document_service` (composite key, cascade) dan relasi `belongsToMany` di kedua
+    model. Selector “Dokumen Terkait” ada di form Pelayanan (tab, mengikuti
+    `services.update`); hanya dokumen `published` yang boleh ditautkan baru,
+    sementara tautan lama yang diarsipkan tetap terlihat di form dan tidak tampil
+    publik. Detail Pelayanan menampilkan “Dokumen Terkait” hanya berisi dokumen
+    published.
+
+11. **Kategori Dokumen adalah Master Data** di
+    `/admin/master-data/kategori-dokumen` (`document-categories.*`), di-seed lima
+    kategori PRD §9.11 dengan `firstOrCreate`. Kategori nonaktif tidak muncul di
+    filter publik, tidak dapat dipilih untuk dokumen baru, dan slug-nya yang
+    dikirim langsung lewat URL diabaikan (halaman kembali menampilkan semua
+    dokumen Terbit), tetapi dokumen Terbit yang memakainya tetap tampil. Kategori
+    tidak dapat dihapus selama masih dipakai, termasuk oleh dokumen soft-deleted
+    (`withTrashed()->count()`); penolakan itu ditampilkan sebagai Alert di halaman
+    daftar kategori.
+
+12. **Redirect permanen untuk URL lama.** `/download` → `/dokumen`,
+    `/download/{id}/unduh` → `/dokumen/{id}/unduh`, `/admin/download` →
+    `/admin/dokumen`, `/admin/kategori-download` →
+    `/admin/master-data/kategori-dokumen`. Semua redirect diberi nama `legacy.*`
+    agar Wayfinder tidak gagal (D-48 §3).
+
+13. **Permission: `documents.*` + `documentcategories.*`** saja (4 verb
+    masing-masing, total 8; 85 → 93). Tidak ada `documents.publish`; publikasi dan
+    arsip adalah field `status` pada update (D-36, D-65). `DocumentPolicy` punya
+    `view` untuk pratinjau admin.
+
+**Divergensi dari PRD.** (a) Enum status menggantikan `is_published` (poin 2).
+(b) Tidak ada `slug`/halaman detail (poin 3). (c) `documents` menyimpan
+`file_disk`/`file_path`/`original_filename` dan metadata tambahan
+(`version_label`, `document_date`, `expires_at`, `is_featured`,
+`download_count`, audit user) sesuai roadmap §6.1. (d) Sebagian URL berubah dari
+PRD §5.1/§5.2 (`/dokumen`, `/admin/dokumen`,
+`/admin/master-data/kategori-dokumen`) dan URL lama diarahkan. Selebihnya
+memenuhi DL-01 sampai DL-08, AC-DL-1 sampai AC-DL-6, XC-E3, dan NFR-SEC.
+
+**Utang / keterbatasan yang diketahui.** E2E tidak membaca database secara
+langsung; counter unduhan diverifikasi di test Pest, bukan di browser. Pratinjau
+admin dan publik hanya untuk PDF. `expires_at` tidak menyembunyikan dokumen. Tidak
+ada versioning berkas historis: replace menimpa file aktif dan menghapus file
+lama. `docs/ADMIN_GUIDE.md` belum dibuat (sama seperti Phase 6B). Batas 10 MB di
+production tetap bergantung pada `php.ini`/host.
+
+@see `docs/DECISIONS.md` D-24, D-36, D-44, D-45, D-48, D-54, D-63, D-65
+@see `docs/roadmap/phase-8b-documents.md`
+@see `docs/PRD.md` 7.10, 9.11, DL-01..DL-08, AC-DL-1..AC-DL-6
