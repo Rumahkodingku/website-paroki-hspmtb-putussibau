@@ -1,3 +1,5 @@
+import type { PublicDocumentCard } from '@/types/document';
+
 /*
  * Types for the public Pelayanan pages.
  *
@@ -84,6 +86,7 @@ export type PublicServiceDetail = {
     requirements: PublicServiceRequirement[];
     steps: PublicServiceStep[];
     faqs: PublicServiceFaq[];
+    documents: PublicDocumentCard[];
     updated_at: string | null;
     seo: { title: string; description: string };
 };

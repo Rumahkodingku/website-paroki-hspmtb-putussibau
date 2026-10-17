@@ -239,6 +239,22 @@ class PermissionSeeder extends Seeder
         'galleries.create',
         'galleries.update',
         'galleries.delete',
+
+        /*
+         * Dokumen, added with the module in Phase 8B (D-66).
+         *
+         * Four verbs per entity. Publishing and archiving are ordinary status
+         * fields of the update form, not separate abilities (D-36, D-65).
+         */
+        'documents.view',
+        'documents.create',
+        'documents.update',
+        'documents.delete',
+
+        'documentcategories.view',
+        'documentcategories.create',
+        'documentcategories.update',
+        'documentcategories.delete',
     ];
 
     /**

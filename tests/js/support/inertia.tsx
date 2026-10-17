@@ -6,7 +6,7 @@ import {
     type RenderResult,
 } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
-import type { MediaLimits, SharedProps } from '@/types';
+import type { DocumentUploadLimits, MediaLimits, SharedProps } from '@/types';
 
 /**
  * A real Inertia context for component tests.
@@ -51,6 +51,22 @@ const MEDIA_LIMITS: MediaLimits = {
     maxHeight: 8000,
 };
 
+const DOCUMENT_UPLOADS: DocumentUploadLimits = {
+    mimeTypes: [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/zip',
+        'application/x-zip-compressed',
+    ],
+    extensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'],
+    maxUploadKilobytes: 10240,
+};
+
 /** The shared props a public page receives from HandleInertiaRequests. */
 export function publicPageProps(
     overrides: Partial<SharedProps> = {},
@@ -63,6 +79,7 @@ export function publicPageProps(
         sidebarOpen: true,
         seo: { ...EMPTY_SEO },
         media: { ...MEDIA_LIMITS },
+        documentUploads: { ...DOCUMENT_UPLOADS },
         ...overrides,
     };
 }
@@ -130,16 +147,19 @@ export function renderWithInertia(
     {
         url = '/',
         props = {},
+        errors = {},
         ...options
     }: {
         url?: string;
         props?: Partial<SharedProps>;
+        errors?: Record<string, string>;
     } & Omit<RenderOptions, 'wrapper'> = {},
 ): RenderResult {
     const resolved = {
         ...page,
         url,
-        props: publicPageProps(props),
+        props: { ...publicPageProps(props), errors },
+        errors,
     } as unknown as Page<SharedProps>;
 
     function Wrapper({ children }: { children: ReactNode }) {

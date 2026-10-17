@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { index as servicesIndex, store, update } from '@/routes/services';
 import { TabFaq } from './tab-faq';
 import { TabInformasiUmum } from './tab-informasi-umum';
+import { TabDokumenTerkait } from './tab-dokumen-terkait';
 import { TabJadwalBiaya } from './tab-jadwal-biaya';
 import { TabKontakPendaftaran } from './tab-kontak-pendaftaran';
 import { TabPersyaratan } from './tab-persyaratan';
@@ -15,6 +16,7 @@ import { TabProsedur } from './tab-prosedur';
 import type {
     ServiceCategoryOption,
     ServiceDetail,
+    ServiceDocumentOption,
     ServiceFaqRow,
     ServiceFormData,
     ServiceFormMeta,
@@ -28,7 +30,8 @@ type TabKey =
     | 'prosedur'
     | 'jadwal'
     | 'kontak'
-    | 'faq';
+    | 'faq'
+    | 'dokumen';
 
 const TAB_KEYS: TabKey[] = [
     'informasi',
@@ -37,9 +40,10 @@ const TAB_KEYS: TabKey[] = [
     'jadwal',
     'kontak',
     'faq',
+    'dokumen',
 ];
 
-const SCALAR_TABS: TabKey[] = ['informasi', 'jadwal', 'kontak'];
+const SCALAR_TABS: TabKey[] = ['informasi', 'jadwal', 'kontak', 'dokumen'];
 
 function isTabKey(value: string): value is TabKey {
     return (TAB_KEYS as string[]).includes(value);
@@ -52,6 +56,7 @@ type Props = {
     requirements?: ServiceRequirementRow[];
     steps?: ServiceStepRow[];
     faqs?: ServiceFaqRow[];
+    documents?: ServiceDocumentOption[];
 } & ServiceFormMeta;
 
 function emptyData(): ServiceFormData {
@@ -74,6 +79,7 @@ function emptyData(): ServiceFormData {
         is_emergency: false,
         is_active: false,
         sort_order: '0',
+        document_ids: [],
     };
 }
 
@@ -97,6 +103,7 @@ function toFormData(service: ServiceDetail): ServiceFormData {
         is_emergency: service.is_emergency,
         is_active: service.is_active,
         sort_order: String(service.sort_order),
+        document_ids: service.document_ids ?? [],
     };
 }
 
@@ -107,6 +114,7 @@ export function ServiceForm({
     requirements = [],
     steps = [],
     faqs = [],
+    documents = [],
     labels,
     hints,
     copy,
@@ -228,6 +236,9 @@ export function ServiceForm({
                                 <TabTrigger value="faq">
                                     {copy.tab_faq}
                                 </TabTrigger>
+                                <TabTrigger value="dokumen">
+                                    Dokumen Terkait
+                                </TabTrigger>
                             </>
                         ) : null}
                     </TabsList>
@@ -300,6 +311,15 @@ export function ServiceForm({
                                     form={form}
                                     labels={labels}
                                     hints={hints}
+                                    copy={copy}
+                                    onSubmit={onSubmit}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="dokumen">
+                                <TabDokumenTerkait
+                                    form={form}
+                                    documents={documents}
                                     copy={copy}
                                     onSubmit={onSubmit}
                                 />

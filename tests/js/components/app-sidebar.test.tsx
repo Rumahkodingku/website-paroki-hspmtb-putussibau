@@ -381,16 +381,26 @@ describe('AppSidebar — Galeri', () => {
     });
 });
 
+describe('AppSidebar — Dokumen', () => {
+    it('links straight to the document list', () => {
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Dokumen' })).toHaveAttribute(
+            'href',
+            '/admin/dokumen',
+        );
+    });
+});
+
 describe('AppSidebar — modules with no route yet', () => {
     it('does not link them', () => {
         renderSidebar('/admin');
 
-        // Kontak (Phase 8C) and Download (Phase 8B) are still marked rather than
-        // linked, so nothing in this sidebar points at a URL that would 404.
-        // Asserted through the absence of a link rather than through the marker
-        // text: the marker is micro-legal styling, and a test that fails when
-        // someone rewords it stops guarding the thing it was written for.
+        // Kontak (Phase 8C) is still marked rather than linked, so nothing in
+        // this sidebar points at a URL that would 404. Asserted through the
+        // absence of a link rather than through the marker text: the marker is
+        // micro-legal styling, and a test that fails when someone rewords it
+        // stops guarding the thing it was written for.
         expect(screen.queryByRole('link', { name: 'Kontak' })).toBeNull();
-        expect(screen.queryByRole('link', { name: 'Download' })).toBeNull();
     });
 });

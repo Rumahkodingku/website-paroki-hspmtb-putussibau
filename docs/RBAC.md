@@ -11,7 +11,7 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and eighty-five permissions. That is not an oversight: the PRD puts
+One role and ninety-three permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
@@ -32,6 +32,10 @@ are absent on purpose:
 - There is no `posts.publish` or `events.publish`. Publishing is `is_published`
   on the row, an ordinary field of the update form, not a separate act — the
   same decision as D-37 for `is_active`.
+- There is no `documents.publish` or `documents.archive`. The document module has
+  a `status` enum, but publishing and archiving are still ordinary fields of the
+  update form, so they ride on `documents.update` (D-66). The admin preview route
+  is gated on `documents.view` through `DocumentPolicy::view`.
 - The parish profile and the service-area narrative are singletons, so they
   carry only `parishprofiles.view` and `parishprofiles.update`. There is no
   create or delete endpoint for a row that must always be exactly one, and the
@@ -64,6 +68,8 @@ are absent on purpose:
 | Community categories | `communitycategories.view`, `communitycategories.create`, `communitycategories.update`, `communitycategories.delete` |
 | Areas (wilayah/lingkungan/stasi) | `areas.view`, `areas.create`, `areas.update`, `areas.delete` |
 | Galleries | `galleries.view`, `galleries.create`, `galleries.update`, `galleries.delete` |
+| Documents | `documents.view`, `documents.create`, `documents.update`, `documents.delete` |
+| Document categories | `documentcategories.view`, `documentcategories.create`, `documentcategories.update`, `documentcategories.delete` |
 
 The role:
 

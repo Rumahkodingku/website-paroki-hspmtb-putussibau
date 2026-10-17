@@ -5,6 +5,8 @@ use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
 use App\Http\Controllers\Area\AreaController;
 use App\Http\Controllers\Area\PublicAreaController;
+use App\Http\Controllers\Document\DocumentController;
+use App\Http\Controllers\Document\PublicDocumentController;
 use App\Http\Controllers\Galeri\GalleryController;
 use App\Http\Controllers\Galeri\GalleryPhotoController;
 use App\Http\Controllers\Galeri\PublicGalleryController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\MassSchedule\PublicMassScheduleController;
 use App\Http\Controllers\MassSchedule\ScheduleNoticeController;
 use App\Http\Controllers\MassSchedule\SpecialMassController;
 use App\Http\Controllers\MasterData\CommunityCategoryController;
+use App\Http\Controllers\MasterData\DocumentCategoryController;
 use App\Http\Controllers\MasterData\EventCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
 use App\Http\Controllers\MasterData\PostCategoryController;
@@ -42,8 +45,6 @@ use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureAdminAccess;
 use Illuminate\Auth\Middleware\RequirePassword;
-use Illuminate\Http\Response as HttpResponse;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -97,18 +98,12 @@ Route::get('/galeri/{gallery:slug}', [PublicGalleryController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('galeri.show');
 
+Route::get('/dokumen', [PublicDocumentController::class, 'index'])->name('dokumen.index');
+Route::get('/dokumen/{document}/unduh', [PublicDocumentController::class, 'download'])
+    ->where('document', '[0-9]+')
+    ->name('dokumen.unduh');
+
 Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
-
-Route::get('/download/{id}/unduh', fn (): HttpResponse => Response::make(
-    "[ISI: berkas belum tersedia. Modul Download dibangun pada Fase 8.]\n",
-    200,
-    [
-        'Content-Type' => 'application/octet-stream',
-        'Content-Disposition' => 'attachment; filename="belum-tersedia.txt"',
-    ],
-))->where('id', '[0-9]+')->name('download.unduh');
-
-Route::inertia('/download', 'public/download')->name('download.index');
 
 Route::inertia('/design-system', 'public/design-system')->name('design-system.index');
 
@@ -273,6 +268,14 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::patch('/master-data/kategori-komunitas/{community_category}', [CommunityCategoryController::class, 'update'])->name('community-categories.update');
         Route::delete('/master-data/kategori-komunitas/{community_category}', [CommunityCategoryController::class, 'destroy'])->name('community-categories.destroy');
 
+        // Kategori Dokumen — Master Data since Phase 08B (D-66).
+        Route::get('/master-data/kategori-dokumen', [DocumentCategoryController::class, 'index'])->name('document-categories.index');
+        Route::get('/master-data/kategori-dokumen/tambah', [DocumentCategoryController::class, 'create'])->name('document-categories.create');
+        Route::post('/master-data/kategori-dokumen', [DocumentCategoryController::class, 'store'])->name('document-categories.store');
+        Route::get('/master-data/kategori-dokumen/{document_category}/ubah', [DocumentCategoryController::class, 'edit'])->name('document-categories.edit');
+        Route::patch('/master-data/kategori-dokumen/{document_category}', [DocumentCategoryController::class, 'update'])->name('document-categories.update');
+        Route::delete('/master-data/kategori-dokumen/{document_category}', [DocumentCategoryController::class, 'destroy'])->name('document-categories.destroy');
+
         /*
          * ------------------------------------------------------------------
          * Komunitas
@@ -331,6 +334,24 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::post('/galeri/{gallery}/foto/sampul', [GalleryPhotoController::class, 'cover'])->name('gallery-photos.cover');
         Route::patch('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'update'])->name('gallery-photos.update');
         Route::delete('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'destroy'])->name('gallery-photos.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Dokumen
+         * ------------------------------------------------------------------
+         |
+         | The list is the module root: PRD 5.2 names /admin/download, but the
+         | feature is called Dokumen now, so /admin/download is a named legacy
+         | redirect and this is the destination.
+         |
+         */
+        Route::get('/dokumen', [DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/dokumen/tambah', [DocumentController::class, 'create'])->name('documents.create');
+        Route::post('/dokumen', [DocumentController::class, 'store'])->name('documents.store');
+        Route::get('/dokumen/{document}/ubah', [DocumentController::class, 'edit'])->name('documents.edit');
+        Route::patch('/dokumen/{document}', [DocumentController::class, 'update'])->name('documents.update');
+        Route::delete('/dokumen/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::get('/dokumen/{document}/pratinjau', [DocumentController::class, 'preview'])->name('documents.preview');
 
         /*
          * ------------------------------------------------------------------
@@ -513,3 +534,25 @@ Route::redirect('/admin/kategori-agenda/tambah', '/admin/master-data/kategori-ag
     ->name('legacy.event-categories.create');
 Route::redirect('/admin/kategori-agenda/{event_category}/ubah', '/admin/master-data/kategori-agenda/{event_category}/ubah')
     ->name('legacy.event-categories.edit');
+
+/*
+|--------------------------------------------------------------------------
+| The Download URLs Dokumen replaced
+|--------------------------------------------------------------------------
+|
+| /download and /download/{id}/unduh were live placeholders from Phase 03 and
+| are the links a bookmark may still hold. They are permanent redirects, named
+| like the other legacy routes so Wayfinder does not generate a duplicate
+| export (D-48 §3).
+|
+*/
+
+Route::redirect('/download', '/dokumen', 301)
+    ->name('legacy.download.index');
+Route::redirect('/download/{id}/unduh', '/dokumen/{id}/unduh', 301)
+    ->where('id', '[0-9]+')
+    ->name('legacy.download.unduh');
+Route::redirect('/admin/download', '/admin/dokumen', 301)
+    ->name('legacy.download.admin');
+Route::redirect('/admin/kategori-download', '/admin/master-data/kategori-dokumen', 301)
+    ->name('legacy.download-categories.index');

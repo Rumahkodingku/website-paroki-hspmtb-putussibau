@@ -4,7 +4,7 @@ import {
     CalendarClock,
     CalendarDays,
     ChevronRight,
-    Download,
+    FileText,
     Globe,
     HandHeart,
     Images,
@@ -55,6 +55,8 @@ import { index as serviceCategoriesIndex } from '@/routes/service-categories';
 import { index as communitiesIndex } from '@/routes/communities';
 import { index as communityCategoriesIndex } from '@/routes/community-categories';
 import { index as galleriesIndex } from '@/routes/galleries';
+import { index as documentsIndex } from '@/routes/documents';
+import { index as documentCategoriesIndex } from '@/routes/document-categories';
 import { index as areasIndex } from '@/routes/areas';
 import { edit as editParishProfile } from '@/routes/parish-profile';
 import { index as parishHistoriesIndex } from '@/routes/parish-histories';
@@ -115,6 +117,7 @@ const CONTENT_ENTRIES: Entry[] = [
             { title: 'Kategori Agenda', href: eventCategoriesIndex() },
             { title: 'Kategori Pelayanan', href: serviceCategoriesIndex() },
             { title: 'Kategori Komunitas', href: communityCategoriesIndex() },
+            { title: 'Kategori Dokumen', href: documentCategoriesIndex() },
         ],
     },
     { title: 'Pelayanan', href: servicesIndex(), icon: HandHeart },
@@ -122,7 +125,7 @@ const CONTENT_ENTRIES: Entry[] = [
     { title: 'Area', href: areasIndex(), icon: MapPin },
     { title: 'Galeri', href: galleriesIndex(), icon: Images },
     { title: 'Kontak', icon: Mail },
-    { title: 'Download', icon: Download },
+    { title: 'Dokumen', href: documentsIndex(), icon: FileText },
 ];
 
 const ACCOUNT_ENTRIES: Entry[] = [

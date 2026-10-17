@@ -48,8 +48,8 @@ dataset('public pages', fn (): array => [
     '/komunitas' => ['/komunitas', 'public/komunitas'],
     '/area' => ['/area', 'public/area'],
     '/galeri' => ['/galeri', 'public/galeri'],
+    '/dokumen' => ['/dokumen', 'public/dokumen'],
     '/kontak' => ['/kontak', 'public/kontak'],
-    '/download' => ['/download', 'public/download'],
     '/design-system' => ['/design-system', 'public/design-system'],
 ]);
 
@@ -75,6 +75,10 @@ dataset('public pages', fn (): array => [
  * renders the directory, so it left this list too. Its props are asserted by
  * tests/Feature/Galeri/PublicGalleryDirectoryTest.php. See D-65.
  *
+ * Phase 08B did the same for /dokumen: it now queries published documents and
+ * renders the directory, so it left this list too. Its props are asserted by
+ * tests/Feature/Document/PublicDocumentPageTest.php. See D-66.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
@@ -86,7 +90,6 @@ dataset('public pages', fn (): array => [
 dataset('placeholder pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
     '/kontak' => ['/kontak', 'public/kontak'],
-    '/download' => ['/download', 'public/download'],
     '/design-system' => ['/design-system', 'public/design-system'],
 ]);
 
@@ -124,7 +127,7 @@ it('sends no page-specific props from a placeholder', function (string $url) {
     // `media` is shared for the same reason `seo` is: the upload limits are
     // config/media.php's to decide and the browser needs them everywhere. See
     // D-62.
-    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'media', 'errors'];
+    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'media', 'documentUploads', 'errors'];
 
     expect(array_diff(array_keys($props), $shared))->toBe([]);
 })->with('placeholder pages');

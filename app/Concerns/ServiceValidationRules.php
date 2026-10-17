@@ -2,7 +2,9 @@
 
 namespace App\Concerns;
 
+use App\Enums\DocumentStatus;
 use App\Enums\MediaStatus;
+use App\Models\Document;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Rules\GoogleFormUrl;
@@ -87,6 +89,11 @@ trait ServiceValidationRules
             'is_emergency' => ['required', 'boolean'],
             'is_active' => ['required', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'document_ids' => ['nullable', 'array'],
+            'document_ids.*' => [
+                'integer',
+                Rule::exists('documents', 'id')->whereNull('deleted_at'),
+            ],
         ];
     }
 
@@ -109,6 +116,9 @@ trait ServiceValidationRules
             'form_url.max' => 'Tautan Google Form terlalu panjang.',
             'form_button_label.required' => 'Label tombol pendaftaran wajib diisi.',
             'form_closed_message.max' => 'Pesan penutupan maksimal :max karakter.',
+            'document_ids.array' => 'Dokumen terkait tidak valid.',
+            'document_ids.*.integer' => 'Dokumen terkait tidak valid.',
+            'document_ids.*.exists' => 'Dokumen yang dipilih tidak tersedia.',
         ];
     }
 
@@ -132,6 +142,7 @@ trait ServiceValidationRules
             'form_url' => 'tautan Google Form',
             'form_button_label' => 'label tombol',
             'form_closed_message' => 'pesan penutupan',
+            'document_ids' => 'dokumen terkait',
         ];
     }
 
@@ -236,6 +247,25 @@ trait ServiceValidationRules
                     'contact_phone',
                     'Layanan darurat wajib memiliki nomor telepon sebelum diaktifkan.'
                 );
+            }
+
+            /** @var list<int> $requested */
+            $requested = array_map('intval', (array) ($data['document_ids'] ?? []));
+            $current = $existing?->documents()->pluck('documents.id')->all() ?? [];
+            $newIds = array_values(array_diff(array_unique($requested), $current));
+
+            if ($newIds !== []) {
+                $unpublished = Document::query()
+                    ->whereIn('id', $newIds)
+                    ->where('status', '!=', DocumentStatus::Published)
+                    ->exists();
+
+                if ($unpublished) {
+                    $validator->errors()->add(
+                        'document_ids',
+                        'Hanya dokumen berstatus Terbit yang dapat ditautkan.'
+                    );
+                }
             }
         };
     }

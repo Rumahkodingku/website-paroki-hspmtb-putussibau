@@ -53,7 +53,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 6A** | Parish Profile (Profil Paroki)             | ✅ Done    |
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ✅ Done    |
-| **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri selesai |
+| **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri & 8B Dokumen selesai |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
 | **Phase 11** | Production, Content Population & Handover | ⚪ Planned |
@@ -162,18 +162,35 @@ Galeri berada di `/admin/galeri` dengan pengelola foto di
 Foto menunjuk baris `media` (bukan kolom path), sampul menunjuk foto di album
 dengan fallback foto pertama, status cukup `is_published` boolean, dan limit
 unggah mengikuti `config/media.php` (JPEG/PNG, 3 MB) — semuanya dicatat di D-65.
-Phase 8B (Dokumen/Download) dan 8C (Kontak) belum dikerjakan.
+Phase 8B (Dokumen) selesai; 8C (Kontak) belum dikerjakan.
 
 Dokumen implementasi:
 
 ```text
 roadmap/phase-8A-galleries.md
+roadmap/phase-8b-documents.md
 plan-implementation/plan-phase-8a-galleries.md
+plan-implementation/plan-phase-8b-documents.md
 ```
 
 > **Engineering complete; konten belum.** Tabel, CRUD, unggah batch, sampul,
 > urutan, lightbox, dan test ada. Tidak ada seeder produksi: album dan foto
 > harus diunggah dan divalidasi paroki sebelum dipublikasikan.
+
+### Phase 8B — Dokumen (modul selesai)
+
+Phase 8B membangun modul **Dokumen**: berkas PDF/Office/ZIP disimpan di disk
+privat, diunduh lewat endpoint terkontrol, dan dikelola dari `/admin/dokumen`
+dengan kategori di `/admin/master-data/kategori-dokumen`. Halaman publik
+`/dokumen` menampilkan dokumen Terbit, filter kategori, pencarian, dan seksi
+unggulan. Dokumen juga dapat ditautkan ke layanan lewat tab “Dokumen Terkait”,
+menutup penundaan `document_service` dari D-54. Status memakai enum
+`draft/published/archived`, berkas memakai pipeline terpisah dari Media, dan URL
+lama `/download` diarahkan permanen. Detail keputusan ada di D-66.
+
+> **Engineering complete; konten belum.** Tidak ada seeder dokumen produksi.
+> Kategori di-seed dari PRD, tetapi berkas dan metadatanya harus diunggah dan
+> divalidasi paroki.
 
 ### Phase 7 — Communities (Komunitas)
 

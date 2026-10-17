@@ -32,25 +32,25 @@ function withUploader(ui: React.ReactElement) {
     );
 }
 
-function renderField(
-    props: Partial<React.ComponentProps<typeof MediaUploadField>> = {},
-) {
+function renderField(props: Record<string, unknown> = {}) {
     const onMediaChange = vi.fn();
     const onAltChange = vi.fn();
 
     const view = renderWithInertia(
         withUploader(
             <MediaUploadField
-                id="post-media"
-                label="Gambar utama"
-                altLabel="Teks alternatif gambar"
-                altValue=""
-                onAltChange={onAltChange}
-                onMediaChange={onMediaChange}
-                currentUrl={STORED_URL}
-                aspect={16 / 9}
-                fieldName="featured_image"
-                {...props}
+                {...({
+                    id: 'post-media',
+                    label: 'Gambar utama',
+                    altLabel: 'Teks alternatif gambar',
+                    altValue: '',
+                    onAltChange,
+                    onMediaChange,
+                    currentUrl: STORED_URL,
+                    aspect: 16 / 9,
+                    fieldName: 'featured_image',
+                    ...props,
+                } as React.ComponentProps<typeof MediaUploadField>)}
             />,
         ),
     );
@@ -286,15 +286,13 @@ describe('MediaUploadField logo', () => {
 
 describe('MediaUploadField variants with no backend yet', () => {
     /*
-     * Gallery, Download and Contact are Phase 8. Until that endpoint and its
-     * tables exist, `/admin/media` is the only place a file can go and it
-     * accepts JPEG and PNG only, so a document upload can only ever come back
-     * as a 422 about a form field.
-     *
-     * This is the test that stops the blocks being wired back in early: a file
-     * input here would be a control whose every attempt fails.
+     * Gallery and the generic file row still have no endpoint: a gallery needs
+     * many rows while every form column holds one, and a file row does not
+     * exist. This is the test that stops those blocks being wired back in
+     * early, because a file input there would be a control whose every attempt
+     * fails.
      */
-    it.each(['gallery', 'document', 'file'] as const)(
+    it.each(['gallery', 'file'] as const)(
         'renders %s as a notice rather than a picker',
         (variant) => {
             const { container } = renderVariant({
@@ -312,6 +310,47 @@ describe('MediaUploadField variants with no backend yet', () => {
             ).toHaveLength(0);
         },
     );
+});
+
+describe('MediaUploadField document', () => {
+    function renderDocument() {
+        const onFileChange = vi.fn();
+
+        const view = renderVariant({
+            id: 'document-file',
+            variant: 'document',
+            label: 'Berkas dokumen',
+            hint: 'PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, atau ZIP.',
+            onFileChange,
+            currentFileName: 'pedoman-lama.pdf',
+        });
+
+        return { ...view, onFileChange };
+    }
+
+    it('offers a file input and shows the file the record already has', () => {
+        const { container } = renderDocument();
+
+        const input = container.querySelector('input[type="file"]');
+
+        expect(input).not.toBeNull();
+        expect(input).toHaveAttribute('accept');
+        expect(input?.getAttribute('accept')).toContain('.pdf');
+        expect(screen.getByText(/pedoman-lama\.pdf/)).toBeInTheDocument();
+    });
+
+    it('reports the selected file to the form', () => {
+        const { container, onFileChange } = renderDocument();
+        const file = new File(['isi'], 'pedoman.pdf', {
+            type: 'application/pdf',
+        });
+
+        fireEvent.change(container.querySelector('input[type="file"]')!, {
+            target: { files: [file] },
+        });
+
+        expect(onFileChange).toHaveBeenCalledWith(file);
+    });
 });
 
 describe('MediaUploadField image without a crop', () => {

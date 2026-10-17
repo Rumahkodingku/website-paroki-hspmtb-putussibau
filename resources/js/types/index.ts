@@ -7,6 +7,7 @@
  * with it — settings.ts moved out for exactly that reason.
  */
 export type * from './auth';
+export type * from './document';
 export type * from './navigation';
 export type * from './pagination';
 export type * from './ui';
@@ -52,6 +53,21 @@ export type MediaLimits = {
 };
 
 /**
+ * What a document upload is allowed to be, read from config/documents.php.
+ *
+ * Separate from MediaLimits on purpose: the media pipeline accepts images only,
+ * while documents are PDF/Office/ZIP files on a private disk.
+ */
+export type DocumentUploadLimits = {
+    /** From `documents.mime_types`. */
+    mimeTypes: string[];
+    /** From the values of `documents.extensions`, e.g. pdf, docx, zip. */
+    extensions: string[];
+    /** From `documents.max_upload_kilobytes`. PRD DL-01's 10 MB. */
+    maxUploadKilobytes: number;
+};
+
+/**
  * Props HandleInertiaRequests shares with every page.
  *
  * Kept in one place so a page that needs a shared prop reaches for the same
@@ -73,4 +89,5 @@ export type SharedProps = {
     sidebarOpen: boolean;
     seo: SeoDefaults;
     media: MediaLimits;
+    documentUploads: DocumentUploadLimits;
 };

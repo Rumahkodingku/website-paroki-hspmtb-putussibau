@@ -55,6 +55,7 @@ class PublicServiceController extends Controller
             'requirements' => fn ($query) => $query->ordered(),
             'steps' => fn ($query) => $query->ordered(),
             'faqs' => fn ($query) => $query->ordered(),
+            'documents' => fn ($query) => $query->published()->ordered(),
         ]);
 
         $otherServices = Service::active()
