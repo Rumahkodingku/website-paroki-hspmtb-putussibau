@@ -367,16 +367,30 @@ describe('AppSidebar — Area', () => {
     });
 });
 
+describe('AppSidebar — Galeri', () => {
+    it('links straight to the album list', () => {
+        // Phase 8A gave Galeri a module. It is a flat link, not a group: the
+        // album list is the destination the sidebar item should open (D-65).
+        renderSidebar('/admin');
+
+        expect(screen.getByRole('link', { name: 'Galeri' })).toHaveAttribute(
+            'href',
+            '/admin/galeri',
+        );
+        expect(screen.queryByRole('button', { name: 'Galeri' })).toBeNull();
+    });
+});
+
 describe('AppSidebar — modules with no route yet', () => {
     it('does not link them', () => {
         renderSidebar('/admin');
 
-        // Marked rather than linked, so nothing in this sidebar points at a URL
-        // that would 404. Asserted through the absence of a link rather than
-        // through the marker text: the marker is micro-legal styling, and a test
-        // that fails when someone rewords it stops guarding the thing it was
-        // written for.
-        expect(screen.queryByRole('link', { name: 'Galeri' })).toBeNull();
+        // Kontak (Phase 8C) and Download (Phase 8B) are still marked rather than
+        // linked, so nothing in this sidebar points at a URL that would 404.
+        // Asserted through the absence of a link rather than through the marker
+        // text: the marker is micro-legal styling, and a test that fails when
+        // someone rewords it stops guarding the thing it was written for.
         expect(screen.queryByRole('link', { name: 'Kontak' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Download' })).toBeNull();
     });
 });

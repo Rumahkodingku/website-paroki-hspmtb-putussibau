@@ -54,6 +54,7 @@ import { index as servicesIndex } from '@/routes/services';
 import { index as serviceCategoriesIndex } from '@/routes/service-categories';
 import { index as communitiesIndex } from '@/routes/communities';
 import { index as communityCategoriesIndex } from '@/routes/community-categories';
+import { index as galleriesIndex } from '@/routes/galleries';
 import { index as areasIndex } from '@/routes/areas';
 import { edit as editParishProfile } from '@/routes/parish-profile';
 import { index as parishHistoriesIndex } from '@/routes/parish-histories';
@@ -119,7 +120,7 @@ const CONTENT_ENTRIES: Entry[] = [
     { title: 'Pelayanan', href: servicesIndex(), icon: HandHeart },
     { title: 'Komunitas', href: communitiesIndex(), icon: Users },
     { title: 'Area', href: areasIndex(), icon: MapPin },
-    { title: 'Galeri', icon: Images },
+    { title: 'Galeri', href: galleriesIndex(), icon: Images },
     { title: 'Kontak', icon: Mail },
     { title: 'Download', icon: Download },
 ];

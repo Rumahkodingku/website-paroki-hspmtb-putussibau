@@ -53,7 +53,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 6A** | Parish Profile (Profil Paroki)             | ✅ Done    |
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ✅ Done    |
-| **Phase 8**  | Gallery, Download & Contact               | ⚪ Planned |
+| **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri selesai |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
 | **Phase 11** | Production, Content Population & Handover | ⚪ Planned |
@@ -151,6 +151,29 @@ Kemudian lanjut ke phase berikutnya.
 ---
 
 ## Current Focus
+
+### Phase 8A — Galeri (modul selesai)
+
+Phase 8A membangun modul **Galeri**: album dan fotonya, admin dan publik. Admin
+Galeri berada di `/admin/galeri` dengan pengelola foto di
+`/admin/galeri/{album}/foto`; halaman publik dinamis `/galeri` dan
+`/galeri/{slug}` menggantikan route placeholder Phase 03.
+
+Foto menunjuk baris `media` (bukan kolom path), sampul menunjuk foto di album
+dengan fallback foto pertama, status cukup `is_published` boolean, dan limit
+unggah mengikuti `config/media.php` (JPEG/PNG, 3 MB) — semuanya dicatat di D-65.
+Phase 8B (Dokumen/Download) dan 8C (Kontak) belum dikerjakan.
+
+Dokumen implementasi:
+
+```text
+roadmap/phase-8A-galleries.md
+plan-implementation/plan-phase-8a-galleries.md
+```
+
+> **Engineering complete; konten belum.** Tabel, CRUD, unggah batch, sampul,
+> urutan, lightbox, dan test ada. Tidak ada seeder produksi: album dan foto
+> harus diunggah dan divalidasi paroki sebelum dipublikasikan.
 
 ### Phase 7 — Communities (Komunitas)
 
