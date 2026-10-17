@@ -11,7 +11,7 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and eighty-one permissions. That is not an oversight: the PRD puts
+One role and eighty-five permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
@@ -63,6 +63,7 @@ are absent on purpose:
 | Communities | `communities.view`, `communities.create`, `communities.update`, `communities.delete` |
 | Community categories | `communitycategories.view`, `communitycategories.create`, `communitycategories.update`, `communitycategories.delete` |
 | Areas (wilayah/lingkungan/stasi) | `areas.view`, `areas.create`, `areas.update`, `areas.delete` |
+| Galleries | `galleries.view`, `galleries.create`, `galleries.update`, `galleries.delete` |
 
 The role:
 
