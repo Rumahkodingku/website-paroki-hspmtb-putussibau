@@ -220,6 +220,25 @@ class PermissionSeeder extends Seeder
         'areas.create',
         'areas.update',
         'areas.delete',
+
+        /*
+         * Galeri, added with the module in Phase 8A (D-65).
+         *
+         * One group only. There is no `galleries.publish`: publishing is an
+         * ordinary field of the update form, the same decision as
+         * `posts.publish`/`events.publish` (D-36, RBAC.md section 1). The photo
+         * endpoints — attach, reorder, caption, cover, detach — have no list
+         * page of their own, so they are authorized through GalleryAlbumPolicy
+         * on `galleries.update` rather than growing a second group (D-54,
+         * D-55 point 11).
+         *
+         * All single words, per D-36: RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/.
+         */
+        'galleries.view',
+        'galleries.create',
+        'galleries.update',
+        'galleries.delete',
     ];
 
     /**

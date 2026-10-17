@@ -4511,3 +4511,106 @@ dalam editor. Label `Cancel`/`Apply` pada dialog potong masih bahasa Inggris
 (D-62), dan sekarang muncul di lebih banyak form.
 
 @see `docs/DECISIONS.md` D-22, D-24, D-62, D-63
+---
+
+## D-65 — Modul Galeri (Phase 8A): skema berbasis Media, sampul, dan status
+
+**Status:** Accepted · branch `feat/phase-8a-galleries`
+
+**Konteks.** Phase 8A membangun modul Galeri: album dan foto, admin dan publik.
+PRD §9.10 menggambarkan `gallery_albums` dan `gallery_photos` dengan kolom path
+(`path`, `thumb_path`, `original_path`, `width`, `height`, `file_size`), sedangkan
+seluruh modul terbaru menyimpan gambar sebagai baris `media` dan meresolusi URL
+dari sana (`communities.logo_media_id`, `pastors.photo_media_id`,
+`services.thumbnail_media_id`). Roadmap `phase-8A-galleries.md` §6.1 mengizinkan
+penyesuaian nama tabel/kolom dengan konvensi proyek. Tujuh keputusan diambil
+sebelum implementasi dan mengikat.
+
+**Keputusan.**
+
+1. **Foto menunjuk `media`, bukan kolom path.** `gallery_photos` berisi
+   `gallery_album_id`, `media_id`, `caption`, `alt_text`, `sort_order`. Ini
+   divergensi sadar dari PRD §9.10: satu berkas diproses sekali oleh pipeline
+   `/admin/media` (varian `thumb`/`medium`/`large`, WebP, EXIF hilang) dan dipakai
+   ulang, sementara baris album hanya menyimpan urutan dan keterangan. Original
+   tetap di disk privat (D-24).
+
+2. **Sampul menunjuk foto di album, bukan Media.** `gallery_albums.cover_photo_id`
+   → `gallery_photos` (`nullOnDelete`), dan `null` jatuh ke foto pertama menurut
+   `sort_order` (PRD §9.10 dan GAL-07). Karena sampul adalah baris foto album,
+   foto yang dilepas tidak bisa meninggalkan sampul menggantung. Referensi
+   sirkular (`gallery_photos.gallery_album_id` ↔ `gallery_albums.cover_photo_id`)
+   diselesaikan dengan menambah kolom cover lewat `Schema::table` setelah tabel
+   foto dibuat.
+
+3. **Status `is_published` boolean + `published_at`.** Tanpa enum status dan
+   tanpa status Arsip: PRD §9.10 hanya menyebut satu flag, dan hanya dua keadaan
+   yang ada. `published_at` disetel sekali saat pertama terbit oleh
+   `SaveGalleryAlbumAction`, tidak pernah diterima dari request.
+
+4. **Limit unggah mengikuti `config/media.php` apa adanya: JPEG/PNG, 3 MB, tanpa
+   WebP.** PRD GAL-01/AC-GAL-6 menyebut JPG/PNG/**WebP** dan **5 MB**; roadmap §10
+   menyuruh menyelaraskan frontend/backend dengan `config/media.php` dan tidak
+   memakai limit berbeda. Mengubah limit akan menyentuh **semua** modul + shared
+   prop `media` + test Media, jadi limit tetap. Divergensi dicatat di sini.
+
+5. **Slug unik lintas soft delete; soft delete hanya pada album.** Mengikuti
+   D-44/D-45/D-55, bukan aturan `active_marker` (D-40): route publik membinding
+   `{gallery:slug}`, jadi dua baris yang menjawab satu slug membuat binding
+   ambigu. `gallery_photos` tidak punya `deleted_at` — melepas foto berarti
+   menghapus barisnya.
+
+6. **`ON DELETE` eksplisit.** `gallery_photos.gallery_album_id` **cascade**
+   (force delete album menghapus barisnya; soft delete tidak menjalankan cascade,
+   sehingga restore mengembalikan album utuh). `gallery_photos.media_id`
+   **cascade** — arahnya dari Media ke baris foto, tidak pernah sebaliknya; ini
+   yang membuat `MediaController::destroy()` tetap bekerja. `cover_photo_id`
+   **set null**. Alternatif `restrict` pada `media_id` ditolak karena akan
+   mengubah "hapus gambar yang dipakai album" menjadi 500.
+
+7. **Permission `galleries.view/create/update/delete` saja.** Tidak ada
+   `galleries.publish`: publikasi adalah field biasa di form update (D-36). Semua
+   operasi foto — attach, reorder, caption/alt, sampul, detach — diotorisasi lewat
+   `GalleryAlbumPolicy` pada `galleries.update`, karena foto tidak punya halaman
+   daftar sendiri (pola D-54 dan D-55 point 11).
+
+8. **Tanpa kategori album; filter publik = tahun.** PRD §7.8 menyebut filter
+   tahun, bukan kategori; roadmap §6.3 menyatakan kategori bukan syarat MVP.
+   **Tanpa** `is_featured` dan **tanpa** `sort_order` album — belum ada konsumen
+   (beranda adalah Phase 9, dan kolom tanpa pembaca melanggar prinsip D-24).
+   **Tanpa** `post_id`/`event_id`/`community_id` (PRD D-04/§9.10): roadmap §6.1
+   tidak mencantumkannya dan tautan berita/agenda/komunitas dicatat sebagai
+   follow-up.
+
+9. **Kelola foto di halaman terpisah** `/admin/galeri/{gallery}/foto`, bukan tab
+   di form album: form tetap ringkas dan pengelola foto — unggah batch, urutan,
+   sampul, caption — punya ruang.
+
+10. **Uploader multi-file tinggal di feature**
+    (`features/admin/galeri/components/gallery-photo-upload.tsx`), memakai
+    `lib/media-client.ts` yang sudah ada. Setiap berkas diunggah independen dan
+    hanya `media` berstatus `ready` yang dikirim ke
+    `/admin/galeri/{gallery}/foto`; kegagalan satu berkas tidak membuang yang
+    berhasil (GAL-08). Variant `gallery` pada `MediaUploadField` dibiarkan sebagai
+    seam dan tidak diaktifkan (D-63).
+
+11. **Urutan publik deterministik**: `event_date` terbaru dahulu (yang kosong di
+    akhir), lalu `published_at`, lalu `id`.
+
+**Divergensi dari PRD.** (a) `gallery_photos` menyimpan `media_id`, bukan kolom
+path/ukuran (poin 1). (b) Format/batas unggah 3 MB JPEG/PNG tanpa WebP, bukan
+5 MB JPG/PNG/WebP (poin 4). (c) Tidak ada `post_id`/`event_id`/`community_id`
+(poin 8). Selebihnya sesuai: XC-E3 (draf 404), GAL-05 (pengingat tanggung jawab
+foto anak), GAL-07 (sampul fallback), GAL-08 (batch independen), XC-M1/M2/M3.
+
+**Utang / keterbatasan yang diketahui.** Foto pada album draf disimpan sebagai
+varian di disk publik; URL-nya berbasis path UUID yang tidak terenumerasi, sama
+seperti seluruh media lain di aplikasi, jadi ia mengikuti kebijakan storage yang
+ada dan bukan jaminan privasi. Berkas yang diunggah lewat browser tidak dapat
+diselesaikan di E2E karena queue `database` tidak punya worker, sehingga fixture
+album ditanam langsung oleh `tests/e2e/support/gallery.ts`. Tautan album ke
+berita/agenda/komunitas dan integrasi beranda menyusul di Phase 9.
+
+@see `docs/DECISIONS.md` D-24, D-36, D-44, D-54, D-55, D-63
+@see `docs/roadmap/phase-8A-galleries.md`
+@see `docs/PRD.md` 7.8, 9.10
