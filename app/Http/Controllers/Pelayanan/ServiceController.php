@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Pelayanan;
 
+use App\Actions\Pelayanan\SaveServiceAction;
 use App\Concerns\ServiceFormMeta;
 use App\Concerns\SortsAdminList;
+use App\Enums\DocumentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pelayanan\StoreServiceRequest;
 use App\Http\Requests\Pelayanan\UpdateServiceRequest;
@@ -13,6 +15,7 @@ use App\Http\Resources\Pelayanan\ServiceOptionResource;
 use App\Http\Resources\Pelayanan\ServiceRequirementResource;
 use App\Http\Resources\Pelayanan\ServiceResource;
 use App\Http\Resources\Pelayanan\ServiceStepResource;
+use App\Models\Document;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,13 +84,14 @@ class ServiceController extends Controller
 
         return Inertia::render('admin/pelayanan/tambah', [
             'categories' => $this->categoryOptions(),
+            'documents' => $this->documentOptions(),
             ...$this->serviceFormMeta(),
         ]);
     }
 
-    public function store(StoreServiceRequest $request): RedirectResponse
+    public function store(StoreServiceRequest $request, SaveServiceAction $action): RedirectResponse
     {
-        $service = Service::create($request->validated());
+        $service = $action->handle(new Service, $request->validated());
 
         return to_route('services.edit', $service)
             ->with('success', __('pelayanan.flash.service_created'));
@@ -103,6 +107,7 @@ class ServiceController extends Controller
             'requirements' => fn ($query) => $query->ordered(),
             'steps' => fn ($query) => $query->ordered(),
             'faqs' => fn ($query) => $query->ordered(),
+            'documents',
         ]);
 
         return Inertia::render('admin/pelayanan/ubah', [
@@ -111,13 +116,14 @@ class ServiceController extends Controller
             'steps' => array_values(ServiceStepResource::collection($service->steps)->resolve()),
             'faqs' => array_values(ServiceFaqResource::collection($service->faqs)->resolve()),
             'categories' => $this->categoryOptions($service),
+            'documents' => $this->documentOptions($service),
             ...$this->serviceFormMeta(),
         ]);
     }
 
-    public function update(UpdateServiceRequest $request, Service $service): RedirectResponse
+    public function update(UpdateServiceRequest $request, Service $service, SaveServiceAction $action): RedirectResponse
     {
-        $service->update($request->validated());
+        $action->handle($service, $request->validated());
 
         return to_route('services.edit', $service)
             ->with('success', __('pelayanan.flash.service_updated'));
@@ -131,6 +137,33 @@ class ServiceController extends Controller
 
         return to_route('services.index')
             ->with('success', __('pelayanan.flash.service_deleted'));
+    }
+
+    /**
+     * Published documents, plus anything already attached to this service so an
+     * archived link can be seen and removed.
+     *
+     * @return list<array{id: int, title: string, status: string, status_label: string}>
+     */
+    private function documentOptions(?Service $current = null): array
+    {
+        $query = Document::query()->where('status', DocumentStatus::Published);
+
+        if ($current !== null) {
+            $query->orWhereIn('id', $current->documents()->pluck('documents.id'));
+        }
+
+        return array_values(
+            $query->orderBy('title')
+                ->get(['id', 'title', 'status'])
+                ->map(fn (Document $document): array => [
+                    'id' => $document->getKey(),
+                    'title' => $document->title,
+                    'status' => $document->status->value,
+                    'status_label' => $document->status->label(),
+                ])
+                ->all()
+        );
     }
 
     /**

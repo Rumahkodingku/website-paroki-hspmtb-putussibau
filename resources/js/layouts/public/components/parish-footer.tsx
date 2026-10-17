@@ -8,7 +8,7 @@ import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
 import { index as kontak } from '@/routes/kontak';
-import { index as download } from '@/routes/download';
+import { index as dokumen } from '@/routes/dokumen';
 import { index as galeri } from '@/routes/galeri';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
@@ -60,7 +60,7 @@ const PELAYANAN: FooterGroup = {
         { label: 'Pelayanan', href: pelayanan() },
         { label: 'Komunitas', href: komunitas() },
         { label: 'Galeri', href: galeri() },
-        { label: 'Download', href: download() },
+        { label: 'Dokumen', href: dokumen() },
     ],
 };
 
