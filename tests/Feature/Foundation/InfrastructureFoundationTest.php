@@ -205,6 +205,54 @@ test('the app url has no trailing slash', function () {
 
 /*
 |--------------------------------------------------------------------------
+| The media shared prop
+|--------------------------------------------------------------------------
+|
+| config/media.php is what the server validates an upload against, and the
+| browser needs the same three numbers to refuse a file before it is sent. Both
+| sides reading the config is the point: a limit written in both places is a
+| limit that drifts, and it drifts silently, because the browser accepting a
+| file the server rejects produces a 422 with a message about the field rather
+| than about the picker that let the file through.
+|
+*/
+
+test('the media shared prop is present on every page', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('media')
+            ->has('media.mimeTypes')
+            ->has('media.maxUploadKilobytes')
+            ->has('media.maxWidth')
+            ->has('media.maxHeight')
+        );
+});
+
+test('the media limits are read from the media config', function () {
+    // The assertion the drift is caught by: change config/media.php and this
+    // test says so, rather than the browser quietly keeping the old number.
+    $this->get(route('home'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('media.mimeTypes', array_values((array) config('media.mime_types')))
+            ->where('media.maxUploadKilobytes', (int) config('media.max_upload_kilobytes'))
+            ->where('media.maxWidth', (int) config('media.max_width'))
+            ->where('media.maxHeight', (int) config('media.max_height'))
+        );
+});
+
+test('the accepted mime types are a list rather than a keyed map', function () {
+    // PHP preserves the keys of a string-keyed array through JSON as an object,
+    // and mime_types is a plain list in the config. If someone re-keys it, the
+    // component reading mimeTypes.join(',') gets "[object Object]" as an accept
+    // attribute, which accepts nothing at all.
+    $mimeTypes = config('media.mime_types');
+
+    expect(array_keys((array) $mimeTypes))->toBe(range(0, count((array) $mimeTypes) - 1));
+});
+
+/*
+|--------------------------------------------------------------------------
 | The server-rendered baseline head
 |--------------------------------------------------------------------------
 |

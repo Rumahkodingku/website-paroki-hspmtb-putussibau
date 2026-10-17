@@ -5,7 +5,7 @@ import {
     FormActions,
     FormInput,
 } from '@/components/form-fields';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type { PastorFormData, PastorRow } from '../../../types';
 
@@ -102,21 +102,23 @@ export function PastorForm({
                 </div>
 
                 <div className="md:col-span-2">
-                    <MediaField
+                    <MediaUploadField
                         id="pastor-photo"
+                        variant="avatar"
                         label={labels.photo_media_id ?? 'Foto'}
                         altValue={form.data.photo_alt}
                         onAltChange={(value) =>
                             form.setData('photo_alt', value)
                         }
                         altLabel={labels.photo_alt ?? 'Teks alternatif foto'}
-                        mediaId={form.data.photo_media_id}
                         onMediaChange={(id) =>
                             form.setData('photo_media_id', id)
                         }
                         currentUrl={currentPhotoUrl}
                         fieldName="photo_media_id"
-                        emptyHint="Foto bersifat opsional."
+                        // The photo is a nullable column written straight
+                        // through, so an empty value really removes it.
+                        removable
                     />
                 </div>
 

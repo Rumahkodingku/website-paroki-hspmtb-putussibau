@@ -5,7 +5,7 @@ import {
     FormActions,
     FormInput,
 } from '@/components/form-fields';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type { ParishServiceAreaFormData, ParishServiceAreaRow } from '../types';
 
@@ -83,17 +83,21 @@ export function ServiceAreaForm({
                 />
             </Field>
 
-            <MediaField
+            {/*
+             * No `aspect`, so nothing is cropped: this is a map, and cutting it
+             * to a ratio removes streets from it. No alt props either — the
+             * table has no alt column for it, and an empty label used to render
+             * a field nobody could fill in.
+             */}
+            <MediaUploadField
                 id="service-area-map"
+                variant="image"
                 label={labels.map_media_id ?? 'Peta (gambar)'}
-                altValue=""
-                onAltChange={() => undefined}
-                altLabel=""
-                mediaId={form.data.map_media_id}
+                emptyHint="Belum ada gambar peta."
                 onMediaChange={(id) => form.setData('map_media_id', id)}
                 currentUrl={currentMapUrl}
                 fieldName="map_media_id"
-                emptyHint="Belum ada gambar peta."
+                removable
             />
 
             <ActiveSwitch

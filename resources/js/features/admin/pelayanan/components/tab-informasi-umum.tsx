@@ -6,7 +6,7 @@ import {
     FormInput,
     FormTextarea,
 } from '@/components/form-fields';
-import { MediaField } from '@/components/media-field';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Text } from '@/components/text';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -104,23 +104,27 @@ export function TabInformasiUmum({
                         />
                     </Field>
 
-                    <MediaField
+                    <MediaUploadField
                         id="service-thumbnail"
+                        variant="image"
+                        // The public card renders it `aspect-video`, so the crop
+                        // lock matches the shape it is published in.
+                        aspect={16 / 9}
                         label={labels.thumbnail_media_id}
                         hint={hints.thumbnail_media_id}
+                        emptyHint={copy.empty_thumbnail}
                         altValue={form.data.thumbnail_alt}
                         onAltChange={(value) =>
                             form.setData('thumbnail_alt', value)
                         }
                         altLabel={labels.thumbnail_alt}
                         altError={form.errors.thumbnail_alt}
-                        mediaId={form.data.thumbnail_media_id}
                         onMediaChange={(id) =>
                             form.setData('thumbnail_media_id', id)
                         }
                         currentUrl={currentThumbnailUrl}
                         fieldName="thumbnail_media_id"
-                        emptyHint={copy.empty_thumbnail}
+                        removable
                     />
 
                     <Field

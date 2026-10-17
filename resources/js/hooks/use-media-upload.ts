@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { postMediaFile, waitForMedia } from '@/lib/media-client';
 import type { MediaState } from '@/types/news-agenda';
 
 /*
  * Upload an image and wait for it to be processed.
  *
- * Two consumers need this: the article/activity image picker (MediaField) and
- * the insert-image button inside the rich text editor. It lives in hooks/
- * rather than in one of them because a copy in each is a copy that drifts, and
- * the part that matters — the poll — is exactly the part that is easy to get
- * subtly wrong.
+ * The insert-image button inside the rich text editor is the only consumer left.
+ * It survives the picker it grew up beside (MediaField, removed in D-64) because
+ * the editor is not a form field and has no uploadcn block of its own: it needs
+ * the row id back so it can write an <img> into the document, which is not what
+ * any of the six upload variants produce.
  *
  * The flow is upload → wait → ready, and the wait is the point. An upload is
  * queued (XC-M1), so a media row exists for a moment with no variants on disk.
@@ -17,23 +18,14 @@ import type { MediaState } from '@/types/news-agenda';
  * on media_id checks, which is why both ends agree rather than the browser
  * being the only place the rule exists.
  *
- * Polling rather than a socket: the alternative for this codebase would be a
- * websocket nobody has deployed. A setTimeout at 1.5s that stops the moment the
- * status settles is a smaller thing to reason about and to stop working.
+ * The requests live in lib/media-client.ts, which the uploadcn adapter behind
+ * MediaUploadField uses as well. One implementation of the poll, two callers:
+ * this one renders the state as text next to a button, the uploader renders it
+ * as a queue item, and neither of them is allowed to be the only one that waits.
  */
-
-/** How often to ask whether the upload has finished. */
-const POLL_MS = 1500;
-
-/**
- * A hard ceiling. The job retries three times with a backoff
- * (config/media.tries), so an upload that is going to fail has failed by then;
- * a poller that never stops is a request every 1.5s until the tab closes.
- */
-const MAX_ATTEMPTS = 80;
 
 export type UploadOptions = {
-    /** Stored with the media row; the article form fills it in. */
+    /** Stored with the media row; the editor fills it in from its dialog. */
     altText?: string;
     /**
      * A field name the form also posts, sent as `1` so the upload body looks
@@ -58,139 +50,60 @@ export function useMediaUpload(): UseMediaUpload {
     const [uploading, setUploading] = useState(false);
     const [failed, setFailed] = useState<string | null>(null);
 
-    // The poll is a ref, not state, so restarting it does not restart the
-    // timer. A useEffect that depends on `state` and sets an interval depending
-    // on `state` is a loop that only shows up on a slow connection.
-    const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    /*
+     * The poll is abandoned, not merely ignored, when this component goes away.
+     * A timer that outlives its component keeps asking the server every 1.5s
+     * for a row nobody is rendering, and the admin who navigated off pays for
+     * it on their next screen.
+     */
+    const abortRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
         return () => {
-            if (pollRef.current !== null) {
-                clearTimeout(pollRef.current);
-            }
+            abortRef.current?.abort();
+            abortRef.current = null;
         };
     }, []);
-
-    const pollUntilSettled = useCallback(
-        (mediaId: number, attempt = 0): Promise<MediaState | null> =>
-            new Promise((resolve) => {
-                if (attempt > MAX_ATTEMPTS) {
-                    setUploading(false);
-                    setFailed(
-                        'Pemrosesan gambar terlalu lama. Muat ulang halaman untuk melihat hasilnya.',
-                    );
-                    resolve(null);
-
-                    return;
-                }
-
-                pollRef.current = setTimeout(async () => {
-                    try {
-                        const response = await fetch(
-                            `/admin/media/${mediaId}`,
-                            {
-                                headers: {
-                                    Accept: 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                },
-                            },
-                        );
-
-                        if (!response.ok) {
-                            throw new Error(`status ${response.status}`);
-                        }
-
-                        const payload = (await response.json()) as {
-                            media: MediaState;
-                        };
-
-                        setState(payload.media);
-
-                        if (payload.media.status === 'failed') {
-                            setUploading(false);
-                            setFailed(
-                                payload.media.error_message ??
-                                    'Gambar gagal diproses. Coba unggah ulang.',
-                            );
-                            resolve(null);
-
-                            return;
-                        }
-
-                        if (payload.media.status === 'ready') {
-                            setUploading(false);
-                            resolve(payload.media);
-
-                            return;
-                        }
-
-                        resolve(await pollUntilSettled(mediaId, attempt + 1));
-                    } catch {
-                        setUploading(false);
-                        setFailed(
-                            'Status gambar tidak dapat dibaca. Coba muat ulang halaman.',
-                        );
-                        resolve(null);
-                    }
-                }, POLL_MS);
-            }),
-        [],
-    );
 
     const upload = useCallback(
         async (
             file: File,
             options: UploadOptions = {},
         ): Promise<MediaState | null> => {
+            abortRef.current?.abort();
+
+            const controller = new AbortController();
+
+            abortRef.current = controller;
+
             setUploading(true);
             setFailed(null);
 
-            const body = new FormData();
-            body.append('file', file);
-
-            if (options.altText !== undefined) {
-                body.append('alt_text', options.altText);
-            }
-
-            if (options.fieldName !== undefined) {
-                body.append(options.fieldName, '1');
-            }
-
             try {
-                const response = await fetch('/admin/media', {
-                    method: 'POST',
-                    body,
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        // Exactly what Inertia's own XHR client sends: the
-                        // XSRF-TOKEN cookie, echoed back in the X-XSRF-TOKEN
-                        // header. A <input type="file"> is not an Inertia form,
-                        // so nothing attaches it for us — and a missing header
-                        // here is a 419 on every upload, which reads as "the
-                        // file is broken".
-                        'X-XSRF-TOKEN': xsrfToken() ?? '',
-                    },
-                    credentials: 'same-origin',
+                const accepted = await postMediaFile(file, {
+                    ...options,
+                    signal: controller.signal,
                 });
 
-                if (!response.ok) {
-                    const payload = (await response
-                        .json()
-                        .catch(() => null)) as { message?: string } | null;
+                setState(accepted);
 
-                    throw new Error(payload?.message ?? 'Unggahan ditolak.');
-                }
+                const settled = await waitForMedia(accepted.id, {
+                    signal: controller.signal,
+                    onTick: setState,
+                });
 
-                const payload = (await response.json()) as {
-                    media: MediaState;
-                };
+                setUploading(false);
 
-                setState(payload.media);
-
-                return await pollUntilSettled(payload.media.id);
+                return settled;
             } catch (error) {
                 setUploading(false);
+
+                // Leaving the page mid-upload is not something an admin did and
+                // not something they need to be told about.
+                if (isAbort(error)) {
+                    return null;
+                }
+
                 setFailed(
                     error instanceof Error
                         ? error.message
@@ -198,12 +111,19 @@ export function useMediaUpload(): UseMediaUpload {
                 );
 
                 return null;
+            } finally {
+                if (abortRef.current === controller) {
+                    abortRef.current = null;
+                }
             }
         },
-        [pollUntilSettled],
+        [],
     );
 
     const reset = useCallback(() => {
+        abortRef.current?.abort();
+        abortRef.current = null;
+
         setState(null);
         setFailed(null);
         setUploading(false);
@@ -212,14 +132,6 @@ export function useMediaUpload(): UseMediaUpload {
     return { state, uploading, failed, upload, reset };
 }
 
-/**
- * The CSRF token, read from the cookie Laravel sets.
- *
- * @see node_modules/@inertiajs/core — its XhrHttpClient reads the same cookie
- * and sends the same header, which is why this is not a second convention.
- */
-function xsrfToken(): string | null {
-    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
-
-    return match ? decodeURIComponent(match[1]) : null;
+function isAbort(error: unknown): boolean {
+    return error instanceof DOMException && error.name === 'AbortError';
 }

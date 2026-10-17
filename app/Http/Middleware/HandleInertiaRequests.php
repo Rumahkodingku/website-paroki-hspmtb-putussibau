@@ -45,6 +45,7 @@ class HandleInertiaRequests extends Middleware
      *   displayTimezone: string
      *   sidebarOpen: bool
      *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
+     *   media: array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
      *
      * ARCHITECTURE.md Part C rule 1 forbids handing a raw Eloquent model to the
      * browser, and rule 5 requires shared props to stay small. Everything sent
@@ -62,7 +63,12 @@ class HandleInertiaRequests extends Middleware
      * giving them an effect, and it keeps the reads inside SiteSettingsService
      * per D-23 rather than reaching for the table from a component.
      *
-     * @see docs/DECISIONS.md D-21, D-26
+     * `media` exists for the same reason in the opposite direction: config/media.php
+     * decides what an upload may be, and the browser has to refuse the same files
+     * before the request is made rather than answering with a 422 afterwards. A
+     * number written in both places is a number that drifts, so there is one.
+     *
+     * @see docs/DECISIONS.md D-21, D-26, D-62
      *
      * @return array<string, mixed>
      */
@@ -83,6 +89,7 @@ class HandleInertiaRequests extends Middleware
             'displayTimezone' => fn () => config('app.display_timezone'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),
+            'media' => fn (): array => $this->mediaLimits(),
         ];
     }
 
@@ -119,6 +126,35 @@ class HandleInertiaRequests extends Middleware
             'title' => $read('seo_default_title'),
             'description' => $read('seo_default_description'),
             'ogImage' => $read('seo_default_og_image'),
+        ];
+    }
+
+    /**
+     * What an upload is allowed to be, straight from the media pipeline's config.
+     *
+     * POST-04 caps the featured image at 3 MB and XC-M3 decides the accepted MIME
+     * types, but both live in config/media.php because that is what the server
+     * validates against. The browser needs the same three numbers to set the
+     * file input's accept attribute, to refuse an oversized file before sending
+     * it, and to refuse a decompression bomb's dimensions before decoding it.
+     *
+     * Sent as a shared prop rather than shared through page props because the
+     * answer is the same for every page, admin and public alike, and because a
+     * component reading a number it invented for itself is how a 3 MB limit
+     * becomes 10 MB in one form and 3 MB in the next.
+     *
+     * @return array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
+     */
+    private function mediaLimits(): array
+    {
+        /** @var list<string> $mimeTypes */
+        $mimeTypes = array_values((array) config('media.mime_types'));
+
+        return [
+            'mimeTypes' => $mimeTypes,
+            'maxUploadKilobytes' => (int) config('media.max_upload_kilobytes'),
+            'maxWidth' => (int) config('media.max_width'),
+            'maxHeight' => (int) config('media.max_height'),
         ];
     }
 }

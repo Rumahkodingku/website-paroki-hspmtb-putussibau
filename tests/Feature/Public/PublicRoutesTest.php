@@ -118,7 +118,10 @@ it('lets a guest reach every public route without signing in', function (string 
 it('sends no page-specific props from a placeholder', function (string $url) {
     $props = $this->get($url)->viewData('page')['props'];
 
-    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'errors'];
+    // `media` is shared for the same reason `seo` is: the upload limits are
+    // config/media.php's to decide and the browser needs them everywhere. See
+    // D-62.
+    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'media', 'errors'];
 
     expect(array_diff(array_keys($props), $shared))->toBe([]);
 })->with('placeholder pages');
