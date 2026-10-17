@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { CheckCircle2, Image as ImageIcon, Printer } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { DocumentCard } from '@/components/document-card';
 import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
 import { SectionHeading } from '@/components/section-heading';
@@ -287,6 +288,20 @@ export default function PelayananShow({ service, otherServices }: Props) {
                     <SectionHeading title="Pertanyaan yang Sering Diajukan" />
                     <div className="mt-8">
                         <FaqList items={service.faqs} />
+                    </div>
+                </PublicSection>
+            ) : null}
+
+            {service.documents.length > 0 ? (
+                <PublicSection surface="soft">
+                    <SectionHeading title="Dokumen Terkait" />
+                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        {service.documents.map((document) => (
+                            <DocumentCard
+                                key={document.id}
+                                document={document}
+                            />
+                        ))}
                     </div>
                 </PublicSection>
             ) : null}

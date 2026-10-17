@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
      *   sidebarOpen: bool
      *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
      *   media: array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
+     *   documentUploads: array{mimeTypes: list<string>, extensions: list<string>, maxUploadKilobytes: int}
      *
      * ARCHITECTURE.md Part C rule 1 forbids handing a raw Eloquent model to the
      * browser, and rule 5 requires shared props to stay small. Everything sent
@@ -90,6 +91,7 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),
             'media' => fn (): array => $this->mediaLimits(),
+            'documentUploads' => fn (): array => $this->documentUploadLimits(),
         ];
     }
 
@@ -155,6 +157,27 @@ class HandleInertiaRequests extends Middleware
             'maxUploadKilobytes' => (int) config('media.max_upload_kilobytes'),
             'maxWidth' => (int) config('media.max_width'),
             'maxHeight' => (int) config('media.max_height'),
+        ];
+    }
+
+    /**
+     * The document upload limits, straight from config/documents.php.
+     *
+     * The browser needs the same type list and size ceiling the FormRequest
+     * enforces, so a 10 MB file is refused before it is sent rather than after
+     * a slow upload.
+     *
+     * @return array{mimeTypes: list<string>, extensions: list<string>, maxUploadKilobytes: int}
+     */
+    private function documentUploadLimits(): array
+    {
+        /** @var array<string, string> $extensions */
+        $extensions = (array) config('documents.extensions');
+
+        return [
+            'mimeTypes' => array_values((array) config('documents.mime_types')),
+            'extensions' => array_values(array_unique($extensions)),
+            'maxUploadKilobytes' => (int) config('documents.max_upload_kilobytes'),
         ];
     }
 }

@@ -11,7 +11,7 @@ import { AvatarUpload } from '@/components/upload/avatar-upload';
 import { ImageUpload } from '@/components/upload/image-upload';
 import { LogoUpload } from '@/components/upload/logo-upload';
 import { createMediaUploadAdapter } from '@/lib/media-upload-adapter';
-import type { MediaLimits } from '@/types';
+import type { DocumentUploadLimits, MediaLimits } from '@/types';
 import type { MediaState } from '@/types/news-agenda';
 
 /*
@@ -90,6 +90,18 @@ type PlaceholderProps = {
     hint?: string;
 };
 
+type DocumentProps = {
+    id: string;
+    label: string;
+    hint?: string;
+    error?: string;
+    required?: boolean;
+    /** Name of the file the record already has, for edit forms. */
+    currentFileName?: string | null;
+    /** The selected replacement file, or null when it is cleared. */
+    onFileChange: (file: File | null) => void;
+};
+
 export type MediaUploadFieldProps =
     | (CommonProps & {
           variant?: 'image';
@@ -121,15 +133,16 @@ export type MediaUploadFieldProps =
            */
           onMediaChangeMany?: (mediaIds: number[]) => void;
       })
-    | (PlaceholderProps & { variant: 'document' })
+    | (DocumentProps & { variant: 'document' })
     | (PlaceholderProps & { variant: 'file' });
 
 export function MediaUploadField(props: MediaUploadFieldProps) {
     switch (props.variant) {
         case 'gallery':
-        case 'document':
         case 'file':
             return <UnavailableUpload {...props} />;
+        case 'document':
+            return <DocumentVariant {...props} />;
         case 'avatar':
             return <AvatarVariant {...props} />;
         case 'logo':
@@ -346,21 +359,94 @@ function LogoVariant({
 }
 
 /**
- * The three shapes whose backend is Phase 8, drawn as a notice rather than a
- * picker.
+ * The document file picker.
  *
- * `GalleryUpload`, `DocumentUpload` and `FileUpload` are already in
- * components/upload/, and they cannot be used yet: `/admin/media` is the only
- * upload endpoint, it accepts JPEG and PNG only, and it dispatches
- * GenerateImageVariants for every row it writes. A document has no row at all,
- * and a gallery needs many while every form column holds one. Phase 8 — Galeri,
- * Download & Kontak — brings the endpoint, the tables and the permissions; see
- * roadmap/README.md.
+ * A document is submitted with its metadata in one multipart request, not
+ * uploaded ahead of the form, so this is a controlled native file input rather
+ * than uploadcn's uploader. The limits still come from config/documents.php
+ * through the `documentUploads` shared prop, for the same reason the image
+ * limits do.
+ */
+function DocumentVariant({
+    id,
+    label,
+    hint,
+    error,
+    required = false,
+    currentFileName,
+    onFileChange,
+}: DocumentProps) {
+    const page = usePage<{ documentUploads: DocumentUploadLimits }>();
+    const limits = page.props.documentUploads;
+    const [localError, setLocalError] = useState<string | null>(null);
+
+    if (limits === undefined) {
+        throw new Error(
+            'MediaUploadField document variant requires the documentUploads shared prop. See D-66.',
+        );
+    }
+
+    const accept = limits.extensions
+        .map((extension) => `.${extension}`)
+        .join(',');
+    const maxBytes = limits.maxUploadKilobytes * 1024;
+
+    return (
+        <Field
+            id={id}
+            label={label}
+            hint={hint ?? formatDocumentLimits(limits)}
+            error={localError ?? error}
+            required={required}
+        >
+            <div className="space-y-2">
+                {currentFileName ? (
+                    <Text as="p" variant="caption" color="muted">
+                        Berkas saat ini: {currentFileName}
+                    </Text>
+                ) : null}
+
+                <input
+                    id={id}
+                    type="file"
+                    accept={accept}
+                    onChange={(event) => {
+                        const file = event.currentTarget.files?.[0] ?? null;
+
+                        if (file !== null && file.size > maxBytes) {
+                            setLocalError(
+                                `Ukuran berkas maksimal ${limits.maxUploadKilobytes / 1024} MB.`,
+                            );
+                            onFileChange(null);
+
+                            return;
+                        }
+
+                        setLocalError(null);
+                        onFileChange(file);
+                    }}
+                    className="block w-full cursor-pointer rounded-md border border-hairline bg-background px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-secondary/80 focus-visible:border-primary focus-visible:outline-none"
+                />
+            </div>
+        </Field>
+    );
+}
+
+function formatDocumentLimits(limits: DocumentUploadLimits): string {
+    const formats = limits.extensions.map((extension) =>
+        extension.toUpperCase(),
+    );
+
+    return `${formats.join(', ')}. Maksimal ${limits.maxUploadKilobytes / 1024} MB.`;
+}
+
+/**
+ * The shapes whose backend is not this module yet, drawn as a notice rather
+ * than a picker.
  *
- * Rendering the blocks anyway would put a control on screen whose every attempt
- * ends in a 422 about a form field. A notice is the honest version, and it is
- * the seam Phase 8 replaces: the variant names and the callbacks are already
- * here, so filling them in touches this component and nothing that calls it.
+ * `gallery` and `file` still have no endpoint: a gallery needs many rows while
+ * every form column holds one, and a generic file row does not exist. They land
+ * with their own module, if one is approved.
  */
 function UnavailableUpload({ id, label, hint }: PlaceholderProps) {
     return (
@@ -378,9 +464,8 @@ function UnavailableUpload({ id, label, hint }: PlaceholderProps) {
                         Belum tersedia
                     </Text>
                     <Text as="p" variant="caption" color="muted">
-                        Unggah berkas non-gambar dan album galeri menyusul pada
-                        tahap Galeri, Download &amp; Kontak. Sampai saat itu
-                        tidak ada berkas dari bidang ini yang dikirim ke server.
+                        Bidang ini belum tersedia. Tidak ada berkas yang dikirim
+                        ke server sampai modulnya dibangun.
                     </Text>
                 </div>
             </div>
