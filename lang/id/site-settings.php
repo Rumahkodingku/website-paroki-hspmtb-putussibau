@@ -37,9 +37,8 @@ return [
         'contact_phone' => 'Telepon',
         'contact_whatsapp' => 'WhatsApp',
         'contact_email' => 'Surel',
-        'office_hours' => 'Jam Layanan',
-        'maps_embed_url' => 'URL peta tertanam',
-        'maps_link' => 'Tautan peta',
+        'office_hours' => 'Jam Pelayanan Sekretariat',
+        'maps_link' => 'Tautan Google Maps',
 
         'social_facebook' => 'Facebook',
         'social_instagram' => 'Instagram',
@@ -68,7 +67,6 @@ return [
     'multiline' => [
         'short_description',
         'contact_address',
-        'office_hours',
         'motto_verse',
         'seo_default_description',
     ],
@@ -89,6 +87,8 @@ return [
      */
     'hints' => [
         'privacy_policy_content' => 'Isi kebijakan privasi. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
+        'maps_link' => 'Tempel link dari Google Maps (buka lokasi, tekan Bagikan, lalu Salin link). Peta tertanam dibuat otomatis dari link ini.',
+        'office_hours' => 'Atur hari dan jam operasional pelayanan sekretariat paroki.',
     ],
 
     /*
@@ -96,7 +96,6 @@ return [
      | with P10, which is the media milestone, so for now they are text.
      */
     'urls' => [
-        'maps_embed_url',
         'maps_link',
         'social_facebook',
         'social_instagram',

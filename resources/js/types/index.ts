@@ -68,6 +68,34 @@ export type DocumentUploadLimits = {
 };
 
 /**
+ * The parish's public contact details, read from `site_settings` on the server.
+ *
+ * Every action URL is built server-side (`tel:`, `wa.me`, the validated map
+ * URLs), so a component never has to normalise a number or trust a raw value.
+ * A null means "not configured", and the component renders nothing rather than
+ * an empty link. `homeShowContact` travels with the contact block because it
+ * only gates that block, not the /kontak page.
+ *
+ * @see docs/DECISIONS.md D-67
+ */
+export type ContactDetails = {
+    address: string | null;
+    phone: { display: string; tel: string } | null;
+    whatsapp: { display: string | null; url: string } | null;
+    email: string | null;
+    officeHours: string | null;
+    mapsEmbedUrl: string | null;
+    mapsLink: string | null;
+    homeShowContact: boolean;
+    social: {
+        facebook: string | null;
+        instagram: string | null;
+        youtube: string | null;
+        whatsappChannel: string | null;
+    };
+};
+
+/**
  * Props HandleInertiaRequests shares with every page.
  *
  * Kept in one place so a page that needs a shared prop reaches for the same
@@ -77,7 +105,7 @@ export type DocumentUploadLimits = {
  * its own middleware, and flash is delivered by the `flash` DOM event rather than
  * as a page prop, so neither belongs to this contract.
  *
- * @see docs/DECISIONS.md D-21, D-62
+ * @see docs/DECISIONS.md D-21, D-62, D-67
  */
 export type SharedProps = {
     name: string;
@@ -90,4 +118,5 @@ export type SharedProps = {
     seo: SeoDefaults;
     media: MediaLimits;
     documentUploads: DocumentUploadLimits;
+    contact: ContactDetails;
 };

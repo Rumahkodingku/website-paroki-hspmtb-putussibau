@@ -3,6 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Services\SiteSettingsService;
+use App\Support\MapsUrl;
+use App\Support\OfficeHours;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,6 +50,7 @@ class HandleInertiaRequests extends Middleware
      *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
      *   media: array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
      *   documentUploads: array{mimeTypes: list<string>, extensions: list<string>, maxUploadKilobytes: int}
+     *   contact: array{address: string|null, phone: array{display: string, tel: string}|null, whatsapp: array{display: string|null, url: string}|null, email: string|null, officeHours: string|null, mapsEmbedUrl: string|null, mapsLink: string|null, homeShowContact: bool, social: array{facebook: string|null, instagram: string|null, youtube: string|null, whatsappChannel: string|null}}
      *
      * ARCHITECTURE.md Part C rule 1 forbids handing a raw Eloquent model to the
      * browser, and rule 5 requires shared props to stay small. Everything sent
@@ -92,6 +96,7 @@ class HandleInertiaRequests extends Middleware
             'seo' => fn (): array => $this->seoDefaults(),
             'media' => fn (): array => $this->mediaLimits(),
             'documentUploads' => fn (): array => $this->documentUploadLimits(),
+            'contact' => fn (): array => $this->contactDetails(),
         ];
     }
 
@@ -179,5 +184,105 @@ class HandleInertiaRequests extends Middleware
             'extensions' => array_values(array_unique($extensions)),
             'maxUploadKilobytes' => (int) config('documents.max_upload_kilobytes'),
         ];
+    }
+
+    /**
+     * The parish's public contact details, resolved once for every page.
+     *
+     * The footer appears on every public page, so this cannot be a page-only
+     * prop: it is shared for the same reason `seo` is. The page at /kontak
+     * reads it too, which is why the route stays a `Route::inertia` rather than
+     * gaining a controller (D-67).
+     *
+     * Every action URL is built here, not in React: `tel:` and `wa.me` come
+     * from PhoneNumber, map URLs from MapsUrl, and only values that passed
+     * those checks are sent. A null is the honest answer for "not configured",
+     * and the components render nothing rather than an empty link.
+     *
+     * The reads go through SiteSettingsService (D-23), so they share the one
+     * cached map and do not add a query per request.
+     *
+     * @return array{address: string|null, phone: array{display: string, tel: string}|null, whatsapp: array{display: string|null, url: string}|null, email: string|null, officeHours: string|null, mapsEmbedUrl: string|null, mapsLink: string|null, homeShowContact: bool, social: array{facebook: string|null, instagram: string|null, youtube: string|null, whatsappChannel: string|null}}
+     */
+    private function contactDetails(): array
+    {
+        $settings = app(SiteSettingsService::class);
+
+        $read = static function (string $key) use ($settings): ?string {
+            $value = $settings->get($key);
+
+            return is_string($value) && trim($value) !== '' ? trim($value) : null;
+        };
+
+        $phone = $read('contact_phone');
+        $tel = $phone === null ? null : PhoneNumber::toTel($phone);
+
+        $whatsappNumber = $read('contact_whatsapp') ?? $phone;
+        $whatsappUrl = $whatsappNumber === null ? null : PhoneNumber::toWhatsApp($whatsappNumber);
+
+        $email = $read('contact_email');
+
+        if ($email !== null && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            $email = null;
+        }
+
+        return [
+            'address' => $read('contact_address'),
+            'phone' => $tel === null ? null : [
+                'display' => $phone,
+                'tel' => $tel,
+            ],
+            'whatsapp' => $whatsappUrl === null ? null : [
+                'display' => $whatsappNumber,
+                'url' => $whatsappUrl,
+            ],
+            'email' => $email,
+            // The weekly schedule is formatted here into display lines, and a
+            // legacy free-text value is returned unchanged, so a component
+            // renders one string either way (D-68).
+            'officeHours' => OfficeHours::format($settings->get('office_hours')),
+            // Both map URLs come from the one link the parish pasted: the link
+            // is the directions destination, and the frame is derived from it so
+            // the admin never enters an embed URL (D-67).
+            'mapsEmbedUrl' => MapsUrl::embed($read('maps_link')),
+            'mapsLink' => MapsUrl::directions($read('maps_link')),
+            'homeShowContact' => (bool) $settings->get('home_show_contact'),
+            'social' => [
+                'facebook' => $this->httpUrl($read('social_facebook')),
+                'instagram' => $this->httpUrl($read('social_instagram')),
+                'youtube' => $this->httpUrl($read('social_youtube')),
+                'whatsappChannel' => $this->httpUrl($read('social_whatsapp_channel')),
+            ],
+        ];
+    }
+
+    /**
+     * A social URL, or null when it is not an http(s) address.
+     *
+     * Social fields are free text in the settings form, so a typo or a
+     * `javascript:` value has to be refused here rather than becoming an
+     * anchor on a public page.
+     */
+    private function httpUrl(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $parts = parse_url($value);
+
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        if (! in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
+        return $value;
     }
 }
