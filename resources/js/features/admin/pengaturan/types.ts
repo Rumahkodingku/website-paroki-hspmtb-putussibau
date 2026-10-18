@@ -3,6 +3,7 @@ import type { Auth } from '@/types';
 export type SettingsGroupName =
     | 'identitas'
     | 'kontak'
+    | 'profil'
     | 'sosial'
     | 'seo'
     | 'beranda'
@@ -61,6 +62,10 @@ export type SettingsMeta = {
     groupLabels: Record<SettingsGroupName, string>;
     multiline: string[];
     richtext: string[];
+    /** Keys rendered by the media picker. The stored value is a media id. */
+    media: string[];
+    /** Current URL of each media key, so the picker can show what is saved. */
+    mediaUrls: Record<string, string | null>;
     hints: Record<string, string>;
     urls: string[];
     /** Keys rendered by the weekly office-hours editor. */

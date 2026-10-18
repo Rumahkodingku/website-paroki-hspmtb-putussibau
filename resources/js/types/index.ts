@@ -96,6 +96,27 @@ export type ContactDetails = {
 };
 
 /**
+ * The parish's public identity, read from `site_settings` on the server.
+ *
+ * What the public navbar and footer render. The Informasi Profil module was
+ * removed and identity now lives only in site settings (D-69), so this is the
+ * one source for the name, short name, tagline, short description and logo.
+ * Every field is nullable: null means "never configured", and the component
+ * falls back or renders nothing rather than showing an empty lockup.
+ *
+ * @see docs/DECISIONS.md D-69
+ */
+export type IdentityDetails = {
+    name: string | null;
+    shortName: string | null;
+    tagline: string | null;
+    shortDescription: string | null;
+    /** Resolved URL of the `logo` media setting, or null when unset. */
+    logoUrl: string | null;
+    logoAlt: string | null;
+};
+
+/**
  * Props HandleInertiaRequests shares with every page.
  *
  * Kept in one place so a page that needs a shared prop reaches for the same
@@ -116,6 +137,7 @@ export type SharedProps = {
     displayTimezone: string;
     sidebarOpen: boolean;
     seo: SeoDefaults;
+    identity: IdentityDetails;
     media: MediaLimits;
     documentUploads: DocumentUploadLimits;
     contact: ContactDetails;

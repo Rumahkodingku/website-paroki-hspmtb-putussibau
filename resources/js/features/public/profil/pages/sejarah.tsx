@@ -6,14 +6,14 @@ import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
 import { ProfileSubNav } from '../components/profile-subnav';
 import { HistoryTimeline } from '../components/history-timeline';
-import type { PublicHistoryItem, PublicParishProfile } from '../types';
+import type { PublicHistoryItem } from '../types';
 
 type Props = {
-    profile: PublicParishProfile | null;
+    narrative: string | null;
     items: PublicHistoryItem[];
 };
 
-export default function Sejarah({ profile, items }: Props) {
+export default function Sejarah({ narrative, items }: Props) {
     return (
         <>
             <Seo
@@ -33,11 +33,8 @@ export default function Sejarah({ profile, items }: Props) {
                         description="Kronologi berdirinya dan perjalanan paroki."
                     />
 
-                    {profile?.history_description ? (
-                        <RichText
-                            html={profile.history_description}
-                            className="max-w-3xl"
-                        />
+                    {narrative ? (
+                        <RichText html={narrative} className="max-w-3xl" />
                     ) : null}
 
                     {items.length === 0 ? (

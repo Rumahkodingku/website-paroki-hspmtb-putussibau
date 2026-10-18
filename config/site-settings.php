@@ -64,6 +64,7 @@ return [
             'motto_verse',
             'patron_saint',
             'logo',
+            'logo_alt',
             'favicon',
         ],
         'kontak' => [
@@ -74,11 +75,25 @@ return [
             'office_hours',
             'maps_link',
         ],
+        /*
+         * Konten profil yang dulu tinggal di tabel parish_profiles. Modul
+         * Informasi Profil dihapus (D-69); field ini dipindah ke sini atas
+         * permintaan pemilik proyek meski sebagian belum punya consumer publik.
+         */
+        'profil' => [
+            'description',
+            'established_year',
+            'cover',
+            'cover_alt',
+            'video_url',
+            'is_published',
+        ],
         'sosial' => [
             'social_facebook',
             'social_instagram',
             'social_youtube',
             'social_whatsapp_channel',
+            'website',
         ],
         'seo' => [
             'seo_default_title',
@@ -120,7 +135,13 @@ return [
 
     'types' => [
         'privacy_policy_content' => 'html',
+        'description' => 'html',
         'office_hours' => 'json',
+        'logo' => 'media',
+        'favicon' => 'media',
+        'cover' => 'media',
+        'established_year' => 'integer',
+        'is_published' => 'boolean',
         'home_news_limit' => 'integer',
         'home_events_limit' => 'integer',
         'home_gallery_limit' => 'integer',
@@ -175,6 +196,10 @@ return [
 
     'rules' => [
         'privacy_policy_content' => 'nullable|string|max:50000',
+        'description' => 'nullable|string|max:50000',
+        'website' => 'nullable|url|max:255',
+        'video_url' => 'nullable|url|max:500',
+        'established_year' => 'nullable|integer|between:1000,'.date('Y'),
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',
         'home_gallery_limit' => 'integer|between:1,12',

@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Enums\MediaStatus;
 use App\Rules\GoogleMapsLink;
 use App\Services\HtmlSanitizer;
 use App\Support\MapsUrl;
 use App\Support\OfficeHours;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
@@ -247,6 +249,30 @@ class UpdateSettingsRequest extends FormRequest
             'max:2048',
         ];
 
+        /*
+         * logo and cover are media references. The stored value is the media
+         * id as a string (value is a LONGTEXT column), so the generic string
+         * rule would accept anything; these replace it with a real existence
+         * check against a row that finished processing.
+         */
+        $rules['settings.logo'] = [
+            'nullable',
+            'string',
+            Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
+        ];
+        $rules['settings.favicon'] = [
+            'nullable',
+            'string',
+            Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
+        ];
+        $rules['settings.cover'] = [
+            'nullable',
+            'string',
+            Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
+        ];
+        $rules['settings.logo_alt'] = ['nullable', 'string', 'max:255'];
+        $rules['settings.cover_alt'] = ['nullable', 'string', 'max:255'];
+
         return $rules;
     }
 
@@ -263,6 +289,9 @@ class UpdateSettingsRequest extends FormRequest
             'settings.office_hours.*.is_open.boolean' => ':attribute harus bernilai aktif atau nonaktif.',
             'settings.office_hours.*.open_time.date_format' => ':attribute harus dalam format jam HH:mm.',
             'settings.office_hours.*.close_time.date_format' => ':attribute harus dalam format jam HH:mm.',
+            'settings.logo.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
+            'settings.favicon.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
+            'settings.cover.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
         ];
     }
 

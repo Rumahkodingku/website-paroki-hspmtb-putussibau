@@ -13,52 +13,6 @@ export type ProfilFilters = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Profil utama                                                               */
-/* -------------------------------------------------------------------------- */
-
-export type ParishProfileRow = {
-    id: number | null;
-    name: string | null;
-    short_description: string | null;
-    description: string | null;
-    history_description: string | null;
-    address: string | null;
-    phone: string | null;
-    email: string | null;
-    website: string | null;
-    established_year: number | null;
-    logo_media_id: number | null;
-    logo_alt: string | null;
-    logo_url: string | null;
-    cover_media_id: number | null;
-    cover_alt: string | null;
-    cover_url: string | null;
-    map_url: string | null;
-    video_url: string | null;
-    is_published: boolean;
-    can: { update: boolean };
-};
-
-export type ParishProfileFormData = {
-    name: string;
-    short_description: string;
-    description: string;
-    history_description: string;
-    address: string;
-    phone: string;
-    email: string;
-    website: string;
-    established_year: string;
-    logo_media_id: number | null;
-    logo_alt: string;
-    cover_media_id: number | null;
-    cover_alt: string;
-    map_url: string;
-    video_url: string;
-    is_published: boolean;
-};
-
-/* -------------------------------------------------------------------------- */
 /* Sejarah                                                                    */
 /* -------------------------------------------------------------------------- */
 

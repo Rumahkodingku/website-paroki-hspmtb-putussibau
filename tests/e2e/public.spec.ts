@@ -107,7 +107,7 @@ test.describe('situs publik', () => {
 
         await drawer.getByRole('link', { name: 'Profil' }).click();
 
-        await expect(page).toHaveURL(/\/profil$/);
+        await expect(page).toHaveURL(/\/profil\/sejarah$/);
 
         // The drawer closed rather than covering the page it just navigated to.
         await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -207,7 +207,7 @@ test.describe('situs publik', () => {
 
         for (const url of [
             '/',
-            '/profil',
+            '/profil/sejarah',
             '/jadwal-misa',
             '/kontak',
             '/design-system',
@@ -335,7 +335,12 @@ test.describe('tema publik', () => {
         await page.setViewportSize({ width: 360, height: 780 });
         await page.goto('/');
 
-        for (const url of ['/', '/profil', '/kontak', '/design-system']) {
+        for (const url of [
+            '/',
+            '/profil/sejarah',
+            '/kontak',
+            '/design-system',
+        ]) {
             await page.goto(url);
             await toggle(page).click();
 

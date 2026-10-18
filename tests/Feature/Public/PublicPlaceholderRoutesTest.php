@@ -84,7 +84,6 @@ it('names every placeholder route in the route table', function () {
         ->filter();
 
     $expected = [
-        'profil.index',
         'profil.sejarah',
         'profil.wilayah',
         'profil.pastor',

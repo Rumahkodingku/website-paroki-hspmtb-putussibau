@@ -34,7 +34,6 @@ use App\Http\Controllers\Pelayanan\ServiceStepController;
 use App\Http\Controllers\Profil\ParishBoardMemberController;
 use App\Http\Controllers\Profil\ParishBoardPeriodController;
 use App\Http\Controllers\Profil\ParishHistoryItemController;
-use App\Http\Controllers\Profil\ParishProfileController;
 use App\Http\Controllers\Profil\ParishServiceAreaController;
 use App\Http\Controllers\Profil\PastorAssignmentController;
 use App\Http\Controllers\Profil\PastorController;
@@ -55,7 +54,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'public/beranda')->name('home');
 
-Route::get('/profil', [PublicParishProfileController::class, 'index'])->name('profil.index');
 Route::get('/profil/sejarah', [PublicParishProfileController::class, 'sejarah'])->name('profil.sejarah');
 Route::get('/profil/wilayah', [PublicParishProfileController::class, 'wilayah'])->name('profil.wilayah');
 Route::get('/profil/pastor', [PublicParishProfileController::class, 'pastor'])->name('profil.pastor');
@@ -364,14 +362,11 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
          | page (D-52). Every redirect must be named or Wayfinder fails to build.
          |
          */
-        Route::get('/profil', fn () => to_route('parish-profile.edit'))->name('parish-profile.index');
-
-        // Informasi Profil
-        Route::get('/profil/informasi', [ParishProfileController::class, 'edit'])->name('parish-profile.edit');
-        Route::put('/profil/informasi', [ParishProfileController::class, 'update'])->name('parish-profile.update');
+        Route::get('/profil', fn () => to_route('parish-histories.index'))->name('parish-profile.index');
 
         // Sejarah Paroki
         Route::get('/profil/sejarah', [ParishHistoryItemController::class, 'index'])->name('parish-histories.index');
+        Route::put('/profil/sejarah/narasi', [ParishHistoryItemController::class, 'updateNarrative'])->name('parish-histories.narrative.update');
         Route::get('/profil/sejarah/tambah', [ParishHistoryItemController::class, 'create'])->name('parish-histories.create');
         Route::post('/profil/sejarah', [ParishHistoryItemController::class, 'store'])->name('parish-histories.store');
         Route::get('/profil/sejarah/{history_item}/ubah', [ParishHistoryItemController::class, 'edit'])->name('parish-histories.edit');

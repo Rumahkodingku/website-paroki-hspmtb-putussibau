@@ -1,11 +1,9 @@
 <?php
 
-use App\Models\Media;
-use App\Models\MediaVariant;
 use App\Models\ParishBoardMember;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryItem;
-use App\Models\ParishProfile;
+use App\Models\ParishHistoryNarrative;
 use App\Models\ParishServiceArea;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
@@ -16,53 +14,32 @@ use Inertia\Testing\AssertableInertia as Assert;
 | Halaman publik Profil Paroki
 |--------------------------------------------------------------------------
 |
-| Setiap halaman memakai scope published(); baris draf tidak boleh sampai ke
-| pengunjung meski URL-nya benar.
+| The Informasi Profil summary page (/profil) was removed in D-69. What
+| remains are the four section pages. Every published row reaches a visitor
+| only through a published() scope.
 */
 
-it('renders the profile page and hides an unpublished profile', function () {
-    ParishProfile::factory()->unpublished()->create();
+it('renders the history page with its narrative and published items', function () {
+    ParishHistoryNarrative::factory()->create(['narrative' => '<p>Narasi sejarah.</p>']);
+    ParishHistoryItem::factory()->create(['title' => 'Terbit']);
 
-    $this->get('/profil')
+    $this->get('/profil/sejarah')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('public/profil')
-            ->where('profile', null)
-            ->where('sections.sejarah', false));
+            ->component('public/profil/sejarah')
+            ->where('narrative', '<p>Narasi sejarah.</p>')
+            ->has('items', 1)
+            ->where('items.0.title', 'Terbit'));
 });
 
-it('shows a published profile with its sections', function () {
-    ParishProfile::factory()->create(['name' => 'Paroki HSPMTB']);
-    ParishHistoryItem::factory()->create();
-    ParishServiceArea::factory()->create();
-    Pastor::factory()->current()->create();
-    ParishBoardPeriod::factory()->create();
-
-    $this->get('/profil')
+it('sends a null narrative when none has been written', function () {
+    $this->get('/profil/sejarah')
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('profile.name', 'Paroki HSPMTB')
-            ->where('sections.sejarah', true)
-            ->where('sections.pastor', true));
+        ->assertInertia(fn (Assert $page) => $page->where('narrative', null));
 });
 
-it('resolves an attached cover image to its variant URL', function () {
-    // Same lazy-load guard as the admin side, on the public resource: the
-    // controller eager loads coverMedia.variants, and Media::url() reads it.
-    $media = Media::factory()->ready()->create();
-    MediaVariant::factory()->create([
-        'media_id' => $media->getKey(),
-        'name' => 'large',
-        'disk' => (string) config('media.variant_disk'),
-        'path' => 'media/variants/'.$media->getKey().'/large.webp',
-    ]);
-
-    ParishProfile::factory()->create(['cover_media_id' => $media->getKey()]);
-
-    $this->get('/profil')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('profile.cover', fn ($url) => is_string($url) && str_contains($url, 'storage')));
+it('does not serve the removed summary page', function () {
+    $this->get('/profil')->assertNotFound();
 });
 
 it('shows only published history items', function () {

@@ -130,6 +130,11 @@ test('the seeder creates no fabricated parish or admin data', function () {
     // table, because P05 legitimately seeds a Super Admin when ADMIN_EMAIL is
     // configured. Asserting a row count would fail for the right reason but the
     // wrong one.
+    // The demo seeder (D-53) is a deliberate divergence that seeds sample
+    // content, including sample site settings. This test is about the production
+    // seeder, so it runs with the demo layer off.
+    config(['demo.enabled' => false]);
+
     $this->seed(DatabaseSeeder::class);
 
     expect(User::query()->where('email', 'test@example.com')->exists())->toBeFalse()

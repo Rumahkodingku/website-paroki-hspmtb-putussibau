@@ -40,9 +40,11 @@ const MASTER_DATA_SUB_MENU = [
     ['Kategori Komunitas', '/admin/master-data/kategori-komunitas'],
 ] as const;
 
-/** Profil Paroki was a disabled row until Phase 6A gave it a module. */
+/**
+ * Profil Paroki was a disabled row until Phase 6A gave it a module. Informasi
+ * Profil was removed in D-69; the group root now redirects to Sejarah.
+ */
 const PROFIL_PAROKI_SUB_MENU = [
-    ['Informasi Profil', '/admin/profil/informasi'],
     ['Sejarah Paroki', '/admin/profil/sejarah'],
     ['Wilayah Pelayanan', '/admin/profil/wilayah'],
     ['Pastor Paroki', '/admin/profil/pastor'],

@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { updateNarrative } from '@/actions/App/Http/Controllers/Profil/ParishHistoryItemController';
 import type { DataColumn } from '@/components/data-table';
 import { DataTable } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
+import InputError from '@/components/input-error';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
-import { edit as editProfile } from '@/routes/parish-profile';
 import {
     create as createHistory,
     destroy as destroyHistory,
@@ -19,22 +21,22 @@ import {
 } from '@/components/list-parts';
 import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
-import { Text } from '@/components/text';
 import type { Paginated } from '@/types';
-import type {
-    ParishHistoryItemRow,
-    ParishProfileRow,
-} from '@/features/admin/profil/types';
+import type { ParishHistoryItemRow } from '@/features/admin/profil/types';
 
 type Props = {
     items: Paginated<ParishHistoryItemRow>;
-    profile: ParishProfileRow;
+    narrative: string | null;
     filters: { search: string; sort: string; direction: string };
 };
 
-export default function Index({ items, profile, filters }: Props) {
+export default function Index({ items, narrative, filters }: Props) {
     const [deleting, setDeleting] = useState<ParishHistoryItemRow | null>(null);
     const [submitting, setSubmitting] = useState(false);
+
+    const narrativeForm = useForm<{ narrative: string }>({
+        narrative: narrative ?? '',
+    });
 
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
@@ -108,14 +110,33 @@ export default function Index({ items, profile, filters }: Props) {
                     }
                 />
 
-                <div className="rounded-lg border border-hairline p-4">
-                    <Text as="p" variant="caption" color="muted">
-                        Narasi sejarah dikelola pada halaman profil.
-                    </Text>
-                    <Button asChild variant="outline" className="mt-3">
-                        <Link href={editProfile()}>Ubah narasi sejarah</Link>
+                <form
+                    noValidate
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        narrativeForm.submit(updateNarrative(), {
+                            preserveScroll: true,
+                        });
+                    }}
+                    className="space-y-4 rounded-lg border border-hairline p-4"
+                >
+                    <RichTextEditor
+                        id="history-narrative"
+                        label="Narasi sejarah"
+                        value={narrativeForm.data.narrative}
+                        onChange={(html) =>
+                            narrativeForm.setData('narrative', html)
+                        }
+                    />
+
+                    {narrativeForm.errors.narrative ? (
+                        <InputError message={narrativeForm.errors.narrative} />
+                    ) : null}
+
+                    <Button type="submit" disabled={narrativeForm.processing}>
+                        Simpan narasi
                     </Button>
-                </div>
+                </form>
 
                 <ListToolbar
                     search={filters.search}
@@ -149,12 +170,6 @@ export default function Index({ items, profile, filters }: Props) {
                     previous={items.links.prev}
                     next={items.links.next}
                 />
-
-                {profile.history_description === null ? (
-                    <Text as="p" variant="caption" color="muted">
-                        Narasi sejarah belum diisi.
-                    </Text>
-                ) : null}
             </div>
 
             {deleting ? (

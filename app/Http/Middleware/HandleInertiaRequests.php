@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Media;
 use App\Services\SiteSettingsService;
 use App\Support\MapsUrl;
 use App\Support\OfficeHours;
@@ -48,6 +49,7 @@ class HandleInertiaRequests extends Middleware
      *   displayTimezone: string
      *   sidebarOpen: bool
      *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
+     *   identity: array{name: string|null, shortName: string|null, tagline: string|null, shortDescription: string|null, logoUrl: string|null, logoAlt: string|null}
      *   media: array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
      *   documentUploads: array{mimeTypes: list<string>, extensions: list<string>, maxUploadKilobytes: int}
      *   contact: array{address: string|null, phone: array{display: string, tel: string}|null, whatsapp: array{display: string|null, url: string}|null, email: string|null, officeHours: string|null, mapsEmbedUrl: string|null, mapsLink: string|null, homeShowContact: bool, social: array{facebook: string|null, instagram: string|null, youtube: string|null, whatsappChannel: string|null}}
@@ -94,6 +96,7 @@ class HandleInertiaRequests extends Middleware
             'displayTimezone' => fn () => config('app.display_timezone'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),
+            'identity' => fn (): array => $this->identityDetails(),
             'media' => fn (): array => $this->mediaLimits(),
             'documentUploads' => fn (): array => $this->documentUploadLimits(),
             'contact' => fn (): array => $this->contactDetails(),
@@ -133,6 +136,44 @@ class HandleInertiaRequests extends Middleware
             'title' => $read('seo_default_title'),
             'description' => $read('seo_default_description'),
             'ogImage' => $read('seo_default_og_image'),
+        ];
+    }
+
+    /**
+     * The parish's public identity, read through the settings service.
+     *
+     * This is what the public navbar and footer render: the Informasi Profil
+     * module was removed and identity now lives only in site settings (D-69).
+     * Shared rather than page-only because the navbar and footer appear on
+     * every public page, for the same reason `seo` and `contact` are shared.
+     *
+     * Only public identity is sent — never contact details (those already have
+     * their own `contact` prop) and never raw settings rows.
+     *
+     * @return array{name: string|null, shortName: string|null, tagline: string|null, shortDescription: string|null, logoUrl: string|null, logoAlt: string|null}
+     */
+    private function identityDetails(): array
+    {
+        $settings = app(SiteSettingsService::class);
+
+        $read = static function (string $key) use ($settings): ?string {
+            $value = $settings->get($key);
+
+            return is_string($value) && trim($value) !== '' ? trim($value) : null;
+        };
+
+        $logoId = $settings->get('logo');
+        $logoUrl = is_string($logoId) && $logoId !== ''
+            ? Media::query()->with('variants')->find((int) $logoId)?->url('medium')
+            : null;
+
+        return [
+            'name' => $read('parish_name'),
+            'shortName' => $read('parish_short_name'),
+            'tagline' => $read('tagline'),
+            'shortDescription' => $read('short_description'),
+            'logoUrl' => $logoUrl,
+            'logoAlt' => $read('logo_alt'),
         ];
     }
 

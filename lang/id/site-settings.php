@@ -17,6 +17,7 @@ return [
     'groups' => [
         'identitas' => 'Identitas Paroki',
         'kontak' => 'Kontak',
+        'profil' => 'Profil Paroki',
         'sosial' => 'Media Sosial',
         'seo' => 'SEO Dasar',
         'beranda' => 'Beranda',
@@ -30,8 +31,9 @@ return [
         'short_description' => 'Deskripsi singkat',
         'motto_verse' => 'Motto / ayat',
         'patron_saint' => 'Patron Santo',
-        'logo' => 'Lokasi logo',
-        'favicon' => 'Lokasi favicon',
+        'logo' => 'Logo',
+        'logo_alt' => 'Teks alternatif logo',
+        'favicon' => 'Favicon',
 
         'contact_address' => 'Alamat',
         'contact_phone' => 'Telepon',
@@ -39,6 +41,14 @@ return [
         'contact_email' => 'Surel',
         'office_hours' => 'Jam Pelayanan Sekretariat',
         'maps_link' => 'Tautan Google Maps',
+
+        'description' => 'Deskripsi lengkap',
+        'established_year' => 'Tahun berdiri',
+        'cover' => 'Gambar sampul',
+        'cover_alt' => 'Teks alternatif sampul',
+        'video_url' => 'Tautan video',
+        'website' => 'Situs web paroki',
+        'is_published' => 'Tandai profil terbit',
 
         'social_facebook' => 'Facebook',
         'social_instagram' => 'Instagram',
@@ -89,11 +99,18 @@ return [
         'privacy_policy_content' => 'Isi kebijakan privasi. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
         'maps_link' => 'Tempel link dari Google Maps (buka lokasi, tekan Bagikan, lalu Salin link). Peta tertanam dibuat otomatis dari link ini.',
         'office_hours' => 'Atur hari dan jam operasional pelayanan sekretariat paroki.',
+        'logo' => 'Logo dipakai pada header dan footer situs.',
+        'favicon' => 'Ikon kecil yang tampil di tab peramban. Unggah gambar persegi (PNG disarankan).',
+        'description' => 'Prosa profil paroki. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
+        'established_year' => 'Isi hanya bila tahun berdiri memang diketahui.',
+        'is_published' => 'Menandai profil paroki sebagai terbit.',
+        'website' => 'Situs resmi paroki, bila ada. Bukan situs komunitas.',
     ],
 
     /*
-     | Fields that are paths or URLs rather than prose. Upload widgets arrive
-     | with P10, which is the media milestone, so for now they are text.
+     | Fields that are paths or URLs rather than prose. seo_default_og_image
+     | remains a text input; logo, favicon and cover use the media picker and
+     | are declared by type instead.
      */
     'urls' => [
         'maps_link',
@@ -101,9 +118,9 @@ return [
         'social_instagram',
         'social_youtube',
         'social_whatsapp_channel',
-        'logo',
-        'favicon',
         'seo_default_og_image',
+        'website',
+        'video_url',
     ],
 
 ];
