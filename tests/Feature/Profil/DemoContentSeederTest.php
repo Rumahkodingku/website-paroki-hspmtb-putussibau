@@ -5,7 +5,7 @@ use App\Models\Event;
 use App\Models\MassSchedule;
 use App\Models\Media;
 use App\Models\ParishBoardPeriod;
-use App\Models\ParishProfile;
+use App\Models\ParishHistoryNarrative;
 use App\Models\PastorAssignment;
 use App\Models\Post;
 use App\Models\Service;
@@ -13,6 +13,7 @@ use App\Models\ServiceCategory;
 use App\Models\ServiceFaq;
 use App\Models\ServiceRequirement;
 use App\Models\ServiceStep;
+use App\Services\SiteSettingsService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,8 +40,13 @@ beforeEach(function () {
 it('fills every module with published sample content', function () {
     $this->seed(DatabaseSeeder::class);
 
-    expect(ParishProfile::query()->count())->toBe(1)
-        ->and(ParishProfile::query()->first()->is_published)->toBeTrue()
+    $settings = app(SiteSettingsService::class);
+
+    expect(ParishHistoryNarrative::query()->count())->toBe(1)
+        ->and($settings->get('short_description'))->not->toBeNull()
+        ->and($settings->get('description'))->not->toBeNull()
+        ->and($settings->get('logo'))->not->toBeNull()
+        ->and($settings->get('is_published'))->toBeTrue()
         ->and(Post::query()->where('status', 'published')->count())->toBeGreaterThan(0)
         ->and(Event::query()->where('is_published', true)->count())->toBeGreaterThan(0)
         ->and(MassSchedule::query()->count())->toBeGreaterThan(0);
@@ -101,7 +107,7 @@ it('is idempotent across a second run', function () {
     $this->seed(DatabaseSeeder::class);
 
     $before = [
-        ParishProfile::query()->count(),
+        ParishHistoryNarrative::query()->count(),
         Post::query()->count(),
         Event::query()->count(),
         MassSchedule::query()->count(),
@@ -115,7 +121,7 @@ it('is idempotent across a second run', function () {
     $this->seed(DatabaseSeeder::class);
 
     expect([
-        ParishProfile::query()->count(),
+        ParishHistoryNarrative::query()->count(),
         Post::query()->count(),
         Event::query()->count(),
         MassSchedule::query()->count(),
@@ -132,6 +138,6 @@ it('is skipped when the demo flag is off', function () {
 
     $this->seed(DatabaseSeeder::class);
 
-    expect(ParishProfile::query()->count())->toBe(0)
+    expect(ParishHistoryNarrative::query()->count())->toBe(0)
         ->and(Post::query()->count())->toBe(0);
 });

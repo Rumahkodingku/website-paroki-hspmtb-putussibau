@@ -212,6 +212,17 @@ Organization ditunda. Detail keputusan ada di D-67.
 > Alamat, telepon, WhatsApp, surel, jam layanan, dan URL peta harus diisi dan
 > divalidasi paroki sebelum dipublikasikan.
 
+### Revisi — Konsolidasi identitas paroki (D-69)
+
+Modul Informasi Profil (`/admin/profil/informasi`, `/profil`, tabel
+`parish_profiles`) **dihapus**. Identitas dan kontak global kini hanya dikelola
+di **Pengaturan Situs** (grup Identitas Paroki, Kontak, dan grup baru Profil
+Paroki). Narasi sejarah pindah ke tabel singleton `parish_history_narratives`
+dan dikelola di halaman admin **Sejarah Paroki**; halaman publik `/profil/sejarah`
+tetap ada, sedangkan `/profil` (ringkasan) dihapus dan tautan "Profil" di navbar
+dan footer diarahkan ke `/profil/sejarah`. Navbar dan footer membaca identitas
+dari shared prop `identity`. Detail dan divergensi ada di D-69.
+
 ### Phase 7 — Communities (Komunitas)
 
 Phase ini membangun modul **Komunitas** (master kategori komunitas, profil

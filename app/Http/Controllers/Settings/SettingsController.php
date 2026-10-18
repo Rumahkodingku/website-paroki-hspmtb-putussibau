@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UpdateSettingsRequest;
+use App\Models\Media;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -75,7 +76,9 @@ class SettingsController extends Controller
         return [
             'labels' => (array) __('site-settings.labels'),
             'multiline' => (array) __('site-settings.multiline'),
-            'richtext' => $this->richTextKeys(),
+            'richtext' => $this->keysOfType('html'),
+            'media' => $this->keysOfType('media'),
+            'mediaUrls' => $this->mediaUrls(),
             'hints' => (array) __('site-settings.hints'),
             'urls' => (array) __('site-settings.urls'),
             'groupLabels' => (array) __('site-settings.groups'),
@@ -85,6 +88,7 @@ class SettingsController extends Controller
             // setting would want its own control, not this one.
             'officeHours' => ['office_hours'],
             'numericRanges' => [
+                'established_year' => [1000, (int) date('Y')],
                 'home_news_limit' => [3, 6],
                 'home_events_limit' => [3, 5],
                 'home_gallery_limit' => [1, 12],
@@ -119,13 +123,38 @@ class SettingsController extends Controller
      *
      * @return list<string>
      */
-    private function richTextKeys(): array
+    private function keysOfType(string $type): array
     {
         $types = (array) config('site-settings.types');
 
         return array_map(strval(...), array_keys(array_filter(
             $types,
-            fn (mixed $type): bool => $type === 'html',
+            fn (mixed $declared): bool => $declared === $type,
         )));
+    }
+
+    /**
+     * The current URL of each media setting, keyed by setting name.
+     *
+     * The stored value is a media id (a string). The form needs the resolved
+     * variant URL so the picker can show what is already saved; resolving it
+     * here keeps the disk convention on the server. A key with no usable media
+     * is null, which the picker renders as an empty slot.
+     *
+     * @return array<string, string|null>
+     */
+    private function mediaUrls(): array
+    {
+        $urls = [];
+
+        foreach ($this->keysOfType('media') as $key) {
+            $id = $this->settings->get($key);
+
+            $urls[$key] = is_string($id) && $id !== ''
+                ? Media::query()->with('variants')->find((int) $id)?->url('medium')
+                : null;
+        }
+
+        return $urls;
     }
 }

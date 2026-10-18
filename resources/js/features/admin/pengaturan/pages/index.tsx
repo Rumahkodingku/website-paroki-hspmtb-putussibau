@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Suspense, lazy } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { edit } from '@/routes/settings';
 import type {
     OfficeHoursWeek,
     SettingValue,
+    SettingsGroupName,
     SettingsMeta,
 } from '@/features/admin/pengaturan/types';
 import { OfficeHoursEditor } from '../components/office-hours-editor';
@@ -65,14 +67,11 @@ type Props = {
     meta: SettingsMeta;
 };
 
-const GROUP_ORDER = [
-    'identitas',
-    'kontak',
-    'sosial',
-    'seo',
-    'beranda',
-    'privasi',
-] as const;
+/*
+ * Tab order comes from the server. `groups` is built in the order the groups
+ * are listed in config/site-settings.php, so the form does not carry a second
+ * copy of the list that drifts when a group is added.
+ */
 
 type FieldKind =
     | 'text'
@@ -81,6 +80,7 @@ type FieldKind =
     | 'url'
     | 'number'
     | 'switch'
+    | 'media'
     | 'office-hours';
 
 function fieldKind(
@@ -93,6 +93,9 @@ function fieldKind(
     }
     if (meta.officeHours.includes(key)) {
         return 'office-hours';
+    }
+    if (meta.media.includes(key)) {
+        return 'media';
     }
     // Checked before `multiline` because a rich text field is also long, and a
     // textarea for it would silently discard every tag on save.
@@ -127,7 +130,7 @@ function toWire(value: SettingValue): string | OfficeHoursWeek {
 }
 
 export default function Settings({ groups, meta }: Props) {
-    const groupsInOrder = GROUP_ORDER.filter((group) => groups[group]);
+    const groupsInOrder = Object.keys(groups) as SettingsGroupName[];
 
     const initial = Object.fromEntries(
         groupsInOrder
@@ -215,6 +218,17 @@ export default function Settings({ groups, meta }: Props) {
                                         const stringValue =
                                             typeof raw === 'string' ? raw : '';
 
+                                        const mediaCurrentUrl =
+                                            meta.mediaUrls[key] ?? null;
+                                        const onMediaChange = (
+                                            mediaId: number | null,
+                                        ) =>
+                                            set(
+                                                mediaId === null
+                                                    ? ''
+                                                    : String(mediaId),
+                                            );
+
                                         return (
                                             <div
                                                 key={key}
@@ -266,6 +280,62 @@ export default function Settings({ groups, meta }: Props) {
                                                             onChange={set}
                                                         />
                                                     </>
+                                                ) : kind === 'media' ? (
+                                                    key === 'logo' ? (
+                                                        <MediaUploadField
+                                                            id={inputId}
+                                                            variant="logo"
+                                                            label={label}
+                                                            hint={
+                                                                meta.hints[key]
+                                                            }
+                                                            currentUrl={
+                                                                mediaCurrentUrl
+                                                            }
+                                                            fieldName={key}
+                                                            removable
+                                                            onMediaChange={
+                                                                onMediaChange
+                                                            }
+                                                        />
+                                                    ) : key === 'favicon' ? (
+                                                        <MediaUploadField
+                                                            id={inputId}
+                                                            variant="image"
+                                                            aspect={1}
+                                                            label={label}
+                                                            hint={
+                                                                meta.hints[key]
+                                                            }
+                                                            emptyHint="Belum ada favicon."
+                                                            currentUrl={
+                                                                mediaCurrentUrl
+                                                            }
+                                                            fieldName={key}
+                                                            removable
+                                                            onMediaChange={
+                                                                onMediaChange
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <MediaUploadField
+                                                            id={inputId}
+                                                            variant="image"
+                                                            aspect={16 / 9}
+                                                            label={label}
+                                                            hint={
+                                                                meta.hints[key]
+                                                            }
+                                                            currentUrl={
+                                                                mediaCurrentUrl
+                                                            }
+                                                            fieldName={key}
+                                                            removable
+                                                            onMediaChange={
+                                                                onMediaChange
+                                                            }
+                                                        />
+                                                    )
                                                 ) : (
                                                     <>
                                                         <Label
@@ -342,7 +412,8 @@ export default function Settings({ groups, meta }: Props) {
                                                     </>
                                                 )}
 
-                                                {meta.hints[key] ? (
+                                                {meta.hints[key] &&
+                                                kind !== 'media' ? (
                                                     <Text
                                                         as="p"
                                                         variant="caption"

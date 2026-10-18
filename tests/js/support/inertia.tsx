@@ -9,6 +9,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type {
     ContactDetails,
     DocumentUploadLimits,
+    IdentityDetails,
     MediaLimits,
     SharedProps,
 } from '@/types';
@@ -96,6 +97,21 @@ const EMPTY_CONTACT: ContactDetails = {
     },
 };
 
+/**
+ * A parish with no identity configured.
+ *
+ * Null across the board, like EMPTY_CONTACT: the components under test have to
+ * handle the empty state, and a filled fixture would test the fixture instead.
+ */
+const EMPTY_IDENTITY: IdentityDetails = {
+    name: null,
+    shortName: null,
+    tagline: null,
+    shortDescription: null,
+    logoUrl: null,
+    logoAlt: null,
+};
+
 /** The shared props a public page receives from HandleInertiaRequests. */
 export function publicPageProps(
     overrides: Partial<SharedProps> = {},
@@ -107,6 +123,7 @@ export function publicPageProps(
         displayTimezone: 'Asia/Pontianak',
         sidebarOpen: true,
         seo: { ...EMPTY_SEO },
+        identity: { ...EMPTY_IDENTITY },
         media: { ...MEDIA_LIMITS },
         documentUploads: { ...DOCUMENT_UPLOADS },
         contact: { ...EMPTY_CONTACT, social: { ...EMPTY_CONTACT.social } },
