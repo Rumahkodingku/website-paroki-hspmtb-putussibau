@@ -228,6 +228,7 @@ return [
         'location' => 'Lokasi',
         'location_id' => 'Lokasi',
         'longitude' => 'Bujur',
+        'maps_link' => 'Tautan Google Maps',
         'maps_url' => 'URL Google Maps',
         'mass_schedule_id' => 'Jadwal rutin',
         'message' => 'Pesan',

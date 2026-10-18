@@ -79,6 +79,11 @@ class SettingsController extends Controller
             'hints' => (array) __('site-settings.hints'),
             'urls' => (array) __('site-settings.urls'),
             'groupLabels' => (array) __('site-settings.groups'),
+            // The settings the weekly office-hours editor owns. Listed
+            // explicitly rather than derived from a type: the editor is a
+            // bespoke control for one bespoke setting, and a second structured
+            // setting would want its own control, not this one.
+            'officeHours' => ['office_hours'],
             'numericRanges' => [
                 'home_news_limit' => [3, 6],
                 'home_events_limit' => [3, 5],

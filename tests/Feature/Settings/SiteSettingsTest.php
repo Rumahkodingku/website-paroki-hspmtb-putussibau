@@ -138,6 +138,17 @@ test('saving twice updates the row instead of creating a second one', function (
         ->and(settingsService()->get('parish_name'))->toBe('Dua');
 });
 
+test('an empty optional setting is accepted and stored as null', function () {
+    // The form posts every key, and ConvertEmptyStringsToNull turns an
+    // untouched text field into null. Without nullable on the generic rule the
+    // whole form is refused by a field the admin never filled in.
+    $this->actingAs(superAdmin())
+        ->put(route('settings.update'), ['settings' => ['tagline' => '']])
+        ->assertSessionHasNoErrors();
+
+    expect(settingsService()->get('tagline'))->toBeNull();
+});
+
 test('unknown keys are refused rather than stored', function () {
     settingsService()->setMany([
         'parish_name' => 'HSPMTB',
@@ -289,14 +300,18 @@ test('the configured key list matches PRD Lampiran B', function () {
 
     // privacy_policy_content joined the list in P11, which is where
     // HtmlSanitizer lives. It was the one key D-23 held back.
-    expect($keys)->toHaveCount(30)
+    //
+    // maps_embed_url left the list in Phase 8C (D-67): the embed iframe is now
+    // derived from maps_link, so the parish never pastes an embed URL by hand.
+    expect($keys)->toHaveCount(29)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
             'seo_default_og_image',
             'home_show_contact',
             'privacy_policy_content',
-        );
+        )
+        ->and($keys)->not->toContain('maps_embed_url');
 });
 
 /*

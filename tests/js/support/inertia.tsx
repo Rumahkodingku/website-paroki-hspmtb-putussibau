@@ -6,7 +6,12 @@ import {
     type RenderResult,
 } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
-import type { DocumentUploadLimits, MediaLimits, SharedProps } from '@/types';
+import type {
+    ContactDetails,
+    DocumentUploadLimits,
+    MediaLimits,
+    SharedProps,
+} from '@/types';
 
 /**
  * A real Inertia context for component tests.
@@ -67,6 +72,30 @@ const DOCUMENT_UPLOADS: DocumentUploadLimits = {
     maxUploadKilobytes: 10240,
 };
 
+/**
+ * A parish with no contact details configured.
+ *
+ * This is the honest default for a component test: every action area has to
+ * handle the empty state, and a fixture filled with sample phone numbers would
+ * make the empty-state assertions test the fixture instead.
+ */
+const EMPTY_CONTACT: ContactDetails = {
+    address: null,
+    phone: null,
+    whatsapp: null,
+    email: null,
+    officeHours: null,
+    mapsEmbedUrl: null,
+    mapsLink: null,
+    homeShowContact: true,
+    social: {
+        facebook: null,
+        instagram: null,
+        youtube: null,
+        whatsappChannel: null,
+    },
+};
+
 /** The shared props a public page receives from HandleInertiaRequests. */
 export function publicPageProps(
     overrides: Partial<SharedProps> = {},
@@ -80,6 +109,7 @@ export function publicPageProps(
         seo: { ...EMPTY_SEO },
         media: { ...MEDIA_LIMITS },
         documentUploads: { ...DOCUMENT_UPLOADS },
+        contact: { ...EMPTY_CONTACT, social: { ...EMPTY_CONTACT.social } },
         ...overrides,
     };
 }

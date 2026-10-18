@@ -6,6 +6,8 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { dashboard, login } from '@/routes';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
+import type { SharedProps } from '@/types';
+import { HomeContactSection } from '../components/home-contact-section';
 
 /*
  * Guest entry point.
@@ -23,7 +25,10 @@ import { index as jadwalMisa } from '@/routes/jadwal-misa';
  * asserts on that title, and DESIGN.md forbids inventing parish content.
  */
 export default function Welcome() {
-    const { auth } = usePage().props;
+    // Typed, not usePage() bare: an untyped call makes `contact` an `any`, so
+    // the HomeContactSection prop would never be checked against
+    // ContactDetails. Same as features/public/kontak/pages/index.tsx.
+    const { auth, contact } = usePage<SharedProps>().props;
 
     return (
         <>
@@ -134,6 +139,8 @@ export default function Welcome() {
                     </Text>
                 </div>
             </PublicSection>
+
+            <HomeContactSection contact={contact} />
         </>
     );
 }

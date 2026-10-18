@@ -69,6 +69,41 @@ test.describe('pengaturan situs', () => {
         await expect(page.getByRole('button', { name: 'Tebal' })).toBeVisible();
     });
 
+    test('editor jam pelayanan menyimpan jadwal mingguan', async ({ page }) => {
+        await page.goto('/admin/pengaturan');
+        await page.getByRole('tab', { name: 'Kontak' }).click();
+
+        await expect(page.getByText('Jam Pelayanan Sekretariat')).toBeVisible();
+
+        // Only the seven day switches live in this tab; every other Kontak field
+        // is a text input.
+        await expect(page.getByRole('switch')).toHaveCount(7);
+
+        await page
+            .getByRole('switch', { name: 'Aktifkan pelayanan Senin' })
+            .click();
+        await page.getByLabel('Jam buka Senin').fill('08:00');
+        await page.getByLabel('Jam tutup Senin').fill('15:00');
+
+        await Promise.all([
+            page.waitForResponse(
+                (response) =>
+                    response.url().includes('/admin/pengaturan') &&
+                    ['POST', 'PUT'].includes(response.request().method()),
+            ),
+            page.getByTestId('save-settings-button').click(),
+        ]);
+
+        await page.reload();
+        await page.getByRole('tab', { name: 'Kontak' }).click();
+
+        await expect(
+            page.getByRole('switch', { name: 'Aktifkan pelayanan Senin' }),
+        ).toHaveAttribute('aria-checked', 'true');
+        await expect(page.getByLabel('Jam buka Senin')).toHaveValue('08:00');
+        await expect(page.getByLabel('Jam tutup Senin')).toHaveValue('15:00');
+    });
+
     test('halaman pengaturan menolak tamu', async ({ page, context }) => {
         // Drop the session established above: the middleware layers must refuse
         // before the page renders at all.

@@ -11,13 +11,6 @@ import {
 const admin = e2eEnvironment();
 
 /**
- * Only used to build the expected logout landing URL: toHaveURL wants a full
- * URL, and the suite's baseURL lives in playwright.config.ts rather than in a
- * module these specs import.
- */
-const baseURL = 'http://127.0.0.1:8000';
-
-/**
  * These specs cover the part of the application where the three middleware
  * layers, the session and the RBAC grant all have to agree: an admin page that
  * a guest should never see, and a login that has to actually produce a session.
@@ -99,7 +92,9 @@ test.describe('autentikasi admin', () => {
         // documented behaviour: fortify.home is /admin for signing in, but the
         // logout response redirects to the home route, which is /. See the
         // `users can logout` case in tests/Feature/Auth/AuthenticationTest.php.
-        await expect(page).toHaveURL(new RegExp(`${baseURL}/$`));
+        // Built from the page's own origin so the spec does not hard-code a port
+        // the suite may be running on a different one of.
+        await expect(page).toHaveURL(new URL('/', page.url()).href);
 
         // The session is what actually matters, so check that rather than
         // trusting the landing page: an admin URL must now bounce to login.
