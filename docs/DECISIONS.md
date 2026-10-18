@@ -4904,3 +4904,85 @@ libur khusus.
 
 @see `docs/DECISIONS.md` D-23, D-67
 @see `docs/roadmap/phase-8c-contacts.md`
+
+---
+
+## D-69 — Revisi: modul Informasi Profil dihapus, identitas paroki pindah ke Pengaturan Situs
+
+**Status:** Accepted · branch `feat/revisi-konsolidasi-identitas-paroki`
+
+Revisi ini menjawab `docs/revision/revision-data-duplication-profil-pengaturan.md`
+dan disusun di `docs/plan-implementation/plan-revisi-konsolidasi-identitas-paroki.md`.
+Dua permukaan admin menyediakan data identitas paroki yang tumpang tindih:
+`/admin/pengaturan` (site settings) dan `/admin/profil/informasi` (singleton
+`parish_profiles`). Audit menemukan bahwa kontak resmi publik **sudah** dibaca
+dari site settings, sedangkan halaman `/profil` membaca `parish_profiles`.
+Atas permintaan pemilik proyek, **seluruh modul Informasi Profil dihapus**.
+
+**Keputusan yang mengikat.**
+
+1. **Modul Informasi Profil dihapus total** — menyimpang dari D-52, yang
+   menetapkan `parish_profiles` sebagai singleton profil "bukan site settings".
+   Yang dihapus: model `ParishProfile`, `ParishProfileController`,
+   `ParishProfileResource`, `PublicParishProfileResource`,
+   `UpdateParishProfileRequest`, `ParishProfilePolicy`, `ParishProfileFactory`,
+   halaman admin `features/admin/profil/pages/informasi/**`, halaman publik
+   `features/public/profil/pages/index.tsx`, `profile-nav-card`, route
+   `parish-profile.edit/update` dan `profil.index`, entri sidebar "Informasi
+   Profil", serta test `ParishProfileTest` / `ParishProfileSchemaTest`.
+   Route `parish-profile.index` (`/admin/profil`) tetap ada sebagai redirect
+   bernama, kini ke `parish-histories.index`.
+2. **`/profil` publik dihapus.** Tautan "Profil" di navbar dan footer diarahkan
+   ke `/profil/sejarah`; item "Ringkasan" di `ProfileSubNav` dihapus. Navbar
+   memakai mode pencocokan `prefix` (`/profil/*`) agar seluruh bagian profil
+   tetap aktif.
+3. **Narasi sejarah pindah ke modul Sejarah** sebagai tabel singleton baru
+   `parish_history_narratives` (pola `parish_service_areas`). Dikelola di
+   halaman admin Sejarah (`parish-histories.narrative.update`) dan ditampilkan
+   di `/profil/sejarah`. Backfill menyalin `parish_profiles.history_description`.
+4. **Field profil lain dipindah ke `site_settings`** meski sebagian **belum
+   punya consumer publik** — ini menyimpang dari prinsip revisi §5/§7.2
+   ("jangan menyalin konten editorial panjang ke settings") dan dilakukan atas
+   permintaan pengguna. Grup baru `profil`: `description` (html),
+   `established_year` (integer), `cover` (media), `cover_alt`, `video_url`,
+   `is_published` (boolean). `logo_alt` masuk grup `identitas`, dan `website`
+   (label "Situs web paroki") berada di grup `sosial` — dipindah dari `profil`
+   atas permintaan pemilik proyek agar satu tab dengan tautan media sosial.
+   Field yang sudah punya padanan tidak diduplikasi: `name`→`parish_name`,
+   `short_description`→`short_description`, kontak→`contact_*`,
+   `map_url`→`maps_link`, `logo_media_id`→`logo`.
+5. **`logo`, `favicon`, dan `cover` menjadi media picker** (`media_id` +
+   `_alt` untuk logo/cover), bukan string URL. `favicon` tidak memakai alt.
+   Favicon yang diunggah dirender di `<head>` publik (`<link rel="icon">`),
+   dengan fallback ikon bawaan bila kosong. Hanya `seo_default_og_image` yang
+   **tetap** input URL (follow-up).
+6. **Navbar dan footer membaca identitas dari settings.** Shared prop baru
+   `identity` (`name`, `shortName`, `tagline`, `shortDescription`, `logoUrl`,
+   `logoAlt`) dibangun dari `SiteSettingsService`; navbar memakai logo/alt dan
+   footer memakai deskripsi singkat, menggantikan hardcode dan placeholder.
+7. **Migration backfill: settings menang.** Satu migration baru
+   (`2026_10_18_000000_consolidate_parish_identity_into_settings`) membuat tabel
+   narasi, menyalin nilai profil **hanya bila key settings masih kosong**, lalu
+   `drop` `parish_profiles`. `parish_name`, `contact_*`, dan `maps_link` tidak
+   ditimpa. Nilai `parish_profiles.address` ("Putussibau…", tidak pernah
+   dirender) dibuang. Migration lama tidak diedit.
+
+**Divergensi & risiko yang dicatat.** (a) `is_published` kehilangan makna
+setelah `/profil` dihapus. (b) Prosa profil (`description`) dan gambar sampul
+tidak lagi ditampilkan di publik. (c) Beberapa key settings baru adalah data
+mati sampai ada permukaan yang menampilkannya. (d) Nilai `address` profil
+dibuang (bukan overwrite senyap). (e) `seo_default_og_image` belum
+dikonversi ke media.
+
+**Permissions.** `parishprofiles.view`/`parishprofiles.update` **dipertahankan**
+karena masih menggating `ParishServiceAreaPolicy` (Wilayah); hanya
+`ParishProfilePolicy` yang dihapus. Jumlah permission tidak berubah.
+
+**Seeder.** `DemoContentSeeder` tidak lagi mengisi `parish_profiles`; ia mengisi
+site settings (identitas + grup `profil`) dan `parish_history_narratives`.
+`DatabaseFoundationTest` menjalankan seeder dengan `demo.enabled = false` karena
+lapisan demo memang sengaja mengisi data contoh (D-53).
+
+@see `docs/revision/revision-data-duplication-profil-pengaturan.md`
+@see `docs/plan-implementation/plan-revisi-konsolidasi-identitas-paroki.md`
+@see `docs/DECISIONS.md` D-23, D-52, D-53, D-67

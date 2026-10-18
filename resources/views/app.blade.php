@@ -30,12 +30,29 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @php
+            /*
+             * The parish's favicon, if one has been uploaded. It is a media row
+             * (a media id), so the URL is resolved from it here rather than
+             * stored as a path. When unset, the committed placeholder icons are
+             * used instead.
+             */
+            $faviconSetting = app(\App\Services\SiteSettingsService::class)->get('favicon');
+            $faviconUrl = is_string($faviconSetting) && $faviconSetting !== ''
+                ? \App\Models\Media::query()->with('variants')->find((int) $faviconSetting)?->url('thumb')
+                : null;
+        @endphp
+
+        @if($faviconUrl)
+            <link rel="icon" href="{{ $faviconUrl }}">
+            <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+        @else
+            <link rel="icon" href="/favicon.ico" sizes="any">
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @endif
 
         @fonts
-
         @viteReactRefresh
         @php
             /*

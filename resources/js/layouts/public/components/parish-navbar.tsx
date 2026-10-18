@@ -1,5 +1,5 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { AppearanceToggle } from '@/components/appearance-toggle';
@@ -13,6 +13,8 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { toUrl } from '@/lib/utils';
+import type { IdentityDetails } from '@/types';
 import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
@@ -23,17 +25,33 @@ import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
 import { index as areaIndex } from '@/routes/area';
-import { index as profil } from '@/routes/profil';
+import { sejarah as profil } from '@/routes/profil';
 
 type NavEntry = {
     label: string;
     href: NonNullable<InertiaLinkProps['href']>;
-    match: 'exact' | 'section';
+    /**
+     * How the current URL is matched against `href`.
+     *
+     * `exact`  only the same path (Beranda, because "/" prefixes everything).
+     * `section` the path or anything under it (the default).
+     * `prefix` anything under the href's parent path. Profil links to
+     *          /profil/sejarah, but the whole /profil/* section should stay
+     *          active, so it matches on /profil.
+     */
+    match: 'exact' | 'section' | 'prefix';
 };
+
+/** The parent path of a section link, e.g. /profil/sejarah -> /profil. */
+function sectionPrefix(href: NonNullable<InertiaLinkProps['href']>): string {
+    const path = toUrl(href).split('?')[0];
+
+    return path.replace(/\/[^/]+\/?$/, '') || '/';
+}
 
 const NAV_ENTRIES: NavEntry[] = [
     { label: 'Beranda', href: home(), match: 'exact' },
-    { label: 'Profil', href: profil(), match: 'section' },
+    { label: 'Profil', href: profil(), match: 'prefix' },
     { label: 'Jadwal Misa', href: jadwalMisa(), match: 'section' },
     { label: 'Berita & Artikel', href: berita(), match: 'section' },
     { label: 'Agenda', href: agenda(), match: 'section' },
@@ -46,11 +64,16 @@ const NAV_ENTRIES: NavEntry[] = [
 ];
 
 function ParishLogo() {
+    const { identity } = usePage<{ identity?: IdentityDetails }>().props;
+
+    const primary = identity?.shortName ?? identity?.name ?? 'Paroki';
+    const secondary = identity?.name ?? identity?.tagline ?? null;
+
     return (
         <span className="flex items-center gap-3">
             <img
-                src="/logo.svg"
-                alt=""
+                src={identity?.logoUrl ?? '/logo.svg'}
+                alt={identity?.logoUrl ? (identity.logoAlt ?? '') : ''}
                 width={40}
                 height={42}
                 className="size-10 shrink-0 object-contain"
@@ -64,11 +87,13 @@ function ParishLogo() {
             */}
             <span className="hidden flex-col leading-tight sm:flex">
                 <Text as="span" variant="caption-strong" color="foreground">
-                    HSPMTB Putussibau
+                    {primary}
                 </Text>
-                <Text as="span" variant="micro-legal" color="muted">
-                    Hati Santa Perawan Maria Tak Bernoda
-                </Text>
+                {secondary ? (
+                    <Text as="span" variant="micro-legal" color="muted">
+                        {secondary}
+                    </Text>
+                ) : null}
             </span>
         </span>
     );
@@ -97,7 +122,9 @@ function NavList({
                 const active =
                     entry.match === 'exact'
                         ? isCurrentUrl(entry.href)
-                        : isCurrentOrParentUrl(entry.href);
+                        : entry.match === 'prefix'
+                          ? isCurrentOrParentUrl(sectionPrefix(entry.href))
+                          : isCurrentOrParentUrl(entry.href);
 
                 return (
                     <li key={entry.label}>
@@ -157,6 +184,8 @@ function NavList({
 export function ParishNavbar() {
     const [menuOpen, setMenuOpen] = useState(false);
 
+    const { identity } = usePage<{ identity?: IdentityDetails }>().props;
+
     const closeMenu = () => setMenuOpen(false);
 
     return (
@@ -176,7 +205,7 @@ export function ParishNavbar() {
                     className="shrink-0 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                     <span className="sr-only">
-                        Paroki HSPMTB Putussibau, beranda
+                        {identity?.name ?? 'Paroki'}, beranda
                     </span>
                     <span aria-hidden="true">
                         <ParishLogo />

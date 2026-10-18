@@ -2,15 +2,16 @@ import { expect, test } from '@playwright/test';
 import { resetLoginRateLimit, signIn } from './support/session';
 
 /*
- * Profil Paroki — the admin module and its five public pages.
+ * Profil Paroki — the admin module and its four public pages.
  *
  * The file follows the lesson from tests/e2e/master-data.spec.ts: assert the
  * href AND then click it, and check the URL plus something only the target page
  * renders. Asserting an href proves nothing about whether the link works.
+ *
+ * Informasi Profil was removed in D-69; the group root redirects to Sejarah.
  */
 
 const PROFIL_PAROKI_SUB_MENU = [
-    ['Informasi Profil', '/admin/profil/informasi'],
     ['Sejarah Paroki', '/admin/profil/sejarah'],
     ['Wilayah Pelayanan', '/admin/profil/wilayah'],
     ['Pastor Paroki', '/admin/profil/pastor'],
@@ -67,48 +68,41 @@ test.describe('sidebar Profil Paroki', () => {
     });
 });
 
-test.describe('alur profil', () => {
-    test('menyimpan informasi profil dan menampilkannya di halaman publik', async ({
+test.describe('alur narasi sejarah', () => {
+    test('menyimpan narasi sejarah dan menampilkannya di halaman publik', async ({
         page,
     }) => {
         resetLoginRateLimit();
         await signIn(page);
 
-        await page.goto('/admin/profil/informasi');
-        await page.getByLabel('Nama paroki').fill('Paroki Uji E2E');
+        await page.goto('/admin/profil/sejarah');
 
-        const publish = page.locator('#profile-published');
-        if ((await publish.getAttribute('aria-checked')) !== 'true') {
-            await publish.click();
-        }
+        const editor = page.locator('[contenteditable="true"]').first();
+        await editor.click();
+        await editor.fill('Narasi sejarah uji E2E');
 
-        await page
-            .getByRole('button', { name: 'Simpan informasi profil' })
-            .click();
+        await page.getByRole('button', { name: 'Simpan narasi' }).click();
 
-        // The save redirects back to the same edit page.
-        await expect(page).toHaveURL(/\/admin\/profil\/informasi$/);
+        // The save redirects back to the same page.
+        await expect(page).toHaveURL(/\/admin\/profil\/sejarah$/);
 
-        // Public page shows the published name.
-        await page.goto('/profil');
+        // Public page shows the saved narrative.
+        await page.goto('/profil/sejarah');
         await expect(
-            page
-                .locator('#main')
-                .getByRole('heading', { name: 'Paroki Uji E2E' }),
+            page.locator('#main').getByText('Narasi sejarah uji E2E'),
         ).toBeVisible();
     });
 });
 
 test.describe('halaman publik Profil Paroki', () => {
     const PUBLIC_PAGES: Array<[string, string]> = [
-        ['/profil', 'Ringkasan'],
         ['/profil/sejarah', 'Sejarah'],
         ['/profil/wilayah', 'Wilayah Pelayanan'],
         ['/profil/pastor', 'Pastor'],
         ['/profil/struktur', 'Struktur Kepengurusan'],
     ];
 
-    test('pengunjung dapat menavigasi kelimanya', async ({ page }) => {
+    test('pengunjung dapat menavigasi keempatnya', async ({ page }) => {
         for (const [url, activeLabel] of PUBLIC_PAGES) {
             await page.goto(url);
 
