@@ -22,7 +22,7 @@ import { renderWithInertia } from '../support/inertia';
 
 const MENU = [
     { label: 'Beranda', href: '/' },
-    { label: 'Profil', href: '/profil' },
+    { label: 'Profil', href: '/profil/sejarah' },
     { label: 'Jadwal Misa', href: '/jadwal-misa' },
     { label: 'Berita & Artikel', href: '/berita' },
     { label: 'Agenda', href: '/agenda' },

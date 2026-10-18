@@ -1,21 +1,3 @@
-export type PublicParishProfile = {
-    name: string | null;
-    short_description: string | null;
-    description: string | null;
-    history_description: string | null;
-    address: string | null;
-    phone: string | null;
-    email: string | null;
-    website: string | null;
-    established_year: number | null;
-    logo: string | null;
-    logo_alt: string | null;
-    cover: string | null;
-    cover_alt: string | null;
-    map_url: string | null;
-    video_url: string | null;
-};
-
 export type PublicHistoryItem = {
     id: number;
     title: string;
@@ -74,11 +56,4 @@ export type PublicBoardPeriod = {
     description: string | null;
     is_active: boolean;
     members: PublicBoardMember[];
-};
-
-export type ProfilSections = {
-    sejarah: boolean;
-    wilayah: boolean;
-    pastor: boolean;
-    struktur: boolean;
 };

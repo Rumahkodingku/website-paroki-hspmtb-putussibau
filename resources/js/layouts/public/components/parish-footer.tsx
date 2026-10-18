@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { PublicContainer } from '@/components/public-container';
 import { Text } from '@/components/text';
-import type { ContactDetails, SeoDefaults } from '@/types';
+import type { ContactDetails, IdentityDetails, SeoDefaults } from '@/types';
 import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
@@ -21,13 +21,7 @@ import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
 import { index as areaIndex } from '@/routes/area';
-import {
-    index as profil,
-    pastor,
-    sejarah,
-    struktur,
-    wilayah,
-} from '@/routes/profil';
+import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
 
 type FooterLink = {
     label: string;
@@ -43,7 +37,7 @@ const MENU_UTAMA: FooterGroup = {
     title: 'Menu Utama',
     links: [
         { label: 'Beranda', href: home() },
-        { label: 'Profil', href: profil() },
+        { label: 'Profil', href: sejarah() },
         { label: 'Jadwal Misa', href: jadwalMisa() },
         { label: 'Berita & Artikel', href: berita() },
         { label: 'Agenda', href: agenda() },
@@ -173,12 +167,13 @@ function ContactRow({ item }: { item: FooterContactItem }) {
 }
 
 export function ParishFooter() {
-    const { seo, contact } = usePage<{
+    const { seo, contact, identity } = usePage<{
         seo?: SeoDefaults;
         contact?: ContactDetails;
+        identity?: IdentityDetails;
     }>().props;
 
-    const parishName = seo?.siteName ?? 'HSPMTB Putussibau';
+    const parishName = identity?.name ?? seo?.siteName ?? 'HSPMTB Putussibau';
 
     const contactItems: FooterContactItem[] = [];
 
@@ -247,14 +242,15 @@ export function ParishFooter() {
                             </Text>
                         </div>
 
-                        <Text
-                            as="p"
-                            variant="fine-print"
-                            className="mt-4 max-w-sm text-ink-muted"
-                        >
-                            [ISI: deskripsi singkat paroki. Satu atau dua
-                            kalimat yang menjelaskan siapa kami.]
-                        </Text>
+                        {identity?.shortDescription ? (
+                            <Text
+                                as="p"
+                                variant="fine-print"
+                                className="mt-4 max-w-sm text-ink-muted"
+                            >
+                                {identity.shortDescription}
+                            </Text>
+                        ) : null}
 
                         {contactItems.length > 0 ? (
                             <ul className="mt-6 space-y-3">

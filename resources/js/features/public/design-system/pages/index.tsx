@@ -10,7 +10,7 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { home } from '@/routes';
-import { index as profil } from '@/routes/profil';
+import { sejarah as profil } from '@/routes/profil';
 
 /*
  * /design-system - the shell showcase.

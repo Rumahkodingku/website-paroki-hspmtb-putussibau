@@ -36,11 +36,11 @@ are absent on purpose:
   a `status` enum, but publishing and archiving are still ordinary fields of the
   update form, so they ride on `documents.update` (D-66). The admin preview route
   is gated on `documents.view` through `DocumentPolicy::view`.
-- The parish profile and the service-area narrative are singletons, so they
-  carry only `parishprofiles.view` and `parishprofiles.update`. There is no
-  create or delete endpoint for a row that must always be exactly one, and the
-  service area rides on the profile's pair rather than growing a sixth group
-  (D-52).
+- The service-area narrative is a singleton, so it carries only
+  `parishprofiles.view` and `parishprofiles.update`. There is no create or
+  delete endpoint for a row that must always be exactly one. The Informasi
+  Profil module was removed (D-69); the pair is kept because the service area
+  still rides on it rather than growing a new group (D-52).
 
 | Group | Permissions |
 | --- | --- |
@@ -57,7 +57,7 @@ are absent on purpose:
 | Post categories | `postcategories.view`, `postcategories.create`, `postcategories.update`, `postcategories.delete` |
 | Events | `events.view`, `events.create`, `events.update`, `events.delete` |
 | Event categories | `eventcategories.view`, `eventcategories.create`, `eventcategories.update`, `eventcategories.delete` |
-| Parish profile / service area | `parishprofiles.view`, `parishprofiles.update` |
+| Parish service area | `parishprofiles.view`, `parishprofiles.update` |
 | Parish history | `parishhistories.view`, `parishhistories.create`, `parishhistories.update`, `parishhistories.delete` |
 | Pastors (and their assignments) | `pastors.view`, `pastors.create`, `pastors.update`, `pastors.delete` |
 | Board periods | `boardperiods.view`, `boardperiods.create`, `boardperiods.update`, `boardperiods.delete` |

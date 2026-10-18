@@ -22,7 +22,7 @@ use App\Models\Media;
 use App\Models\ParishBoardMember;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryItem;
-use App\Models\ParishProfile;
+use App\Models\ParishHistoryNarrative;
 use App\Models\ParishServiceArea;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
@@ -36,6 +36,7 @@ use App\Models\ServiceRequirement;
 use App\Models\ServiceStep;
 use App\Models\SpecialMass;
 use App\Models\User;
+use App\Services\SiteSettingsService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
@@ -88,7 +89,7 @@ class DemoContentSeeder extends Seeder
 
         $this->seedMassSchedules();
         $this->seedNewsAndAgenda($author, $media, $imagePath);
-        $this->seedParishProfile($media, $imagePath);
+        $this->seedParishIdentity($media, $imagePath);
         $this->seedServices($media);
         $this->seedCommunities($media);
 
@@ -431,33 +432,33 @@ class DemoContentSeeder extends Seeder
     }
 
     /**
-     * Phase 06A — the parish profile and its dependent sections.
+     * Phase 06A — parish identity, history narrative and dependent sections.
+     *
+     * Identity used to live on parish_profiles; that table is gone (D-69) and
+     * the values now live in site settings. Sample values only, never real
+     * parish data.
      */
-    private function seedParishProfile(Media $media, ?string $imagePath): void
+    private function seedParishIdentity(Media $media, ?string $imagePath): void
     {
-        ParishProfile::query()->updateOrCreate(
+        app(SiteSettingsService::class)->setMany([
+            'short_description' => 'Komunitas umat Katolik di Putussibau, Kabupaten Kapuas Hulu, Keuskupan Sintang.',
+            'description' => '<p>Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau '
+                .'melayani umat di wilayah Putussibau dan sekitarnya. '
+                .'Hidup menggereja diwujudkan melalui peribadatan, katekese, dan karya sosial.</p>',
+            'established_year' => 1956,
+            'logo' => $media->getKey(),
+            'logo_alt' => 'Logo Paroki',
+            'cover' => $media->getKey(),
+            'cover_alt' => 'Gambar sampul Paroki',
+            'is_published' => true,
+        ]);
+
+        ParishHistoryNarrative::query()->updateOrCreate(
             [],
             [
-                'name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
-                'short_description' => 'Komunitas umat Katolik di Putussibau, Kabupaten Kapuas Hulu, Keuskupan Sintang.',
-                'description' => '<p>Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau '
-                    .'melayani umat di wilayah Putussibau dan sekitarnya. '
-                    .'Hidup menggereja diwujudkan melalui peribadatan, katekese, dan karya sosial.</p>',
-                'history_description' => '<p>Paroki ini bertumbuh dari komunitas kecil umat menjadi '
+                'narrative' => '<p>Paroki ini bertumbuh dari komunitas kecil umat menjadi '
                     .'paroki yang melayani beberapa stasi dan lingkungan. Perjalanan tersebut '
                     .'menjadi bagian dari sejarah iman umat di Kapuas Hulu.</p>',
-                'address' => 'Putussibau, Kabupaten Kapuas Hulu, Kalimantan Barat',
-                'phone' => null,
-                'email' => null,
-                'website' => null,
-                'established_year' => 1956,
-                'logo_media_id' => $media->getKey(),
-                'logo_alt' => 'Logo Paroki',
-                'cover_media_id' => $media->getKey(),
-                'cover_alt' => 'Gambar sampul Paroki',
-                'map_url' => null,
-                'video_url' => null,
-                'is_published' => true,
             ],
         );
 

@@ -57,7 +57,6 @@ import { index as galleriesIndex } from '@/routes/galleries';
 import { index as documentsIndex } from '@/routes/documents';
 import { index as documentCategoriesIndex } from '@/routes/document-categories';
 import { index as areasIndex } from '@/routes/areas';
-import { edit as editParishProfile } from '@/routes/parish-profile';
 import { index as parishHistoriesIndex } from '@/routes/parish-histories';
 import { edit as editServiceArea } from '@/routes/parish-service-area';
 import { index as pastorsIndex } from '@/routes/pastors';
@@ -76,10 +75,9 @@ const CONTENT_ENTRIES: Entry[] = [
     { title: 'Beranda', icon: Sparkles },
     {
         title: 'Profil Paroki',
-        href: editParishProfile(),
+        href: parishHistoriesIndex(),
         icon: Users,
         children: [
-            { title: 'Informasi Profil', href: editParishProfile() },
             { title: 'Sejarah Paroki', href: parishHistoriesIndex() },
             { title: 'Wilayah Pelayanan', href: editServiceArea() },
             { title: 'Pastor Paroki', href: pastorsIndex() },

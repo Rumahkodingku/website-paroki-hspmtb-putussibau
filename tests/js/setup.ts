@@ -18,8 +18,8 @@ afterEach(() => {
  *
  * Inertia's Link issues its XHR before the component resolver runs, so
  * renderWithInertia's throwing resolver cannot stop one. parish-navbar's drawer
- * test clicks a real link, and the request to localhost:3000/profil went out and
- * came back ECONNREFUSED.
+ * test clicks a real link, and the request to localhost:3000/profil/sejarah went
+ * out and came back ECONNREFUSED.
  *
  * On main that failure was invisible. The rejection settled after Vitest had
  * already reported its results and was on its way out, so the run exited 0 and

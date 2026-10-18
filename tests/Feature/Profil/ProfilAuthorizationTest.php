@@ -11,12 +11,14 @@ use Inertia\Testing\AssertableInertia as Assert;
 | Empat lapis middleware /admin plus Policy. Setiap test admin memakai
 | superAdmin() supaya 403 yang muncul memang dari Policy, bukan dari gate
 | admin.access.
+|
+| The Informasi Profil page was removed in D-69, so the module root now
+| redirects to the Sejarah page and the profile edit route no longer exists.
 */
 
 it('sends a guest to the login page', function (string $route) {
     $this->get($route)->assertRedirect(route('login'));
 })->with([
-    'profile edit' => fn () => route('parish-profile.edit'),
     'history list' => fn () => route('parish-histories.index'),
     'service area' => fn () => route('parish-service-area.edit'),
     'pastors' => fn () => route('pastors.index'),
@@ -27,31 +29,36 @@ it('refuses a signed-in user without the role', function () {
     seedRolesAndPermissions();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('parish-profile.edit'))
+        ->get(route('parish-histories.index'))
         ->assertForbidden();
 });
 
 it('lets a super admin through', function () {
     $this->actingAs(superAdmin())
-        ->get(route('parish-profile.edit'))
+        ->get(route('parish-histories.index'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('admin/profil/informasi/index'));
+        ->assertInertia(fn (Assert $page) => $page->component('admin/profil/sejarah/index'));
 });
 
 it('redirects the module root to the first section rather than rendering a page', function () {
     // There is no overview page (D-52); the root is a named redirect.
     $this->actingAs(superAdmin())
         ->get(route('parish-profile.index'))
-        ->assertRedirect(route('parish-profile.edit'));
+        ->assertRedirect(route('parish-histories.index'));
 });
 
 it('never declares a public profil route twice', function () {
-    $this->get(route('profil.index', absolute: false))->assertOk();
     $this->get(route('profil.sejarah', absolute: false))->assertOk();
 
-    // Visi & Misi was removed in Phase 6A and must not come back.
+    // The Informasi Profil summary page and Visi & Misi are both gone and must
+    // not come back.
     expect(collect(app('router')->getRoutes()->getRoutes())
         ->pluck('action.as')
         ->filter()
         ->contains('profil.visiMisi'))->toBeFalse();
+
+    expect(collect(app('router')->getRoutes()->getRoutes())
+        ->pluck('action.as')
+        ->filter()
+        ->contains('profil.index'))->toBeFalse();
 });

@@ -2,13 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { PublicContainer } from '@/components/public-container';
 import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
-import {
-    index as profilIndex,
-    pastor,
-    sejarah,
-    struktur,
-    wilayah,
-} from '@/routes/profil';
+import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
 
 /*
  * ProfileSubNav - DESIGN.md, "Profile Components".
@@ -20,7 +14,6 @@ import {
  */
 
 const LINKS = [
-    { label: 'Ringkasan', href: profilIndex() },
     { label: 'Sejarah', href: sejarah() },
     { label: 'Wilayah Pelayanan', href: wilayah() },
     { label: 'Pastor', href: pastor() },

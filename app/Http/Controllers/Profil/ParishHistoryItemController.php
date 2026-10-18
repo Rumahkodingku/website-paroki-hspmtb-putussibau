@@ -7,10 +7,10 @@ use App\Concerns\SortsAdminList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profil\StoreParishHistoryItemRequest;
 use App\Http\Requests\Profil\UpdateParishHistoryItemRequest;
+use App\Http\Requests\Profil\UpdateParishHistoryNarrativeRequest;
 use App\Http\Resources\Profil\ParishHistoryItemResource;
-use App\Http\Resources\Profil\ParishProfileResource;
 use App\Models\ParishHistoryItem;
-use App\Models\ParishProfile;
+use App\Models\ParishHistoryNarrative;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,10 +21,11 @@ use Inertia\Response;
 /**
  * Sejarah Paroki — the narrative plus the timeline items.
  *
- * The narrative lives on the profile and is edited on /informasi; this page
- * manages the timeline items and shows the current narrative for context.
+ * The narrative is a singleton edited on this page; the timeline items are
+ * managed below it. The narrative used to live on the removed Informasi Profil
+ * module and moved here in D-69.
  *
- * @see docs/DECISIONS.md D-52
+ * @see docs/DECISIONS.md D-69
  */
 class ParishHistoryItemController extends Controller
 {
@@ -56,13 +57,11 @@ class ParishHistoryItemController extends Controller
             ],
         )->paginate(15)->withQueryString();
 
-        $profile = ParishProfile::current();
+        $narrative = ParishHistoryNarrative::current();
 
         return Inertia::render('admin/profil/sejarah/index', [
             'items' => ParishHistoryItemResource::collection($items),
-            'profile' => ParishProfileResource::make(
-                $profile->loadMissing(['logoMedia.variants', 'coverMedia.variants']),
-            )->resolve(),
+            'narrative' => $narrative->narrative,
             'filters' => [
                 'search' => $search,
                 'sort' => $request->string('sort')->toString(),
@@ -70,6 +69,21 @@ class ParishHistoryItemController extends Controller
             ],
             ...$this->profilFormMeta(),
         ]);
+    }
+
+    /**
+     * Save the history narrative singleton.
+     *
+     * The narrative is sanitized in the form request before it reaches here.
+     */
+    public function updateNarrative(UpdateParishHistoryNarrativeRequest $request): RedirectResponse
+    {
+        ParishHistoryNarrative::current()
+            ->fill(['narrative' => $request->validated('narrative')])
+            ->save();
+
+        return to_route('parish-histories.index')
+            ->with('success', __('Narasi sejarah berhasil disimpan.'));
     }
 
     public function create(): Response

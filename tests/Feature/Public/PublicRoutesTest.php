@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Media;
+use App\Models\MediaVariant;
 use App\Services\SiteSettingsService;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -36,7 +38,6 @@ use Inertia\Testing\AssertableInertia as Assert;
  */
 dataset('public pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
-    '/profil' => ['/profil', 'public/profil'],
     '/profil/sejarah' => ['/profil/sejarah', 'public/profil/sejarah'],
     '/profil/wilayah' => ['/profil/wilayah', 'public/profil/wilayah'],
     '/profil/pastor' => ['/profil/pastor', 'public/profil/pastor'],
@@ -130,8 +131,9 @@ it('sends no page-specific props from a placeholder', function (string $url) {
     // `media` is shared for the same reason `seo` is: the upload limits are
     // config/media.php's to decide and the browser needs them everywhere. See
     // D-62. `contact` is shared for the same reason: the footer renders it on
-    // every public page (D-67).
-    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'media', 'documentUploads', 'contact', 'errors'];
+    // every public page (D-67). `identity` is shared because the navbar and
+    // footer render the parish identity on every public page (D-69).
+    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'identity', 'media', 'documentUploads', 'contact', 'errors'];
 
     expect(array_diff(array_keys($props), $shared))->toBe([]);
 })->with('placeholder pages');
@@ -224,6 +226,29 @@ it('omits an Open Graph tag rather than emitting it empty', function () {
         // og:type and robots carry no setting, so they are always present.
         ->toContain('property="og:type"')
         ->toContain('name="robots"');
+});
+
+it('renders the uploaded favicon in the head and falls back when unset', function () {
+    // No favicon configured: the committed placeholder icons are used.
+    $this->get('/')->assertOk()->assertSee('/favicon.ico', false);
+
+    $media = Media::factory()->ready()->create();
+    MediaVariant::factory()->create([
+        'media_id' => $media->getKey(),
+        'name' => 'thumb',
+        'disk' => (string) config('media.variant_disk'),
+        'path' => 'media/variants/'.$media->getKey().'/thumb.webp',
+    ]);
+
+    app(SiteSettingsService::class)->set('favicon', (string) $media->getKey());
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    // The uploaded favicon replaces the placeholder pair, and the head carries
+    // the resolved variant URL rather than a stored path.
+    expect($html)
+        ->toContain('storage')
+        ->not->toContain('/favicon.ico');
 });
 
 it('keeps an unknown public path at 404', function () {
