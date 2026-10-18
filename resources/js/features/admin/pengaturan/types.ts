@@ -8,8 +8,32 @@ export type SettingsGroupName =
     | 'beranda'
     | 'privasi';
 
-/** Values arrive already converted by SiteSettingsService. */
-export type SettingValue = string | number | boolean | null;
+/** The seven days, keyed the way the stored JSON is keyed. */
+export type OfficeHoursDayKey =
+    | 'monday'
+    | 'tuesday'
+    | 'wednesday'
+    | 'thursday'
+    | 'friday'
+    | 'saturday'
+    | 'sunday';
+
+export type OfficeHoursDay = {
+    is_open: boolean;
+    open_time: string | null;
+    close_time: string | null;
+};
+
+/** A full week. All seven keys are always present. */
+export type OfficeHoursWeek = Record<OfficeHoursDayKey, OfficeHoursDay>;
+
+/**
+ * Values arrive already converted by SiteSettingsService.
+ *
+ * office_hours is the one structured value; a legacy free-text value arrives as
+ * a plain string so the editor can show it without discarding it.
+ */
+export type SettingValue = string | number | boolean | OfficeHoursWeek | null;
 
 /**
  * Groups of settings, keyed by group name then by setting key.
@@ -39,6 +63,8 @@ export type SettingsMeta = {
     richtext: string[];
     hints: Record<string, string>;
     urls: string[];
+    /** Keys rendered by the weekly office-hours editor. */
+    officeHours: string[];
     numericRanges: Record<string, [number, number]>;
 };
 

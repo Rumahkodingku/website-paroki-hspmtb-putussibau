@@ -752,8 +752,9 @@ dan kunci itu sekarang aktif: tipenya `html` di `config/site-settings.php`, dan
 `UpdateSettingsRequest` menyanitasinya sebelum validasi. Satu-satunya field rich
 text di aplikasi pada saat ini.
 
-Sisa 29 kunci tanpa grup `privasi`: identitas 8, kontak 7, sosial 4, seo 3,
-beranda 7.
+Sisa 28 kunci tanpa grup `privasi`: identitas 8, kontak 6, sosial 4, seo 3,
+beranda 7. (Kontak menjadi 6 di Phase 8C ketika `maps_embed_url` dihapus; lihat
+D-67.)
 
 ### 4. Field gambar = teks path/URL, dan janji P10 tidak ditepati
 
@@ -1114,7 +1115,8 @@ Sanitasi ini juga berlaku untuk field non-rich-text nanti — `maps_embed_url`
 Keduanya **belum** dikerjakan: keduanya punya aturan host yang lebih ketat dari
 allowlist skema URL, dan tidak ada field-nya di Phase 01. Saat itu menyebut
 `HtmlSanitizer::toPlainText()` untuk mengekstrak teks polos, bukan mengandalkan
-sanitasi HTML untuk memvalidasi host.
+sanitasi HTML untuk memvalidasi host. (`maps_embed_url` tidak lagi ada sebagai
+kunci setelah D-67; `form_url` tetap berlaku.)
 
 `isClean()` ada untuk membuktikan idempotensi di test. Tidak ada kode aplikasi
 yang mempercayai hasilnya.
@@ -4726,3 +4728,179 @@ production tetap bergantung pada `php.ini`/host.
 @see `docs/DECISIONS.md` D-24, D-36, D-44, D-45, D-48, D-54, D-63, D-65
 @see `docs/roadmap/phase-8b-documents.md`
 @see `docs/PRD.md` 7.10, 9.11, DL-01..DL-08, AC-DL-1..AC-DL-6
+
+---
+
+## D-67 — Modul Kontak (Phase 8C): shared `contact`, validasi peta, dan footer tanpa placeholder
+
+**Status:** Accepted · branch `feat/phase-8c-contacts`
+
+Phase 8C membangun halaman **Kontak** (`docs/roadmap/phase-8c-contacts.md`,
+disusun di `docs/plan-implementation/plan-phase-8c-contacts.md`). Audit dilakukan
+terhadap `main` pada commit `21e5549` dan enam keputusan produk dikonfirmasi
+pemilik proyek sebelum implementasi. Ringkasan yang mengikat:
+
+1. **Satu shared prop `contact`, bukan controller baru.** Footer tampil di
+   setiap halaman publik, jadi data kontak tidak bisa hanya menjadi page prop
+   `/kontak`. `HandleInertiaRequests::contactDetails()` membaca lewat
+   `SiteSettingsService` (D-23) dan mengirim bentuk yang sudah selesai:
+   `address`, `phone{display,tel}`, `whatsapp{display,url}`, `email`,
+   `officeHours`, `mapsEmbedUrl`, `mapsLink`, `homeShowContact`, dan `social`.
+   Route `/kontak` tetap `Route::inertia` karena kontraknya sudah tersedia;
+   controller hanya akan menjadi salinan pembentuk yang sama.
+
+2. **Tidak ada URL aksi yang dibuat di React.** `PhoneNumber::toTel()` dan
+   `toWhatsApp()` membangun aksi telepon/WhatsApp, email hanya dikirim bila
+   lolos `FILTER_VALIDATE_EMAIL`, dan media sosial hanya bila URL-nya
+   http/https. Nilai yang tidak valid menjadi `null`, dan komponen tidak
+   merender apa pun (KON-03..KON-05, KON-09, KON-10).
+
+3. **Satu link peta; iframe diturunkan, tidak disimpan.** Semula `maps_embed_url`
+   adalah kunci terpisah yang harus ditempel admin sebagai URL embed atau HTML
+   `<iframe>`. Amanat lanjutan meminta field itu hilang dan iframe dibuat
+   otomatis dari link Google Maps yang biasa. Jadi kunci `maps_embed_url`
+   **dihapus** dari `config/site-settings.php` (30 → 29 kunci), dan
+   `App\Support\MapsUrl` menurunkan **kedua** nilai dari `maps_link`:
+   `directions()` mengembalikan link apa adanya, `embed()` membangun
+   `https://www.google.com/maps?q=<query>&z=<zoom>&output=embed`. Query diambil
+   berurutan dari `?q=`, `/place/<name>` / `/search/<name>`, lalu `@lat,lng`;
+   zoom dibaca dari `@lat,lng,<z>z` atau `?z=` dan dijepit ke 1–21, default 16.
+   Nilai yang sudah berupa embed (`/maps/embed?pb=…`) atau `<iframe>` tetap
+   diterima dan diteruskan apa adanya agar nilai lama tidak rusak.
+
+4. **Peta hanya Google, dan link pendek ditolak.** Host + prefix path divalidasi
+   lewat `config('site-settings.maps.link_hosts')` (`www.google.com` → `/maps`,
+   `maps.google.com` → `/`); `GoogleMapsLink` dipasang di `UpdateSettingsRequest`
+   karena config hanya memuat rule string. Link pendek `maps.app.goo.gl` /
+   `goo.gl` adalah link Google yang sah tetapi tidak memuat koordinat, sehingga
+   embed tidak bisa dibangun tanpa memanggil Google. Mereka ditolak dengan pesan
+   khusus ("salin link panjangnya") alih-alih diselesaikan lewat jaringan.
+
+5. **`?output=embed` adalah endpoint tanpa kunci, bukan API resmi.** Ia tidak
+   terdokumentasi Google dan bisa berubah; Embed API resmi butuh API key dan
+   tagihan yang di luar scope proyek ini. Risikonya diterima karena seluruh
+   pembentukan URL berada di satu fungsi (`MapsUrl::embed()`) dan diuji, jadi
+   penggantian endpoint adalah satu perubahan kecil di satu tempat. Konsekuensi
+   yang terlihat: marker adalah pin pencarian standar Google, bukan pin kustom.
+
+6. **Footer berhenti menampilkan placeholder kontak.** D-6 (Phase 03)
+   mempertahankan `[ISI: …]` agar kekosongan terlihat. Phase 8C menggantinya
+   dengan shared prop: field yang kosong **disembunyikan**, bukan dirender
+   sebagai baris atau tautan kosong (KON-10/KON-11). Ini perubahan perilaku
+   sadar; teks deskripsi singkat di footer tetap placeholder karena bukan data
+   kontak dan belum punya konsumen shared prop.
+
+7. **Blok kontak beranda dibangun di 8C, bukan ditunda ke Phase 9.** KON-12 dan
+   Definition of Done menuntut `home_show_contact` bekerja. Yang dibangun hanya
+   satu section ringkas (alamat/telepon/WhatsApp/email + tautan `/kontak`);
+   blok beranda lain tetap placeholder Phase 01/03. `home_show_contact=false`
+   menyembunyikan blok ini saja dan tidak menonaktifkan `/kontak`.
+
+8. **Aksi Salin disertakan** untuk alamat dan nomor telepon. Tombol memakai
+   `navigator.clipboard` dengan label aksesibel tetap; bila API tidak tersedia
+   atau ditolak, tombol kembali ke keadaan diam tanpa melempar error.
+
+9. **Structured data Organization/Church ditunda.** PRD KON-06 memintanya, tetapi
+   roadmap KON-13 melarang membuat sistem SEO baru di fase ini dan repo hanya
+   mengizinkan dua file `dangerouslySetInnerHTML` (`ArchitectureTest`). Dicatat
+   sebagai follow-up Phase 9/SEO; tidak ada entri allowlist ketiga.
+
+10. **Rule generik `settings.*` dibuat `nullable`.** Form pengaturan mengirim
+    seluruh key setiap kali simpan dan `ConvertEmptyStringsToNull` mengubah field
+    kosong menjadi `null`; tanpa `nullable`, satu field opsional yang tidak diisi
+    menolak seluruh form. Ini bug lama yang ditemukan saat menguji alur admin →
+    publik, bukan perubahan aturan kontak.
+
+11. **Form pengaturan mengirim method yang benar.** Halaman `/admin/pengaturan`
+    memanggil `form.post(SettingsController.update().url)`, yang mengirim POST ke
+    rute PUT dan ditolak server; akibatnya menyimpan pengaturan tidak pernah
+    benar-benar tersimpan. Diganti dengan `form.submit(SettingsController.update())`
+    agar Wayfinder membawa method dan URL sekaligus. Bug lama ini ditemukan oleh
+    E2E alur admin → publik (AC-KON-3), bukan oleh perubahan kontak.
+
+12. **Tanpa migration, model, tabel, seeder, atau dependency baru.** Tidak ada
+    `contact_persons` dan tidak ada menu admin Kontak terpisah; Pengaturan Situs
+    sudah menjadi sumber tunggal (KON-01, scope roadmap §3).
+
+**Divergensi dari PRD.** (a) Structured data KON-06 ditunda (poin 9).
+(b) Kunci `maps_embed_url` dari PRD Lampiran B **dihapus** (poin 3): iframe kini
+diturunkan dari `maps_link`, sehingga jumlah kunci 30 → 29 dan halaman pengaturan
+tidak lagi meminta URL embed. (c) Footer tidak lagi menampilkan placeholder
+(poin 6), menyimpang dari D-6.
+
+**Utang / keterbatasan yang diketahui.** Engineering-complete tidak berarti
+konten produksi tervalidasi: alamat, telepon, email, jam layanan, dan link peta
+harus dikonfirmasi pihak paroki. Shared prop `contact` ikut terkirim ke halaman
+admin (payload kecil, pola yang sama dengan `seo`). Embed memakai endpoint
+`?output=embed` yang tidak resmi (poin 5), dan link pendek Google ditolak — bila
+paroki biasa memakai link pendek, itu perlu dijelaskan di panduan admin. E2E
+memakai fixture fiktif.
+
+@see `docs/DECISIONS.md` D-6, D-21, D-23, D-46, D-54, D-62, D-66
+@see `docs/roadmap/phase-8c-contacts.md`
+@see `docs/PRD.md` 7.9, KON-01..KON-13, AC-KON-1..AC-KON-5, XC-S2
+
+---
+
+## D-68 — Jam Pelayanan Sekretariat: jadwal mingguan JSON, bukan teks bebas
+
+**Status:** Accepted · branch `feat/phase-8c-contacts`
+
+`office_hours` dulu satu textarea teks bebas. Sekarang ia satu jadwal mingguan:
+tujuh hari, masing-masing dengan jam buka, jam tutup, dan status buka/tutup.
+Keputusan yang mengikat:
+
+1. **Disimpan sebagai JSON di kolom `site_settings.value` yang sudah ada**, bukan
+   tabel baru. Tipe setting baru `json` didaftarkan di `config/site-settings.php`;
+   `SiteSettingsService` yang men-decode saat baca dan meng-encode saat tulis, jadi
+   tidak ada pemanggil yang menyentuh `json_encode` sendiri. Tidak ada migration.
+
+2. **Bentuk: `{monday:{is_open,open_time,close_time}, … , sunday:{…}}`.** Kunci
+   bahasa Inggris karena itu data; label hari bahasa Indonesia karena itu untuk
+   manusia. Format waktu `HH:mm`, dari input native `type="time"`.
+
+3. **Jam tetap disimpan walau hari ditutup.** Contoh JSON di brief menampilkan
+   `open_time: null` untuk hari tutup, tetapi kebutuhan "nilai waktu tidak
+   langsung dihapus … dapat digunakan kembali" lebih terlayani bila jam ikut
+   tersimpan: menyalakan kembali hari memulihkan jam sebelumnya, bahkan setelah
+   simpan dan muat ulang. Validasi tidak mewajibkan jam saat tutup dan tidak
+   memeriksa urutannya, jadi nilai yang dipertahankan tidak pernah menolak form.
+
+4. **Tampilan publik diformat di server.** `App\Support\OfficeHours::format()`
+   mengelompokkan hari buka berturut-turut dengan jam identik menjadi satu baris
+   ("Senin–Jumat: 08.00–15.00 WIB"), menyebut hari tutup tanpa jam, dan
+   mengembalikan `null` bila tidak ada hari yang buka. `ContactDetails.officeHours`
+   tetap `string|null`, sehingga kontrak dan komponen publik tidak berubah.
+   Akhiran "WIB" mengikuti `display_timezone` paroki (Asia/Pontianak).
+   **Di mana jadwal itu tampil:** halaman `/kontak` (kartu "Jam Layanan") dan
+   blok kontak Beranda (`HomeContactSection`). Keduanya membaca prop `contact`
+   yang sama, jadi tidak bisa berbeda isi. **Footer tidak menampilkannya** —
+   footer adalah kolom navigasi fine-print yang ringkas, dan jadwal tujuh baris
+   akan merusaknya; footer sudah punya tautan "Halaman kontak" menuju `/kontak`.
+   Ini dimaksudkan, bukan kelalaian: brief asli menyebut tiga konsumen, dan
+   footer dikecualikan secara sadar atas nama hierarki informasinya.
+
+5. **Data lama teks bebas tidak pernah hilang.** `cast()` mengembalikan string
+   mentah bila nilainya bukan JSON; editor menampilkan teks itu apa adanya dengan
+   tombol "Ganti dengan jadwal mingguan". Selama tombol tidak ditekan, form
+   mengirim string lama kembali, sehingga menyimpan pengaturan Kontak lain tidak
+   menghapusnya. Tidak ada parser teks-lama→struktur (terlalu rapuh).
+
+6. **Validasi backend adalah penjaga utama.** Tujuh hari wajib ada, `is_open`
+   boolean, jam `H:i`, dan bila hari buka maka kedua jam wajib serta jam tutup
+   harus lebih akhir dari jam buka. Pesan memakai nama hari ("Jam buka Senin
+   wajib diisi…"). Validasi React hanya pelengkap; `settings.office_hours`
+   didefinisikan eksplisit sehingga menggantikan rule generik `settings.*` dan
+   array bisa lolos — perilaku wildcard ini diverifikasi di test.
+
+**Divergensi dari brief.** Poin 3 di atas (jam dipertahankan saat tutup) berbeda
+dari contoh JSON ilustratif di brief; contoh itu sendiri menyebut dirinya hanya
+format. Jumlah kunci `site_settings` tidak berubah (satu kunci, kini terstruktur).
+
+**Utang / keterbatasan yang diketahui.** Teks lama tidak dikonversi otomatis.
+Jam belum memakai zona waktu per-hari dan tidak ada indikator buka/tutup
+real-time (di luar scope). Tidak ada beberapa rentang per hari atau jadwal hari
+libur khusus.
+
+@see `docs/DECISIONS.md` D-23, D-67
+@see `docs/roadmap/phase-8c-contacts.md`

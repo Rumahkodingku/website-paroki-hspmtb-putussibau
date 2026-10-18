@@ -53,7 +53,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 6A** | Parish Profile (Profil Paroki)             | ✅ Done    |
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ✅ Done    |
-| **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri & 8B Dokumen selesai |
+| **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri, 8B Dokumen & 8C Kontak selesai |
 | **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
 | **Phase 11** | Production, Content Population & Handover | ⚪ Planned |
@@ -162,15 +162,17 @@ Galeri berada di `/admin/galeri` dengan pengelola foto di
 Foto menunjuk baris `media` (bukan kolom path), sampul menunjuk foto di album
 dengan fallback foto pertama, status cukup `is_published` boolean, dan limit
 unggah mengikuti `config/media.php` (JPEG/PNG, 3 MB) — semuanya dicatat di D-65.
-Phase 8B (Dokumen) selesai; 8C (Kontak) belum dikerjakan.
+Phase 8B (Dokumen) dan Phase 8C (Kontak) selesai; lihat bagian berikut.
 
 Dokumen implementasi:
 
 ```text
 roadmap/phase-8A-galleries.md
 roadmap/phase-8b-documents.md
+roadmap/phase-8c-contacts.md
 plan-implementation/plan-phase-8a-galleries.md
 plan-implementation/plan-phase-8b-documents.md
+plan-implementation/plan-phase-8c-contacts.md
 ```
 
 > **Engineering complete; konten belum.** Tabel, CRUD, unggah batch, sampul,
@@ -191,6 +193,24 @@ lama `/download` diarahkan permanen. Detail keputusan ada di D-66.
 > **Engineering complete; konten belum.** Tidak ada seeder dokumen produksi.
 > Kategori di-seed dari PRD, tetapi berkas dan metadatanya harus diunggah dan
 > divalidasi paroki.
+
+### Phase 8C — Kontak (modul selesai)
+
+Phase 8C membangun halaman publik `/kontak` dari **Pengaturan Situs**, tanpa
+tabel atau menu admin baru. Data kontak menjadi satu shared prop `contact`
+(`HandleInertiaRequests`), sehingga halaman Kontak, footer, dan blok kontak
+beranda membaca sumber yang sama. Telepon/WhatsApp memakai `PhoneNumber`,
+email hanya dirender bila valid, dan titik aksi disembunyikan bila datanya
+kosong. Admin hanya menempel satu link Google Maps (`maps_link`); iframe peta
+dan tautan petunjuk arah **diturunkan otomatis** dari link itu (endpoint publik
+`?output=embed`, tanpa API key), jadi tidak ada field URL embed. Link pendek
+`maps.app.goo.gl` ditolak karena tidak memuat koordinat. Aksi Salin disertakan.
+`home_show_contact` mengatur blok beranda saja, bukan `/kontak`. Structured data
+Organization ditunda. Detail keputusan ada di D-67.
+
+> **Engineering complete; konten belum.** Tidak ada seeder kontak produksi.
+> Alamat, telepon, WhatsApp, surel, jam layanan, dan URL peta harus diisi dan
+> divalidasi paroki sebelum dipublikasikan.
 
 ### Phase 7 — Communities (Komunitas)
 
