@@ -188,8 +188,28 @@ final class SiteSettingsService
         return match (config("site-settings.types.{$key}")) {
             'integer' => (int) $value,
             'boolean' => filter_var($value, FILTER_VALIDATE_BOOL),
+            'json' => $this->decodeJson($value),
             default => $value,
         };
+    }
+
+    /**
+     * Decode a JSON setting, falling back to the raw string.
+     *
+     * A value written before the setting became structured — office_hours once
+     * held a free-text description — is not valid JSON. Returning it unchanged
+     * keeps that text readable and stops the next read from turning it into
+     * null, which would make the following save the thing that loses it.
+     */
+    private function decodeJson(string $value): mixed
+    {
+        try {
+            $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return $value;
+        }
+
+        return is_array($decoded) ? $decoded : $value;
     }
 
     /**
@@ -200,7 +220,19 @@ final class SiteSettingsService
         return match (true) {
             $value === null => null,
             is_bool($value) => $value ? '1' : '0',
+            is_array($value) => $this->encodeJson($value),
             default => (string) $value,
         };
+    }
+
+    /**
+     * A JSON string for a structured setting, in a form that stays readable in
+     * the column: no escaped slashes, and Indonesian labels are not mangled.
+     *
+     * @param  array<mixed>  $value
+     */
+    private function encodeJson(array $value): string
+    {
+        return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
     }
 }

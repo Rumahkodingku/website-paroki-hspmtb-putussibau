@@ -72,7 +72,6 @@ return [
             'contact_whatsapp',
             'contact_email',
             'office_hours',
-            'maps_embed_url',
             'maps_link',
         ],
         'sosial' => [
@@ -121,6 +120,7 @@ return [
 
     'types' => [
         'privacy_policy_content' => 'html',
+        'office_hours' => 'json',
         'home_news_limit' => 'integer',
         'home_events_limit' => 'integer',
         'home_gallery_limit' => 'integer',
@@ -178,6 +178,39 @@ return [
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',
         'home_gallery_limit' => 'integer|between:1,12',
+        // maps_link has no string rule here: it needs a host allowlist and the
+        // parsing in App\Support\MapsUrl, so UpdateSettingsRequest attaches the
+        // GoogleMapsLink rule object instead.
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Map links
+    |--------------------------------------------------------------------------
+    |
+    | PRD XC-S2 and KON-02 restrict maps to Google Maps. There is one admin
+    | field, `maps_link`, holding a link copied from Google Maps' Share button.
+    | App\Support\MapsUrl derives both the directions link and the embed iframe
+    | from it, so the parish never pastes an embed URL by hand.
+    |
+    | The allowlist is a host-to-path-prefix map rather than a substring check,
+    | because the substring forms are the bypasses: `google.com.evil.test`
+    | contains `google.com`, and so does `evil.test/?next=www.google.com/maps`.
+    | Path prefixes are checked against the parsed path, never the raw string.
+    |
+    | Short share links (maps.app.goo.gl) are listed separately. They carry no
+    | coordinates, so an embed cannot be built from them without asking Google;
+    | they are refused with a message that tells the admin to copy the longer
+    | link instead.
+    |
+    */
+
+    'maps' => [
+        'link_hosts' => [
+            'www.google.com' => ['/maps'],
+            'maps.google.com' => ['/'],
+        ],
+        'short_hosts' => ['maps.app.goo.gl', 'goo.gl'],
     ],
 
 ];

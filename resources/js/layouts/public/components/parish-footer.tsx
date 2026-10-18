@@ -1,9 +1,16 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import { Link, usePage } from '@inertiajs/react';
-import { type LucideIcon, Church, Mail, MapPin, Phone } from 'lucide-react';
+import {
+    type LucideIcon,
+    Church,
+    Mail,
+    MapPin,
+    MessageCircle,
+    Phone,
+} from 'lucide-react';
 import { PublicContainer } from '@/components/public-container';
 import { Text } from '@/components/text';
-import type { SeoDefaults } from '@/types';
+import type { ContactDetails, SeoDefaults } from '@/types';
 import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
@@ -64,10 +71,11 @@ const PELAYANAN: FooterGroup = {
     ],
 };
 
-const MEDIA_SOCIAL = [
-    { label: 'Facebook', value: '[ISI: tautan Facebook paroki]' },
-    { label: 'Instagram', value: '[ISI: tautan Instagram paroki]' },
-    { label: 'YouTube', value: '[ISI: tautan YouTube paroki]' },
+const MEDIA_SOCIAL: { key: keyof ContactDetails['social']; label: string }[] = [
+    { key: 'facebook', label: 'Facebook' },
+    { key: 'instagram', label: 'Instagram' },
+    { key: 'youtube', label: 'YouTube' },
+    { key: 'whatsappChannel', label: 'Kanal WhatsApp' },
 ];
 
 const LEGAL = ['Kebijakan Privasi', 'Syarat & Ketentuan', 'Kontak Sekretariat'];
@@ -116,15 +124,18 @@ function FooterLinks({ group }: { group: FooterGroup }) {
     );
 }
 
-function ContactRow({
-    icon: Icon,
-    label,
-    value,
-}: {
+type FooterContactItem = {
+    key: string;
     icon: LucideIcon;
     label: string;
     value: string;
-}) {
+    href?: string;
+    external?: boolean;
+};
+
+function ContactRow({ item }: { item: FooterContactItem }) {
+    const Icon = item.icon;
+
     return (
         <li className="flex items-start gap-2">
             <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -133,18 +144,89 @@ function ContactRow({
                 own line box: an icon with text wrapping around it at
                 items-start is the one place a phone-sized footer goes wrong.
             */}
-            <Text as="span" variant="fine-print" className="text-ink-muted">
-                <span className="sr-only">{label}: </span>
-                {value}
+            <Text
+                as="span"
+                variant="fine-print"
+                className="whitespace-pre-line text-ink-muted"
+            >
+                <span className="sr-only">{item.label}: </span>
+                {item.href ? (
+                    <a
+                        href={item.href}
+                        aria-label={`${item.label}: ${item.value}`}
+                        {...(item.external
+                            ? {
+                                  target: '_blank',
+                                  rel: 'noopener noreferrer',
+                              }
+                            : {})}
+                        className="transition-colors hover:text-red-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                    >
+                        {item.value}
+                    </a>
+                ) : (
+                    item.value
+                )}
             </Text>
         </li>
     );
 }
 
 export function ParishFooter() {
-    const { seo } = usePage<{ seo?: SeoDefaults }>().props;
+    const { seo, contact } = usePage<{
+        seo?: SeoDefaults;
+        contact?: ContactDetails;
+    }>().props;
 
     const parishName = seo?.siteName ?? 'HSPMTB Putussibau';
+
+    const contactItems: FooterContactItem[] = [];
+
+    if (contact?.address) {
+        contactItems.push({
+            key: 'address',
+            icon: MapPin,
+            label: 'Alamat',
+            value: contact.address,
+        });
+    }
+
+    if (contact?.phone) {
+        contactItems.push({
+            key: 'phone',
+            icon: Phone,
+            label: 'Telepon',
+            value: contact.phone.display,
+            href: contact.phone.tel,
+        });
+    }
+
+    if (contact?.whatsapp) {
+        contactItems.push({
+            key: 'whatsapp',
+            icon: MessageCircle,
+            label: 'WhatsApp',
+            value: contact.whatsapp.display ?? 'WhatsApp',
+            href: contact.whatsapp.url,
+            external: true,
+        });
+    }
+
+    if (contact?.email) {
+        contactItems.push({
+            key: 'email',
+            icon: Mail,
+            label: 'Surel',
+            value: contact.email,
+            href: `mailto:${contact.email}`,
+        });
+    }
+
+    const socialItems = MEDIA_SOCIAL.flatMap((item) => {
+        const href = contact?.social[item.key] ?? null;
+
+        return href === null ? [] : [{ ...item, href }];
+    });
 
     return (
         <footer className="border-t border-divider-soft bg-canvas-soft">
@@ -174,23 +256,13 @@ export function ParishFooter() {
                             kalimat yang menjelaskan siapa kami.]
                         </Text>
 
-                        <ul className="mt-6 space-y-3">
-                            <ContactRow
-                                icon={MapPin}
-                                label="Alamat"
-                                value="[ISI: alamat lengkap paroki]"
-                            />
-                            <ContactRow
-                                icon={Phone}
-                                label="Telepon"
-                                value="[ISI: nomor sekretariat]"
-                            />
-                            <ContactRow
-                                icon={Mail}
-                                label="Surel"
-                                value="[ISI: alamat surel paroki]"
-                            />
-                        </ul>
+                        {contactItems.length > 0 ? (
+                            <ul className="mt-6 space-y-3">
+                                {contactItems.map((item) => (
+                                    <ContactRow key={item.key} item={item} />
+                                ))}
+                            </ul>
+                        ) : null}
                     </div>
 
                     <FooterLinks group={MENU_UTAMA} />
@@ -198,36 +270,44 @@ export function ParishFooter() {
                     <FooterLinks group={PELAYANAN} />
 
                     <div>
-                        <Text
-                            as="h2"
-                            variant="caption-strong"
-                            color="foreground"
-                        >
-                            Media Sosial
-                        </Text>
-
-                        <ul className="mt-4 space-y-2">
-                            {MEDIA_SOCIAL.map((item) => (
-                                <li
-                                    key={item.label}
-                                    className="inline-flex min-h-11 items-center"
+                        {socialItems.length > 0 ? (
+                            <>
+                                <Text
+                                    as="h2"
+                                    variant="caption-strong"
+                                    color="foreground"
                                 >
-                                    <Text
-                                        as="span"
-                                        variant="fine-print"
-                                        color="subtle"
-                                    >
-                                        {item.value}
-                                    </Text>
-                                </li>
-                            ))}
-                        </ul>
+                                    Media Sosial
+                                </Text>
+
+                                <ul className="mt-4 space-y-2">
+                                    {socialItems.map((item) => (
+                                        <li key={item.key}>
+                                            <a
+                                                href={item.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={FOOTER_LINK}
+                                            >
+                                                <Text
+                                                    as="span"
+                                                    variant="fine-print"
+                                                    className="text-ink-muted hover:text-red-on-surface"
+                                                >
+                                                    {item.label}
+                                                </Text>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : null}
 
                         <Text
                             as="h2"
                             variant="caption-strong"
                             color="foreground"
-                            className="mt-8"
+                            className={socialItems.length > 0 ? 'mt-8' : ''}
                         >
                             Kontak
                         </Text>
@@ -244,15 +324,24 @@ export function ParishFooter() {
                                     </Text>
                                 </Link>
                             </li>
-                            <li className="inline-flex min-h-11 items-center">
-                                <Text
-                                    as="span"
-                                    variant="fine-print"
-                                    color="subtle"
-                                >
-                                    [ISI: tautan peta lokasi]
-                                </Text>
-                            </li>
+                            {contact?.mapsLink ? (
+                                <li>
+                                    <a
+                                        href={contact.mapsLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={FOOTER_LINK}
+                                    >
+                                        <Text
+                                            as="span"
+                                            variant="fine-print"
+                                            className="text-ink-muted hover:text-red-on-surface"
+                                        >
+                                            Petunjuk arah
+                                        </Text>
+                                    </a>
+                                </li>
+                            ) : null}
                         </ul>
                     </div>
                 </div>

@@ -13,9 +13,11 @@ import { Textarea } from '@/components/ui/textarea';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import { edit } from '@/routes/settings';
 import type {
+    OfficeHoursWeek,
     SettingValue,
     SettingsMeta,
 } from '@/features/admin/pengaturan/types';
+import { OfficeHoursEditor } from '../components/office-hours-editor';
 
 /*
  * Tiptap and ProseMirror together are a few hundred kilobytes, and this page is
@@ -78,7 +80,8 @@ type FieldKind =
     | 'richtext'
     | 'url'
     | 'number'
-    | 'switch';
+    | 'switch'
+    | 'office-hours';
 
 function fieldKind(
     key: string,
@@ -87,6 +90,9 @@ function fieldKind(
 ): FieldKind {
     if (typeof value === 'boolean') {
         return 'switch';
+    }
+    if (meta.officeHours.includes(key)) {
+        return 'office-hours';
     }
     // Checked before `multiline` because a rich text field is also long, and a
     // textarea for it would silently discard every tag on save.
@@ -105,13 +111,16 @@ function fieldKind(
     return 'text';
 }
 
-/** Everything the backend accepts is a string on the wire. */
-function toWire(value: SettingValue): string {
+/** Everything the backend accepts is a string on the wire, except office hours. */
+function toWire(value: SettingValue): string | OfficeHoursWeek {
     if (value === null || value === undefined) {
         return '';
     }
     if (typeof value === 'boolean') {
         return value ? '1' : '0';
+    }
+    if (typeof value === 'object') {
+        return value;
     }
 
     return String(value);
@@ -124,15 +133,19 @@ export default function Settings({ groups, meta }: Props) {
         groupsInOrder
             .flatMap((group) => Object.entries(groups[group]))
             .map(([key, value]) => [key, toWire(value)]),
-    ) as Record<string, string>;
+    ) as Record<string, string | OfficeHoursWeek>;
 
-    const { data, setData, post, processing, errors, reset } = useForm<{
-        settings: Record<string, string>;
+    const { data, setData, submit, processing, errors, reset } = useForm<{
+        settings: Record<string, string | OfficeHoursWeek>;
     }>({ settings: initial });
 
-    const submit = (event: React.FormEvent) => {
+    const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        post(SettingsController.update().url);
+        // The Wayfinder object carries the route's method as well as its URL.
+        // Calling form.post(url) here sent a POST to a PUT route, which the
+        // server rejected; form.submit(action) is the contract that keeps the
+        // two in step.
+        submit(SettingsController.update());
     };
 
     return (
@@ -148,11 +161,24 @@ export default function Settings({ groups, meta }: Props) {
                     description="Identitas paroki, kontak, media sosial, SEO dasar, beranda, dan kebijakan privasi"
                 />
 
-                <form onSubmit={submit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <Tabs defaultValue={groupsInOrder[0]} className="gap-6">
-                        <TabsList className="flex-wrap">
+                        {/*
+                            The same tab bar the two other tabbed admin forms
+                            use (community-form.tsx, service-form.tsx): a line
+                            variant left-aligned under a hairline, rather than
+                            this page's earlier centred pill row.
+                        */}
+                        <TabsList
+                            variant="line"
+                            className="flex h-auto flex-wrap justify-start gap-1 border-b border-hairline bg-transparent p-0"
+                        >
                             {groupsInOrder.map((group) => (
-                                <TabsTrigger key={group} value={group}>
+                                <TabsTrigger
+                                    key={group}
+                                    value={group}
+                                    className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary"
+                                >
                                     {meta.groupLabels[group] ?? group}
                                 </TabsTrigger>
                             ))}
@@ -177,11 +203,17 @@ export default function Settings({ groups, meta }: Props) {
                                         const message =
                                             errors[`settings.${key}`];
 
-                                        const set = (next: string) =>
+                                        const set = (
+                                            next: string | OfficeHoursWeek,
+                                        ) =>
                                             setData('settings', {
                                                 ...data.settings,
                                                 [key]: next,
                                             });
+
+                                        const raw = data.settings[key];
+                                        const stringValue =
+                                            typeof raw === 'string' ? raw : '';
 
                                         return (
                                             <div
@@ -213,6 +245,27 @@ export default function Settings({ groups, meta }: Props) {
                                                             }
                                                         />
                                                     </div>
+                                                ) : kind === 'office-hours' ? (
+                                                    <>
+                                                        <Text
+                                                            as="p"
+                                                            variant="body-strong"
+                                                            color="foreground"
+                                                        >
+                                                            {label}
+                                                        </Text>
+
+                                                        <OfficeHoursEditor
+                                                            id={inputId}
+                                                            value={
+                                                                data.settings[
+                                                                    key
+                                                                ] ?? null
+                                                            }
+                                                            errors={errors}
+                                                            onChange={set}
+                                                        />
+                                                    </>
                                                 ) : (
                                                     <>
                                                         <Label
@@ -230,10 +283,7 @@ export default function Settings({ groups, meta }: Props) {
                                                                 <RichTextEditor
                                                                     id={inputId}
                                                                     value={
-                                                                        data
-                                                                            .settings[
-                                                                            key
-                                                                        ] ?? ''
+                                                                        stringValue
                                                                     }
                                                                     onChange={(
                                                                         next,
@@ -249,10 +299,7 @@ export default function Settings({ groups, meta }: Props) {
                                                             <Textarea
                                                                 id={inputId}
                                                                 value={
-                                                                    data
-                                                                        .settings[
-                                                                        key
-                                                                    ] ?? ''
+                                                                    stringValue
                                                                 }
                                                                 onChange={(
                                                                     event,
@@ -279,10 +326,7 @@ export default function Settings({ groups, meta }: Props) {
                                                                 min={range?.[0]}
                                                                 max={range?.[1]}
                                                                 value={
-                                                                    data
-                                                                        .settings[
-                                                                        key
-                                                                    ] ?? ''
+                                                                    stringValue
                                                                 }
                                                                 onChange={(
                                                                     event,
@@ -308,7 +352,12 @@ export default function Settings({ groups, meta }: Props) {
                                                     </Text>
                                                 ) : null}
 
-                                                <InputError message={message} />
+                                                {kind ===
+                                                'office-hours' ? null : (
+                                                    <InputError
+                                                        message={message}
+                                                    />
+                                                )}
                                             </div>
                                         );
                                     },

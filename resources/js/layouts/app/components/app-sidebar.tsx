@@ -10,7 +10,6 @@ import {
     Images,
     LayoutGrid,
     ListChecks,
-    Mail,
     MapPin,
     Settings,
     Sparkles,
@@ -124,7 +123,6 @@ const CONTENT_ENTRIES: Entry[] = [
     { title: 'Komunitas', href: communitiesIndex(), icon: Users },
     { title: 'Area', href: areasIndex(), icon: MapPin },
     { title: 'Galeri', href: galleriesIndex(), icon: Images },
-    { title: 'Kontak', icon: Mail },
     { title: 'Dokumen', href: documentsIndex(), icon: FileText },
 ];
 

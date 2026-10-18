@@ -1,7 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 import { e2eEnvironment } from './tests/e2e/support/environment';
 
-const port = 8000;
+/**
+ * The port the E2E web server binds to.
+ *
+ * 8000 is the default and what `npm run e2e` has always used. E2E_PORT exists so
+ * the suite can be run while `composer dev` is already holding 8000: Playwright
+ * reuses an existing server outside CI, and a reused `artisan serve` reads its
+ * connection from .env — the dev database — so every login and fixture fails as
+ * a credential or data mismatch. Giving E2E its own port sidesteps that without
+ * stopping the dev server.
+ */
+const port = Number(process.env.E2E_PORT ?? 8000);
 const baseURL = `http://127.0.0.1:${port}`;
 
 const environment = e2eEnvironment();
