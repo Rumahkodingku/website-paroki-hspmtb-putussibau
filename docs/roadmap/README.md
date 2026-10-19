@@ -54,7 +54,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ✅ Done    |
 | **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri, 8B Dokumen & 8C Kontak selesai |
-| **Phase 9**  | Homepage & Admin Dashboard                | 🟡 9A Beranda selesai; 9B Dashboard planned |
+| **Phase 9**  | Homepage & Admin Dashboard                | 🟡 9A Beranda & 9B Dashboard selesai |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
 | **Phase 11** | Production, Content Population & Handover | ⚪ Planned |
 
@@ -187,6 +187,29 @@ plan-implementation/plan-phase-9a-homepage.md
 > **Engineering complete; konten belum.** Berita, agenda, pelayanan, galeri, dan
 > kontak tetap kosong sampai paroki mengisi dan memvalidasi kontennya. E2E
 > berjalan pada database bare dan sengaja menguji empty state.
+
+### Phase 9B — Admin Dashboard (selesai)
+
+Phase 9B mengganti placeholder Dashboard dengan agregator read-only:
+lima kartu ringkasan (Berita, Agenda, Dokumen, Jadwal Misa, Pelayanan), Aksi
+Cepat, Agenda Terdekat, Berita Terbaru, Perlu Perhatian, dan Konten Terbaru.
+Semua angka dihitung di backend dengan definisi yang terdokumentasi; tidak ada
+tabel statistik, analytics, atau audit log baru. Route `dashboard` berpindah dari
+`Route::inertia` ke controller tipis, dengan middleware dan otorisasi yang sama.
+
+Dokumen implementasi:
+
+```text
+roadmap/phase-9b-admin-dashboard.md
+plan-implementation/plan-phase-9b-admin-dashboard.md
+```
+
+Keputusan definisi statistik dan cakupan "Perlu Perhatian" ada di D-76 dan D-77.
+Delapan belas test Pest (`tests/Feature/DashboardTest.php`), satu suite Vitest, dan
+satu spec Playwright (`tests/e2e/dashboard.spec.ts`) menjaga perilakunya.
+
+> **Engineering complete; konten belum.** Database kosong menampilkan angka 0 dan
+> empty state, bukan error; tidak ada seeder produksi.
 
 ### Phase 8A — Galeri (modul selesai)
 
