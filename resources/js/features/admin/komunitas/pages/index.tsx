@@ -94,10 +94,10 @@ export default function Index({
             sortKey: 'name',
             cell: ({ row }) => (
                 <div className="space-y-0.5">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.name}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {row.original.slug}
                     </Text>
                 </div>
@@ -171,7 +171,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ category: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua kategori</option>
                         {categories.map((category) => (
@@ -187,7 +187,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua status</option>
                         {statuses.map((option) => (
@@ -203,7 +203,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ publication: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua publikasi</option>
                         <option value="published">Dipublikasikan</option>

@@ -66,14 +66,14 @@ export default function Index({ periods, selected }: Props) {
                                 className={`rounded-lg border p-4 ${
                                     selected?.id === period.id
                                         ? 'border-primary'
-                                        : 'border-hairline'
+                                        : 'border-border'
                                 }`}
                             >
                                 <div className="flex flex-wrap items-center gap-2">
                                     <button
                                         type="button"
                                         onClick={() => selectPeriod(period.id)}
-                                        className="text-body-strong hover:underline"
+                                        className="text-heading-sm hover:underline"
                                     >
                                         {period.name}
                                     </button>
@@ -95,7 +95,7 @@ export default function Index({ periods, selected }: Props) {
 
                                 <Text
                                     as="p"
-                                    variant="caption"
+                                    variant="body-sm"
                                     color="muted"
                                     className="mt-1"
                                 >
@@ -153,7 +153,7 @@ export default function Index({ periods, selected }: Props) {
                 {selected ? (
                     <section className="space-y-4 border-t pt-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                            <Text as="h3" variant="tagline">
+                            <Text as="h3" variant="heading-md">
                                 Anggota - {selected.name}
                             </Text>
                             <Button asChild>
@@ -173,7 +173,7 @@ export default function Index({ periods, selected }: Props) {
                                 description="Tambahkan anggota untuk menyusun kepengurusan."
                             />
                         ) : (
-                            <ul className="divide-y divide-hairline rounded-lg border border-hairline">
+                            <ul className="divide-y divide-border rounded-lg border border-border">
                                 {selected.members.map((member) => (
                                     <li
                                         key={member.id}
@@ -185,12 +185,12 @@ export default function Index({ periods, selected }: Props) {
                                                     src={member.photo_url}
                                                     alt={member.name}
                                                     loading="lazy"
-                                                    className="size-16 rounded-md border border-hairline object-cover"
+                                                    className="size-16 rounded-md border border-border object-cover"
                                                 />
                                             ) : (
                                                 <div
                                                     aria-hidden="true"
-                                                    className="flex size-16 items-center justify-center rounded-md border border-hairline bg-muted text-caption text-muted-foreground"
+                                                    className="flex size-16 items-center justify-center rounded-md border border-border bg-muted text-body-sm text-muted-foreground"
                                                 >
                                                     —
                                                 </div>
@@ -198,13 +198,13 @@ export default function Index({ periods, selected }: Props) {
                                             <div>
                                                 <Text
                                                     as="p"
-                                                    variant="body-strong"
+                                                    variant="heading-sm"
                                                 >
                                                     {member.name}
                                                 </Text>
                                                 <Text
                                                     as="p"
-                                                    variant="caption"
+                                                    variant="body-sm"
                                                     color="muted"
                                                 >
                                                     {member.position}

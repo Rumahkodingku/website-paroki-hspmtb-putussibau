@@ -89,8 +89,8 @@ export function OfficeHoursEditor({
     if (typeof value === 'string' && value.trim() !== '') {
         return (
             <div className="space-y-3">
-                <div className="space-y-2 rounded-lg border border-hairline bg-muted/40 p-4">
-                    <Text as="p" variant="caption-strong" color="foreground">
+                <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-4">
+                    <Text as="p" variant="label" color="foreground">
                         Jadwal lama masih berupa teks
                     </Text>
                     <Text
@@ -137,9 +137,9 @@ export function OfficeHoursEditor({
                 return (
                     <div
                         key={key}
-                        className="grid gap-3 rounded-lg border border-hairline p-4 lg:grid-cols-[7rem_1fr_1fr_12rem] lg:items-center lg:gap-4"
+                        className="grid gap-3 rounded-lg border border-border p-4 lg:grid-cols-[7rem_1fr_1fr_12rem] lg:items-center lg:gap-4"
                     >
-                        <Text as="p" variant="body-strong" color="foreground">
+                        <Text as="p" variant="heading-sm" color="foreground">
                             {label}
                         </Text>
 

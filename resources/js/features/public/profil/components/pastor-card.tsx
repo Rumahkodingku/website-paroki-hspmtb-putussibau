@@ -14,7 +14,7 @@ export function PastorCard({ pastor }: { pastor: PublicPastor }) {
                     src={pastor.photo}
                     alt={pastor.photo_alt ?? displayName}
                     loading="lazy"
-                    className="aspect-4/5 w-full max-w-40 rounded-lg border border-hairline object-cover sm:w-40"
+                    className="aspect-4/5 w-full max-w-40 rounded-lg border border-border object-cover sm:w-40"
                 />
             ) : null}
 
@@ -24,7 +24,7 @@ export function PastorCard({ pastor }: { pastor: PublicPastor }) {
                         {displayName}
                     </Text>
                     {pastor.position_label ? (
-                        <Text as="p" variant="caption-strong" color="danger">
+                        <Text as="p" variant="label" color="danger">
                             {pastor.position_label}
                             {pastor.start_year
                                 ? ` · sejak ${pastor.start_year}`

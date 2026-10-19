@@ -386,22 +386,42 @@ feature; two or more makes it app-level:
 | `text-link.tsx` | three auth pages | `components/` |
 | `text.tsx` | every text element outside `components/ui/` | `components/` |
 | `media-upload-field.tsx` | the article, activity, board member, pastor and community forms | `components/` |
+| `article-card.tsx` | Berita and Beranda (Phase 9A) | `components/` |
+| `event-card.tsx` | Agenda and Beranda (Phase 9A) | `components/` |
+| `next-mass-card.tsx` | Jadwal Misa and Beranda (Phase 9A) | `components/` |
+| `contact-map.tsx` | Kontak and Beranda (Phase 9A) | `components/` |
+| `masonry-grid.tsx` | Beranda and Galeri (D-75) | `components/` |
 
 **`components/shared/` is not created yet.** It only means something once two or
 more features need the same thing, and Part A says a directory is created when it
 has a first file. `types/` holds only the types more than one feature needs, so
 that deleting a feature deletes its contract along with it.
 
+**DESIGN-v2 domain names are roles, not file names.** `DESIGN-v2.md` §14 names
+seventeen domain components; the files keep their existing names and the roles
+are mapped instead (D-72 §3). So `DESIGN-v2.md` asking for `NewsCard` means
+`components/article-card.tsx`, `UpcomingMassPanel` means
+`components/next-mass-card.tsx`, `ParishHero` means
+`features/public/beranda/components/home-hero.tsx`, and `QuickAccessBar` means
+`home-quick-links.tsx`. Only genuinely new components take a v2 name.
+
 ### 1.2 Typography
 
 **`text.tsx` owns the choice of typography; `as` owns the choice of element.**
 The two are independent, and `as` never changes the variant.
 
-`variant` maps the sixteen `--text-*` tokens in `resources/css/app.css` onto
-role names. `h1`…`h6` are mapped onto display steps DESIGN.md already defines —
-`h1` is `display-lg`, `h2` is `display-md`, `h3` is `tagline`, and so on — rather
-than given tokens of their own, because the document never defines heading
-levels. There is no `size` prop; the token scale is not an API to route around.
+`variant` maps the eleven `--text-*` steps in `resources/css/app.css` onto role
+names, per `DESIGN-v2.md` (D-72): `display-xl`, `display-lg`, `display-md`,
+`heading-lg`, `heading-md`, `heading-sm`, `body-lg`, `body`, `body-sm`, `label`
+and `fine-print`. `h1`…`h6` are mapped onto those steps rather than given tokens
+of their own — `h1` is `display-lg`, `h2` is `display-md`, `h3` is `heading-lg`,
+and so on. There is no `size` prop; the token scale is not an API to route
+around.
+
+DESIGN-v2 names a `text-body` colour, but the project already uses `--text-body`
+as a font **size**; the two would collide in Tailwind v4. The body colour
+therefore has no `text-body` utility — body copy uses `text-foreground` or
+`text-muted-foreground`. See D-72 §4.
 
 Default element is derived from the variant: headings and `blockquote` render
 their own tag, everything else is a `span`. That is why `<Text variant="h3">`

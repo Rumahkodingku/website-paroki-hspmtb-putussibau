@@ -24,7 +24,7 @@ export function ListPagination({ meta, previous, next, className }: Props) {
                 className,
             )}
         >
-            <Text as="p" variant="caption" color="muted">
+            <Text as="p" variant="body-sm" color="muted">
                 Halaman {meta.current_page} dari {meta.last_page} · {meta.total}{' '}
                 data
             </Text>
@@ -36,7 +36,7 @@ export function ListPagination({ meta, previous, next, className }: Props) {
                         preserveScroll
                         preserveState
                         aria-label="Halaman sebelumnya"
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-hairline hover:bg-accent focus-visible:border-primary"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-border hover:bg-accent focus-visible:border-primary"
                     >
                         <ChevronLeft aria-hidden="true" className="size-4" />
                     </Link>
@@ -62,7 +62,7 @@ export function ListPagination({ meta, previous, next, className }: Props) {
                                 'inline-flex h-11 min-w-11 items-center justify-center rounded-md border px-3 text-sm',
                                 link.active
                                     ? 'border-primary bg-primary text-primary-foreground'
-                                    : 'border-hairline hover:bg-accent',
+                                    : 'border-border hover:bg-accent',
                             )}
                         >
                             {link.label}
@@ -76,7 +76,7 @@ export function ListPagination({ meta, previous, next, className }: Props) {
                         preserveScroll
                         preserveState
                         aria-label="Halaman berikutnya"
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-hairline hover:bg-accent focus-visible:border-primary"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-border hover:bg-accent focus-visible:border-primary"
                     >
                         <ChevronRight aria-hidden="true" className="size-4" />
                     </Link>

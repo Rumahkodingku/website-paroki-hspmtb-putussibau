@@ -86,12 +86,12 @@ export default function Index({
             sortKey: 'title',
             cell: ({ row }) => (
                 <div className="space-y-1">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.title}
                     </Text>
                     <div className="flex flex-wrap items-center gap-2">
                         {row.original.category ? (
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {row.original.category.name}
                             </Text>
                         ) : null}
@@ -113,7 +113,7 @@ export default function Index({
             id: 'file',
             header: 'Berkas',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.extension.toUpperCase()} ·{' '}
                     {formatBytes(row.original.file_size)}
                 </Text>
@@ -167,7 +167,7 @@ export default function Index({
                             target="_blank"
                             rel="noreferrer"
                             aria-label="Pratinjau dokumen"
-                            className="cursor-pointer rounded-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="cursor-pointer rounded-sm text-primary-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             <Eye className="size-4" aria-hidden="true" />
                         </a>

@@ -1,144 +1,89 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
-import { ParishCard, ParishCardContent } from '@/components/parish-card';
-import { PublicSection } from '@/components/public-section';
-import { Text } from '@/components/text';
-import { Button } from '@/components/ui/button';
-import { dashboard, login } from '@/routes';
-import { index as jadwalMisa } from '@/routes/jadwal-misa';
+import { usePage } from '@inertiajs/react';
+import { Seo } from '@/components/seo';
 import type { SharedProps } from '@/types';
 import { HomeContactSection } from '../components/home-contact-section';
+import { HomeAgendaSection } from '../components/home-agenda-section';
+import { HomeDevotionSection } from '../components/home-devotion-section';
+import { HomeGallerySection } from '../components/home-gallery-section';
+import { HomeHero } from '../components/home-hero';
+import { HomeNewsSection } from '../components/home-news-section';
+import { HomeNextMassSection } from '../components/home-next-mass-section';
+import { HomeQuickLinks } from '../components/home-quick-links';
+import { HomeServicesSection } from '../components/home-services-section';
+import type { HomepageProps } from '../types';
 
-/*
- * Guest entry point.
+/**
+ * The public homepage.
  *
- * This is still the Phase 01 foundation page, not the finished homepage. PRD 13
- * Fase 4 owns the real Beranda: hero slider, announcement bar, next-mass
- * resolver, latest news, upcoming agenda and the rest, all of which need tables
- * that do not exist yet.
+ * The page is deliberately a composition, not a data owner. The controller
+ * decides what each block may see; this file decides how the blocks sit next to
+ * each other. Every section that has no data returns null on its own, so the
+ * page never leaves a heading above an empty region.
  *
- * Phase 03 changed the markup, not the content. The hand-written container,
- * section and card classes are replaced by the shared public components, so this
- * page is now a real exercise of the foundation rather than a fourth place that
- * spells out max-w-7xl and px-4 on its own. Every [ISI: ...] placeholder and the
- * "Selamat Datang" title stay exactly as they were: tests/e2e/public.spec.ts
- * asserts on that title, and DESIGN.md forbids inventing parish content.
+ * The layout alternates surfaces and shapes so the page does not read as one
+ * card grid repeated: full-bleed photograph, divided quick links, a soft mass
+ * band, editorial news cards, a two-column agenda, a navy reflection, a list of
+ * services, a photographic strip, then the contact block.
  */
-export default function Welcome() {
-    // Typed, not usePage() bare: an untyped call makes `contact` an `any`, so
-    // the HomeContactSection prop would never be checked against
-    // ContactDetails. Same as features/public/kontak/pages/index.tsx.
-    const { auth, contact } = usePage<SharedProps>().props;
+export default function Beranda({
+    nextMass,
+    news,
+    events,
+    devotion,
+    services,
+    galleryPhotos,
+    galleryIllustrations,
+    hero,
+    sections,
+}: HomepageProps) {
+    const { contact, displayTimezone, identity, seo } =
+        usePage<SharedProps>().props;
 
     return (
         <>
-            <Head title="Selamat Datang" />
+            <Seo
+                title={seo.title ?? identity.shortName ?? 'Beranda'}
+                description={
+                    seo.description ??
+                    hero.description ??
+                    identity.shortDescription
+                }
+                ogImage={seo.ogImage ?? hero.ogImage}
+                ogType="website"
+            />
 
-            <PublicSection>
-                <div className="flex flex-col gap-8">
-                    <section className="space-y-6">
-                        <Text as="p" variant="caption-strong" color="danger">
-                            Paroki Hati Santa Perawan Maria Tak Bernoda
-                        </Text>
+            <HomeHero hero={hero} identity={identity} />
 
-                        {/*
-                            variant h1 rather than display-md: this is the
-                            page's h1 and the largest heading the public site
-                            uses. display-md is the section step, and using it
-                            for both is what made every h1, h2 and h3 the same
-                            size. text-balance comes with the variant - a
-                            one-sentence welcome that breaks badly reads as a
-                            bug.
-                        */}
-                        <Text as="h1" variant="h1" className="max-w-3xl">
-                            [ISI: kalimat sambutan paroki]
-                        </Text>
+            <HomeQuickLinks />
 
-                        <Text
-                            as="p"
-                            variant="body"
-                            color="muted"
-                            className="max-w-2xl"
-                        >
-                            [ISI: ringkasan singkat siapa kami dan mengapa situs
-                            ini ada. Dipilih agar pengunjung baru memahami
-                            sebelum menjelajah.]
-                        </Text>
+            <HomeNextMassSection
+                nextMass={nextMass}
+                displayTimezone={displayTimezone}
+            />
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            {auth.user ? (
-                                <Button asChild size="lg">
-                                    <Link href={dashboard()}>
-                                        Dashboard
-                                        <ArrowRight />
-                                    </Link>
-                                </Button>
-                            ) : (
-                                /*
-                                    No Register link: PRD AUTH-R2 forbids public
-                                    registration, so no such route exists.
-                                    See docs/DECISIONS.md D-19.
-                                */
-                                <Button asChild size="lg">
-                                    <Link href={login()}>Masuk</Link>
-                                </Button>
-                            )}
+            <HomeNewsSection news={news} displayTimezone={displayTimezone} />
 
-                            {/*
-                                Used to be an empty-fragment href in Phase 01,
-                                which is navigation to nowhere: the browser
-                                resolves it to the current page, so the visitor
-                                stays put and has no reason to think the click
-                                failed. /jadwal-misa exists as of Phase 03, so
-                                this points at it. The label stays bracketed
-                                because the schedule itself still has to come
-                                from the parish.
-                            */}
-                            <Button asChild size="lg" variant="outline">
-                                <Link href={jadwalMisa()}>
-                                    [ISI: tautan jadwal misa]
-                                </Link>
-                            </Button>
-                        </div>
-                    </section>
+            <HomeAgendaSection
+                events={events}
+                displayTimezone={displayTimezone}
+            />
 
-                    <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {[
-                            { label: 'Jadwal Misa', value: '[ISI: jadwal]' },
-                            { label: 'Berita', value: '[ISI: berita terbaru]' },
-                            { label: 'Agenda', value: '[ISI: agenda]' },
-                            {
-                                label: 'Pelayanan',
-                                value: '[ISI: layanan pastorat]',
-                            },
-                        ].map((item) => (
-                            <ParishCard key={item.label}>
-                                <ParishCardContent className="flex flex-col gap-2">
-                                    <Text
-                                        as="p"
-                                        variant="caption-strong"
-                                        color="muted"
-                                    >
-                                        {item.label}
-                                    </Text>
-                                    <Text
-                                        as="p"
-                                        variant="body"
-                                        color="foreground"
-                                    >
-                                        {item.value}
-                                    </Text>
-                                </ParishCardContent>
-                            </ParishCard>
-                        ))}
-                    </section>
+            <HomeDevotionSection
+                devotion={devotion}
+                enabled={sections.devotion}
+                displayTimezone={displayTimezone}
+            />
 
-                    <Text as="p" variant="fine-print" color="muted">
-                        Halaman ini adalah placeholder fondasi. Situs publik
-                        lengkap dibangun pada phase Beranda berikutnya.
-                    </Text>
-                </div>
-            </PublicSection>
+            <HomeServicesSection
+                services={services}
+                enabled={sections.services}
+            />
+
+            <HomeGallerySection
+                galleryPhotos={galleryPhotos}
+                galleryIllustrations={galleryIllustrations}
+                enabled={sections.gallery}
+            />
 
             <HomeContactSection contact={contact} />
         </>

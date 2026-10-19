@@ -29,14 +29,14 @@ export function ScheduleNoticeBanner({ notices }: Props) {
             data-test="schedule-notice-banner"
             className="space-y-4 rounded-lg border border-primary/40 bg-primary/5 p-6"
         >
-            <Text as="h2" variant="h3" className="text-primary">
+            <Text as="h2" variant="h3" className="text-primary-on-surface">
                 Pemberitahuan Perubahan Jadwal
             </Text>
 
             <ul className="space-y-4">
                 {notices.map((notice) => (
                     <li key={notice.id} className="space-y-1">
-                        <Text as="p" variant="body-strong">
+                        <Text as="p" variant="heading-sm">
                             {notice.title}
                         </Text>
                         <Text as="p" variant="body">

@@ -33,7 +33,7 @@ import { Text } from '@/components/text';
  * actually see.
  */
 export const LabelAcceptsHtmlFor = (
-    <Text as="label" variant="caption-strong" htmlFor="nama">
+    <Text as="label" variant="label" htmlFor="nama">
         Nama
     </Text>
 );
@@ -76,14 +76,14 @@ export const DivRejectsType = <Text as="div" type="button" />;
 /*
  * The variant, colour and override vocabularies are closed.
  *
- * There is no `success` and no `warning` colour: DESIGN.md has no green or
+ * There is no `success` and no `warning` colour: DESIGN-v2 has no green or
  * amber in its palette, and D-22 removed the text-green-600 success messages
  * for that reason. A closed union is what keeps them from being reintroduced
  * through a convenient-looking escape hatch.
  */
 
-// @ts-expect-error no such variant; the scale is the sixteen DESIGN.md tokens.
-export const RejectsUnknownVariant = <Text variant="display-xl" />;
+// @ts-expect-error no such variant; the scale is the eleven DESIGN-v2 steps.
+export const RejectsUnknownVariant = <Text variant="hero-display" />;
 
 // @ts-expect-error no success colour exists in this design system.
 export const RejectsSuccessColour = <Text color="success" />;

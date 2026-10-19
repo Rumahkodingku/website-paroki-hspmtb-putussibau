@@ -28,7 +28,7 @@ export default function AuthCardLayout({
                     className="flex items-center gap-2 self-center font-medium"
                 >
                     <div className="flex h-9 w-9 items-center justify-center">
-                        <AppLogoIcon className="size-9 fill-current text-black dark:text-white" />
+                        <AppLogoIcon className="size-9 fill-current text-foreground" />
                     </div>
                 </Link>
 
@@ -46,7 +46,7 @@ export default function AuthCardLayout({
                             */}
                             <CardTitle className="text-xl">{title}</CardTitle>
                             <CardDescription>
-                                <Text as="span" variant="caption">
+                                <Text as="span" variant="body-sm">
                                     {description}
                                 </Text>
                             </CardDescription>

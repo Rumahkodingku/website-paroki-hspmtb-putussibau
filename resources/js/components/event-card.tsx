@@ -3,7 +3,34 @@ import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/text';
 import { formatWibDate, formatWibTime } from '@/lib/datetime';
 import { show as eventShow } from '@/routes/agenda';
-import type { PublicEvent } from '../types';
+
+/**
+ * One activity, as the public agenda and homepage cards need it.
+ *
+ * The type lives beside the component because two features render it now; a
+ * feature's own resource shape is structurally compatible.
+ */
+export type EventCardData = {
+    id: number;
+    title: string;
+    slug: string;
+    summary: string | null;
+    start_at: string;
+    end_at: string | null;
+    is_all_day: boolean;
+    location_name: string | null;
+    location_url: string | null;
+    poster: string | null;
+    poster_alt: string | null;
+    status: 'scheduled' | 'cancelled' | 'postponed';
+    status_label: string;
+    category: {
+        id: number;
+        name: string;
+        slug: string;
+        color_value: string;
+    } | null;
+};
 
 /**
  * One activity, as a card.
@@ -21,7 +48,7 @@ export function EventCard({
     displayTimezone,
     headingLevel = 'h3',
 }: {
-    event: PublicEvent;
+    event: EventCardData;
     displayTimezone: string;
     headingLevel?: 'h2' | 'h3';
 }) {
@@ -29,7 +56,7 @@ export function EventCard({
 
     return (
         <article
-            className={`group relative flex flex-col gap-3 border-t border-hairline pt-5 ${
+            className={`group relative flex flex-col gap-3 border-t border-border pt-5 ${
                 isNotHappening ? 'opacity-70' : ''
             }`}
         >
@@ -43,10 +70,10 @@ export function EventCard({
              */}
             <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
-                    <Text as="p" variant="caption-strong" color="brand">
+                    <Text as="p" variant="label" color="brand">
                         {formatWibDate(event.start_at, displayTimezone)}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {event.is_all_day
                             ? 'Sepanjang hari'
                             : formatWibTime(event.start_at)}
@@ -74,7 +101,7 @@ export function EventCard({
             </Text>
 
             {event.location_name ? (
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {event.location_name}
                 </Text>
             ) : null}
@@ -88,7 +115,7 @@ export function EventCard({
             <Link
                 href={eventShow(event.slug)}
                 prefetch
-                className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="rounded-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 Detail kegiatan
                 <span className="sr-only">: {event.title}</span>

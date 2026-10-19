@@ -39,7 +39,7 @@ export default function Struktur({ periods }: Props) {
                             as="p"
                             variant="body"
                             color="muted"
-                            className="rounded-lg border border-dashed border-hairline p-6"
+                            className="rounded-lg border border-dashed border-border p-6"
                         >
                             Struktur kepengurusan belum dipublikasikan.
                         </Text>
@@ -52,11 +52,7 @@ export default function Struktur({ periods }: Props) {
                                 <Text as="h2" variant="h3" id="periode-aktif">
                                     {active.name}
                                 </Text>
-                                <Text
-                                    as="p"
-                                    variant="caption-strong"
-                                    color="danger"
-                                >
+                                <Text as="p" variant="label" color="danger">
                                     Periode aktif · {active.start_year ?? '?'}–
                                     {active.end_year ?? 'sekarang'}
                                 </Text>
@@ -77,7 +73,7 @@ export default function Struktur({ periods }: Props) {
                     )}
 
                     {archive.length > 0 ? (
-                        <section className="space-y-8 border-t border-divider-soft pt-10">
+                        <section className="space-y-8 border-t border-border-subtle pt-10">
                             <Text as="h2" variant="h3">
                                 Arsip periode
                             </Text>
@@ -90,7 +86,7 @@ export default function Struktur({ periods }: Props) {
                                         </Text>
                                         <Text
                                             as="p"
-                                            variant="caption"
+                                            variant="body-sm"
                                             color="muted"
                                         >
                                             {period.start_year ?? '?'}–

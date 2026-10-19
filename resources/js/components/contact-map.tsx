@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
  * destination, and the embed URL has already been through the Google Maps host
  * allowlist on the server. The frame is lazy and given a title so it is not an
  * unlabelled region to a screen reader.
+ *
+ * Lifted to components/ in Phase 9A: the contact page and the homepage contact
+ * block both render it, and a feature may not import another feature.
  */
 export function ContactMap({
     embedUrl,
@@ -23,7 +26,7 @@ export function ContactMap({
     return (
         <div className="space-y-4">
             {embedUrl ? (
-                <div className="aspect-video w-full overflow-hidden rounded-lg border border-hairline bg-muted">
+                <div className="aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
                     <iframe
                         src={embedUrl}
                         title="Peta lokasi paroki"

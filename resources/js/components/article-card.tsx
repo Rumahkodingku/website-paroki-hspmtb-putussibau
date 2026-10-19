@@ -3,7 +3,34 @@ import { ArrowRight } from 'lucide-react';
 import { Text } from '@/components/text';
 import { show as post } from '@/routes/berita';
 import { formatWibDate } from '@/lib/datetime';
-import type { PublicPost } from '../types';
+
+/**
+ * One article, as the public list and homepage cards need it.
+ *
+ * The type lives beside the component rather than in a feature's types file:
+ * two features render this card now, and ARCHITECTURE.md Part B section 4
+ * forbids one feature reaching into another. A feature's own resource shape is
+ * structurally compatible with this one.
+ */
+export type ArticleCardData = {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    image: string | null;
+    image_alt: string | null;
+    /** Fallback illustration, not a photograph of the parish (D-71). */
+    image_is_illustration?: boolean;
+    /** Sent only for locally committed illustrations. */
+    image_srcset?: string;
+    image_sizes?: string;
+    category: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
+    published_at: string | null;
+};
 
 /**
  * DESIGN.md `NewsCard`: "Image-first editorial card with date, category, title,
@@ -27,30 +54,39 @@ export function ArticleCard({
     displayTimezone,
     headingLevel = 'h3',
 }: {
-    article: PublicPost;
+    article: ArticleCardData;
     displayTimezone: string;
     headingLevel?: 'h2' | 'h3';
 }) {
     return (
-        <article className="group bg-canvas relative overflow-hidden rounded-lg border border-hairline transition-colors focus-within:border-primary hover:border-primary">
+        <article className="group relative overflow-hidden rounded-lg border border-border bg-card transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {article.image ? (
-                <img
-                    src={article.image}
-                    alt={article.image_alt ?? ''}
-                    loading="lazy"
-                    className="aspect-16/10 w-full rounded-t-lg object-cover"
-                />
+                <>
+                    <img
+                        src={article.image}
+                        alt={article.image_alt ?? ''}
+                        srcSet={article.image_srcset}
+                        sizes={article.image_sizes}
+                        loading="lazy"
+                        className="aspect-16/10 w-full rounded-t-lg object-cover"
+                    />
+                    {article.image_is_illustration ? (
+                        <span className="absolute top-3 left-3 rounded-pill bg-gold-soft px-2.5 py-1 text-fine-print font-medium text-navy-deep">
+                            Ilustrasi
+                        </span>
+                    ) : null}
+                </>
             ) : null}
 
             <div className="space-y-3 p-6">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     {article.category ? (
-                        <Text as="p" variant="caption-strong" color="brand">
+                        <Text as="p" variant="label" color="brand">
                             {article.category.name}
                         </Text>
                     ) : null}
                     {article.published_at ? (
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {formatWibDate(
                                 article.published_at,
                                 displayTimezone,
@@ -79,7 +115,7 @@ export function ArticleCard({
                  */}
                 <span
                     aria-hidden="true"
-                    className="inline-flex items-center gap-2 text-sm text-primary transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="inline-flex items-center gap-2 text-sm text-primary-on-surface transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                     Baca selengkapnya
                     <ArrowRight className="size-4" />
@@ -94,7 +130,7 @@ export function ArticleCard({
             <Link
                 href={post(article.slug)}
                 prefetch
-                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 <span className="sr-only">Baca artikel: {article.title}</span>
             </Link>

@@ -5,13 +5,13 @@ import type { PublicHistoryItem } from '../types';
 /*
  * The history timeline.
  *
- * A vertical hairline with a marker per event; year-only events show the year
+ * A vertical border with a marker per event; year-only events show the year
  * and dated events show the full date. The marker is a shape, not a colour
  * alone, so the order survives a greyscale screenshot (roadmap 6A-82).
  */
 export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
     return (
-        <ol className="relative space-y-10 border-l border-hairline pl-6">
+        <ol className="relative space-y-10 border-l border-border pl-6">
             {items.map((item) => (
                 <li key={item.id} className="relative">
                     <span
@@ -19,7 +19,7 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                         className="absolute top-1.5 -left-[calc(1.5rem+5px)] size-2.5 rounded-full border-2 border-primary bg-background"
                     />
 
-                    <Text as="p" variant="caption-strong" color="danger">
+                    <Text as="p" variant="label" color="danger">
                         {item.date ?? item.year ?? 'Tahun tidak diketahui'}
                     </Text>
 
@@ -32,7 +32,7 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                             src={item.image}
                             alt={item.image_alt ?? ''}
                             loading="lazy"
-                            className="mt-4 w-full max-w-md rounded-lg border border-hairline object-cover"
+                            className="mt-4 w-full max-w-md rounded-lg border border-border object-cover"
                         />
                     ) : null}
 

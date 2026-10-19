@@ -91,10 +91,10 @@ export default function Index({
             sortKey: 'title',
             cell: ({ row }) => (
                 <div className="flex flex-col gap-1">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.title}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {row.original.author_name}
                     </Text>
                 </div>
@@ -130,7 +130,7 @@ export default function Index({
                         displayTimezone,
                     )
                 ) : (
-                    <Text variant="caption" color="muted">
+                    <Text variant="body-sm" color="muted">
                         Belum ada tanggal
                     </Text>
                 ),
@@ -152,7 +152,7 @@ export default function Index({
                                 <Link
                                     href={previewPost(row.original.id)}
                                     prefetch
-                                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                    className="rounded-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 >
                                     <Eye className="mr-1 inline h-4 w-4" />
                                 </Link>
@@ -204,7 +204,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -219,7 +219,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ kategori: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {categoryOptions.map((option) => (
                             <option key={option.value} value={option.value}>

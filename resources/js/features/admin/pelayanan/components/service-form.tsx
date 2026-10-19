@@ -164,12 +164,12 @@ export function ServiceForm({
     const isCreate = mode === 'create';
 
     const header = (
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-5">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
             <div className="space-y-1">
                 <Text as="h3" variant="h3">
                     {isCreate ? copy.create_title : copy.edit_title}
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {isCreate ? copy.create_description : copy.edit_description}
                 </Text>
             </div>
@@ -345,7 +345,7 @@ function TabTrigger({
         <TabsTrigger
             value={value}
             disabled={disabled}
-            className="rounded-md border-none px-4 py-2 text-sm data-[state=active]:border-hairline data-[state=active]:bg-accent data-[state=active]:text-primary data-[state=active]:shadow-none"
+            className="rounded-md border-none px-4 py-2 text-sm data-[state=active]:border-border data-[state=active]:bg-accent data-[state=active]:text-primary-on-surface data-[state=active]:shadow-none"
         >
             {children}
         </TabsTrigger>

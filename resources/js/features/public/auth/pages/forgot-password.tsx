@@ -29,7 +29,7 @@ export default function ForgotPassword({ status }: Props) {
             {status && (
                 <Text
                     as="p"
-                    variant="caption"
+                    variant="body-sm"
                     weight="medium"
                     color="brand"
                     align="center"
@@ -77,12 +77,12 @@ export default function ForgotPassword({ status }: Props) {
                     The line inherits its size from the Text, and the TextLink
                     inside it inherits too - TextLink carries no size of its own,
                     so a caller that wanted one had been reaching for a Tailwind
-                    scale step to add to the anchor. `caption` is the same 14px
+                    scale step to add to the anchor. `body-sm` is the same 14px
                     this was at as text-sm.
                 */}
                 <Text
                     as="p"
-                    variant="caption"
+                    variant="body-sm"
                     color="muted"
                     align="center"
                     className="space-x-1"

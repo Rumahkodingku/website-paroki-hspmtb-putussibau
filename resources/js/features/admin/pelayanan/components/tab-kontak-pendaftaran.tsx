@@ -60,7 +60,7 @@ export function TabKontakPendaftaran({
                 <Text as="h3" variant="h3">
                     Kontak & Pendaftaran
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     Lengkapi informasi kontak dan pendaftaran pelayanan ini.
                     Informasi ini akan ditampilkan di halaman pelayanan
                 </Text>
@@ -72,7 +72,7 @@ export function TabKontakPendaftaran({
                         <Text as="h3" variant="h3">
                             {copy.registration_title}
                         </Text>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {copy.registration_description}
                         </Text>
                     </div> */}
@@ -114,7 +114,7 @@ export function TabKontakPendaftaran({
                             </a>
                         </Button>
                     ) : (
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {form.data.form_url === ''
                                 ? copy.not_using_form
                                 : copy.invalid_url_notice}
@@ -178,7 +178,7 @@ export function TabKontakPendaftaran({
                             <Text as="h3" variant="h3">
                                 {copy.contact_person_title}
                             </Text>
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {copy.contact_person_description}
                             </Text>
                         </div> */}
@@ -216,7 +216,7 @@ export function TabKontakPendaftaran({
                         </Field>
                     </section>
 
-                    <section className="space-y-4 rounded-lg border border-hairline bg-muted p-5">
+                    <section className="space-y-4 rounded-lg border border-border bg-muted p-5">
                         <div className="flex items-center justify-between gap-4">
                             <Label htmlFor="service-emergency">
                                 {labels.is_emergency}
@@ -238,12 +238,12 @@ export function TabKontakPendaftaran({
                             />
                         </div>
 
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {hints.is_emergency}
                         </Text>
 
                         {form.data.is_emergency ? (
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {copy.emergency_no_url_notice}
                             </Text>
                         ) : null}
@@ -255,22 +255,22 @@ export function TabKontakPendaftaran({
                         </Text>
                         <ul className="list-disc space-y-1 pl-5">
                             <li>
-                                <Text as="span" variant="caption" color="muted">
+                                <Text as="span" variant="body-sm" color="muted">
                                     {copy.note_form_optional}
                                 </Text>
                             </li>
                             <li>
-                                <Text as="span" variant="caption" color="muted">
+                                <Text as="span" variant="body-sm" color="muted">
                                     {copy.note_test_link}
                                 </Text>
                             </li>
                             <li>
-                                <Text as="span" variant="caption" color="muted">
+                                <Text as="span" variant="body-sm" color="muted">
                                     {copy.note_manual_sync}
                                 </Text>
                             </li>
                             <li>
-                                <Text as="span" variant="caption" color="muted">
+                                <Text as="span" variant="body-sm" color="muted">
                                     {copy.note_contact_consent}
                                 </Text>
                             </li>

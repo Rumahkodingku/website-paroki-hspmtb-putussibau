@@ -26,7 +26,7 @@ export default function AppLogo() {
                 */}
                 <Text
                     as="span"
-                    variant="body-strong"
+                    variant="heading-sm"
                     weight="semibold"
                     leading="tight"
                     truncate

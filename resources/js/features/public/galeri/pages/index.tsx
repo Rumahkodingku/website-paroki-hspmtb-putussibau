@@ -65,7 +65,7 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
                                 onChange={(event) =>
                                     applyYear(event.target.value)
                                 }
-                                className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                                className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                             >
                                 <option value="">Semua tahun</option>
                                 {years.map((year) => (
@@ -84,15 +84,15 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
                             ))}
                         </div>
                     ) : (
-                        <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-                            <Text as="p" variant="body-strong">
+                        <div className="rounded-lg border border-dashed border-border p-10 text-center">
+                            <Text as="p" variant="heading-sm">
                                 {isFiltered
                                     ? 'Tidak ada album pada tahun ini.'
                                     : 'Belum ada album yang dipublikasikan.'}
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 color="muted"
                                 className="mt-1"
                             >

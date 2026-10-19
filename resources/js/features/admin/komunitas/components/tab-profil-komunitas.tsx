@@ -44,7 +44,7 @@ export function TabProfilKomunitas({ form, labels }: Props) {
                         label={labels.vision ?? 'Visi'}
                     />
                     {form.errors.vision ? (
-                        <Text as="p" variant="caption" color="danger">
+                        <Text as="p" variant="body-sm" color="danger">
                             {form.errors.vision}
                         </Text>
                     ) : null}
@@ -61,7 +61,7 @@ export function TabProfilKomunitas({ form, labels }: Props) {
                         label={labels.mission ?? 'Misi'}
                     />
                     {form.errors.mission ? (
-                        <Text as="p" variant="caption" color="danger">
+                        <Text as="p" variant="body-sm" color="danger">
                             {form.errors.mission}
                         </Text>
                     ) : null}

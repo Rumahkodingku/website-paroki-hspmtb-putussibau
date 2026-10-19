@@ -32,19 +32,19 @@ export function ScheduleNoticeCards({
             {rows.map((notice) => (
                 <li
                     key={notice.id}
-                    className="rounded-lg border border-hairline p-4"
+                    className="rounded-lg border border-border p-4"
                 >
                     <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {notice.title}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {scopeLabel(notice)}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {formatWibDateTime(
                                     notice.starts_at,
                                     displayTimezone,
@@ -52,11 +52,7 @@ export function ScheduleNoticeCards({
                             </Text>
 
                             {notice.target_deleted ? (
-                                <Text
-                                    as="p"
-                                    variant="micro-legal"
-                                    color="muted"
-                                >
+                                <Text as="p" variant="fine-print" color="muted">
                                     Target terhapus
                                 </Text>
                             ) : null}

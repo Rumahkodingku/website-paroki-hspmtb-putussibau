@@ -25,13 +25,13 @@ export function areaColumns(
                     className={
                         row.original.parent_id === null
                             ? 'space-y-0.5'
-                            : 'space-y-0.5 border-l-2 border-hairline ps-4'
+                            : 'space-y-0.5 border-l-2 border-border ps-4'
                     }
                 >
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.name}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {row.original.slug}
                     </Text>
                 </div>

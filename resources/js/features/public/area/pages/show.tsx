@@ -44,7 +44,7 @@ export default function StasiLingkunganShow({ area }: Props) {
                     {area.description ? (
                         <Text
                             as="p"
-                            variant="lead"
+                            variant="body-lg"
                             color="muted"
                             className="max-w-3xl whitespace-pre-line"
                         >
@@ -56,14 +56,14 @@ export default function StasiLingkunganShow({ area }: Props) {
                 {area.parent ? (
                     <Text
                         as="p"
-                        variant="caption"
+                        variant="body-sm"
                         color="muted"
                         className="mt-4"
                     >
                         {area.parent.type_label}:{' '}
                         <Link
                             href={areaShow(area.parent.slug)}
-                            className="text-primary hover:underline"
+                            className="text-primary-on-surface hover:underline"
                         >
                             {area.parent.name}
                         </Link>
@@ -72,22 +72,22 @@ export default function StasiLingkunganShow({ area }: Props) {
 
                 <div className="mt-10 grid gap-6 md:grid-cols-2">
                     {area.leader_name ? (
-                        <div className="rounded-lg border border-hairline p-5">
-                            <Text as="p" variant="caption" color="muted">
+                        <div className="rounded-lg border border-border p-5">
+                            <Text as="p" variant="body-sm" color="muted">
                                 Ketua
                             </Text>
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {area.leader_name}
                             </Text>
                         </div>
                     ) : null}
 
                     {area.contact_phone ? (
-                        <div className="rounded-lg border border-hairline p-5">
-                            <Text as="p" variant="caption" color="muted">
+                        <div className="rounded-lg border border-border p-5">
+                            <Text as="p" variant="body-sm" color="muted">
                                 Kontak
                             </Text>
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {area.contact_phone}
                             </Text>
                         </div>
@@ -101,15 +101,15 @@ export default function StasiLingkunganShow({ area }: Props) {
                     which is the reason LocationInfo behaves the same way.
                 */}
                 {area.address || area.mapsUrl ? (
-                    <div className="mt-6 rounded-lg border border-hairline p-5">
-                        <Text as="p" variant="caption" color="muted">
+                    <div className="mt-6 rounded-lg border border-border p-5">
+                        <Text as="p" variant="body-sm" color="muted">
                             Alamat
                         </Text>
 
                         {area.address ? (
                             <Text
                                 as="p"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 className="whitespace-pre-line"
                             >
                                 {area.address}
@@ -122,7 +122,7 @@ export default function StasiLingkunganShow({ area }: Props) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 data-test="area-maps-link"
-                                className="mt-2 inline-flex items-center rounded-sm text-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                className="mt-2 inline-flex items-center rounded-sm text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                             >
                                 Buka di Google Maps
                             </a>
@@ -138,13 +138,13 @@ export default function StasiLingkunganShow({ area }: Props) {
                         {area.children.map((child) => (
                             <li
                                 key={child.id}
-                                className="rounded-lg border border-hairline bg-card p-5"
+                                className="rounded-lg border border-border bg-card p-5"
                             >
                                 <Link
                                     href={areaShow(child.slug)}
-                                    className="block focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                    className="block focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 >
-                                    <Text as="p" variant="body-strong">
+                                    <Text as="p" variant="heading-sm">
                                         {child.name}
                                     </Text>
                                 </Link>

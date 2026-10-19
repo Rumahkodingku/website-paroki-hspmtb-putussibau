@@ -18,11 +18,11 @@ export function DocumentCard({
     }).url;
 
     return (
-        <article className="flex h-full flex-col rounded-lg border border-hairline bg-card p-6">
+        <article className="flex h-full flex-col rounded-lg border border-border bg-card p-6">
             <div className="flex items-start gap-4">
                 <span
                     aria-hidden="true"
-                    className="flex size-11 shrink-0 items-center justify-center rounded-md bg-canvas-soft text-primary"
+                    className="flex size-11 shrink-0 items-center justify-center rounded-md bg-canvas-subtle text-primary-on-surface"
                 >
                     <FileText className="size-5" />
                 </span>
@@ -61,7 +61,7 @@ export function DocumentCard({
                 <div className="flex flex-wrap gap-x-2">
                     <dt className="sr-only">Format dan ukuran</dt>
                     <dd>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {document.extension.toUpperCase()} ·{' '}
                             {formatBytes(document.file_size)}
                         </Text>
@@ -69,13 +69,13 @@ export function DocumentCard({
                 </div>
 
                 {document.document_date ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Tanggal dokumen: {formatWibDate(document.document_date)}
                     </Text>
                 ) : null}
 
                 {document.version_label ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Versi: {document.version_label}
                     </Text>
                 ) : null}

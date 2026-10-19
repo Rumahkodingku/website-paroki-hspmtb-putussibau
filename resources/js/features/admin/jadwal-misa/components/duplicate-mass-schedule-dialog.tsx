@@ -59,7 +59,7 @@ export function DuplicateMassScheduleDialog({
                             placeholder="Pilih lokasi tujuan"
                         />
                         {errors?.location_id ? (
-                            <Text as="p" variant="caption" color="danger">
+                            <Text as="p" variant="body-sm" color="danger">
                                 {errors.location_id}
                             </Text>
                         ) : null}

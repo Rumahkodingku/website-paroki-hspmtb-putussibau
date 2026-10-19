@@ -64,7 +64,7 @@ function SortableHead<T extends RowData>({
                 type="button"
                 onClick={() => onSort(sortKey, next)}
                 aria-label={`Urutkan berdasarkan ${typeof label === 'string' ? label : 'kolom ini'}`}
-                className="-mx-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="-mx-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 {label}
 
@@ -170,7 +170,7 @@ export function TableEmpty({
 
 export function SortHint() {
     return (
-        <Text as="p" variant="caption" color="muted" className="sr-only">
+        <Text as="p" variant="body-sm" color="muted" className="sr-only">
             Klik nama kolom untuk mengurutkan daftar.
         </Text>
     );

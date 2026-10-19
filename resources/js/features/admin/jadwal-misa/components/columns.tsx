@@ -47,7 +47,7 @@ export function massScheduleColumns(
             header: 'Nama misa',
             sortKey: 'name',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.name}
                 </Text>
             ),
@@ -89,7 +89,7 @@ export function specialMassColumns(
             header: 'Judul',
             sortKey: 'title',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.title}
                 </Text>
             ),
@@ -165,7 +165,7 @@ export function scheduleNoticeColumns(
             header: 'Judul',
             sortKey: 'title',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.title}
                 </Text>
             ),
@@ -190,7 +190,7 @@ export function scheduleNoticeColumns(
                     <NoticeStatusBadge status={row.original.status} />
 
                     {row.original.target_deleted ? (
-                        <Text as="span" variant="micro-legal" color="muted">
+                        <Text as="span" variant="fine-print" color="muted">
                             Target terhapus
                         </Text>
                     ) : null}

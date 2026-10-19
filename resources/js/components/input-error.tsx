@@ -4,7 +4,7 @@ import { Text } from '@/components/text';
 /*
  * A validation message, and the only red text on an admin page.
  *
- * red-on-surface rather than text-destructive or text-primary: the brand red is
+ * primary-on-surface rather than text-destructive or text-primary-on-surface: the brand red is
  * correct for a fill and wrong for text on the dark canvas, where it measures
  * 2.28:1. See the token's own note in app.css and D-32.
  *
@@ -18,7 +18,7 @@ type InputErrorProps = ComponentProps<typeof Text<'p'>> & {
 
 export default function InputError({ message, ...props }: InputErrorProps) {
     return message ? (
-        <Text as="p" variant="caption" color="danger" {...props}>
+        <Text as="p" variant="body-sm" color="danger" {...props}>
             {message}
         </Text>
     ) : null;

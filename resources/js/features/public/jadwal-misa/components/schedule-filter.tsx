@@ -39,7 +39,7 @@ export function ScheduleFilter({
 
     return (
         <div
-            className="flex flex-wrap items-end gap-3 rounded-lg border border-hairline p-4 print:hidden"
+            className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4 print:hidden"
             data-test="schedule-filter"
         >
             <div className="space-y-2">
@@ -60,7 +60,7 @@ export function ScheduleFilter({
                             day,
                         })
                     }
-                    className="h-11 w-full min-w-44 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                    className="h-11 w-full min-w-44 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                 >
                     <option value="">Semua lokasi</option>
                     {locations.map((location) => (
@@ -86,7 +86,7 @@ export function ScheduleFilter({
                                 : null,
                         })
                     }
-                    className="h-11 w-full min-w-36 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                    className="h-11 w-full min-w-36 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                 >
                     <option value="">Semua hari</option>
                     {[0, 1, 2, 3, 4, 5, 6].map((value) => (
@@ -101,14 +101,14 @@ export function ScheduleFilter({
                 <button
                     type="button"
                     onClick={() => onChange({ location_id: null, day: null })}
-                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                     Reset filter
                 </button>
             ) : null}
 
             {hasFilter ? (
-                <Text as="p" variant="caption" color="muted" className="w-full">
+                <Text as="p" variant="body-sm" color="muted" className="w-full">
                     Filter aktif. Tautan di bilah alamat bisa dibagikan.
                 </Text>
             ) : null}

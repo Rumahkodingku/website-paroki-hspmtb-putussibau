@@ -92,7 +92,7 @@ export function TabBergabungKontak({ form, labels, hints }: Props) {
                     }
                 />
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {hints.show_contact}
                 </Text>
             </div>

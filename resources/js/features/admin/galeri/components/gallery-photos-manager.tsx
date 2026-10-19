@@ -16,7 +16,7 @@ import type { GalleryAlbumDetail, GalleryPhotoItem } from '../types';
 
 /*
  * The whole photo manager for one album: the uploader, the ordered grid, the
- * caption dialog and the two confirmations.
+ * body-sm dialog and the two confirmations.
  *
  * The order and the cover are held locally so a move or a cover pick is instant;
  * each is persisted by its own request when the admin asks. After a mutation the
@@ -170,7 +170,7 @@ export function GalleryPhotosManager({
                 <Text as="h3" variant="h3">
                     Tambah Foto
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {hints.sensitive ??
                         'Pastikan foto anak-anak atau data pribadi sudah mendapat izin sebelum diterbitkan.'}
                 </Text>
@@ -195,15 +195,15 @@ export function GalleryPhotosManager({
                 </div>
 
                 {photos.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-                        <Text as="p" variant="body-strong">
+                    <div className="rounded-lg border border-dashed border-border p-10 text-center">
+                        <Text as="p" variant="heading-sm">
                             {empty.photos ?? 'Belum ada foto di album ini.'}
                         </Text>
                     </div>
                 ) : (
                     <>
                         {dirty ? (
-                            <Text as="p" variant="caption" color="danger">
+                            <Text as="p" variant="body-sm" color="danger">
                                 {copy.reorder_hint ?? 'Urutan belum disimpan.'}
                             </Text>
                         ) : null}

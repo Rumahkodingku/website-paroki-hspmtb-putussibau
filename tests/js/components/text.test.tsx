@@ -12,8 +12,8 @@ import { Text } from '@/components/text';
  * the component under test proves only that the component agrees with itself.
  *
  * Where a class IS asserted it is asserted as a design-system token
- * (`text-caption`, `text-muted-foreground`), never as a Tailwind scale step,
- * for the reason public-primitives.test.tsx gives: DESIGN.md owns the visual
+ * (`text-body-sm`, `text-muted-foreground`), never as a Tailwind scale step,
+ * for the reason public-primitives.test.tsx gives: DESIGN-v2 owns the visual
  * values and is allowed to change them without breaking a caller.
  */
 
@@ -42,29 +42,31 @@ describe('Text', () => {
      */
     it('keeps both the typography token and the colour', () => {
         render(
-            <Text variant="caption" color="muted">
+            <Text variant="body-sm" color="muted">
                 Keduanya
             </Text>,
         );
 
         const element = screen.getByText('Keduanya');
 
-        expect(element).toHaveClass('text-caption');
+        expect(element).toHaveClass('text-body-sm');
         expect(element).toHaveClass('text-muted-foreground');
     });
 
     it.each([
-        ['hero', 'text-hero-display'],
+        ['hero', 'text-display-xl'],
+        ['display-xl', 'text-display-xl'],
         ['display-lg', 'text-display-lg'],
         ['display-md', 'text-display-md'],
-        ['lead', 'text-lead'],
-        ['lead-airy', 'text-lead-airy'],
-        ['tagline', 'text-tagline'],
-        ['body-strong', 'text-body-strong'],
-        ['caption-strong', 'text-caption-strong'],
-        ['nav', 'text-nav-link'],
+        ['heading-lg', 'text-heading-lg'],
+        ['heading-md', 'text-heading-md'],
+        ['heading-sm', 'text-heading-sm'],
+        ['body-lg', 'text-body-lg'],
+        ['body', 'text-body'],
+        ['body-sm', 'text-body-sm'],
+        ['label', 'text-label'],
+        ['nav', 'text-label'],
         ['fine-print', 'text-fine-print'],
-        ['micro-legal', 'text-micro-legal'],
     ] as const)('maps variant "%s" to its design token', (variant, token) => {
         render(<Text variant={variant}>Contoh</Text>);
 
@@ -72,18 +74,18 @@ describe('Text', () => {
     });
 
     /*
-     * DESIGN.md defines three display steps and never defines heading levels,
-     * so h1..h6 are mapped onto steps that already existed. Before this
-     * mapping h1, h2 and h3 all rendered at display-md, which meant a document
-     * outline carried no visual hierarchy at all.
+     * DESIGN-v2 defines display and heading steps and never defines heading
+     * levels, so h1..h6 are mapped onto steps that already exist: h1
+     * display-lg, h2 display-md, h3 heading-lg, h4 heading-md, h5/h6
+     * heading-sm.
      */
     it.each([
         ['h1', 1, 'text-display-lg'],
         ['h2', 2, 'text-display-md'],
-        ['h3', 3, 'text-tagline'],
-        ['h4', 4, 'text-body-strong'],
-        ['h5', 5, 'text-caption-strong'],
-        ['h6', 6, 'text-caption-strong'],
+        ['h3', 3, 'text-heading-lg'],
+        ['h4', 4, 'text-heading-md'],
+        ['h5', 5, 'text-heading-sm'],
+        ['h6', 6, 'text-heading-sm'],
     ] as const)(
         'renders variant "%s" as a level-%s heading',
         (variant, level, token) => {
@@ -128,7 +130,7 @@ describe('Text', () => {
         ['h2', true],
         ['h3', false],
         ['h4', false],
-        ['body-strong', false],
+        ['heading-sm', false],
     ] as const)('carries text-balance on %s: %s', (variant, balanced) => {
         render(<Text variant={variant}>Contoh</Text>);
 
@@ -173,7 +175,7 @@ describe('Text', () => {
         expect(quote).toHaveClass('border-s-4', 'border-primary', 'ps-4');
         expect(quote).toHaveClass('text-navy', 'italic');
         // Not optional: text-navy on the dark canvas measures 1.25:1.
-        expect(quote).toHaveClass('dark:text-navy-light');
+        expect(quote).toHaveClass('dark:text-navy-soft');
     });
 
     /*
@@ -206,7 +208,7 @@ describe('Text', () => {
     it('can render as a label bound to a form control', () => {
         render(
             <>
-                <Text as="label" variant="caption-strong" htmlFor="nama">
+                <Text as="label" variant="label" htmlFor="nama">
                     Nama
                 </Text>
                 <input id="nama" />
@@ -233,9 +235,9 @@ describe('Text', () => {
      * caller's class and the override would be silently ignored.
      */
     it('lets a caller className override the variant typography', () => {
-        render(<Text className="text-micro-legal">Ditimpa</Text>);
+        render(<Text className="text-fine-print">Ditimpa</Text>);
 
-        expect(screen.getByText('Ditimpa')).toHaveClass('text-micro-legal');
+        expect(screen.getByText('Ditimpa')).toHaveClass('text-fine-print');
         expect(screen.getByText('Ditimpa')).not.toHaveClass('text-body');
     });
 
@@ -310,10 +312,10 @@ describe('Text', () => {
     it.each([
         ['foreground', 'text-foreground'],
         ['muted', 'text-muted-foreground'],
-        ['subtle', 'text-ink-muted-soft'],
+        ['subtle', 'text-subtle'],
         ['brand', 'text-navy'],
-        ['brand-inverse', 'text-navy-light'],
-        ['danger', 'text-red-on-surface'],
+        ['brand-inverse', 'text-navy-soft'],
+        ['danger', 'text-primary-on-surface'],
         ['inherit', 'text-inherit'],
     ] as const)('maps colour "%s" to its token', (color, token) => {
         render(<Text color={color}>Warna</Text>);
@@ -332,7 +334,7 @@ describe('Text', () => {
 
         expect(screen.getByText('Merek')).toHaveClass(
             'text-navy',
-            'dark:text-navy-light',
+            'dark:text-navy-soft',
         );
     });
 
@@ -342,11 +344,11 @@ describe('Text', () => {
      * with text-white - inherits it instead of fighting it.
      */
     it('emits no colour class by default so the surface colour wins', () => {
-        render(<Text variant="body-strong">Ikut induk</Text>);
+        render(<Text variant="heading-sm">Ikut induk</Text>);
 
         const element = screen.getByText('Ikut induk');
 
-        expect(element).toHaveClass('text-body-strong');
+        expect(element).toHaveClass('text-heading-sm');
         expect(element.className).not.toMatch(/text-foreground/);
     });
 
@@ -493,7 +495,7 @@ describe('Text', () => {
      */
     it('composes with an icon and a link', () => {
         render(
-            <Text variant="caption-strong" className="flex items-center gap-2">
+            <Text variant="label" className="flex items-center gap-2">
                 <span aria-hidden="true">📍</span>
                 <a href="/kontak">Kontak</a>
             </Text>,

@@ -317,12 +317,12 @@ export function PostForm({
                     </Field>
                 ) : null}
 
-                <div className="flex items-start justify-between gap-4 rounded-lg border border-hairline p-4">
+                <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
                         <Label htmlFor="post-pinned">
                             {labels.is_pinned ?? 'Sematkan di halaman berita'}
                         </Label>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Maksimal dua artikel aktif dapat disematkan. Artikel
                             sematan tampil di bagian atas halaman berita.
                         </Text>
@@ -336,7 +336,7 @@ export function PostForm({
                     />
                 </div>
                 {form.errors.is_pinned ? (
-                    <Text as="p" variant="caption" color="danger" role="alert">
+                    <Text as="p" variant="body-sm" color="danger" role="alert">
                         {form.errors.is_pinned}
                     </Text>
                 ) : null}

@@ -42,7 +42,7 @@ export function NewsFilters({
                     value={filters.q}
                     placeholder="Cari judul atau isi berita"
                     onChange={(event) => apply({ q: event.target.value })}
-                    className="h-11 w-full rounded-pill border border-hairline bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
+                    className="h-11 w-full rounded-pill border border-border bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
                 />
             </div>
 
@@ -56,7 +56,7 @@ export function NewsFilters({
                     onChange={(event) =>
                         apply({ kategori: event.target.value })
                     }
-                    className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                    className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                 >
                     <option value="">Semua kategori</option>
                     {categories.map((category) => (
@@ -71,7 +71,7 @@ export function NewsFilters({
                 <button
                     type="button"
                     onClick={() => apply({ q: '', kategori: '' })}
-                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                     Reset filter
                 </button>
@@ -84,7 +84,7 @@ export function NewsFilters({
              */}
             <Text
                 as="p"
-                variant="caption"
+                variant="body-sm"
                 color="muted"
                 role="status"
                 aria-live="polite"

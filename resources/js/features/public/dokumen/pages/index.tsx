@@ -81,7 +81,7 @@ export default function DokumenIndex({
                                     setSearch(event.target.value)
                                 }
                                 placeholder="Cari judul atau deskripsi dokumen"
-                                className="h-11 min-w-0 flex-1 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                                className="h-11 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                             />
                             <Button type="submit" variant="outline">
                                 <Search className="size-4" aria-hidden="true" />
@@ -104,7 +104,7 @@ export default function DokumenIndex({
                                         kategori: event.target.value,
                                     })
                                 }
-                                className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                                className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                             >
                                 <option value="">Semua kategori</option>
                                 {categories.map((category) => (
@@ -150,15 +150,15 @@ export default function DokumenIndex({
                                 ))}
                             </div>
                         ) : (
-                            <div className="mt-5 rounded-lg border border-dashed border-hairline p-10 text-center">
-                                <Text as="p" variant="body-strong">
+                            <div className="mt-5 rounded-lg border border-dashed border-border p-10 text-center">
+                                <Text as="p" variant="heading-sm">
                                     {isFiltered
                                         ? 'Tidak ada dokumen yang cocok dengan filter.'
                                         : 'Belum ada dokumen yang dipublikasikan.'}
                                 </Text>
                                 <Text
                                     as="p"
-                                    variant="caption"
+                                    variant="body-sm"
                                     color="muted"
                                     className="mt-1"
                                 >

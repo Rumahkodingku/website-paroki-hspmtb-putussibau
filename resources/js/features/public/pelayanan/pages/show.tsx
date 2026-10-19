@@ -79,10 +79,10 @@ export default function PelayananShow({ service, otherServices }: Props) {
                     <img
                         src={service.thumbnail}
                         alt={service.thumbnail_alt ?? ''}
-                        className="mt-8 aspect-video w-full rounded-xl border border-hairline object-cover"
+                        className="mt-8 aspect-video w-full rounded-xl border border-border object-cover"
                     />
                 ) : (
-                    <div className="mt-8 flex aspect-video w-full items-center justify-center rounded-xl border border-hairline bg-canvas-soft text-muted-foreground">
+                    <div className="mt-8 flex aspect-video w-full items-center justify-center rounded-xl border border-border bg-canvas-subtle text-muted-foreground">
                         <ImageIcon className="size-10" aria-hidden="true" />
                     </div>
                 )}
@@ -103,7 +103,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                             {service.summary ? (
                                 <Text
                                     as="p"
-                                    variant="lead"
+                                    variant="body-lg"
                                     color="muted"
                                     className="max-w-2xl"
                                 >
@@ -126,7 +126,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                         ) : null}
                     </div>
 
-                    <aside className="space-y-4 rounded-lg border border-hairline bg-canvas-soft p-6">
+                    <aside className="space-y-4 rounded-lg border border-border bg-canvas-subtle p-6">
                         <Text as="h2" variant="h3">
                             Kontak & Pendaftaran
                         </Text>
@@ -138,7 +138,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                         />
 
                         {service.contact.name ? (
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 Penanggung jawab: {service.contact.name}
                             </Text>
                         ) : null}
@@ -153,7 +153,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                         {FLOW_STEPS.map((step, index) => (
                             <li
                                 key={step.title}
-                                className="rounded-lg border border-hairline bg-card p-5"
+                                className="rounded-lg border border-border bg-card p-5"
                             >
                                 <span
                                     aria-hidden="true"
@@ -163,12 +163,12 @@ export default function PelayananShow({ service, otherServices }: Props) {
                                 </span>
                                 <Text
                                     as="p"
-                                    variant="body-strong"
+                                    variant="heading-sm"
                                     className="mt-3"
                                 >
                                     {step.title}
                                 </Text>
-                                <Text as="p" variant="caption" color="muted">
+                                <Text as="p" variant="body-sm" color="muted">
                                     {step.description}
                                 </Text>
                             </li>
@@ -187,7 +187,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                                 className="flex items-start gap-3"
                             >
                                 <CheckCircle2
-                                    className="mt-0.5 size-5 shrink-0 text-primary"
+                                    className="mt-0.5 size-5 shrink-0 text-primary-on-surface"
                                     aria-hidden="true"
                                 />
                                 <div>
@@ -197,7 +197,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                                     {requirement.note ? (
                                         <Text
                                             as="p"
-                                            variant="caption"
+                                            variant="body-sm"
                                             color="muted"
                                         >
                                             {requirement.note}
@@ -226,7 +226,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                                     {index + 1}
                                 </span>
                                 <div>
-                                    <Text as="p" variant="body-strong">
+                                    <Text as="p" variant="heading-sm">
                                         {step.title}
                                     </Text>
                                     {step.description ? (
@@ -307,12 +307,12 @@ export default function PelayananShow({ service, otherServices }: Props) {
             ) : null}
 
             <PublicSection>
-                <div className="flex flex-col items-start gap-6 rounded-lg border border-hairline p-6 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col items-start gap-6 rounded-lg border border-border p-6 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <Text as="p" variant="body-strong">
+                        <Text as="p" variant="heading-sm">
                             Siap mendaftar?
                         </Text>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {service.cta.state === 'form_open'
                                 ? 'Buka tautan pendaftaran atau hubungi penanggung jawab.'
                                 : 'Hubungi kontak yang tersedia untuk informasi lebih lanjut.'}
@@ -329,7 +329,7 @@ export default function PelayananShow({ service, otherServices }: Props) {
                 {service.updated_at ? (
                     <Text
                         as="p"
-                        variant="caption"
+                        variant="body-sm"
                         color="muted"
                         className="mt-6"
                     >

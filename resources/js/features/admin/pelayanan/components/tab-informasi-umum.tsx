@@ -47,7 +47,7 @@ export function TabInformasiUmum({
                 <Text as="h3" variant="h3">
                     Informasi Umum
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     Lengkapi informasi umum pelayanan ini, termasuk nama,
                     kategori, dLL. Informasi ini akan ditampilkan di halaman
                     pelayanan
@@ -155,14 +155,14 @@ export function TabInformasiUmum({
                             label={labels.introduction}
                         />
                         {form.errors.introduction ? (
-                            <Text as="p" variant="caption" color="danger">
+                            <Text as="p" variant="body-sm" color="danger">
                                 {form.errors.introduction}
                             </Text>
                         ) : null}
                     </div>
                 </div>
 
-                <aside className="space-y-5 rounded-lg border border-hairline p-5">
+                <aside className="space-y-5 rounded-lg border border-border p-5">
                     <Field
                         id="service-sort-order"
                         label={labels.sort_order}
@@ -181,7 +181,7 @@ export function TabInformasiUmum({
                         />
                     </Field>
 
-                    <div className="flex items-center justify-between gap-4 border-t border-hairline pt-4">
+                    <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
                         <Label htmlFor="service-active">
                             {labels.is_active}
                         </Label>

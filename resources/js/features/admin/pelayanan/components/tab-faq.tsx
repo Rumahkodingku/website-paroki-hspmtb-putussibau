@@ -61,7 +61,7 @@ export function TabFaq({ serviceId, items, labels, copy, empty }: Props) {
                     <Text as="h3" variant="h3">
                         {copy.faq_title}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {copy.faq_description}
                     </Text>
                 </div>
@@ -76,7 +76,7 @@ export function TabFaq({ serviceId, items, labels, copy, empty }: Props) {
                     as="p"
                     variant="body"
                     color="muted"
-                    className="rounded-lg border border-dashed border-hairline p-6"
+                    className="rounded-lg border border-dashed border-border p-6"
                 >
                     {empty.faqs}
                 </Text>
@@ -85,16 +85,16 @@ export function TabFaq({ serviceId, items, labels, copy, empty }: Props) {
                     {items.map((item, index) => (
                         <li
                             key={item.id}
-                            className="rounded-lg border border-hairline p-4"
+                            className="rounded-lg border border-border p-4"
                         >
                             <div className="flex items-start gap-4">
                                 <div className="min-w-0 flex-1 space-y-1">
-                                    <Text as="p" variant="body-strong">
+                                    <Text as="p" variant="heading-sm">
                                         {item.question}
                                     </Text>
                                     <Text
                                         as="p"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                     >
                                         {item.answer}
@@ -148,7 +148,7 @@ export function TabFaq({ serviceId, items, labels, copy, empty }: Props) {
                                         onClick={() => setDeleting(item)}
                                     >
                                         <Trash
-                                            className="size-4 text-red-on-surface"
+                                            className="size-4 text-primary-on-surface"
                                             aria-hidden="true"
                                         />
                                     </Button>

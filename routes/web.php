@@ -10,6 +10,7 @@ use App\Http\Controllers\Document\PublicDocumentController;
 use App\Http\Controllers\Galeri\GalleryController;
 use App\Http\Controllers\Galeri\GalleryPhotoController;
 use App\Http\Controllers\Galeri\PublicGalleryController;
+use App\Http\Controllers\Home\PublicHomeController;
 use App\Http\Controllers\Komunitas\CommunityController;
 use App\Http\Controllers\Komunitas\PublicCommunityController;
 use App\Http\Controllers\MassSchedule\MassScheduleController;
@@ -52,7 +53,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::inertia('/', 'public/beranda')->name('home');
+Route::get('/', PublicHomeController::class)->name('home');
 
 Route::get('/profil/sejarah', [PublicParishProfileController::class, 'sejarah'])->name('profil.sejarah');
 Route::get('/profil/wilayah', [PublicParishProfileController::class, 'wilayah'])->name('profil.wilayah');

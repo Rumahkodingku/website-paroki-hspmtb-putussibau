@@ -4986,3 +4986,419 @@ lapisan demo memang sengaja mengisi data contoh (D-53).
 @see `docs/revision/revision-data-duplication-profil-pengaturan.md`
 @see `docs/plan-implementation/plan-revisi-konsolidasi-identitas-paroki.md`
 @see `docs/DECISIONS.md` D-23, D-52, D-53, D-67
+
+---
+
+## D-70 — Beranda Publik (Phase 9A): agregasi modul, hero dari Pengaturan Situs
+
+**Status:** Accepted · branch `feat/phase-9a-homepage`
+
+Phase 9A mengganti placeholder Beranda dengan halaman publik final. Dokumen
+roadmap `docs/roadmap/phase-9a-homepage.md` adalah spesifikasinya, dan
+`docs/plan-implementation/plan-phase-9a-homepage.md` mencatat urutan kerjanya.
+Keputusan yang mengikat:
+
+1. **Beranda adalah halaman agregasi, bukan sumber data kedua.** Tidak ada tabel,
+   model, controller admin, atau CRUD Beranda baru. Berita, agenda, pelayanan,
+   dan galeri tetap dibaca dari modul yang sudah memilikinya. Satu-satunya
+   controller baru adalah `PublicHomeController`, yang menyusun props dari
+   query modul-modul tersebut. Route `home` tetap nama yang sama.
+
+2. **Empat setting hero baru, disetujui pemilik proyek.**
+   `home_hero_title`, `home_hero_description`, `home_hero_image`, dan
+   `home_hero_image_alt` masuk grup `beranda`. Ini menambah jumlah key site
+   settings dari 37 menjadi 41 dan merupakan divergensi sadar dari PRD Lampiran B
+   (yang tidak mencantumkannya). `home_hero_image` bertipe `media`, sehingga
+   admin mengganti gambar lewat picker yang sudah ada; `home_hero_image_alt`
+   wajib diisi saat gambar dipilih (HOME-05/XC-M5). `home_hero_title` dan
+   `home_hero_description` adalah teks biasa, bukan HTML.
+
+3. **Hero punya fallback statis.** `public/hero-section.png` disediakan pemilik
+   proyek dan `public/hero-section.webp` dibuat darinya. WebP dipakai untuk
+   tampilan, PNG untuk Open Graph. `config/homepage.php` memegang kedua path,
+   teks alt fallback, dan slug kategori renungan, sehingga tidak ada path aset
+   yang ditulis ulang di controller dan React. Fallback ini yang membuat
+   instalasi baru tetap punya hero sebelum admin mengunggah gambar.
+
+4. **Hero statis, bukan `hero_slides`, dan tanpa announcement bar.** PRD §7.1
+   meminta slider hero dan banner pengumuman, tetapi roadmap 9A secara eksplisit
+   melarang tabel/CRUD Beranda baru dan tidak mencantumkan announcement bar
+   dalam urutan section target. Karena itu HOME-03, HOME-04, HOME-05, dan
+   AC-HOME-5 **tidak terpenuhi** di Phase 9A. AC-HOME-2 terpenuhi sebagian:
+   judul, deskripsi, gambar, dan alt hero dapat diubah dari Pengaturan Situs,
+   tetapi tidak ada pengumuman yang dapat dikelola. Ini bukan fitur yang
+   terlupa; ia ditunda ke phase yang memang membangun modul tersebut.
+
+5. **`home_gallery_limit` menghitung foto, bukan album.** Itu yang dikatakan
+   label setting dan PRD §7.1 blok 10. Query mengambil foto `ready` dari album
+   `published`, urut terbaru, lalu membatasinya. Tidak ada resource album kedua.
+
+6. **Renungan adalah post terbaru kategori `renungan`.** PRD §7.1 blok 8
+   mendefinisikannya sebagai artikel kategori Renungan, dan kategori itu sudah
+   di-seed. Jika tidak ada post terbit, section disembunyikan. Tidak ada modul
+   renungan baru.
+
+7. **Satu definisi agenda mendatang.** `Event::scopeUpcomingFromToday()` memakai
+   awal hari ini di `app.display_timezone`, lalu dikonversi ke UTC. `/agenda`
+   dan Beranda sama-sama memakainya, sehingga batas tengah malam tidak bisa
+   berbeda di dua halaman.
+
+8. **Section opsional yang kosong tidak dirender.** Berita, agenda, renungan,
+   pelayanan, galeri, dan kontak menghilangkan seluruh section saat tidak ada
+   data atau toggle-nya mati. Misa Berikutnya tetap tampil dengan empty state
+   yang informatif, karena ketiadaan jadwal adalah informasi yang berguna.
+   `home_show_contact=false` hanya memengaruhi blok Beranda; `/kontak` tetap
+   dapat diakses.
+
+9. **Empat komponen dipindahkan ke `components/`.** `ArticleCard`, `EventCard`,
+   `NextMassCard`/`LocationLink`, dan `ContactMap` sekarang dipakai dua halaman.
+   Tipe props-nya hidup di file komponen agar `components/` tidak mengimpor tipe
+   feature, dan pemindahan ini menjaga aturan dependency `ARCHITECTURE.md`
+   Part B §4. Tidak ada perubahan markup atau perilaku selain penambahan opsi
+   `showLabel`/`headingLevel` pada `NextMassCard` untuk konteks Beranda.
+
+10. **SEO homepage memakai `Seo` dan fallback server-side.** Blade memakai
+    `parish_short_name` sebagai judul homepage bila `seo_default_title` kosong,
+    `short_description` sebagai meta description bila
+    `seo_default_description` kosong, dan `hero-section.png` sebagai OG image
+    bila `seo_default_og_image` kosong. Nilai yang tetap kosong menghasilkan tag
+    yang tidak dirender, bukan tag kosong.
+
+**Divergensi dari PRD.** Butir 4 di atas (hero statis dan tidak ada announcement
+bar), ditambah empat key hero yang tidak ada di Lampiran B. AC-HOME-1 dan
+AC-HOME-4 terpenuhi sebagian karena pengumuman tidak ada dan meta description
+bergantung pada setting yang diisi paroki.
+
+**Utang / keterbatasan yang diketahui.** Aset fallback adalah aset statis, bukan
+upload Media, sehingga tidak melewati pipeline varian; WebP dibuat sekali di
+repository. `home_hero_image_alt` wajib saat gambar dipilih dan menambah satu
+langkah admin. Renungan bergantung pada slug kategori `renungan`; mengganti slug
+akan menyembunyikan section sampai kategori baru diisi. E2E berjalan pada
+database bare, jadi Beranda E2E sengaja hanya membuktikan hero, pintasan, CTA,
+empty state, dan tidak adanya placeholder.
+
+@see `docs/roadmap/phase-9a-homepage.md`
+@see `docs/plan-implementation/plan-phase-9a-homepage.md`
+@see `docs/DECISIONS.md` D-21, D-23, D-26, D-34, D-39, D-46, D-67, D-69
+
+---
+
+## D-71 — Ilustrasi Beranda: fallback demo dari WebP lokal, bukan media paroki
+
+**Status:** Accepted · branch `feat/phase-9a-homepage`
+
+Beranda bisa menampilkan ilustrasi pada slot yang belum punya media. Ini bukan
+konten paroki dan bukan pengganti pipeline Media; ia hanya jaring pengaman
+tampilan untuk lokal/demo supaya halaman tidak penuh slot kosong. Rencana
+lengkapnya ada di `docs/design-plans/beranda-ilustrasi-gambar-internet.md`.
+
+### 1. Default mati, dan hanya lokal/demo
+
+`HOMEPAGE_ILLUSTRATIONS` default `false`. `App\Support\HomepageIllustration`
+mengembalikan `null`/`[]` saat flag mati, sehingga produksi tidak pernah
+menampilkan foto stok. E2E juga memaksa flag `false` di `playwright.config.ts`
+agar database bare tetap deterministik dan tidak ada request jaringan luar.
+
+### 2. Fallback-only, tidak pernah menggantikan media resmi
+
+`PublicHomeController` hanya mengisi ilustrasi pada item yang `image`/`thumbnail`
+nya `null`. Artikel dengan `featured_image`, layanan dengan thumbnail,
+atau album dengan foto tetap memakai media aslinya. Resource publik
+(`PublicPostResource`, `PublicServiceCardResource`, `PublicGalleryTeaserResource`)
+tidak diubah, sehingga `/berita`, `/pelayanan`, dan `/galeri` tetap identik.
+
+### 3. Galeri kosong dikirim sebagai prop terpisah
+
+`galleryPhotos` tetap `[]` bila tidak ada album terbit; ilustrasi galeri dikirim
+sebagai `galleryIllustrations` dan dirender sebagai strip berjudul "Ilustrasi"
+tanpa tautan album. Ini mencegah ilustrasi menyamar sebagai dokumentasi kegiatan
+paroki.
+
+### 4. Aset lokal, bukan hotlink
+
+Aset disimpan di `public/illustrations/` sebagai WebP tiga lebar (600/960/1200),
+dibuat dengan `cwebp` dari foto Unsplash berlisensi. Keuntungannya: offline,
+deterministik, tanpa ketergantungan pihak ketiga, dan bisa `srcset`. Sumber asli
+dan fotografernya:
+
+| Slot | Foto Unsplash | Fotografer |
+| --- | --- | --- |
+| activity | https://unsplash.com/photos/LNRyGwIJr5c | Alejandro Escamilla |
+| study | https://unsplash.com/photos/nJdwUHmaY8A | Aleks Dorohovich |
+| gathering | https://unsplash.com/photos/pwaaqfoMibI | Tina Rataj |
+| journey | https://unsplash.com/photos/OokBLPrkCNk | Dorothy Lin |
+| nature-lake | https://unsplash.com/photos/6J--NXulQCs | Paul Jarvis |
+| nature-detail | https://unsplash.com/photos/Y2PYfopoz-k | Sonja Langford |
+| craft | https://unsplash.com/photos/qVj3KuEikvg | Rula Sibai |
+
+Semua subjek dipilih agar tidak menampilkan bangunan gereja yang bisa
+disalahartikan sebagai Paroki HSPMTB.
+
+### 5. Selalu berlabel
+
+Setiap ilustrasi tampil dengan badge "Ilustrasi" dan `alt` berawalan
+"Ilustrasi: ". Ini memenuhi semangat AGENTS.md "jangan mengarang data paroki"
+dan DESIGN.md "Do not use generic stock photography when approved parish
+photography is available": foto resmi tetap menang, ilustrasi hanya mengisi
+kekosongan dan tidak diklaim sebagai foto paroki.
+
+### 6. Divergensi dan risiko
+
+Ini divergensi sadar dari DESIGN.md. Risikonya diterima karena flag default mati,
+aset lokal (bukan hotlink), label yang jelas, dan hero tetap memakai aset resmi
+`public/hero-section.webp`. Bila paroki mengisi media untuk sebuah slot,
+ilustrasi otomatis hilang.
+
+**Tidak mengubah** schema, permission, route, atau pipeline Media. Hanya
+`config/homepage.php`, `App\Support\HomepageIllustration`,
+`PublicHomeController`, dan komponen Beranda.
+
+@see `docs/design-plans/beranda-ilustrasi-gambar-internet.md`
+@see `docs/DECISIONS.md` D-24, D-53, D-70
+
+---
+
+## D-72 — Migrasi design system ke DESIGN-v2
+
+**Status:** Accepted · migrasi presentasi (M0–M6) · branch `feat/design-v2-migration`
+
+`docs/DESIGN-v2.md` menggantikan `docs/DESIGN.md` v1.1 sebagai **satu-satunya
+acuan desain UI**. DESIGN.md ditandai *superseded* di baris awal tetapi isinya
+dikekalkan sebagai rekam jejak; aturan visualnya tidak lagi mengikat. Rencana
+implementasi bertahap ada di
+`docs/plan-implementation/plan-design-v2-migration.md`.
+
+### 1. Keputusan yang mengikat migrasi
+
+1. **Jangkauan** — restyle publik **dan** redesign admin. Variabel CSS bersifat
+   global, jadi token baru wajib konsisten di kedua audiens.
+2. **Strategi token** — *staged hard replace*: token v2 diperkenalkan,
+   pemakaian dimigrasikan per-fitur, lalu token v1 dihapus. Tidak ada alias
+   permanen, sehingga tidak ada dua kosakata yang bisa bertolak.
+3. **Font** — awalnya `Inter` lewat provider `bunny` `laravel-vite-plugin`
+   (**tanpa dependency npm baru**), menggantikan Instrument Sans. **Diganti lagi
+   ke `Mona Sans`** tanpa mengubah cara pemuatan; lihat D-74.
+4. **Nama komponen** — nama lama dipertahankan; peran DESIGN-v2 dipetakan (lihat
+   §3). Hanya komponen baru yang memakai nama v2.
+5. **Tema default** — tetap `system`. `light` tetap baseline yang diuji penuh.
+
+### 2. Primary tidak berubah
+
+Token `primary` tetap `#AB020E` di light maupun dark. Di dark, teks/ring merah
+memakai tint `#F06A73` **hanya** bila merah brand tidak cukup kontras terhadap
+permukaan tertentu; ini tidak mengubah token `primary`.
+
+### 3. Pemetaan peran komponen DESIGN-v2 → komponen aktual
+
+| Peran v2 | Komponen aktual |
+| --- | --- |
+| `ParishNavbar` | `layouts/public/components/parish-navbar.tsx` |
+| `ParishHero` | `features/public/beranda/components/home-hero.tsx` |
+| `QuickAccessBar` | `features/public/beranda/components/home-quick-links.tsx` |
+| `FeaturedNews` | `features/public/berita/components/pinned-strip.tsx` |
+| `NewsCard` | `components/article-card.tsx` |
+| `MassScheduleCard` | `features/public/jadwal-misa/components/mass-schedule-card.tsx` |
+| `UpcomingMassPanel` | `components/next-mass-card.tsx` + `home-next-mass-section.tsx` |
+| `AgendaCard` | `components/event-card.tsx` |
+| `SacramentServiceCard` | `features/public/pelayanan/components/service-card.tsx` |
+| `CommunityCard` | `features/public/komunitas/components/community-card.tsx` |
+| `ParishTimeline` | `features/public/profil/components/history-timeline.tsx` |
+| `PastorCard` | `features/public/profil/components/pastor-card.tsx` |
+| `OrganizationChart` | `features/public/profil/components/organization-chart.tsx` |
+| `ServiceAreaMap` | `components/contact-map.tsx` + `features/public/area/*` |
+| `ParishGallery` | `features/public/galeri/components/photo-grid.tsx` (+ lightbox) |
+| `ParishCTA` | `components/parish-cta.tsx` |
+| `ParishFooter` | `layouts/public/components/parish-footer.tsx` |
+
+### 4. Tabrakan `text-body`
+
+DESIGN-v2 menamai warna teks body `text-body`, sementara proyek sudah memakai
+`--text-body` sebagai **ukuran font** (Tailwind v4 memetakan keduanya ke utility
+`text-body`). Karena itu **warna body tidak memperoleh utility `text-body`**.
+Teks isi memakai `text-foreground` (text-primary) atau `text-muted-foreground`
+(text-muted) sesuai hierarki. Bila audit kontras benar-benar menuntut warna di
+antara keduanya, didefinisikan `--color-body-text` (utility `text-body-text`).
+
+### 5. Skala tipografi v2
+
+16 token v1 dipetakan ke 11 langkah v2 (`display-xl/lg/md`, `heading-lg/md/sm`,
+`body-lg/body/body-sm`, `label`, `fine-print`). `micro-legal` (10px) dan
+`dense-link` **dihapus**: v2 melarang teks penting di bawah 13–14px. Tabel
+lengkap ada di plan §3.5.
+
+### 6. Konsekuensi
+
+- `app.blade.php` berhenti memakai `oklch()` shadcn dan memakai warna kanvas v2.
+- `lib/utils.ts` mendaftarkan 11 nama font-size v2 ke tailwind-merge.
+- Test yang mengunci token lama diperbarui; guard baru memastikan tidak ada
+  kelas token v1 yang tersisa dan setiap route publik bebas overflow di kedua
+  tema.
+- Migrasi murni presentasi: tidak ada migration/model/route/controller baru.
+
+@see `docs/DESIGN-v2.md`
+@see `docs/plan-implementation/plan-design-v2-migration.md`
+@see `docs/DECISIONS.md` D-22, D-32, D-33
+
+---
+
+## D-73 — Navbar publik dikelompokkan dengan `NavigationMenu`
+
+**Status:** Accepted · revisi navbar publik · branch `feat/phase-9a-homepage`
+
+Navbar publik sebelumnya menaruh **11 tautan dalam satu baris** mulai `lg`
+(1024px). Dengan logo, tombol tema, dan gutter, baris itu mepet dan berisiko
+meluber di 1024–1280px. Baris desktop sekarang memakai Radix `NavigationMenu`
+(shadcn) dan dikelompokkan menjadi **tujuh kontrol**.
+
+### 1. Pengelompokan (mengikuti IA footer)
+
+| Kontrol | Jenis | Isi |
+| --- | --- | --- |
+| Beranda | tautan | `/` |
+| Profil | dropdown | Sejarah, Wilayah Pelayanan, Area, Pastor, Struktur Kepengurusan |
+| Jadwal Misa | tautan | `/jadwal-misa` |
+| Berita & Artikel | tautan | `/berita` |
+| Agenda | tautan | `/agenda` |
+| Pelayanan | dropdown | Pelayanan, Komunitas, Galeri, Dokumen |
+| Kontak | tautan | `/kontak` |
+
+Gruparnya sama dengan grup footer (`Profil Paroki`, `Pelayanan & Komunitas`),
+jadi tidak ada kosakata IA kedua. Halaman pendarat sebuah grup adalah anak
+pertamanya, sehingga tetap satu klik di dalam dropdown.
+
+### 2. Drawer ponsel tetap datar
+
+`Sheet` di bawah `lg` tetap menampilkan **11 tautan datar** dan tidak
+dikelompokkan. Di ponsel daftar gulir satu tingkat lebih cepat daripada
+kolapsibel bertingkat, dan ini menjaga perilaku serta tes yang sudah ada.
+
+### 3. Aksesibilitas
+
+- Trigger grup adalah `<button>` (Radix), bukan tautan. Saat salah satu anaknya
+  aktif, trigger menerima `aria-current="page"` dan `data-active`, dan teksnya
+  memakai `primary-on-surface` (merah aman-gelap). Tautan tunggal tetap
+  `aria-current="page"`.
+- Semua kontrol baris `h-11` (44px); trigger memakai token `label`.
+- Radix menangani navigasi papan tik, fokus, escape, dan hover.
+
+### 4. Perbaikan primitif dan dependency
+
+`components/ui/navigation-menu.tsx` mengimpor `cn` dari paket `cn` dan
+`NavigationMenu` dari paket `radix-ui` terpadu — yang dilarang D-22 **dan**
+tidak ada di `package-lock.json`, sehingga `npm ci` bersih akan gagal
+membangunnya. Impor diperbaiki ke `@/lib/utils` dan
+`@radix-ui/react-navigation-menu`, lalu `cn` dan `radix-ui` dihapus dari
+`package.json`.
+
+### 5. Konsekuensi
+
+- `tests/js/components/parish-navbar.test.tsx` diubah: baris desktop diuji
+  sebagai 5 tautan + 2 tombol disclosure, drawer tetap 11 datar.
+- `tests/e2e/public.spec.ts` mendapat satu uji desktop (buka grup Profil →
+  navigasi ke Pastor).
+
+@see `docs/DESIGN-v2.md` §8
+@see `docs/DECISIONS.md` D-22, D-72
+
+---
+
+## D-74 — Font UI diganti ke Mona Sans
+
+**Status:** Accepted · revisi tipografi · branch `feat/phase-9a-homepage`
+
+DESIGN-v2 §4 awalnya menyebut `Inter`. Font UI publik dan admin **diganti ke
+`Mona Sans`** (GitHub, lisensi SIL OFL 1.1). Dokumen DESIGN-v2 §4 dan §16
+diperbarui langsung mengikuti keputusan ini.
+
+### 1. Cara pemuatan
+
+Tetap lewat provider `bunny` `laravel-vite-plugin` yang sudah terpasang —
+**tanpa dependency npm baru** — lalu di-self-host ke `/build/assets` saat build
+dan disuntik lewat `@fonts`. `variable: '--font-sans'`; stack di
+`resources/css/app.css` menunjuk `'Mona Sans'`, lalu `ui-sans-serif`/`system-ui`.
+
+### 2. Bobot dan italic
+
+- **Normal**: 400/500/600/700.
+- **Italic asli**: 400 dan 600 saja. Sebelumnya Inter hanya memuat normal
+  sehingga `italic` disintesis browser; Mona Sans kini memakai italic nyata.
+
+Dibatasi lewat **dua definisi** `bunny('Mona Sans', …)` dengan `alias` dan
+`variable` berbeda (`mona-sans`/`--font-sans` dan
+`mona-sans-italic`/`--font-sans-italic`). Alasannya: `mergeFontDefinitions`
+menyatukan weights+styles per alias (cross-product), dan `validateFontsConfig`
+menolak alias/variabel duplikat. Definisi italic mematikan `optimizedFallbacks`
+agar tidak ada `@font-face "Mona Sans fallback"` kedua.
+
+### 3. Subset
+
+`latin` dan `latin-ext`.
+
+### 4. Konsekuensi
+
+- `vite.config.ts` dan `resources/css/app.css` adalah satu-satunya tempat
+  keluarga font disebut; keduanya harus berubah bersama, atau browser jatuh ke
+  `system-ui`.
+- Metrik Mona Sans berbeda dari Inter, jadi tinggi baris/heading bisa bergeser
+  sedikit; token `--text-*` tidak berubah. QA visual tetap perlu.
+- Payload font bertambah (normal 4 + italic 2 bobot × 2 subset × 2 format).
+- Tidak ada perubahan test: font murni presentasi.
+
+@see `docs/DESIGN-v2.md` §4, §16
+@see `docs/DECISIONS.md` D-72
+
+---
+
+## D-75 — Galeri publik memakai Masonry Grid (CSS multi-column)
+
+**Status:** Accepted · revisi UI Galeri (Beranda + halaman album) · branch `feat/phase-9a-homepage`
+
+Galeri publik — strip Galeri Kegiatan di beranda dan grid foto album —
+berubah dari grid ber-potong (`4 / 3`, dan `aspect-square` di album) menjadi
+**masonry** dengan rasio asli tiap foto. Daftar album di `/galeri` **tidak**
+ikut berubah; kartu album tetap grid biasa.
+
+### 1. Teknik: CSS multi-column
+
+`columns-*` + `break-inside-avoid` pada tiap tile, bukan library JavaScript.
+
+- **Tanpa dependency baru** (AGENTS.md/D-22 melarang menambah pustaka tanpa
+  persetujuan) dan tanpa pengukuran: `columns` menyeimbangkan kolomnya sendiri.
+- Kolom seimbang otomatis; rasio asli tiap foto dipertahankan, yang justru
+  Jalan keluarnya variasi tinggi — memotong ke rasio tetap akan menghilangkan
+  justru masonry itu.
+- Desain degrade baik: tanpa `break-inside-avoid` sebuah tile hanya bisa
+  terpotong antar kolom, bukan rusak.
+
+Layout bersama diletakkan di `components/masonry-grid.tsx`
+(`MasonryGrid`, `MasonryItem`, `aspectRatioFrom`) karena dipakai dua feature.
+
+### 2. Rasio asli, bukan crop
+
+Lebar/tinggi diambil dari baris `media` (sudah ada di
+`PublicGalleryPhotoResource` dan `PublicGalleryTeaserResource`), dengan fallback
+`4 / 3` bila null. `aspect-ratio` membuat tinggi kolom sudah dipesan sebelum gambar selesai
+diunduh, jadi tidak ada lompatan layout. Tile memakai `fit="contain"`, sehingga
+foto terpotong diberi letterbox dan bukan dipotong — DESIGN-v2 §7 melarang
+memotong wajah atau objek suci.
+
+### 3. Konsekuensi (sengaja diterima)
+
+- **Urutan kolom-mayor**: item mengisi kolom pertama ke bawah sebelum kolom
+  berikutnya, bukan kiri→kanan. Tab order mengikuti DOM yang sesuai dengan
+  tampilan, jadi keduanya tidak pernah bertentangan — tetapi album yang
+  urutannya dimaksudkan dibaca kiri→kanan bukan ini.
+- Foto tanpa dimensi jatuh ke rasio `4 / 3`; tile dengan `src` kosong tetap
+  dapat placeholder `ImageOff` dari `ParishImage`.
+- Lightbox album, tombol `Perbesar foto`, dan tautan beranda ke album tetap
+  sama — hanya konekturnya yang berubah.
+
+### 4. Tidak berubah
+
+`lightbox.tsx`, `galeri/pages/index.tsx` (daftar album), backend/resource, dan
+tipe. Uji lama (`galeri.spec.ts`, `homepage.test.tsx`) tidak perlu diperbarui
+karena semantik tombol/heading/tautan dipertahankan.
+
+@see `docs/DESIGN-v2.md` §10 `ParishGallery`, §7
+@see `docs/ARCHITECTURE.md` Part B §1.1
+@see `docs/DECISIONS.md` D-22, D-72

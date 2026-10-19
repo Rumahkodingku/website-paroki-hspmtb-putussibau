@@ -41,7 +41,7 @@ export function DeleteDialog({
 
                     <Text
                         as="p"
-                        variant="caption"
+                        variant="body-sm"
                         color="muted"
                         className="mt-3"
                     >

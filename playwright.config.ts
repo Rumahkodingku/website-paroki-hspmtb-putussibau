@@ -104,6 +104,17 @@ export default defineConfig({
              * while proving nothing about them.
              */
             APP_DEBUG: 'false',
+
+            /**
+             * Keep the homepage's demo illustrations off.
+             *
+             * The E2E database is rebuilt bare, so a flag that were on would
+             * fill empty cards with stock photographs and make the specs assert
+             * against a page the parish would never ship. The default is
+             * already false; this makes it explicit so a developer's shell
+             * environment cannot leak into the run.
+             */
+            HOMEPAGE_ILLUSTRATIONS: 'false',
         },
 
         // /up is Laravel's health endpoint. It answers without touching the

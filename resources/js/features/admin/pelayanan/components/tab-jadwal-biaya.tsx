@@ -17,7 +17,7 @@ export function TabJadwalBiaya({ form, labels, hints, onSubmit }: Props) {
                 <Text as="h3" variant="h3">
                     Jadwal & Biaya
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     Lengkapi informasi jadwal dan biaya pelayanan ini. Informasi
                     ini akan ditampilkan di halaman pelayanan.
                 </Text>

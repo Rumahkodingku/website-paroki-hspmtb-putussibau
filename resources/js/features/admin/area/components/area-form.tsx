@@ -213,12 +213,12 @@ export function AreaForm({
                 that latitude and longitude travel together - is easier to see
                 when they sit next to each other with a heading over them.
             */}
-            <section className="space-y-6 rounded-lg border border-hairline p-6">
+            <section className="space-y-6 rounded-lg border border-border p-6">
                 <div className="space-y-1">
                     <Text as="h3" variant="h3">
                         {labels.location_heading ?? 'Lokasi dan Peta'}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {labels.location_description ??
                             'Alamat dan titik peta area ini. Lintang dan bujur harus diisi bersama, atau dikosongkan bersama.'}
                     </Text>

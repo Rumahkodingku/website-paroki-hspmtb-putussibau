@@ -6,7 +6,7 @@ import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
 import type { Paginated } from '@/types';
 import type { PublicCategory, PublicPost, PublicPostFilters } from '../types';
-import { ArticleCard } from '../components/article-card';
+import { ArticleCard } from '@/components/article-card';
 import { NewsFilters } from '../components/news-filters';
 import { PinnedStrip } from '../components/pinned-strip';
 
@@ -90,15 +90,15 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-                                <Text as="p" variant="body-strong">
+                            <div className="rounded-lg border border-dashed border-border p-10 text-center">
+                                <Text as="p" variant="heading-sm">
                                     {isFiltered
                                         ? 'Tidak ada berita untuk pencarian ini.'
                                         : 'Belum ada berita yang diterbitkan.'}
                                 </Text>
                                 <Text
                                     as="p"
-                                    variant="caption"
+                                    variant="body-sm"
                                     color="muted"
                                     className="mt-1"
                                 >

@@ -97,7 +97,7 @@ export default function Index({
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label={copy.preview_site}
-                            className="rounded-sm text-muted-foreground hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="rounded-sm text-muted-foreground hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             <Eye className="size-4" aria-hidden="true" />
                         </a>
@@ -145,7 +145,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ category: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {categoryOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -160,7 +160,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>

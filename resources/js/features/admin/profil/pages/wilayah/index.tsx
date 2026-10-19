@@ -26,8 +26,8 @@ export default function Wilayah({ area, labels, hints }: Props) {
                     variant="default"
                 />
 
-                <div className="mb-6 rounded-lg border border-hairline bg-muted/40 p-4">
-                    <p className="text-caption text-muted-foreground">
+                <div className="mb-6 rounded-lg border border-border bg-muted/40 p-4">
+                    <p className="text-body-sm text-muted-foreground">
                         Data rinci stasi, wilayah, dan lingkungan dikelola pada
                         modul Komunitas dan hanya ditampilkan di sini.
                     </p>

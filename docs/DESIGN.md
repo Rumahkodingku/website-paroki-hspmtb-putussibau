@@ -416,6 +416,10 @@ components:
         padding: 64px
 ---
 
+> **⚠️ SUPERSEDED (v1.1).** Dokumen ini digantikan oleh [`DESIGN-v2.md`](./DESIGN-v2.md).
+> Aturan visual di bawah **tidak lagi berlaku** dan hanya disimpan sebagai rekam jejak.
+> Acuan desain yang mengikat sekarang adalah `DESIGN-v2.md`. Lihat `DECISIONS.md` D-72.
+
 ## Overview
 
 HSPMTB's web presence is designed as a **modern digital home for parish life**, not as a generic corporate website. The interface uses photography, generous whitespace, clear information hierarchy, and quiet UI chrome so that the parish identity, worship schedule, pastoral services, community activities, and people remain the visual focus.

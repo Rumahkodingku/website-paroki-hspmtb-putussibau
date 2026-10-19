@@ -13,26 +13,26 @@ import {
 const parishCardVariants = cva('transition-colors', {
     variants: {
         variant: {
-            default: 'border-hairline bg-card text-card-foreground',
+            default: 'border-border bg-card text-card-foreground',
             /*
-             * secondary, not a literal bg-navy-light.
+             * secondary, not a literal bg-navy-soft.
              *
-             * DESIGN.md components.agenda-card names navy-light, and in light
-             * mode secondary IS navy-light - so nothing changes visually there.
-             * The literal did not survive dark mode: navy-light is a near-white
-             * surface and text-foreground in dark mode is a near-white ink, so
-             * the card measured 1.04:1 and disappeared. secondary is navy-light in
+             * DESIGN.md components.agenda-card names navy-soft, and in light
+             * mode secondary IS navy-soft - so nothing changes visually there.
+             * The literal did not survive dark mode: navy-soft is a near-white
+             * surface and text-foreground in dark mode is a near-white foreground, so
+             * the card measured 1.04:1 and disappeared. secondary is navy-soft in
              * light and dark-navy-soft in dark, which is the entire reason a
              * semantic token exists.
              *
              * The dark:text override is the same split one level down: DESIGN.md
-             * gives the agenda card ink text in light mode, and that ink is
+             * gives the agenda card foreground text in light mode, and that foreground is
              * unreadable on the dark surface.
              */
             agenda: 'border-transparent bg-secondary text-foreground dark:text-secondary-foreground',
         },
         interactive: {
-            true: 'focus-within:border-primary hover:border-primary',
+            true: 'focus-within:border-primary-on-surface hover:border-primary-on-surface',
             false: '',
         },
     },

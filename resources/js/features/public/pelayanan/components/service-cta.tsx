@@ -69,7 +69,7 @@ export function ServiceCta({
     if (cta.state === 'emergency') {
         return (
             <div className={className}>
-                <Text as="p" variant="body-strong" className="mb-3">
+                <Text as="p" variant="heading-sm" className="mb-3">
                     {labels.contact_now}
                 </Text>
 
@@ -102,7 +102,7 @@ export function ServiceCta({
                     as="p"
                     variant="body"
                     color="muted"
-                    className="rounded-lg border border-dashed border-hairline p-4"
+                    className="rounded-lg border border-dashed border-border p-4"
                 >
                     {labels.contact_secretariat}
                 </Text>

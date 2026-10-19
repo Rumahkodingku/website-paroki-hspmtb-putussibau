@@ -49,7 +49,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
                                         /*
-                                         * caption rather than the text-sm it
+                                         * body-sm rather than the text-sm it
                                          * carried before: same 14px, but the
                                          * design system's tracking instead of
                                          * Tailwind's scale step. TextLink owns
@@ -59,7 +59,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                          */
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-caption"
+                                            className="ml-auto text-body-sm"
                                             tabIndex={5}
                                         >
                                             Forgot your password?
@@ -109,14 +109,14 @@ export default function Login({ status, canResetPassword }: Props) {
 
             {status && (
                 /*
-                 * A status message, not body copy. `caption` is the same 14px
+                 * A status message, not body copy. `body-sm` is the same 14px
                  * this was at as text-sm, and `brand` carries the dark override
                  * with it - see the colour variant's comment for why that pair
                  * is not left to the caller.
                  */
                 <Text
                     as="p"
-                    variant="caption"
+                    variant="body-sm"
                     weight="medium"
                     color="brand"
                     align="center"

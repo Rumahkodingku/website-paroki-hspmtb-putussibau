@@ -14,7 +14,7 @@ import type { PublicGalleryCard as PublicGalleryCardData } from '../types';
  */
 export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
     return (
-        <article className="group relative overflow-hidden rounded-lg border border-hairline transition-colors focus-within:border-primary hover:border-primary">
+        <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {album.cover_url ? (
                 <img
                     src={album.cover_url}
@@ -23,7 +23,7 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
                     className="aspect-4/3 w-full rounded-t-lg object-cover"
                 />
             ) : (
-                <div className="flex aspect-4/3 w-full items-center justify-center rounded-t-lg bg-canvas-soft text-muted-foreground">
+                <div className="flex aspect-4/3 w-full items-center justify-center rounded-t-lg bg-canvas-subtle text-muted-foreground">
                     <Images className="size-8" aria-hidden="true" />
                 </div>
             )}
@@ -34,7 +34,7 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
                 </Text>
 
                 {album.event_date ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {new Intl.DateTimeFormat('id-ID', {
                             day: 'numeric',
                             month: 'long',
@@ -43,13 +43,13 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
                     </Text>
                 ) : null}
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {album.photo_count} foto
                 </Text>
 
                 <span
                     aria-hidden="true"
-                    className="inline-flex items-center gap-2 text-sm text-primary transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="inline-flex items-center gap-2 text-sm text-primary-on-surface transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                     Lihat Album
                     <ArrowRight className="size-4" />
@@ -59,7 +59,7 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
             <Link
                 href={galleryShow(album.slug)}
                 prefetch
-                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 <span className="sr-only">Lihat album {album.title}</span>
             </Link>
