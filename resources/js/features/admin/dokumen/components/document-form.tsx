@@ -200,7 +200,7 @@ export function DocumentForm({
                     activeLabel={meta.labels.is_featured ?? 'Dokumen unggulan'}
                 />
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {meta.hints.is_featured}
                 </Text>
             </div>

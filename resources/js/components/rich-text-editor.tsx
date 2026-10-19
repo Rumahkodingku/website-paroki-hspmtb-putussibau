@@ -770,7 +770,7 @@ export function RichTextEditor({
                     {imageUpload.uploading ? (
                         <Text
                             as="p"
-                            variant="caption"
+                            variant="body-sm"
                             color="muted"
                             role="status"
                         >
@@ -781,7 +781,7 @@ export function RichTextEditor({
                     {imageUpload.failed ? (
                         <Text
                             as="p"
-                            variant="caption"
+                            variant="body-sm"
                             color="danger"
                             role="alert"
                         >

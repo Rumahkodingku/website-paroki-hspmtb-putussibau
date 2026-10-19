@@ -7,7 +7,7 @@ import { wibMonthLabel, wibShiftMonth } from '@/lib/datetime';
 import type { AgendaIndexProps } from '../types';
 import { AgendaCalendar } from '../components/agenda-calendar';
 import { AgendaControls } from '../components/agenda-controls';
-import { EventCard } from '../components/event-card';
+import { EventCard } from '@/components/event-card';
 
 /*
  * The public agenda.

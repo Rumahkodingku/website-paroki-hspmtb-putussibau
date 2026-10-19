@@ -28,7 +28,7 @@ export function RowActions({
                         <Link
                             href={updateHref}
                             aria-label="Ubah"
-                            className="cursor-pointer rounded-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="cursor-pointer rounded-sm text-primary-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             <Pencil className="size-4" aria-hidden="true" />
                         </Link>
@@ -47,7 +47,7 @@ export function RowActions({
                             type="button"
                             onClick={onDelete}
                             aria-label="Hapus"
-                            className="cursor-pointer rounded-sm text-red-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="cursor-pointer rounded-sm text-primary-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             <Trash className="size-4" aria-hidden="true" />
                         </button>

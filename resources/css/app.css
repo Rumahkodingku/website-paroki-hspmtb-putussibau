@@ -7,128 +7,99 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * HSPMTB Design System v2 — docs/DESIGN-v2.md is the binding reference.
+ * docs/DESIGN.md (v1.1) is superseded; see D-72.
+ *
+ * Every token below is a DESIGN-v2 token. Components use the semantic
+ * utilities (bg-background, text-foreground, bg-primary, border-border,
+ * text-muted-foreground); arbitrary hex in a feature component is forbidden and
+ * ArchitectureTest enforces it.
+ */
 @theme {
     /*
-     * Typography. SF Pro is not licensed for web distribution, so per
-     * DESIGN.md the stack falls back to the platform UI font. --font-display
-     * exists so headings can prefer SF Pro Display when the OS has it.
+     * Typography — DESIGN-v2 §4. Mona Sans is loaded through the bunny provider
+     * in vite.config.ts (normal 400/500/600/700, italic 400/600); the stack
+     * degrades to system-ui. There is no separate display family in v2. See
+     * D-74.
      */
     --font-sans:
-        'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Mona Sans', ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --font-display:
-        'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont,
-        'Segoe UI', sans-serif;
+    --font-display: var(--font-sans);
 
-    /* DESIGN.md typography.* — size, line height, letter spacing, weight. */
-    --text-hero-display: 56px;
-    --text-hero-display--line-height: 1.07;
-    --text-hero-display--letter-spacing: -0.28px;
-    --text-hero-display--font-weight: 600;
+    /*
+     * The eleven v2 steps. The display and heading steps use clamp() so the
+     * desktop/mobile pair DESIGN-v2 documents (52/36, 40/32, 32/26, 24/22,
+     * 20/18, 18/17) is one fluid token rather than a size plus a breakpoint.
+     * body, body-sm, label and fine-print are fixed.
+     */
+    --text-display-xl: clamp(36px, 24px + 3vw, 52px);
+    --text-display-xl--line-height: 1.08;
+    --text-display-xl--letter-spacing: -0.025em;
+    --text-display-xl--font-weight: 700;
 
-    --text-display-lg: 40px;
-    --text-display-lg--line-height: 1.1;
-    --text-display-lg--letter-spacing: -0.4px;
-    --text-display-lg--font-weight: 600;
+    --text-display-lg: clamp(32px, 25.6px + 2vw, 40px);
+    --text-display-lg--line-height: 1.12;
+    --text-display-lg--letter-spacing: -0.02em;
+    --text-display-lg--font-weight: 700;
 
-    --text-display-md: 34px;
+    --text-display-md: clamp(26px, 22.4px + 1.5vw, 32px);
     --text-display-md--line-height: 1.18;
-    --text-display-md--letter-spacing: -0.374px;
+    --text-display-md--letter-spacing: -0.015em;
     --text-display-md--font-weight: 600;
 
-    --text-lead: 28px;
-    --text-lead--line-height: 1.14;
-    --text-lead--letter-spacing: 0.196px;
-    --text-lead--font-weight: 400;
+    --text-heading-lg: clamp(22px, 20px + 0.6vw, 24px);
+    --text-heading-lg--line-height: 1.25;
+    --text-heading-lg--letter-spacing: -0.01em;
+    --text-heading-lg--font-weight: 600;
 
-    --text-lead-airy: 24px;
-    --text-lead-airy--line-height: 1.5;
-    --text-lead-airy--letter-spacing: 0;
-    --text-lead-airy--font-weight: 300;
+    --text-heading-md: clamp(18px, 16.8px + 0.5vw, 20px);
+    --text-heading-md--line-height: 1.3;
+    --text-heading-md--letter-spacing: -0.005em;
+    --text-heading-md--font-weight: 600;
 
-    --text-tagline: 21px;
-    --text-tagline--line-height: 1.19;
-    --text-tagline--letter-spacing: 0.231px;
-    --text-tagline--font-weight: 600;
+    --text-heading-sm: 16px;
+    --text-heading-sm--line-height: 1.4;
+    --text-heading-sm--font-weight: 600;
 
-    --text-body-strong: 17px;
-    --text-body-strong--line-height: 1.24;
-    --text-body-strong--letter-spacing: -0.374px;
-    --text-body-strong--font-weight: 600;
+    --text-body-lg: clamp(17px, 16.3px + 0.3vw, 18px);
+    --text-body-lg--line-height: 1.6;
+    --text-body-lg--font-weight: 400;
 
-    --text-body: 17px;
-    --text-body--line-height: 1.47;
-    --text-body--letter-spacing: -0.2px;
+    --text-body: 16px;
+    --text-body--line-height: 1.6;
     --text-body--font-weight: 400;
 
-    --text-dense-link: 17px;
-    --text-dense-link--line-height: 2;
-    --text-dense-link--letter-spacing: 0;
-    --text-dense-link--font-weight: 400;
+    --text-body-sm: 14px;
+    --text-body-sm--line-height: 1.5;
+    --text-body-sm--font-weight: 400;
 
-    --text-caption: 14px;
-    --text-caption--line-height: 1.43;
-    --text-caption--letter-spacing: -0.224px;
-    --text-caption--font-weight: 400;
-
-    --text-caption-strong: 14px;
-    --text-caption-strong--line-height: 1.29;
-    --text-caption-strong--letter-spacing: -0.224px;
-    --text-caption-strong--font-weight: 600;
-
-    --text-button-large: 18px;
-    --text-button-large--line-height: 1;
-    --text-button-large--letter-spacing: 0;
-    --text-button-large--font-weight: 500;
-
-    --text-button-utility: 14px;
-    --text-button-utility--line-height: 1.29;
-    --text-button-utility--letter-spacing: -0.224px;
-    --text-button-utility--font-weight: 400;
+    --text-label: 13px;
+    --text-label--line-height: 1.4;
+    --text-label--font-weight: 600;
 
     --text-fine-print: 12px;
-    --text-fine-print--line-height: 1.3;
-    --text-fine-print--letter-spacing: -0.12px;
+    --text-fine-print--line-height: 1.45;
     --text-fine-print--font-weight: 400;
 
-    --text-micro-legal: 10px;
-    --text-micro-legal--line-height: 1.3;
-    --text-micro-legal--letter-spacing: -0.08px;
-    --text-micro-legal--font-weight: 400;
-
-    --text-nav-link: 13px;
-    --text-nav-link--line-height: 1;
-    --text-nav-link--letter-spacing: -0.12px;
-    --text-nav-link--font-weight: 400;
-
-    /* DESIGN.md rounded.* */
-    --radius-xs: 5px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --radius-xl: 24px;
+    /* Radius — DESIGN-v2 §6. */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
     --radius-pill: 9999px;
 
     /*
-     * DESIGN.md "Elevation & Depth". Two tokens, and only two, because the
-     * document only defines two shadowed levels; everything else on that table
-     * is flat or a 1px hairline, which the border tokens already cover.
-     *
-     *   shadow-soft-card  a card that needs to separate from a similar background
-     *   shadow-image      photography that needs visual weight
-     *
-     * Tailwind's own shadow-* scale is deliberately unused on public surfaces.
-     * DESIGN.md is explicit that shadows "should establish separation, not
-     * create a floating SaaS-card aesthetic" and that they must not go on every
-     * card. A token named after the level makes shadow-xl-on-everything the
-     * deliberate choice rather than the default.
+     * Elevation — DESIGN-v2 §6 asks for border contrast before shadow and warns
+     * against heavy shadows on every card. Two tokens, used sparingly.
      */
     --shadow-soft-card: 0 8px 30px rgba(16, 24, 40, 0.06);
     --shadow-image: 0 8px 30px rgba(0, 0, 0, 0.16);
 
-    /* shadcn semantic tokens, backed by the CSS variables below. */
+    /* Semantic tokens, backed by the CSS variables in :root / .dark below. */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
 
@@ -158,75 +129,35 @@
     --color-ring: var(--ring);
 
     /*
-     * Brand palette from DESIGN.md colors.*. Named so components can reach for
-     * a documented surface directly: bg-navy, text-gold, bg-gold-light.
-     * Deliberately no --color-body, because a body colour would collide with
-     * the --text-body typography token above.
+     * Brand and neutral utilities named in DESIGN-v2 §2: bg-navy, bg-gold-soft,
+     * bg-primary-soft, bg-canvas-subtle, border-border-subtle, text-subtle.
      */
-    --color-navy: #01266d;
-    --color-navy-dark: #001a4d;
-    --color-navy-light: #eaf0fa;
-    --color-gold: #fcb027;
-    --color-gold-dark: #d99400;
-    --color-gold-light: #fff4d6;
-    --color-ink: #111827;
-    --color-canvas-soft: #f8f9fb;
-    /*
-     * Near-white, and NOT a duplicate of --background. DESIGN.md lists both
-     * `canvas` (#FFFFFF) and `surface-pearl` (#FCFCFD) as separate colours and
-     * gives pearl a distinct job: `button-pearl-capsule`, a secondary control
-     * that has to read as a step below the canvas rather than on top of it. The
-     * two values are three hex digits apart, so this looks like an accidental
-     * copy-paste to anyone reading it cold. It is deliberate; collapsing them
-     * would flatten that control into the background.
-     */
-    --color-surface-pearl: #fcfcfd;
-    --color-surface-chip: #e5e7eb;
-    --color-hairline: #e4e7ec;
-    --color-divider-soft: #f2f4f7;
-    --color-ink-muted: #667085;
-    --color-ink-muted-strong: #475467;
-    --color-ink-muted-soft: #98a2b3;
-    /*
-     * The red to use when red is TEXT rather than a fill: the active navigation
-     * item, a link inside rich text, the eyebrow above a heading, the text on the
-     * destructive Alert.
-     *
-     * It exists because one value cannot do both jobs in dark mode. The brand
-     * red fills a button well - white on #AB020E is 7.65:1 - but as text on the
-     * dark canvas it measures 2.28:1, because a dark red has no luminance left
-     * to offer against a dark surface. DESIGN.md already names the answer in
-     * its palette as primary-on-dark (#FF6670), which measures 6.14:1 on the same
-     * canvas; this token just points at it in dark mode and at primary in light.
-     *
-     * Fill surfaces keep using bg-primary. Text uses this.
-     *
-     * @see docs/DECISIONS.md D-32
-     */
-    --color-red-on-surface: var(--red-on-surface);
-    /*
-     * red-on-surface is what a red BORDER wants too, not just red text.
-     *
-     * An outline button or the border of a focused card is a UI boundary, and
-     * WCAG 1.4.11 wants 3:1 between a boundary and what sits behind it. The
-     * brand red on the dark canvas is 2.28:1, so a red-bordered control would
-     * dissolve into the page; primary-on-dark is 6.14:1 there.
-     */
-    /*
-     * DESIGN.md colors.red-soft, and it replaces --color-primary-light.
-     *
-     * D-22 recorded primary-light as a colour-mix derived from primary to stand
-     * in for a token the document then left undefined. v1.1 defines it properly
-     * as red-soft (#FDE7E9), so the derived name is gone: two names for one
-     * colour is how a palette starts drifting. The dark value is red-soft-dark
-     * and is declared in the .dark block below.
-     */
-    --color-red-soft: var(--red-soft);
-    --color-primary-hover: #8f010b;
-    --color-primary-focus: #c51624;
-    --color-red-on-dark: #ff6670;
+    --color-canvas-subtle: var(--canvas-subtle);
+    --color-surface-raised: var(--surface-raised);
+    --color-border-subtle: var(--border-subtle);
+    --color-control: var(--control);
+    --color-subtle: var(--subtle);
 
-    /* Charts are not specified in DESIGN.md, so they reuse documented hues. */
+    --color-navy: var(--navy);
+    --color-navy-deep: var(--navy-deep);
+    --color-navy-soft: var(--navy-soft);
+    --color-gold: var(--gold);
+    --color-gold-soft: var(--gold-soft);
+
+    --color-primary-hover: var(--primary-hover);
+    --color-primary-active: var(--primary-active);
+    --color-primary-soft: var(--primary-soft);
+    --color-primary-soft-dark: var(--primary-soft-dark);
+    /*
+     * The red to use when red is TEXT, BORDER or a FOCUS RING rather than a
+     * fill. In light mode it is the brand red; in dark mode a dark red has no
+     * luminance left against a dark surface, so it points at the lighter
+     * accessible tint DESIGN-v2 allows (#F06A73). The primary token itself
+     * never changes. See D-72.
+     */
+    --color-primary-on-surface: var(--primary-on-surface);
+
+    /* Charts are not specified in DESIGN-v2; they reuse documented hues. */
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
     --color-chart-3: var(--chart-3);
@@ -244,203 +175,134 @@
 }
 
 /*
-| Light theme — DESIGN.md semantic: block.
+| Light theme — DESIGN-v2 §2 "Light theme neutrals" + "Semantic tokens".
 */
 :root {
     --background: #ffffff; /* canvas */
-    --foreground: #111827; /* ink */
+    --foreground: #171a21; /* text-primary */
 
-    --card: #ffffff; /* canvas */
-    --card-foreground: #111827; /* ink */
+    --card: #ffffff; /* surface */
+    --card-foreground: #171a21; /* text-primary */
 
-    --popover: #fcfcfd; /* surface-pearl - Admin Surface Hierarchy */
-    --popover-foreground: #111827; /* ink */
+    --popover: #ffffff; /* surface-raised */
+    --popover-foreground: #171a21; /* text-primary */
 
-    --primary: #ab020e;
-    --primary-foreground: #ffffff; /* on-primary */
+    --primary: #ab020e; /* primary — fixed */
+    --primary-foreground: #ffffff;
 
-    --secondary: #eaf0fa; /* navy-light */
-    --secondary-foreground: #001a4d; /* navy-dark */
+    --secondary: #eaf0fa; /* navy-soft */
+    --secondary-foreground: #001a4d; /* navy-deep */
 
-    --muted: #f8f9fb; /* canvas-soft */
-    --muted-foreground: #667085; /* body-muted */
+    --muted: #f7f8fa; /* canvas-subtle */
+    --muted-foreground: #626b79; /* text-muted */
 
-    --accent: #fff4d6; /* gold-light */
+    --accent: #fff4d6; /* gold-soft */
     /*
-     * DESIGN.md maps accent-foreground to gold-dark (#D99400), but that pair
-     * measures 2.34:1 against the gold-light accent surface, which fails WCAG
-     * AA even for large text. Button's outline and ghost variants render text
-     * on exactly this pair, so following the document literally would ship
-     * unreadable hover text.
-     *
-     * navy-dark is the alternative the document already supplies for dark text
-     * on a soft surface and measures 14.62:1. Divergence recorded in D-22.
-     * gold-dark stays available as --color-gold-dark for decorative use, just
-     * not as text on a light background.
+     * text-primary on gold-soft, not gold: gold on its own tint fails AA. navy
+     * is the documented dark text on a soft surface (D-72).
      */
-    --accent-foreground: #001a4d; /* navy-dark, not gold-dark - see D-22 */
+    --accent-foreground: #001a4d; /* navy-deep */
 
-    /* DESIGN.md maps destructive onto primary, so a delete action looks like
-       the primary red rather than a generic warning colour. */
-    --destructive: #ab020e;
+    --destructive: #ab020e; /* primary */
     --destructive-foreground: #ffffff;
 
-    /*
-     * The red as text, in light mode. Identical to primary here, which is the
-     * point: the split between this and primary exists only because dark mode
-     * cannot use the same value for both. See the .dark block.
-     */
-    --red-on-surface: #ab020e;
-    /* DESIGN.md colors.red-soft, replacing the derived primary-light from D-22. */
-    --red-soft: #fde7e9;
+    --border: #e0e3e8;
+    --input: #e0e3e8;
+    --ring: #ab020e; /* primary */
 
-    --border: #e4e7ec; /* hairline */
-    --input: #e4e7ec; /* hairline */
-    --ring: #c51624; /* primary-focus */
+    --canvas-subtle: #f7f8fa;
+    --surface-raised: #ffffff;
+    --border-subtle: #eceef2;
+    --control: #ffffff;
+    --subtle: #77808d; /* text-subtle */
+
+    --navy: #01266d;
+    --navy-deep: #001a4d;
+    --navy-soft: #eaf0fa;
+    --gold: #fcb027;
+    --gold-soft: #fff4d6;
+
+    --primary-hover: #8f010b;
+    --primary-active: #760109;
+    --primary-soft: #fbeaec;
+    --primary-soft-dark: #35191d;
+    --primary-on-surface: #ab020e;
 
     --chart-1: #01266d; /* navy */
     --chart-2: #ab020e; /* primary */
     --chart-3: #fcb027; /* gold */
-    --chart-4: #667085; /* body-muted */
-    --chart-5: #475467; /* ink-muted-80 */
+    --chart-4: #626b79; /* text-muted */
+    --chart-5: #343a46; /* text-body */
 
-    /*
- * Admin Surface Hierarchy, light mode: app canvas canvas-soft, sidebar and
- * header canvas, content panel canvas.
- *
- * The app canvas is NOT --background. --background is semantic.background, which
- * DESIGN.md defines as canvas and which the public pages use as their page
- * background. The admin needs a different canvas behind its panels, and the two
- * cannot share one body colour, so the admin applies canvas-soft at its own
- * shell (app-shell.tsx) rather than redefining a global token. See D-32.
- */
-    --sidebar: #ffffff; /* canvas */
-    --sidebar-foreground: #111827; /* ink */
+    /* Admin surface hierarchy, light: app canvas canvas-subtle, panels canvas. */
+    --sidebar: #ffffff;
+    --sidebar-foreground: #171a21;
     --sidebar-primary: #ab020e;
     --sidebar-primary-foreground: #ffffff;
-    /*
-     * red-soft, and it replaces navy-light.
-     *
-     * DESIGN.md assigns red-soft to the selected navigation and active tab
-     * state, with red as the selected text - "The active item uses HSPMTB Red,
-     * a subtle red-tinted background". The navy-light that was here marked the
-     * active row in blue, which is not the brand's choice.
-     *
-     * One consequence worth stating plainly: ui/sidebar.tsx uses this same pair
-     * for `hover:` as well as for `data-[active=true]:`, and the two states
-     * cannot be told apart without editing a generated file. Hovering a sidebar
-     * row therefore tints it red too. That is on-brand rather than wrong - red
-     * is the interactive colour throughout - but it is a visible change and it
-     * is recorded in D-32 rather than left to be discovered.
-     */
-    --sidebar-accent: #fde7e9; /* red-soft */
-    --sidebar-accent-foreground: #ab020e; /* primary */
-    --sidebar-border: #e4e7ec; /* hairline */
-    --sidebar-ring: #c51624; /* primary-focus */
+    --sidebar-accent: #fbeaec; /* primary-soft */
+    --sidebar-accent-foreground: #ab020e;
+    --sidebar-border: #e0e3e8;
+    --sidebar-ring: #ab020e;
 }
 
 /*
-| Dark theme — DESIGN.md v1.1, "Dark Mode — Soft Neutral".
-|
-| Every value below is a documented token. Phase 01 derived this palette from
-| the navy ramp with color-mix() because the document said dark mode had not been
-| established. v1.1 establishes it, and states the rule that invalidated the old
-| one outright:
-|
-|     "Do not use HSPMTB Navy as the global page background."
-|     "Do not use pure black (#000000) or pure white (#FFFFFF) as the dominant
-|      dark-mode canvas/text pair."
-|
-| So there is no navy in the canvas, the cards or the text, and no color-mix()
-| anywhere below: each value is one of the fourteen dark-* colours the document
-| defines. D-22 section 3 recorded the old palette and is superseded by D-32.
-|
-| Navy still appears in this block - as secondary's surface and as the sidebar
-| accent - because the document keeps it for "selected accents, active
-| structural elements, or editorial sections", which is exactly those two jobs.
-|
-| Two values depart from a literal reading, both measured rather than guessed:
-|
-|   --ring        The document's semantic.dark.ring is primary-focus (#C51624),
-|                 which measures 2.92:1 against dark-canvas and 2.42:1 against
-|                 dark-surface. WCAG 2.2 SC 2.4.11 wants 3:1 from a focus
-|                 indicator to what sits next to it, so a ring that is darker
-|                 than its own background is invisible in the one place it is
-|                 needed. primary-on-dark (#FF6670) is the same colour the
-|                 document already offers for red on dark, at 6.14:1.
-|
-|   --red-on-surface   Semantic.dark.primary is primary (#AB020E), and it is
-|                 honoured here: --primary is that red, because a button filled
-|                 with it carries white text at 7.65:1 and the brand red should
-|                 stay the action signal. But #AB020E used as TEXT measures
-|                 2.28:1 on dark-canvas, so red text points at a separate token.
-|
-| Every foreground/background pair in this block measures 4.98:1 or better.
+| Dark theme — DESIGN-v2 §2 "Dark theme neutrals". Neutral charcoal surfaces,
+| never a saturated navy canvas. Every foreground/background pair targets
+| 4.5:1 text and 3:1 border/ring.
 */
 .dark {
-    --background: #171a1f; /* dark-canvas */
-    --foreground: #f3f4f6; /* dark-ink */
+    --background: #111318; /* dark-canvas */
+    --foreground: #f3f4f6; /* dark-text-primary */
 
-    --card: #232a33; /* dark-surface */
-    --card-foreground: #f3f4f6; /* dark-ink */
+    --card: #1d2129; /* dark-surface */
+    --card-foreground: #f3f4f6; /* dark-text-primary */
 
-    /* Dialogs, popovers and dropdowns sit one step above the content they open
-       from, which is what makes them readable without a heavy shadow. */
-    --popover: #2a323d; /* dark-surface-elevated */
-    --popover-foreground: #f3f4f6; /* dark-ink */
+    --popover: #252a34; /* dark-surface-raised */
+    --popover-foreground: #f3f4f6;
 
-    --primary: #ab020e; /* primary - unchanged from light */
-    --primary-foreground: #ffffff; /* on-primary */
+    --primary: #ab020e; /* primary — unchanged */
+    --primary-foreground: #ffffff;
 
-    --secondary: #223653; /* dark-navy-soft */
-    --secondary-foreground: #f3f4f6; /* dark-ink */
+    --secondary: #252a34; /* dark-surface-raised */
+    --secondary-foreground: #f3f4f6;
 
-    --muted: #1c2229; /* dark-canvas-soft */
-    --muted-foreground: #aab4c0; /* dark-muted */
+    --muted: #171a21; /* dark-canvas-subtle */
+    --muted-foreground: #a6adba; /* dark-text-muted */
 
-    /* Dark gold is a ceremonial surface, not a highlight. The document is
-       explicit that gold must not become a large or glowing dark surface, so
-       this is the darkened gold ramp rather than the brand gold. */
-    --accent: #3a2e17; /* dark-gold-soft */
-    --accent-foreground: #fcb027; /* gold */
+    --accent: #252a34;
+    --accent-foreground: #f3f4f6;
 
-    --destructive: #ab020e; /* primary */
-    --destructive-foreground: #ffffff; /* on-primary */
+    --destructive: #ab020e;
+    --destructive-foreground: #ffffff;
 
-    --border: #39424e; /* dark-border */
-    --input: #39424e; /* dark-border */
-    --ring: #ff6670; /* primary-on-dark - see the note above */
+    --border: #343a46; /* dark-border */
+    --input: #343a46;
+    --ring: #f06a73; /* lighter accessible red tint for the dark canvas */
 
-    /* See the note above: this is the one value that cannot be the brand red. */
-    --red-on-surface: #ff6670; /* primary-on-dark */
-    /* DESIGN.md colors.red-soft-dark. */
-    --red-soft: #3a171a;
+    --canvas-subtle: #171a21; /* dark-canvas-subtle */
+    --surface-raised: #252a34; /* dark-surface-raised */
+    --border-subtle: #292e38; /* dark-border-subtle */
+    --control: #191d24; /* dark-control */
+    --subtle: #8992a1; /* dark-text-subtle */
 
-    /*
-     * Charts are not specified in DESIGN.md, so they reuse the palette the
-     * document defines for dark surfaces and text: dark-body for the strongest
-     * series, red-on-surface for the brand one, gold for the ceremonial one.
-     */
-    --chart-1: #e5e7eb; /* dark-body */
-    --chart-2: #ff6670; /* primary-on-dark */
-    --chart-3: #fcb027; /* gold */
-    --chart-4: #aab4c0; /* dark-muted */
-    --chart-5: #7f8a98; /* dark-subtle */
+    --primary-soft: #35191d; /* primary-soft-dark */
+    --primary-on-surface: #f06a73; /* lighter accessible red tint */
 
-    /*
-     * Admin Surface Hierarchy, dark: the sidebar and the header are one step
-     * above the app canvas, so the sidebar reads as a distinct region without
-     * being a colour block. dark-subtle is the disabled-item colour the document
-     * names for that purpose.
-     */
-    --sidebar: #1c2229; /* dark-canvas-soft */
-    --sidebar-foreground: #f3f4f6; /* dark-ink */
-    --sidebar-primary: #ab020e; /* primary */
-    --sidebar-primary-foreground: #ffffff; /* on-primary */
-    --sidebar-accent: #3a171a; /* red-soft-dark */
-    --sidebar-accent-foreground: #ff6670; /* primary-on-dark */
-    --sidebar-border: #39424e; /* dark-border */
-    --sidebar-ring: #ff6670; /* primary-on-dark */
+    --chart-1: #f3f4f6;
+    --chart-2: #f06a73;
+    --chart-3: #fcb027;
+    --chart-4: #a6adba;
+    --chart-5: #8992a1;
+
+    /* Admin surface hierarchy, dark: sidebar/header one step above the canvas. */
+    --sidebar: #171a21; /* dark-canvas-subtle */
+    --sidebar-foreground: #f3f4f6;
+    --sidebar-primary: #ab020e;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #35191d; /* primary-soft-dark */
+    --sidebar-accent-foreground: #f06a73;
+    --sidebar-border: #343a46;
+    --sidebar-ring: #f06a73;
 }
 
 @layer base {
@@ -454,9 +316,8 @@
     }
 
     /*
-     * Removes the 300ms tap delay on touch devices. It does not by itself
-     * provide the 44x44px minimum DESIGN.md asks for; that is handled by the
-     * size variants of the interactive primitives.
+     * Removes the 300ms tap delay on touch devices. The 44x44px minimum comes
+     * from the interactive primitives' size variants, not from here.
      */
     button,
     [role='button'],
@@ -465,34 +326,16 @@
     }
 
     /*
-     * Deliberately no global :focus-visible override. The shadcn primitives
-     * already carry focus-visible ring utilities, and a global outline would
-     * draw a second indicator on top of those. Elements without a primitive
-     * keep the browser default, which is visible on its own.
+     * No global :focus-visible override: the shadcn primitives already carry
+     * focus-visible ring utilities, and a global outline would draw a second
+     * indicator on top of those.
      */
 }
 
 /*
- * Prose styling for stored rich text.
- *
- * Two consumers: the Tiptap editing surface, and the public component that
- * renders the stored HTML. They share one class so the administrator sees the
- * paragraph spacing they will get and the visitor sees the same thing.
- *
- * Written here rather than pulled from @tailwindcss/typography because DESIGN.md
- * asks that typography map to the documented tokens instead of introducing
- * sizes of its own, and a plugin brings its own scale. Every value below is a
- * token from the @theme block above.
- *
- * The elements matched here are exactly config/html.php's allowlist, so nothing
- * needs styling for a tag the sanitizer would have removed anyway.
- *
- * The heading steps mirror the mapping components/text.tsx decided for h1-h4
- * (h1 display-lg, h2 display-md, h3 tagline, h4 body-strong). They were all
- * text-body-strong here once, which is 17px: the document outline carried no
- * visual hierarchy at all and picking H2 in the editor changed nothing on
- * screen. There is no h1 rule because the allowlist has no h1 - h1 is the page
- * title. See D-51.
+ * Prose styling for stored rich text, using the v2 tokens. The heading steps
+ * mirror the Text mapping (h2 display-md, h3 heading-lg, h4 heading-sm); there
+ * is no h1 because the allowlist has no h1. See D-51 and D-72.
  */
 @layer components {
     .rich-text {
@@ -508,11 +351,11 @@
     }
 
     .rich-text h3 {
-        @apply mt-6 font-display text-tagline first:mt-0;
+        @apply mt-6 font-display text-heading-lg first:mt-0;
     }
 
     .rich-text h4 {
-        @apply mt-6 text-body-strong first:mt-0;
+        @apply mt-6 text-heading-sm first:mt-0;
     }
 
     .rich-text s {
@@ -520,11 +363,11 @@
     }
 
     .rich-text code {
-        @apply rounded-sm bg-muted px-1.5 py-0.5 font-mono text-caption;
+        @apply rounded-sm bg-muted px-1.5 py-0.5 font-mono text-body-sm;
     }
 
     .rich-text pre {
-        @apply overflow-x-auto rounded-md bg-navy-dark p-4 text-caption text-white;
+        @apply overflow-x-auto rounded-md bg-navy-deep p-4 text-body-sm text-white;
     }
 
     .rich-text pre code {
@@ -536,15 +379,15 @@
     }
 
     .rich-text sup {
-        @apply align-super text-caption;
+        @apply align-super text-body-sm;
     }
 
     .rich-text sub {
-        @apply align-sub text-caption;
+        @apply align-sub text-body-sm;
     }
 
     .rich-text hr {
-        @apply my-6 border-hairline;
+        @apply my-6 border-border;
     }
 
     .rich-text ul {
@@ -557,24 +400,20 @@
 
     .rich-text blockquote {
         /*
-         * The dark override is not optional. text-navy is #01266D, which
-         * measures 1.25:1 against the dark canvas - dark blue on a dark surface
-         * is not a subtle choice, it is invisible. navy-light is the same ramp
-         * read the other way and measures 15.24:1.
-         *
-         * features/admin/akun/pages/profile.tsx already pairs them the same way.
+         * The dark override is not optional: navy is #01266D and measures
+         * 1.25:1 against the dark canvas, so navy-soft is the same ramp read
+         * the other way.
          */
-        @apply border-s-4 border-primary ps-4 text-navy italic dark:text-navy-light;
+        @apply border-s-4 border-primary ps-4 text-navy italic dark:text-navy-soft;
     }
 
     .rich-text a {
         /*
-         * text-red-on-surface, not text-primary. In dark mode primary is the
-         * brand red #AB020E, which is right for a fill and wrong for a link on
-         * a dark surface: 2.28:1. red-on-surface points at primary-on-dark
-         * there and measures 6.14:1 on the same background.
+         * primary-on-surface, not primary: in dark mode the brand red is a fill
+         * colour, and as text on a dark surface it measures 2.28:1.
+         * primary-on-surface points at the lighter tint there.
          */
-        @apply text-red-on-surface underline underline-offset-4 hover:text-primary-hover;
+        @apply text-primary-on-surface underline underline-offset-4 hover:text-primary-hover;
     }
 
     .rich-text img {
@@ -586,7 +425,7 @@
     }
 
     .rich-text figcaption {
-        @apply mt-2 text-caption text-muted-foreground;
+        @apply mt-2 text-body-sm text-muted-foreground;
     }
 
     .rich-text table {
@@ -595,11 +434,11 @@
 
     .rich-text th,
     .rich-text td {
-        @apply border border-hairline px-3 py-2 text-left align-top;
+        @apply border border-border px-3 py-2 text-left align-top;
     }
 
     .rich-text th {
-        @apply bg-muted text-body-strong font-semibold;
+        @apply bg-muted text-heading-sm;
     }
 
     .rich-text .tiptap {
@@ -620,17 +459,8 @@
 | Print
 |--------------------------------------------------------------------------
 |
-| PRD XC-B2 requires the schedule page to have a print stylesheet: no
-| navigation, no banners, clean typography. There was none in this file before
-| Phase 04 — not one @media print anywhere — so this is the first.
-|
-| Two mechanisms, deliberately. Tailwind's print: variant handles the elements a
-| component knows about (the filter, the share buttons), because that keeps the
-| decision next to the markup. These rules handle what markup cannot: the page
-| chrome, which lives in the layout and has no opinion about being printed.
-|
-| The schedule is expected to be printed and carried to church, so it is the
-| thing the rules below protect. Everything else is removed to make room.
+| PRD XC-B2: the schedule page must print cleanly — no navigation, no
+| banners, clean typography.
 |
 */
 
@@ -638,8 +468,6 @@
     /*
      * Chrome. The navbar, the footer and the skip link are the three things a
      * printed schedule cannot use and a visitor will always be told to remove.
-     * Removing them here rather than in the layout means the layout does not
-     * need to know it can be printed.
      */
     header nav,
     header [role='banner'],
@@ -650,8 +478,8 @@
     }
 
     /*
-     * A printed page is paper, not a screen: the soft canvas and the ink-muted
-     * text colour are chosen for a backlit display and cost toner here.
+     * A printed page is paper, not a screen: the soft canvas and muted ink are
+     * chosen for a backlit display and cost toner here.
      */
     body {
         background: #fff !important;
@@ -672,9 +500,7 @@
     }
 
     /*
-     * Links are followed by their URL only where the URL is the point. On a
-     * schedule every link is either a map link or nothing, and printing a
-     * Google Maps URL under every mass makes the page unreadable.
+     * Links are followed by their URL only where the URL is the point.
      */
     a[href^='http']::after {
         content: ' (' attr(href) ')';
@@ -684,7 +510,7 @@
 
     /*
      * The map buttons are a screen affordance; the printed page keeps the
-     * location's name and address, which is what someone needs on paper.
+     * location's name and address.
      */
     [data-test='maps-link'],
     [data-test='location-maps-link'] {
@@ -692,9 +518,8 @@
     }
 
     /*
-     * `print:hidden` already removes the filter, the tabs and the share
-     * buttons. This covers the tab panels' own borders so the surviving one
-     * does not carry a rule that framed the removed sibling.
+     * `print:hidden` already removes the filter, tabs and share buttons. This
+     * covers the tab panels' own borders.
      */
     [role='tabpanel'] {
         border: 0 !important;

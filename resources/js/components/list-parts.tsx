@@ -37,12 +37,12 @@ export function ListHeader({
                     {title}
                 </Text>
                 {description ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {description}
                     </Text>
                 ) : null}
                 {typeof count === 'number' ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {count} data
                     </Text>
                 ) : null}
@@ -76,7 +76,7 @@ export function ListToolbar({
                 onChange={(event) => onSearch(event.target.value)}
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
-                className="h-11 min-w-48 flex-1 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                className="h-11 min-w-48 flex-1 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
             />
             {children}
         </div>
@@ -91,12 +91,12 @@ export function ListEmpty({
     description?: string;
 }) {
     return (
-        <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-            <Text as="p" variant="body-strong">
+        <div className="rounded-lg border border-dashed border-border p-10 text-center">
+            <Text as="p" variant="heading-sm">
                 {title}
             </Text>
             {description ? (
-                <Text as="p" variant="caption" color="muted" className="mt-1">
+                <Text as="p" variant="body-sm" color="muted" className="mt-1">
                     {description}
                 </Text>
             ) : null}
@@ -123,7 +123,7 @@ export function FilterSelect({
             value={value}
             aria-label={label}
             onChange={(event) => onChange(event.target.value)}
-            className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+            className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
         >
             {options.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -139,7 +139,7 @@ export function ResetFilters({ onReset }: { onReset: () => void }) {
         <button
             type="button"
             onClick={onReset}
-            className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
             Reset filter
         </button>

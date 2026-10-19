@@ -31,7 +31,7 @@ export function TabDokumenTerkait({ form, documents, copy, onSubmit }: Props) {
                 <Text as="h3" variant="h3">
                     Dokumen Terkait
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     Pilih dokumen yang perlu dibaca atau diunduh umat sebelum
                     mendaftar layanan ini. Hanya dokumen berstatus Terbit yang
                     dapat ditautkan baru.
@@ -39,7 +39,7 @@ export function TabDokumenTerkait({ form, documents, copy, onSubmit }: Props) {
             </div>
 
             {form.errors.document_ids ? (
-                <Text as="p" variant="caption" className="text-destructive">
+                <Text as="p" variant="body-sm" className="text-destructive">
                     {form.errors.document_ids}
                 </Text>
             ) : null}
@@ -57,7 +57,7 @@ export function TabDokumenTerkait({ form, documents, copy, onSubmit }: Props) {
                         return (
                             <li
                                 key={document.id}
-                                className="flex items-start gap-3 rounded-md border border-hairline p-4"
+                                className="flex items-start gap-3 rounded-md border border-border p-4"
                             >
                                 <Checkbox
                                     id={id}
@@ -80,7 +80,7 @@ export function TabDokumenTerkait({ form, documents, copy, onSubmit }: Props) {
                 </ul>
             )}
 
-            <Text as="p" variant="caption" color="muted">
+            <Text as="p" variant="body-sm" color="muted">
                 {copy.documents_hint ??
                     'Dokumen yang diarsipkan tidak lagi tampil di halaman publik, meskipun tautannya masih tersimpan.'}
             </Text>

@@ -62,7 +62,7 @@ export default function Edit({ pastor, labels, hints, positions }: Props) {
                     />
 
                     {pastor.assignments.length === 0 ? (
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Belum ada riwayat penugasan.
                         </Text>
                     ) : (
@@ -70,13 +70,13 @@ export default function Edit({ pastor, labels, hints, positions }: Props) {
                             {pastor.assignments.map((assignment) => (
                                 <li
                                     key={assignment.id}
-                                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-hairline p-4"
+                                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
                                 >
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                             <Text
                                                 as="span"
-                                                variant="body-strong"
+                                                variant="heading-sm"
                                             >
                                                 {assignment.position_label}
                                             </Text>
@@ -86,7 +86,7 @@ export default function Edit({ pastor, labels, hints, positions }: Props) {
                                         </div>
                                         <Text
                                             as="p"
-                                            variant="caption"
+                                            variant="body-sm"
                                             color="muted"
                                         >
                                             {assignment.start_year ??
@@ -98,7 +98,7 @@ export default function Edit({ pastor, labels, hints, positions }: Props) {
                                         {assignment.description ? (
                                             <Text
                                                 as="p"
-                                                variant="caption"
+                                                variant="body-sm"
                                                 color="muted"
                                             >
                                                 {assignment.description}

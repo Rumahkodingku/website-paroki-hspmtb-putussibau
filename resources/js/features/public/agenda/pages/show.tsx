@@ -14,7 +14,7 @@ import {
 import { home } from '@/routes';
 import { ics as eventIcs, index as agendaIndex } from '@/routes/agenda';
 import type { AgendaShowProps } from '../types';
-import { EventCard } from '../components/event-card';
+import { EventCard } from '@/components/event-card';
 import { EventJsonLd } from '../components/event-json-ld';
 
 /*
@@ -67,7 +67,7 @@ export default function Show({ event, related }: AgendaShowProps) {
                     <article className="space-y-6">
                         <header className="space-y-4">
                             {event.category ? (
-                                <Text as="p" variant="tagline" color="brand">
+                                <Text as="p" variant="heading-md" color="brand">
                                     {event.category.name}
                                 </Text>
                             ) : null}
@@ -100,13 +100,13 @@ export default function Show({ event, related }: AgendaShowProps) {
                                 </div>
                             ) : null}
 
-                            <dl className="grid gap-3 border-y border-hairline py-4">
+                            <dl className="grid gap-3 border-y border-border py-4">
                                 <div className="flex flex-wrap items-baseline gap-x-3">
-                                    <dt className="w-28 text-micro-legal text-muted-foreground uppercase">
+                                    <dt className="w-28 text-fine-print text-muted-foreground uppercase">
                                         Waktu
                                     </dt>
                                     <dd>
-                                        <Text as="p" variant="body-strong">
+                                        <Text as="p" variant="heading-sm">
                                             {formatWibDate(
                                                 event.start_at,
                                                 displayTimezone,
@@ -131,7 +131,7 @@ export default function Show({ event, related }: AgendaShowProps) {
 
                                 {event.location_name ? (
                                     <div className="flex flex-wrap items-baseline gap-x-3">
-                                        <dt className="w-28 text-micro-legal text-muted-foreground uppercase">
+                                        <dt className="w-28 text-fine-print text-muted-foreground uppercase">
                                             Lokasi
                                         </dt>
                                         <dd>
@@ -140,14 +140,14 @@ export default function Show({ event, related }: AgendaShowProps) {
                                                     href={event.location_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                                    className="rounded-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                                 >
                                                     {event.location_name}
                                                 </a>
                                             ) : (
                                                 <Text
                                                     as="p"
-                                                    variant="body-strong"
+                                                    variant="heading-sm"
                                                 >
                                                     {event.location_name}
                                                 </Text>
@@ -178,7 +178,7 @@ export default function Show({ event, related }: AgendaShowProps) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 data-test="add-to-google"
-                                className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm text-primary-foreground hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm text-primary-foreground hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                             >
                                 Tambahkan ke Google Calendar
                             </a>
@@ -195,7 +195,7 @@ export default function Show({ event, related }: AgendaShowProps) {
                                 <a
                                     href={eventIcs(event.slug).url}
                                     data-test="download-ics"
-                                    className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                                    className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
                                 >
                                     Unduh kalender (.ics)
                                 </a>

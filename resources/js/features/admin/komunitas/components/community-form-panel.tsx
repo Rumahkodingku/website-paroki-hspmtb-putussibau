@@ -16,7 +16,7 @@ export function CommunityFormPanel({
                 <Text as="h3" variant="h3">
                     {title}
                 </Text>
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {description}
                 </Text>
             </div>

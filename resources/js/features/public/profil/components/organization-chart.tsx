@@ -23,22 +23,22 @@ export function OrganizationChart({
             {members.map((member) => (
                 <li
                     key={member.id}
-                    className="flex items-center gap-4 rounded-lg border border-hairline bg-background p-4"
+                    className="flex items-center gap-4 rounded-lg border border-border bg-background p-4"
                 >
                     {member.photo ? (
                         <img
                             src={member.photo}
                             alt={member.photo_alt ?? member.name}
                             loading="lazy"
-                            className="size-14 shrink-0 rounded-full border border-hairline object-cover"
+                            className="size-14 shrink-0 rounded-full border border-border object-cover"
                         />
                     ) : null}
 
                     <div>
-                        <Text as="p" variant="body-strong">
+                        <Text as="p" variant="heading-sm">
                             {member.name}
                         </Text>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {member.position}
                         </Text>
                     </div>

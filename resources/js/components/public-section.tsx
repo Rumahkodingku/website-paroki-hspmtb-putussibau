@@ -20,7 +20,7 @@ const PADDING = {
 
 const SURFACE = {
     default: 'bg-background text-foreground',
-    soft: 'bg-canvas-soft text-foreground',
+    soft: 'bg-canvas-subtle text-foreground',
     navy: 'bg-navy text-white',
 } as const;
 

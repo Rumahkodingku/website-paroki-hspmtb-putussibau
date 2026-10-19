@@ -33,6 +33,8 @@ const CONFIGURED: ContactDetails = {
     phone: { display: '0812-3456-7890', tel: 'tel:+6281234567890' },
     email: 'sekretariat@example.test',
     officeHours: 'Senin–Jumat: 08.00–15.00 WIB\nSabtu: Tutup',
+    mapsEmbedUrl: 'https://www.google.com/maps?q=Paroki&z=17&output=embed',
+    mapsLink: 'https://www.google.com/maps/place/Paroki/@-0.02,111.7,17z',
 };
 
 describe('HomeContactSection', () => {
@@ -102,5 +104,47 @@ describe('HomeContactSection', () => {
         );
 
         expect(screen.queryByText('Jam Layanan')).toBeNull();
+    });
+
+    it('renders the map and directions when the shared contact has them', () => {
+        renderWithInertia(<HomeContactSection contact={CONFIGURED} />);
+
+        expect(screen.getByTitle('Peta lokasi paroki')).toHaveAttribute(
+            'src',
+            'https://www.google.com/maps?q=Paroki&z=17&output=embed',
+        );
+        expect(
+            screen.getByRole('link', { name: 'Petunjuk Arah' }),
+        ).toHaveAttribute(
+            'href',
+            'https://www.google.com/maps/place/Paroki/@-0.02,111.7,17z',
+        );
+    });
+
+    it('renders the block when only a map or directions link exists', () => {
+        renderWithInertia(
+            <HomeContactSection
+                contact={{
+                    ...EMPTY,
+                    mapsEmbedUrl: CONFIGURED.mapsEmbedUrl,
+                }}
+            />,
+        );
+
+        expect(
+            screen.getByRole('heading', { name: 'Hubungi Kami' }),
+        ).toBeInTheDocument();
+        expect(screen.getByTitle('Peta lokasi paroki')).toBeInTheDocument();
+    });
+
+    it('hides the map too when home_show_contact is false', () => {
+        const { container } = renderWithInertia(
+            <HomeContactSection
+                contact={{ ...CONFIGURED, homeShowContact: false }}
+            />,
+        );
+
+        expect(container).toBeEmptyDOMElement();
+        expect(screen.queryByTitle('Peta lokasi paroki')).toBeNull();
     });
 });

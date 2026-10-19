@@ -33,7 +33,7 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
                         as="p"
                         variant="body"
                         color="muted"
-                        className="mt-10 rounded-lg border border-dashed border-hairline p-6"
+                        className="mt-10 rounded-lg border border-dashed border-border p-6"
                     >
                         Belum ada layanan yang dipublikasikan. Silakan kembali
                         lagi nanti.

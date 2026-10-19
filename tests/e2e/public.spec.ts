@@ -25,8 +25,76 @@ test.describe('situs publik', () => {
         const response = await page.goto('/');
 
         expect(response?.status()).toBe(200);
-        await expect(page).toHaveTitle(/Selamat Datang/);
+        await expect(page).toHaveTitle(/HSPMTB|Beranda/);
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    });
+
+    test('beranda menampilkan hero, CTA, dan pintasan tanpa placeholder', async ({
+        page,
+    }) => {
+        await page.goto('/');
+
+        await expect(
+            page.getByRole('img', { name: /Foto gereja paroki/ }),
+        ).toBeVisible();
+
+        await expect(
+            page.getByRole('link', { name: 'Lihat Jadwal Misa' }),
+        ).toHaveAttribute('href', '/jadwal-misa');
+        await expect(
+            page.getByRole('link', { name: 'Sejarah Paroki' }),
+        ).toHaveAttribute('href', '/profil/sejarah');
+
+        const shortcuts = page.getByRole('navigation', {
+            name: 'Pintasan beranda',
+        });
+
+        await expect(
+            shortcuts.getByRole('link', { name: /Jadwal Misa/ }),
+        ).toHaveAttribute('href', '/jadwal-misa');
+        await expect(
+            shortcuts.getByRole('link', { name: /Berita & Artikel/ }),
+        ).toHaveAttribute('href', '/berita');
+        await expect(
+            shortcuts.getByRole('link', { name: /Agenda/ }),
+        ).toHaveAttribute('href', '/agenda');
+        await expect(
+            shortcuts.getByRole('link', { name: /Pelayanan/ }),
+        ).toHaveAttribute('href', '/pelayanan');
+
+        // The Phase 01/03 placeholder copy must be gone from the public page.
+        await expect(page.getByText(/\[ISI:/)).toHaveCount(0);
+        await expect(page.getByText(/placeholder fondasi/)).toHaveCount(0);
+    });
+
+    test('CTA beranda membuka halaman jadwal misa', async ({ page }) => {
+        await page.goto('/');
+
+        await page.getByRole('link', { name: 'Lihat Jadwal Misa' }).click();
+
+        await expect(page).toHaveURL(/\/jadwal-misa$/);
+        await expect(page.getByRole('banner')).toBeVisible();
+    });
+
+    test('beranda tetap terbaca dan tidak menampilkan placeholder', async ({
+        page,
+    }) => {
+        await page.goto('/');
+
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+        // The next-mass block always renders: either the resolved mass or the
+        // polite empty state. Which one depends on whether an earlier spec in
+        // this serial run created a schedule, so only the block is asserted.
+        await expect(
+            page.getByRole('heading', {
+                level: 2,
+                name: 'Misa Berikutnya',
+            }),
+        ).toBeVisible();
+
+        await expect(page.getByText(/\[ISI:/)).toHaveCount(0);
+        await expect(page.getByText(/placeholder fondasi/)).toHaveCount(0);
     });
 
     test('frontend benar-benar dimuat, bukan halaman tanpa aset', async ({
@@ -115,6 +183,26 @@ test.describe('situs publik', () => {
         // The persistent shell survived the navigation.
         await expect(page.getByRole('banner')).toBeVisible();
         await expect(page.getByRole('contentinfo')).toBeVisible();
+    });
+
+    /**
+     * The desktop bar is grouped (D-73): a disclosure button opens its section
+     * and a child navigates. Checked at a desktop width because that is where
+     * the grouped bar is the navigation - below lg it is the drawer.
+     */
+    test('menu utama desktop membuka grup dan menavigasi ke anaknya', async ({
+        page,
+    }) => {
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto('/');
+
+        const banner = page.getByRole('banner');
+
+        await banner.getByRole('button', { name: 'Profil' }).click();
+        await banner.getByRole('link', { name: 'Pastor' }).click();
+
+        await expect(page).toHaveURL(/\/profil\/pastor$/);
+        await expect(page.getByRole('banner')).toBeVisible();
     });
 
     /**

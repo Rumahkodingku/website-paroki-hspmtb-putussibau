@@ -8,6 +8,7 @@ import {
     Phone,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { ContactMap } from '@/components/contact-map';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
 import { Text } from '@/components/text';
@@ -99,15 +100,16 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
         });
     }
 
-    if (items.length === 0) {
+    const hasMap = Boolean(contact.mapsEmbedUrl || contact.mapsLink);
+
+    if (items.length === 0 && !hasMap) {
         return null;
     }
 
     return (
-        <PublicSection surface="soft">
+        <PublicSection>
             <div className="space-y-8">
                 <SectionHeading
-                    eyebrow="Kontak"
                     title="Hubungi Kami"
                     description="Alamat dan kanal komunikasi sekretariat paroki."
                     action={
@@ -120,60 +122,69 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
                     }
                 />
 
-                <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((item) => {
-                        const Icon = item.icon;
-                        const value = (
-                            <Text
-                                as="span"
-                                variant="body"
-                                color="muted"
-                                className="break-words whitespace-pre-line"
-                            >
-                                {item.value}
-                            </Text>
-                        );
+                {items.length > 0 ? (
+                    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {items.map((item) => {
+                            const Icon = item.icon;
+                            const value = (
+                                <Text
+                                    as="span"
+                                    variant="body"
+                                    color="muted"
+                                    className="wrap-break-word whitespace-pre-line"
+                                >
+                                    {item.value}
+                                </Text>
+                            );
 
-                        return (
-                            <li
-                                key={item.key}
-                                className="flex items-start gap-3"
-                            >
-                                <Icon
-                                    className="mt-0.5 size-5 shrink-0 text-red-on-surface"
-                                    aria-hidden="true"
-                                />
+                            return (
+                                <li
+                                    key={item.key}
+                                    className="flex items-start gap-3"
+                                >
+                                    <Icon
+                                        className="mt-0.5 size-5 shrink-0 text-primary-on-surface"
+                                        aria-hidden="true"
+                                    />
 
-                                <div className="space-y-1">
-                                    <Text
-                                        as="p"
-                                        variant="caption-strong"
-                                        color="foreground"
-                                    >
-                                        {item.label}
-                                    </Text>
-
-                                    {item.href ? (
-                                        <a
-                                            href={item.href}
-                                            {...(item.external
-                                                ? {
-                                                      target: '_blank',
-                                                      rel: 'noopener noreferrer',
-                                                  }
-                                                : {})}
-                                            className="transition-colors hover:text-red-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                                    <div className="space-y-1">
+                                        <Text
+                                            as="p"
+                                            variant="label"
+                                            color="foreground"
                                         >
-                                            {value}
-                                        </a>
-                                    ) : (
-                                        value
-                                    )}
-                                </div>
-                            </li>
-                        );
-                    })}
-                </ul>
+                                            {item.label}
+                                        </Text>
+
+                                        {item.href ? (
+                                            <a
+                                                href={item.href}
+                                                {...(item.external
+                                                    ? {
+                                                          target: '_blank',
+                                                          rel: 'noopener noreferrer',
+                                                      }
+                                                    : {})}
+                                                className="transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                                            >
+                                                {value}
+                                            </a>
+                                        ) : (
+                                            value
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : null}
+
+                {hasMap ? (
+                    <ContactMap
+                        embedUrl={contact.mapsEmbedUrl}
+                        directionsUrl={contact.mapsLink}
+                    />
+                ) : null}
             </div>
         </PublicSection>
     );

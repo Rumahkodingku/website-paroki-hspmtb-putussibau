@@ -118,7 +118,7 @@ export default function Index({ items, narrative, filters }: Props) {
                             preserveScroll: true,
                         });
                     }}
-                    className="space-y-4 rounded-lg border border-hairline p-4"
+                    className="space-y-4 rounded-lg border border-border p-4"
                 >
                     <RichTextEditor
                         id="history-narrative"

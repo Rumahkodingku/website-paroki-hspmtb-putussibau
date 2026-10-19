@@ -41,7 +41,7 @@ export default function Wilayah({ area }: Props) {
                             as="p"
                             variant="body"
                             color="muted"
-                            className="rounded-lg border border-dashed border-hairline p-6"
+                            className="rounded-lg border border-dashed border-border p-6"
                         >
                             Informasi wilayah pelayanan belum dipublikasikan.
                         </Text>
@@ -52,7 +52,7 @@ export default function Wilayah({ area }: Props) {
                             src={area.map}
                             alt="Peta wilayah pelayanan paroki"
                             loading="lazy"
-                            className="w-full rounded-xl border border-hairline object-cover"
+                            className="w-full rounded-xl border border-border object-cover"
                         />
                     ) : null}
 
@@ -61,9 +61,9 @@ export default function Wilayah({ area }: Props) {
                             href={area.map_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-primary-on-surface hover:underline"
                         >
-                            <Text as="span" variant="caption-strong">
+                            <Text as="span" variant="label">
                                 Buka peta
                             </Text>
                             <ExternalLink
@@ -73,7 +73,7 @@ export default function Wilayah({ area }: Props) {
                         </a>
                     ) : null}
 
-                    <div className="flex flex-col items-start gap-3 border-t border-hairline pt-6">
+                    <div className="flex flex-col items-start gap-3 border-t border-border pt-6">
                         <Text as="p" variant="body" color="muted">
                             Daftar rinci stasi, wilayah, dan lingkungan beserta
                             pengurusnya tersedia pada halaman berikut.

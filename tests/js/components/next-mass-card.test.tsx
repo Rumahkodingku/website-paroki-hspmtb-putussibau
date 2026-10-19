@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { render, screen, within } from '@testing-library/react';
-import { NextMassCard } from '@/features/public/jadwal-misa/components/next-mass-card';
+import { NextMassCard } from '@/components/next-mass-card';
 import type { NextMass } from '@/features/public/jadwal-misa/types';
 
 /*

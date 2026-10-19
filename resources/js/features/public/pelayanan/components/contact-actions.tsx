@@ -52,7 +52,7 @@ export function ContactActions({
             </div>
 
             {contact.phone ? (
-                <Text as="p" variant="caption" color="muted" className="mt-3">
+                <Text as="p" variant="body-sm" color="muted" className="mt-3">
                     {contact.phone}
                 </Text>
             ) : null}

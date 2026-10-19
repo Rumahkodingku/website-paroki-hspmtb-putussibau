@@ -42,11 +42,12 @@ export function Field({
     return (
         <div className="space-y-2">
             <Label htmlFor={id}>
-                {label} {required && <span className="text-red-500">*</span>}
+                {label}{' '}
+                {required && <span className="text-destructive">*</span>}
             </Label>
             <div className="mt-2"> {children}</div>
             {hint ? (
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {hint}
                 </Text>
             ) : null}
@@ -78,7 +79,7 @@ export function ChoiceSelect({
         >
             <SelectTrigger
                 id={id}
-                className="h-11 w-full border-hairline bg-background py-5 font-normal shadow-none focus-visible:border-primary"
+                className="h-11 w-full border-border bg-background py-5 font-normal shadow-none focus-visible:border-primary"
             >
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
@@ -142,7 +143,7 @@ export function FormTextarea({
             rows={rows}
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            className="h-24 w-full resize-none border-hairline shadow-none focus-visible:border-primary"
+            className="h-24 w-full resize-none border-border shadow-none focus-visible:border-primary"
             placeholder={placeholder}
         />
     );
@@ -179,7 +180,7 @@ export function FormInput({
             min={min}
             max={max}
             onChange={(event) => onChange(event.target.value)}
-            className="border-hairline focus-visible:border-primary"
+            className="border-border focus-visible:border-primary"
             placeholder={placeholder}
         />
     );

@@ -73,18 +73,18 @@ export default function DesignSystem() {
                 <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <ParishCard>
                         <ParishCardContent className="flex flex-col gap-2">
-                            <Text as="p" variant="caption-strong" color="muted">
+                            <Text as="p" variant="label" color="muted">
                                 [ISI: label]
                             </Text>
                             <Text
                                 as="p"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 color="foreground"
                             >
                                 [ISI: kartu default]
                             </Text>
                             <Text as="p" variant="fine-print" color="muted">
-                                [ISI: permukaan canvas dengan garis hairline.]
+                                [ISI: permukaan canvas dengan garis border.]
                             </Text>
                         </ParishCardContent>
                     </ParishCard>
@@ -97,12 +97,12 @@ export default function DesignSystem() {
                                 the dark override with it so this label stays
                                 legible when the agenda surface turns dark.
                             */}
-                            <Text as="p" variant="caption-strong" color="brand">
+                            <Text as="p" variant="label" color="brand">
                                 [ISI: label]
                             </Text>
                             <Text
                                 as="p"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 color="foreground"
                             >
                                 [ISI: kartu agenda]
@@ -110,9 +110,9 @@ export default function DesignSystem() {
                             <Text
                                 as="p"
                                 variant="fine-print"
-                                className="text-ink-muted"
+                                className="text-muted-foreground"
                             >
-                                [ISI: permukaan navy-light, sesuai
+                                [ISI: permukaan navy-soft, sesuai
                                 components.agenda-card.]
                             </Text>
                         </ParishCardContent>
@@ -120,12 +120,12 @@ export default function DesignSystem() {
 
                     <ParishCard interactive>
                         <ParishCardContent className="flex flex-col gap-2">
-                            <Text as="p" variant="caption-strong" color="muted">
+                            <Text as="p" variant="label" color="muted">
                                 [ISI: label]
                             </Text>
                             <Text
                                 as="p"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 color="foreground"
                             >
                                 <LinkLike>[ISI: kartu interaktif]</LinkLike>
@@ -178,7 +178,7 @@ export default function DesignSystem() {
                     description="[ISI: satu komponen untuk empat daftar kosong: berita, agenda, album, dokumen. Isinya decided oleh pemanggil.]"
                 />
 
-                <div className="mt-10 rounded-lg border border-hairline bg-card">
+                <div className="mt-10 rounded-lg border border-border bg-card">
                     <EmptyState
                         icon={Newspaper}
                         title="[ISI: belum ada berita terbaru]"
@@ -196,14 +196,14 @@ export default function DesignSystem() {
                 />
 
                 <div className="mt-10 grid gap-6 lg:grid-cols-2">
-                    <div className="flex flex-col gap-3 rounded-lg border border-hairline bg-card p-6">
+                    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-6">
                         <Skeleton className="h-5 w-1/3" />
                         <Skeleton className="h-40 w-full rounded-md" />
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-2/3" />
                     </div>
 
-                    <div className="flex flex-col gap-3 rounded-lg border border-hairline bg-card p-6">
+                    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-6">
                         <Skeleton className="h-6 w-2/3" />
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-5/6" />
@@ -266,11 +266,11 @@ export default function DesignSystem() {
                 <div className="mt-10 flex flex-col gap-12">
                     {/* Display steps and the heading hierarchy. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Display dan hierarki heading
                         </Text>
 
-                        <div className="mt-4 flex flex-col gap-4 border-l-4 border-hairline ps-4">
+                        <div className="mt-4 flex flex-col gap-4 border-l-4 border-border ps-4">
                             {/*
                                 Every one of these is a real heading at a real
                                 level. A screen reader stepping through this
@@ -283,14 +283,14 @@ export default function DesignSystem() {
                             <Text as="h3" variant="display-md">
                                 display-md / h2 — 34px, membawa text-balance
                             </Text>
-                            <Text as="h4" variant="tagline">
-                                tagline / h3 — 21px
+                            <Text as="h4" variant="heading-md">
+                                heading-md / h3 — 21px
                             </Text>
-                            <Text as="h5" variant="body-strong">
-                                body-strong / h4 — 17px
+                            <Text as="h5" variant="heading-sm">
+                                heading-sm / h4 — 17px
                             </Text>
-                            <Text as="h6" variant="caption-strong">
-                                caption-strong / h5, h6 — 14px
+                            <Text as="h6" variant="label">
+                                label / h5, h6 — 14px
                             </Text>
                             <Text as="p" variant="hero">
                                 hero — 56px, khusus hero beranda
@@ -298,32 +298,32 @@ export default function DesignSystem() {
                         </div>
                     </div>
 
-                    {/* Body, lead, caption and the small print. */}
+                    {/* Body, body-lg, body-sm and the small print. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
-                            Body, lead, caption, dan fine print
+                        <Text as="p" variant="label" color="muted">
+                            Body, body-lg, caption, dan fine print
                         </Text>
 
                         <div className="mt-4 flex flex-col gap-3">
-                            <Text as="p" variant="lead">
-                                lead — 28px, teks pendukung hero.
+                            <Text as="p" variant="body-lg">
+                                body-lg — 28px, teks pendukung hero.
                             </Text>
-                            <Text as="p" variant="lead-airy">
-                                lead-airy — 24px, lead editorial yang longgar.
+                            <Text as="p" variant="body-lg">
+                                body-lg — 24px, body-lg editorial yang longgar.
                             </Text>
                             <Text as="p" variant="body">
                                 body — 17px, ukuran bacaan baku. Ini yang
                                 dipakai paragraf mana pun yang tidak punya peran
                                 khusus.
                             </Text>
-                            <Text as="p" variant="body-strong">
-                                body-strong — 17px, penekanan di dalam teks.
+                            <Text as="p" variant="heading-sm">
+                                heading-sm — 17px, penekanan di dalam teks.
                             </Text>
-                            <Text as="p" variant="caption">
-                                caption — 14px, metadata dan label sekunder.
+                            <Text as="p" variant="body-sm">
+                                body-sm — 14px, metadata dan label sekunder.
                             </Text>
-                            <Text as="p" variant="caption-strong">
-                                caption-strong — 14px, judul kecil.
+                            <Text as="p" variant="label">
+                                label — 14px, judul kecil.
                             </Text>
                             <Text as="p" variant="nav">
                                 nav — 13px, link navigasi utama.
@@ -331,15 +331,15 @@ export default function DesignSystem() {
                             <Text as="p" variant="fine-print">
                                 fine-print — 12px, footer dan legal.
                             </Text>
-                            <Text as="p" variant="micro-legal">
-                                micro-legal — 10px, microcopy legal yang jarang.
+                            <Text as="p" variant="fine-print">
+                                fine-print — 10px, microcopy legal yang jarang.
                             </Text>
                         </div>
                     </div>
 
                     {/* Semantic colours. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Warna semantik
                         </Text>
 
@@ -359,16 +359,16 @@ export default function DesignSystem() {
                                 muted — deskripsi dan metadata
                             </Text>
                             <Text as="p" color="subtle">
-                                subtle — ink-muted-soft, footer
+                                subtle — subtle, footer
                             </Text>
                             <Text as="p" color="brand">
                                 brand — navy, berubah di dark mode
                             </Text>
                             <Text as="p" color="brand-inverse">
-                                brand-inverse — navy-light, di atas navy
+                                brand-inverse — navy-soft, di atas navy
                             </Text>
                             <Text as="p" color="danger">
-                                danger — red-on-surface, untuk pesan galat
+                                danger — primary-on-surface, untuk pesan galat
                             </Text>
                             <Text as="p" color="inherit">
                                 inherit — mengikuti induknya
@@ -378,7 +378,7 @@ export default function DesignSystem() {
 
                     {/* Alignment. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Perataan
                         </Text>
 
@@ -389,9 +389,9 @@ export default function DesignSystem() {
                                 <Text
                                     key={align}
                                     as="p"
-                                    variant="caption"
+                                    variant="body-sm"
                                     align={align}
-                                    className="border-b border-hairline pb-1"
+                                    className="border-b border-border pb-1"
                                 >
                                     {align}
                                 </Text>
@@ -401,47 +401,47 @@ export default function DesignSystem() {
 
                     {/* Transform and decoration. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Transform dan dekorasi
                         </Text>
 
                         <div className="mt-4 flex flex-wrap items-center gap-4">
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 transform="uppercase"
                             >
                                 uppercase
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 transform="lowercase"
                             >
                                 LOWERCASE
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 transform="capitalize"
                             >
                                 capitalize
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 decoration="underline"
                             >
                                 underline
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 decoration="line-through"
                             >
                                 line-through
                             </Text>
-                            <Text as="p" variant="caption" italic>
+                            <Text as="p" variant="body-sm" italic>
                                 italic
                             </Text>
                         </div>
@@ -449,7 +449,7 @@ export default function DesignSystem() {
 
                     {/* Truncation, clamping and word breaking. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Pemotongan baris dan pemenggalan kata
                         </Text>
 
@@ -463,7 +463,7 @@ export default function DesignSystem() {
                                 breadcrumbs.tsx pairs it with min-w-0.
                             */}
                             <div className="max-w-xs">
-                                <Text as="p" variant="body-strong" truncate>
+                                <Text as="p" variant="heading-sm" truncate>
                                     [ISI: nama paroki panjang yang dipotong satu
                                     baris]
                                 </Text>
@@ -478,7 +478,7 @@ export default function DesignSystem() {
                             </div>
 
                             <div className="max-w-xs">
-                                <Text as="p" variant="caption" break="words">
+                                <Text as="p" variant="body-sm" break="words">
                                     [ISI]:
                                     nama-paroki-yang-sangat-panjang-sehingga-perlu-dipenggalan-di-tengah-kata
                                 </Text>
@@ -488,54 +488,54 @@ export default function DesignSystem() {
 
                     {/* Semantic elements chosen by `as`. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             Elemen semantik lewat as
                         </Text>
 
                         <div className="mt-4 flex flex-col gap-3">
                             {/*
-                                All six share variant="body-strong", and all six
+                                All six share variant="heading-sm", and all six
                                 prove the separation: `as` picks the tag,
                                 `variant` picks the typography, and neither one
                                 reaches into the other.
                             */}
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 as="p"
                             </Text>
-                            <Text as="span" variant="body-strong">
+                            <Text as="span" variant="heading-sm">
                                 as="span" — di dalam paragraf ini.
                             </Text>
-                            <Text as="strong" variant="body-strong">
+                            <Text as="strong" variant="heading-sm">
                                 as="strong"
                             </Text>
-                            <Text as="em" variant="body-strong">
+                            <Text as="em" variant="heading-sm">
                                 as="em"
                             </Text>
-                            <Text as="small" variant="body-strong">
+                            <Text as="small" variant="heading-sm">
                                 as="small"
                             </Text>
                             <Text
                                 as="time"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 dateTime="2026-01-01"
                             >
                                 as="time"
                             </Text>
-                            <Text as="mark" variant="body-strong">
+                            <Text as="mark" variant="heading-sm">
                                 as="mark"
                             </Text>
-                            <Text as="del" variant="body-strong">
+                            <Text as="del" variant="heading-sm">
                                 as="del"
                             </Text>
-                            <Text as="ins" variant="body-strong">
+                            <Text as="ins" variant="heading-sm">
                                 as="ins"
                             </Text>
-                            <Text as="cite" variant="body-strong">
+                            <Text as="cite" variant="heading-sm">
                                 as="cite"
                             </Text>
                             <Text
                                 as="label"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 htmlFor="contoh-label"
                             >
                                 as="label"
@@ -546,8 +546,8 @@ export default function DesignSystem() {
                             />
                             <Text
                                 as="kbd"
-                                variant="body-strong"
-                                className="rounded border border-hairline px-1"
+                                variant="heading-sm"
+                                className="rounded border border-border px-1"
                             >
                                 as="kbd"
                             </Text>
@@ -560,7 +560,7 @@ export default function DesignSystem() {
 
                     {/* className and the override props. */}
                     <div>
-                        <Text as="p" variant="caption-strong" color="muted">
+                        <Text as="p" variant="label" color="muted">
                             className dan override
                         </Text>
 
@@ -574,7 +574,7 @@ export default function DesignSystem() {
                             */}
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 className="rounded-md bg-muted p-2"
                             >
                                 className menambah tampilan, bukan mengganti
@@ -582,11 +582,10 @@ export default function DesignSystem() {
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
-                                className="text-micro-legal"
+                                variant="body-sm"
+                                className="text-fine-print"
                             >
-                                className="text-micro-legal" mengalahkan
-                                variant.
+                                className="text-fine-print" mengalahkan variant.
                             </Text>
 
                             {/*
@@ -626,7 +625,7 @@ function LinkLike({ children }: { children: string }) {
     return (
         <Text
             as="span"
-            variant="body-strong"
+            variant="heading-sm"
             className="cursor-pointer underline underline-offset-4"
         >
             {children}

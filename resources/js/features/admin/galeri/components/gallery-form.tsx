@@ -137,7 +137,7 @@ export function GalleryForm({
                     activeLabel={labels.is_published ?? 'Terbitkan album'}
                 />
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {form.data.is_published
                         ? 'Album akan tampil di halaman publik galeri.'
                         : (copy.draft_hint ??

@@ -101,7 +101,7 @@ export function GalleryPhotoDialog({
                         />
                     </Field>
 
-                    <Text as="p" variant="micro-legal" color="muted">
+                    <Text as="p" variant="fine-print" color="muted">
                         Pastikan foto anak-anak atau data pribadi sudah mendapat
                         izin sebelum album diterbitkan.
                     </Text>

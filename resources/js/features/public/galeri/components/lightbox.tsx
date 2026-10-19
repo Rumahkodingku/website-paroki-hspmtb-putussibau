@@ -89,7 +89,7 @@ export function Lightbox({ photos, index, title, onClose, onNavigate }: Props) {
             onClick={onClose}
         >
             <div className="flex items-center justify-between gap-3">
-                <Text as="p" variant="caption" className="text-white/80">
+                <Text as="p" variant="body-sm" className="text-white/80">
                     Foto {index + 1} dari {photos.length}
                 </Text>
 
@@ -137,7 +137,7 @@ export function Lightbox({ photos, index, title, onClose, onNavigate }: Props) {
                         <figcaption>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 className="text-center text-white/85"
                             >
                                 {photo.caption}

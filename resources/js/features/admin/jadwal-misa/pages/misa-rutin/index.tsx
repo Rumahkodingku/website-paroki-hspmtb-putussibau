@@ -120,7 +120,7 @@ export default function MisaRutin({
                         onChange={(event) =>
                             applyFilter({ location_id: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua lokasi</option>
                         {locations.map((location) => (
@@ -139,7 +139,7 @@ export default function MisaRutin({
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {STATUS_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>

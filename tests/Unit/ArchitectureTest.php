@@ -820,3 +820,73 @@ test('the seo head keys match the ones the blade template renders', function () 
     // server counterpart, because that tag can never replace anything.
     expect(array_diff($inComponent, $inBlade))->toBe([]);
 });
+
+test('no component reaches for a retired DESIGN.md v1 token', function () {
+    // D-72: DESIGN-v2 replaces DESIGN.md v1.1, and the v1 token names were
+    // renamed across the source in one staged migration. A class that still
+    // names a retired token has no CSS behind it - Tailwind emits nothing for an
+    // unknown utility - so the element silently falls back to the browser
+    // default and no error is raised. Only a test catches it.
+    //
+    // The scan is a token boundary, not a substring: `tagline` is a real prop on
+    // IdentityDetails and `leading-*` is a Tailwind utility, so the retired
+    // *class* fragments are matched as whole words and `text-tagline` is used
+    // rather than the bare word.
+    $retired = [
+        'hairline',
+        'divider-soft',
+        'ink-muted',
+        'canvas-soft',
+        'surface-pearl',
+        'surface-chip',
+        'navy-dark',
+        'navy-light',
+        'gold-light',
+        'gold-dark',
+        'red-soft',
+        'red-on-surface',
+        'red-on-dark',
+        'primary-focus',
+        'hero-display',
+        'lead-airy',
+        'dense-link',
+        'text-tagline',
+        'body-strong',
+        'caption-strong',
+        'micro-legal',
+        'nav-link',
+        'button-utility',
+        'button-large',
+    ];
+
+    $offenders = [];
+
+    foreach (File::allFiles(resource_path('js')) as $file) {
+        if (! in_array($file->getExtension(), ['ts', 'tsx'], true)) {
+            continue;
+        }
+
+        $relative = Str::after($file->getRealPath(), base_path().'/');
+
+        // Generated output is not ours to restyle.
+        if (Str::startsWith(Str::after($relative, 'resources/js/'), [
+            'actions/',
+            'routes/',
+            'wayfinder/',
+        ])) {
+            continue;
+        }
+
+        $contents = (string) $file->getContents();
+
+        foreach ($retired as $token) {
+            $pattern = '/(?<![A-Za-z0-9-])'.preg_quote($token, '/').'(?![A-Za-z0-9-])/';
+
+            if (preg_match($pattern, $contents) === 1) {
+                $offenders[] = "{$relative}: {$token}";
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});

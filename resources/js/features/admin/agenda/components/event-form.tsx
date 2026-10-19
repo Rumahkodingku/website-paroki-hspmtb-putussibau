@@ -269,12 +269,12 @@ export function EventForm({
                     />
                 </Field>
 
-                <div className="flex items-start justify-between gap-4 rounded-lg border border-hairline p-4">
+                <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
                         <Label htmlFor="event-all-day">
                             {labels.is_all_day ?? 'Sepanjang hari'}
                         </Label>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {hints.is_all_day}
                         </Text>
                     </div>
@@ -287,7 +287,7 @@ export function EventForm({
                     />
                 </div>
                 {form.errors.is_all_day ? (
-                    <Text as="p" variant="caption" color="danger" role="alert">
+                    <Text as="p" variant="body-sm" color="danger" role="alert">
                         {form.errors.is_all_day}
                     </Text>
                 ) : null}
@@ -343,7 +343,7 @@ export function EventForm({
                     />
                 </Field>
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {form.data.location_id !== null
                         ? 'Lokasi master dipilih, sehingga nama di atas tidak dipakai. Kosongkan baris lokasi master bila nama yang dipakai berbeda.'
                         : 'Tanpa lokasi master, nama yang diketik di atas yang tampil di agenda publik.'}
@@ -393,12 +393,12 @@ export function EventForm({
                     />
                 </Field>
 
-                <div className="flex items-start justify-between gap-4 rounded-lg border border-hairline p-4">
+                <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
                         <Label htmlFor="event-published">
                             {labels.is_published ?? 'Tampilkan di situs'}
                         </Label>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Nonaktifkan untuk menyembunyikan kegiatan tanpa
                             menghapusnya.
                         </Text>
@@ -412,7 +412,7 @@ export function EventForm({
                     />
                 </div>
                 {form.errors.is_published ? (
-                    <Text as="p" variant="caption" color="danger" role="alert">
+                    <Text as="p" variant="body-sm" color="danger" role="alert">
                         {form.errors.is_published}
                     </Text>
                 ) : null}

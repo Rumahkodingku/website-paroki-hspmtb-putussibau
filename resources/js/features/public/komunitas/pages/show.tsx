@@ -92,7 +92,7 @@ export default function KomunitasShow({ community }: Props) {
                     <div className="mt-8 grid gap-6 md:grid-cols-2">
                         {community.meeting_schedule ? (
                             <div>
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     Jadwal
                                 </Text>
                                 <Text
@@ -108,7 +108,7 @@ export default function KomunitasShow({ community }: Props) {
 
                         {community.meeting_location ? (
                             <div>
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     Lokasi
                                 </Text>
                                 <Text
@@ -131,7 +131,7 @@ export default function KomunitasShow({ community }: Props) {
                     <div className="mt-8 grid gap-8 md:grid-cols-2">
                         {community.eligibility ? (
                             <div>
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     Persyaratan
                                 </Text>
                                 <Text
@@ -147,7 +147,7 @@ export default function KomunitasShow({ community }: Props) {
 
                         {community.joining_info ? (
                             <div>
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     Cara Bergabung
                                 </Text>
                                 <Text
@@ -169,7 +169,7 @@ export default function KomunitasShow({ community }: Props) {
                     <SectionHeading title="Kontak Pengurus" />
                     <div className="mt-6 space-y-1">
                         {community.contact?.name ? (
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {community.contact.name}
                             </Text>
                         ) : null}
@@ -210,12 +210,12 @@ export default function KomunitasShow({ community }: Props) {
             ) : null}
 
             <PublicSection>
-                <div className="flex flex-col items-start gap-6 rounded-lg border border-hairline p-6 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col items-start gap-6 rounded-lg border border-border p-6 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <Text as="p" variant="body-strong">
+                        <Text as="p" variant="heading-sm">
                             Tertarik bergabung?
                         </Text>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Hubungi pengurus komunitas atau sekretariat paroki
                             untuk informasi lebih lanjut.
                         </Text>
