@@ -18,7 +18,7 @@ export function AppShell({ children, variant = 'sidebar' }: Props) {
     }
 
     return (
-        <div className="bg-canvas-soft">
+        <div className="bg-canvas-subtle">
             <SidebarProvider defaultOpen={isOpen}>{children}</SidebarProvider>
         </div>
     );

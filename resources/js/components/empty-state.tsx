@@ -41,7 +41,7 @@ export function EmptyState({
 
             <div className="space-y-1">
                 {/*
-                    caption-strong rather than a heading step, on purpose.
+                    label rather than a heading step, on purpose.
                     An empty state is a status message sitting inside whatever
                     section the page already headed, so it should not compete
                     with that section's own heading - and defaulting to level 3
@@ -49,7 +49,7 @@ export function EmptyState({
                 */}
                 <Text
                     as={level === 2 ? 'h2' : 'h3'}
-                    variant="caption-strong"
+                    variant="label"
                     color="foreground"
                 >
                     {title}

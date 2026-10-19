@@ -46,7 +46,7 @@ export function PinnedBadge({ pinned }: { pinned: boolean }) {
  */
 export function PostDateHint({ status }: { status: PostStatus }) {
     if (status === 'draft') {
-        return <Text variant="caption">Belum ada tanggal</Text>;
+        return <Text variant="body-sm">Belum ada tanggal</Text>;
     }
 
     return null;

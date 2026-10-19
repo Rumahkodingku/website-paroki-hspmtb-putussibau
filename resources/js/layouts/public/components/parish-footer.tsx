@@ -88,7 +88,7 @@ const FOOTER_LINK =
 function FooterLinks({ group }: { group: FooterGroup }) {
     return (
         <div>
-            <Text as="h2" variant="caption-strong" color="foreground">
+            <Text as="h2" variant="label" color="foreground">
                 {group.title}
             </Text>
 
@@ -106,7 +106,7 @@ function FooterLinks({ group }: { group: FooterGroup }) {
                             <Text
                                 as="span"
                                 variant="fine-print"
-                                className="text-ink-muted hover:text-red-on-surface"
+                                className="text-muted-foreground hover:text-primary-on-surface"
                             >
                                 {link.label}
                             </Text>
@@ -141,7 +141,7 @@ function ContactRow({ item }: { item: FooterContactItem }) {
             <Text
                 as="span"
                 variant="fine-print"
-                className="whitespace-pre-line text-ink-muted"
+                className="whitespace-pre-line text-muted-foreground"
             >
                 <span className="sr-only">{item.label}: </span>
                 {item.href ? (
@@ -154,7 +154,7 @@ function ContactRow({ item }: { item: FooterContactItem }) {
                                   rel: 'noopener noreferrer',
                               }
                             : {})}
-                        className="transition-colors hover:text-red-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                        className="transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
                         {item.value}
                     </a>
@@ -224,18 +224,18 @@ export function ParishFooter() {
     });
 
     return (
-        <footer className="border-t border-divider-soft bg-canvas-soft">
+        <footer className="border-t border-border-subtle bg-canvas-subtle">
             <PublicContainer className="py-16">
                 <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
                     <div className="lg:col-span-2">
                         <div className="flex items-center gap-2">
                             <Church
-                                className="size-5 text-red-on-surface"
+                                className="size-5 text-primary-on-surface"
                                 aria-hidden="true"
                             />
                             <Text
                                 as="span"
-                                variant="body-strong"
+                                variant="heading-sm"
                                 color="foreground"
                             >
                                 {parishName}
@@ -246,7 +246,7 @@ export function ParishFooter() {
                             <Text
                                 as="p"
                                 variant="fine-print"
-                                className="mt-4 max-w-sm text-ink-muted"
+                                className="mt-4 max-w-sm text-muted-foreground"
                             >
                                 {identity.shortDescription}
                             </Text>
@@ -270,7 +270,7 @@ export function ParishFooter() {
                             <>
                                 <Text
                                     as="h2"
-                                    variant="caption-strong"
+                                    variant="label"
                                     color="foreground"
                                 >
                                     Media Sosial
@@ -288,7 +288,7 @@ export function ParishFooter() {
                                                 <Text
                                                     as="span"
                                                     variant="fine-print"
-                                                    className="text-ink-muted hover:text-red-on-surface"
+                                                    className="text-muted-foreground hover:text-primary-on-surface"
                                                 >
                                                     {item.label}
                                                 </Text>
@@ -301,7 +301,7 @@ export function ParishFooter() {
 
                         <Text
                             as="h2"
-                            variant="caption-strong"
+                            variant="label"
                             color="foreground"
                             className={socialItems.length > 0 ? 'mt-8' : ''}
                         >
@@ -314,7 +314,7 @@ export function ParishFooter() {
                                     <Text
                                         as="span"
                                         variant="fine-print"
-                                        className="text-ink-muted hover:text-red-on-surface"
+                                        className="text-muted-foreground hover:text-primary-on-surface"
                                     >
                                         Halaman kontak
                                     </Text>
@@ -331,7 +331,7 @@ export function ParishFooter() {
                                         <Text
                                             as="span"
                                             variant="fine-print"
-                                            className="text-ink-muted hover:text-red-on-surface"
+                                            className="text-muted-foreground hover:text-primary-on-surface"
                                         >
                                             Petunjuk arah
                                         </Text>
@@ -342,8 +342,8 @@ export function ParishFooter() {
                     </div>
                 </div>
 
-                <div className="mt-12 flex flex-col gap-4 border-t border-divider-soft pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <Text as="p" variant="micro-legal" color="subtle">
+                <div className="mt-12 flex flex-col gap-4 border-t border-border-subtle pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <Text as="p" variant="fine-print" color="subtle">
                         &copy; {new Date().getFullYear()}{' '}
                         <span title={parishName}>{parishName}</span>. Seluruh
                         hak cipta dilindungi.
@@ -354,7 +354,7 @@ export function ParishFooter() {
                             <li key={label}>
                                 <Text
                                     as="span"
-                                    variant="micro-legal"
+                                    variant="fine-print"
                                     color="subtle"
                                 >
                                     {label}

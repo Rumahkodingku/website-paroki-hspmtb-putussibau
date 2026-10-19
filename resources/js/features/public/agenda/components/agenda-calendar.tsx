@@ -61,7 +61,7 @@ export function AgendaCalendar({
                             <th
                                 key={name}
                                 scope="col"
-                                className="pb-2 text-center text-micro-legal text-muted-foreground uppercase"
+                                className="pb-2 text-center text-fine-print text-muted-foreground uppercase"
                             >
                                 {name}
                             </th>
@@ -82,7 +82,7 @@ export function AgendaCalendar({
                                             day.key ||
                                             `blank-${weekIndex}-${dayIndex}`
                                         }
-                                        className="border border-hairline p-0 align-top"
+                                        className="border border-border p-0 align-top"
                                     >
                                         <div
                                             className={`flex h-16 min-h-16 flex-col gap-1 p-1.5 ${
@@ -90,9 +90,9 @@ export function AgendaCalendar({
                                             }`}
                                         >
                                             <span
-                                                className={`text-micro-legal tabular-nums ${
+                                                className={`text-fine-print tabular-nums ${
                                                     day.isToday
-                                                        ? 'font-semibold text-primary'
+                                                        ? 'font-semibold text-primary-on-surface'
                                                         : 'text-muted-foreground'
                                                 }`}
                                             >
@@ -116,11 +116,11 @@ export function AgendaCalendar({
                                                         )}
                                                         prefetch
                                                         title={event.title}
-                                                        className={`block truncate rounded-sm px-1 py-0.5 text-micro-legal ${
+                                                        className={`block truncate rounded-sm px-1 py-0.5 text-fine-print ${
                                                             event.status ===
                                                             'cancelled'
                                                                 ? 'bg-destructive/10 text-destructive line-through'
-                                                                : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none'
+                                                                : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
                                                         }`}
                                                     >
                                                         {event.title}
@@ -130,7 +130,7 @@ export function AgendaCalendar({
                                             {dayEvents.length > 2 ? (
                                                 <Text
                                                     as="span"
-                                                    variant="micro-legal"
+                                                    variant="fine-print"
                                                     color="muted"
                                                 >
                                                     +{dayEvents.length - 2} lagi

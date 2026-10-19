@@ -48,7 +48,7 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
             className="flex flex-wrap items-center gap-3"
             data-test="share-actions"
         >
-            <Text as="p" variant="caption-strong" color="muted">
+            <Text as="p" variant="label" color="muted">
                 Bagikan
             </Text>
 
@@ -57,7 +57,7 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-test="share-whatsapp"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 WhatsApp
             </a>
@@ -67,7 +67,7 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-test="share-facebook"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 Facebook
             </a>
@@ -76,7 +76,7 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
                 type="button"
                 onClick={copyLink}
                 data-test="share-copy"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 Salin tautan
             </button>

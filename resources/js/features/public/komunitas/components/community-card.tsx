@@ -19,7 +19,7 @@ export function CommunityCard({
     community: PublicCommunityCardData;
 }) {
     return (
-        <article className="group relative overflow-hidden rounded-lg border border-hairline transition-colors focus-within:border-primary hover:border-primary">
+        <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {community.thumbnail_url ? (
                 <img
                     src={community.thumbnail_url}
@@ -28,7 +28,7 @@ export function CommunityCard({
                     className="aspect-16/10 w-full rounded-t-lg object-cover"
                 />
             ) : (
-                <div className="flex aspect-16/10 w-full items-center justify-center rounded-t-lg bg-canvas-soft text-muted-foreground">
+                <div className="flex aspect-16/10 w-full items-center justify-center rounded-t-lg bg-canvas-subtle text-muted-foreground">
                     <ImageIcon className="size-8" aria-hidden="true" />
                 </div>
             )}
@@ -55,7 +55,7 @@ export function CommunityCard({
 
                 <span
                     aria-hidden="true"
-                    className="inline-flex items-center gap-2 text-sm text-primary transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="inline-flex items-center gap-2 text-sm text-primary-on-surface transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                     Lihat Detail
                     <ArrowRight className="size-4" />
@@ -65,7 +65,7 @@ export function CommunityCard({
             <Link
                 href={communityShow(community.slug)}
                 prefetch
-                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 <span className="sr-only">
                     Lihat detail komunitas {community.name}

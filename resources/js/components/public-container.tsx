@@ -43,7 +43,7 @@ export function PublicContainer({
         <Tag
             className={cn(
                 'mx-auto w-full',
-                width === 'wide' ? 'max-w-[1440px]' : 'max-w-7xl',
+                width === 'wide' ? 'max-w-360' : 'max-w-7xl',
                 !bleed && 'px-4 sm:px-6 lg:px-8',
                 className,
             )}

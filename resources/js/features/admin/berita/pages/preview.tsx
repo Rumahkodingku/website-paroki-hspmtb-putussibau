@@ -51,10 +51,10 @@ export default function Preview({ post, isPublished }: Props) {
 
                 {!isPublished ? (
                     <Alert className="mb-8">
-                        <Text as="p" variant="body-strong">
+                        <Text as="p" variant="heading-sm">
                             Pratinjau
                         </Text>
-                        <Text as="p" variant="caption">
+                        <Text as="p" variant="body-sm">
                             Artikel ini belum tayang di halaman publik. Halaman
                             ini hanya untuk admin dan tidak akan ditemukan mesin
                             pencari.
@@ -65,7 +65,7 @@ export default function Preview({ post, isPublished }: Props) {
                 <article className="mx-auto max-w-3xl space-y-6">
                     <header className="space-y-3">
                         {post.category ? (
-                            <Text as="p" variant="tagline" color="brand">
+                            <Text as="p" variant="heading-md" color="brand">
                                 {post.category.name}
                             </Text>
                         ) : null}
@@ -75,11 +75,11 @@ export default function Preview({ post, isPublished }: Props) {
                         </Text>
 
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {post.author_name}
                             </Text>
                             {post.published_at ? (
-                                <Text as="p" variant="caption" color="muted">
+                                <Text as="p" variant="body-sm" color="muted">
                                     {formatWibDate(
                                         post.published_at,
                                         displayTimezone,
@@ -99,7 +99,7 @@ export default function Preview({ post, isPublished }: Props) {
 
                     {post.scripture_reference ? (
                         <blockquote className="border-l-4 border-primary pl-4">
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {post.scripture_reference}
                             </Text>
                         </blockquote>
@@ -107,7 +107,7 @@ export default function Preview({ post, isPublished }: Props) {
 
                     <RichText html={post.content} />
 
-                    <footer className="flex justify-end border-t border-hairline pt-6">
+                    <footer className="flex justify-end border-t border-border pt-6">
                         <Button asChild variant="outline">
                             <Link href={postsIndex()}>Kembali ke daftar</Link>
                         </Button>

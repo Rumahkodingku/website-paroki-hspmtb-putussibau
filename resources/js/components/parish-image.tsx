@@ -41,8 +41,8 @@ export function ParishImage({
         >
             {failed ? (
                 /*
-                 * secondary, not a literal navy-light. navy-light is a near-white
-                 * surface and the dark theme's ink is a near-white colour too, so
+                 * secondary, not a literal navy-soft. navy-soft is a near-white
+                 * surface and the dark theme's foreground is a near-white colour too, so
                  * the pair measured 1.04:1 - a placeholder nobody can see, which
                  * is the one thing a placeholder must not be.
                  */
@@ -50,7 +50,7 @@ export function ParishImage({
                     className="flex size-full items-center justify-center bg-secondary"
                     aria-hidden="true"
                 >
-                    <ImageOff className="size-6 text-ink-muted-soft" />
+                    <ImageOff className="size-6 text-subtle" />
                 </div>
             ) : (
                 <img

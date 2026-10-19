@@ -131,6 +131,30 @@ class Event extends Model
     }
 
     /**
+     * Activities that have not finished their day yet.
+     *
+     * "Ahead" means from the start of today in the parish's timezone, not from
+     * now(): an activity that began an hour ago and has not finished is still
+     * something somebody might walk into, and one that began this morning
+     * belongs on today's list rather than yesterday's.
+     *
+     * One definition, used by both /agenda and the homepage. A second copy of
+     * this boundary is how the two pages end up disagreeing at midnight.
+     *
+     * @param  Builder<Event>  $query
+     * @return Builder<Event>
+     */
+    public function scopeUpcomingFromToday(Builder $query): Builder
+    {
+        $startOfToday = Carbon::now()
+            ->setTimezone((string) config('app.display_timezone'))
+            ->startOfDay()
+            ->utc();
+
+        return $query->where('start_at', '>=', $startOfToday);
+    }
+
+    /**
      * Bind `{event:slug}` on the public routes to a published activity only.
      *
      * The same mechanism Post uses. The .ics endpoint is bound through it too,

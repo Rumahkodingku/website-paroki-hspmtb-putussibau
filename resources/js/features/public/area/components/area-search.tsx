@@ -34,13 +34,13 @@ export function AreaSearch({
                     value={value}
                     placeholder="Cari nama stasi atau lingkungan"
                     onChange={(event) => onChange(event.target.value)}
-                    className="h-11 w-full rounded-pill border border-hairline bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
+                    className="h-11 w-full rounded-pill border border-border bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
                 />
             </div>
 
             <Text
                 as="p"
-                variant="caption"
+                variant="body-sm"
                 color="muted"
                 role="status"
                 aria-live="polite"

@@ -270,6 +270,11 @@ class UpdateSettingsRequest extends FormRequest
             'string',
             Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
         ];
+        $rules['settings.home_hero_image'] = [
+            'nullable',
+            'string',
+            Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
+        ];
         $rules['settings.logo_alt'] = ['nullable', 'string', 'max:255'];
         $rules['settings.cover_alt'] = ['nullable', 'string', 'max:255'];
 
@@ -292,6 +297,7 @@ class UpdateSettingsRequest extends FormRequest
             'settings.logo.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'settings.favicon.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'settings.cover.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
+            'settings.home_hero_image.exists' => 'Gambar hero yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
         ];
     }
 

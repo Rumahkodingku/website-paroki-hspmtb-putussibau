@@ -24,17 +24,17 @@ export function ServiceCards({
             {rows.map((service) => (
                 <li
                     key={service.id}
-                    className="rounded-lg border border-hairline p-4"
+                    className="rounded-lg border border-border p-4"
                 >
                     <div className="flex items-start gap-3">
                         {service.thumbnail ? (
                             <img
                                 src={service.thumbnail}
                                 alt={service.thumbnail_alt ?? ''}
-                                className="size-11 shrink-0 rounded-md border border-hairline object-cover"
+                                className="size-11 shrink-0 rounded-md border border-border object-cover"
                             />
                         ) : (
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-md border border-hairline bg-canvas-soft text-muted-foreground">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-md border border-border bg-canvas-subtle text-muted-foreground">
                                 <ImageIcon
                                     className="size-5"
                                     aria-hidden="true"
@@ -47,14 +47,14 @@ export function ServiceCards({
                                 <div className="min-w-0">
                                     <Text
                                         as="p"
-                                        variant="body-strong"
+                                        variant="heading-sm"
                                         className="truncate"
                                     >
                                         {service.title}
                                     </Text>
                                     <Text
                                         as="p"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                         className="truncate"
                                     >
@@ -86,7 +86,7 @@ export function ServiceCards({
                             {service.can.update ? (
                                 <Link
                                     href={editService(service.id)}
-                                    className="inline-flex items-center gap-1.5 text-sm text-primary"
+                                    className="inline-flex items-center gap-1.5 text-sm text-primary-on-surface"
                                 >
                                     <Pencil
                                         className="size-4"

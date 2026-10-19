@@ -37,7 +37,7 @@ export function PinnedStrip({
                 {articles.map((article) => (
                     <article
                         key={article.id}
-                        className="group relative grid gap-4 overflow-hidden rounded-lg bg-navy-light p-6 sm:grid-cols-2 sm:items-center"
+                        className="group relative grid gap-4 overflow-hidden rounded-lg bg-navy-soft p-6 sm:grid-cols-2 sm:items-center"
                     >
                         {article.image ? (
                             <img
@@ -50,11 +50,7 @@ export function PinnedStrip({
 
                         <div className="space-y-2">
                             {article.category ? (
-                                <Text
-                                    as="p"
-                                    variant="caption-strong"
-                                    color="brand"
-                                >
+                                <Text as="p" variant="label" color="brand">
                                     {article.category.name}
                                 </Text>
                             ) : null}
@@ -64,7 +60,7 @@ export function PinnedStrip({
                             </Text>
 
                             {article.published_at ? (
-                                <Text as="p" variant="caption" color="muted">
+                                <Text as="p" variant="body-sm" color="muted">
                                     {formatWibDate(
                                         article.published_at,
                                         displayTimezone,
@@ -76,7 +72,7 @@ export function PinnedStrip({
                         <Link
                             href={post(article.slug)}
                             prefetch
-                            className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             <span className="sr-only">
                                 Baca artikel: {article.title}

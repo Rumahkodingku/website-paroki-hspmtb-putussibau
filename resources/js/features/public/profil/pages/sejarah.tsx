@@ -42,7 +42,7 @@ export default function Sejarah({ narrative, items }: Props) {
                             as="p"
                             variant="body"
                             color="muted"
-                            className="rounded-lg border border-dashed border-hairline p-6"
+                            className="rounded-lg border border-dashed border-border p-6"
                         >
                             Linimasa sejarah belum dipublikasikan.
                         </Text>

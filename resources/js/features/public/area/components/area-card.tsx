@@ -13,7 +13,7 @@ import type { PublicAreaCard as PublicAreaCardData } from '../types';
  */
 export function AreaCard({ area }: { area: PublicAreaCardData }) {
     return (
-        <article className="group relative overflow-hidden rounded-lg border border-hairline p-6 transition-colors focus-within:border-primary hover:border-primary">
+        <article className="group relative overflow-hidden rounded-lg border border-border p-6 transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             <div className="space-y-3">
                 <Badge variant="secondary">{area.type_label}</Badge>
 
@@ -22,14 +22,14 @@ export function AreaCard({ area }: { area: PublicAreaCardData }) {
                 </Text>
 
                 {area.leader_name ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Ketua: {area.leader_name}
                     </Text>
                 ) : null}
 
                 <span
                     aria-hidden="true"
-                    className="inline-flex items-center gap-2 text-sm text-primary transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="inline-flex items-center gap-2 text-sm text-primary-on-surface transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                     Lihat Detail
                     <ArrowRight className="size-4" />
@@ -39,7 +39,7 @@ export function AreaCard({ area }: { area: PublicAreaCardData }) {
             <Link
                 href={areaShow(area.slug)}
                 prefetch
-                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
                 <span className="sr-only">
                     Lihat detail {area.type_label} {area.name}

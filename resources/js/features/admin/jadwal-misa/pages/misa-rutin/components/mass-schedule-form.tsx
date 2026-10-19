@@ -163,7 +163,7 @@ export function MassScheduleForm({
                         <button
                             type="button"
                             onClick={onDuplicate}
-                            className="inline-flex h-11 items-center rounded-md px-2 text-sm text-primary underline-offset-4 hover:text-primary/80 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                            className="inline-flex h-11 items-center rounded-md px-2 text-sm text-primary-on-surface underline-offset-4 hover:text-primary-on-surface/80 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         >
                             Duplikasi ke lokasi lain
                         </button>

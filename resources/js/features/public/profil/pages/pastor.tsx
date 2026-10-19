@@ -45,7 +45,7 @@ export default function Pastor({ current, history }: Props) {
                                 as="p"
                                 variant="body"
                                 color="muted"
-                                className="rounded-lg border border-dashed border-hairline p-6"
+                                className="rounded-lg border border-dashed border-border p-6"
                             >
                                 Data pastor yang bertugas belum dipublikasikan.
                             </Text>
@@ -64,7 +64,7 @@ export default function Pastor({ current, history }: Props) {
                     {history.length > 0 ? (
                         <section
                             aria-labelledby="riwayat-pastor"
-                            className="space-y-6 border-t border-divider-soft pt-10"
+                            className="space-y-6 border-t border-border-subtle pt-10"
                         >
                             <Text as="h2" variant="h3" id="riwayat-pastor">
                                 Riwayat pastor paroki
@@ -74,16 +74,16 @@ export default function Pastor({ current, history }: Props) {
                                 {history.map((assignment) => (
                                     <li
                                         key={assignment.id}
-                                        className="flex flex-wrap items-baseline justify-between gap-2 border-b border-hairline pb-3"
+                                        className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3"
                                     >
-                                        <Text as="span" variant="body-strong">
+                                        <Text as="span" variant="heading-sm">
                                             {assignment.title
                                                 ? `${assignment.title} ${assignment.name}`
                                                 : assignment.name}
                                         </Text>
                                         <Text
                                             as="span"
-                                            variant="caption"
+                                            variant="body-sm"
                                             color="muted"
                                         >
                                             {assignment.position_label} ·{' '}

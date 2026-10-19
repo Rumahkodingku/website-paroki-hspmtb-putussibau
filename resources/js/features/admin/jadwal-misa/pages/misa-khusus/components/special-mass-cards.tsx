@@ -23,19 +23,19 @@ export function SpecialMassCards({ rows }: { rows: SpecialMassRow[] }) {
             {rows.map((mass) => (
                 <li
                     key={mass.id}
-                    className="rounded-lg border border-hairline p-4"
+                    className="rounded-lg border border-border p-4"
                 >
                     <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {mass.title}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {formatWibDateTime(mass.start_at)}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {mass.location.name}
                             </Text>
                         </div>

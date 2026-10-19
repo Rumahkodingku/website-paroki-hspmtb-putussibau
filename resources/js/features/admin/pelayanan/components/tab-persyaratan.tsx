@@ -71,7 +71,7 @@ export function TabPersyaratan({
                     <Text as="h3" variant="h3">
                         {copy.requirement_title}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {copy.requirement_description}
                     </Text>
                 </div>
@@ -86,7 +86,7 @@ export function TabPersyaratan({
                     as="p"
                     variant="body"
                     color="muted"
-                    className="rounded-lg border border-dashed border-hairline p-6"
+                    className="rounded-lg border border-dashed border-border p-6"
                 >
                     {empty.requirements}
                 </Text>
@@ -95,7 +95,7 @@ export function TabPersyaratan({
                     {items.map((item, index) => (
                         <li
                             key={item.id}
-                            className="flex items-start gap-4 rounded-lg border border-hairline p-4"
+                            className="flex items-start gap-4 rounded-lg border border-border p-4"
                         >
                             <span
                                 aria-hidden="true"
@@ -105,13 +105,13 @@ export function TabPersyaratan({
                             </span>
 
                             <div className="min-w-0 flex-1 space-y-1">
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     {item.text}
                                 </Text>
                                 {item.note ? (
                                     <Text
                                         as="p"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                     >
                                         {item.note}
@@ -166,7 +166,7 @@ export function TabPersyaratan({
                                     onClick={() => setDeleting(item)}
                                 >
                                     <Trash
-                                        className="size-4 text-red-on-surface"
+                                        className="size-4 text-primary-on-surface"
                                         aria-hidden="true"
                                     />
                                 </Button>
@@ -178,7 +178,7 @@ export function TabPersyaratan({
 
             <Text
                 as="p"
-                variant="caption"
+                variant="body-sm"
                 color="muted"
                 className="rounded-lg bg-muted p-4"
             >

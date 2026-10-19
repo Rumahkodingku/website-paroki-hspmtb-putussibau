@@ -78,28 +78,28 @@ export function AgendaControls({
     activeCategory: string;
 }) {
     const tabClass = (value: AgendaMode) =>
-        `inline-flex h-11 items-center rounded-md px-4 text-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+        `inline-flex h-11 items-center rounded-md px-4 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
             mode === value
                 ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground'
         }`;
 
     const chipClass = (active: boolean) =>
-        `inline-flex h-11 items-center rounded-pill border px-4 text-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+        `inline-flex h-11 items-center rounded-pill border px-4 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
             active
                 ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-hairline hover:border-primary'
+                : 'border-border hover:border-primary-on-surface'
         }`;
 
     const monthClass =
-        'inline-flex h-11 items-center rounded-md px-3 text-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none';
+        'inline-flex h-11 items-center rounded-md px-3 text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
     return (
         <div className="flex flex-col gap-4">
             <div
                 role="tablist"
                 aria-label="Tampilan agenda"
-                className="inline-flex gap-1 self-start rounded-md border border-hairline p-1"
+                className="inline-flex gap-1 self-start rounded-md border border-border p-1"
             >
                 {(Object.keys(MODE_LABEL) as AgendaMode[]).map((value) => (
                     <Link
@@ -173,7 +173,7 @@ export function AgendaControls({
                     {month === todayMonth ? (
                         <Text
                             as="p"
-                            variant="caption-strong"
+                            variant="label"
                             color="brand"
                             className="px-3"
                         >

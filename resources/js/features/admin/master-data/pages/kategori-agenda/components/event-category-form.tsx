@@ -35,7 +35,7 @@ function ColourPreview({ value }: { value: string }) {
     return (
         <span
             aria-hidden="true"
-            className="inline-block size-6 shrink-0 rounded-sm border border-hairline"
+            className="inline-block size-6 shrink-0 rounded-sm border border-border"
             style={{
                 backgroundColor: valid ? value : 'transparent',
             }}

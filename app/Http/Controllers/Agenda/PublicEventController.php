@@ -86,21 +86,16 @@ class PublicEventController extends Controller
      */
     private function upcoming(?EventCategory $category): array
     {
-        $startOfToday = Carbon::now()
-            ->setTimezone((string) config('app.display_timezone'))
-            ->startOfDay()
-            ->utc();
-
         return array_values(PublicEventResource::collection(
             Event::query()
                 ->published()
+                ->upcomingFromToday()
                 // location as well as category: displayLocationName() reads the
                 // master location, and shouldBeStrict() turns the lazy load into
                 // a 500 rather than an N+1.
                 ->with(['category', 'location'])
                 ->when($category !== null, fn (Builder $query) => $query
                     ->where('event_category_id', $category->getKey()))
-                ->where('start_at', '>=', $startOfToday)
                 ->orderBy('start_at')
                 ->orderBy('id')
                 ->limit(self::UPCOMING_LIMIT)

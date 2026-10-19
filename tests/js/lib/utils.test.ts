@@ -43,14 +43,14 @@ describe('cn', () => {
      *
      * That was not theoretical. Every Button size variant lost its token this
      * way (so the whole application was rendering buttons at the browser's
-     * default 16px), and Badge lost text-micro-legal.
+     * default 16px), and Badge lost text-fine-print.
      */
     it('keeps a design typography token alongside a text colour', () => {
         expect(cn('text-body', 'text-foreground')).toBe(
             'text-body text-foreground',
         );
-        expect(cn('text-caption-strong', 'text-muted-foreground')).toBe(
-            'text-caption-strong text-muted-foreground',
+        expect(cn('text-label', 'text-muted-foreground')).toBe(
+            'text-label text-muted-foreground',
         );
     });
 
@@ -60,9 +60,9 @@ describe('cn', () => {
      * override a component's typography through className.
      */
     it('resolves two design typography tokens in favour of the last one', () => {
-        expect(cn('text-body', 'text-caption')).toBe('text-caption');
-        expect(cn('text-display-md', 'text-hero-display')).toBe(
-            'text-hero-display',
+        expect(cn('text-body', 'text-body-sm')).toBe('text-body-sm');
+        expect(cn('text-display-md', 'text-display-xl')).toBe(
+            'text-display-xl',
         );
     });
 
@@ -81,8 +81,8 @@ describe('cn', () => {
         expect(cn('text-muted-foreground', 'text-foreground')).toBe(
             'text-foreground',
         );
-        expect(cn('text-body', 'text-navy', 'dark:text-navy-light')).toBe(
-            'text-body text-navy dark:text-navy-light',
+        expect(cn('text-body', 'text-navy', 'dark:text-navy-soft')).toBe(
+            'text-body text-navy dark:text-navy-soft',
         );
     });
 
@@ -92,8 +92,8 @@ describe('cn', () => {
      * applying the roadmap's 56 -> 40 -> 34 -> 28 hero strategy.
      */
     it('keeps typography tokens at different breakpoints', () => {
-        expect(cn('text-hero-display', 'md:text-display-lg')).toBe(
-            'text-hero-display md:text-display-lg',
+        expect(cn('text-display-xl', 'md:text-display-lg')).toBe(
+            'text-display-xl md:text-display-lg',
         );
     });
 
@@ -117,28 +117,28 @@ describe('cn', () => {
         expect(
             cn(
                 base,
-                'h-9 px-4 text-button-utility',
+                'h-9 px-4 text-label',
                 'bg-primary text-primary-foreground',
             ),
-        ).toContain('text-button-utility');
+        ).toContain('text-label');
 
         expect(
             cn(
                 base,
-                'h-12 px-8 text-button-large',
+                'h-12 px-8 text-body-lg',
                 'bg-primary text-primary-foreground',
             ),
-        ).toContain('text-button-large');
+        ).toContain('text-body-lg');
     });
 
     it('keeps the Badge size token through its variant merge', () => {
         expect(
             cn(
                 'inline-flex items-center font-medium',
-                'text-micro-legal',
+                'text-fine-print',
                 'border-transparent bg-primary text-primary-foreground',
             ),
-        ).toContain('text-micro-legal');
+        ).toContain('text-fine-print');
     });
 });
 

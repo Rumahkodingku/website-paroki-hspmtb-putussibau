@@ -41,11 +41,11 @@ export function serviceColumns(
             sortKey: 'title',
             cell: ({ row }) => (
                 <div className="space-y-1">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.title}
                     </Text>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {row.original.slug}
                         </Text>
                         {!row.original.is_active ? (
@@ -101,7 +101,7 @@ export function serviceColumns(
             header: copy.col_updated,
             sortKey: 'updated_at',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.updated_at
                         ? formatWibDateTime(row.original.updated_at)
                         : '—'}

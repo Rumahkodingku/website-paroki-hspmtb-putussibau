@@ -92,16 +92,16 @@ export default function Index({ albums, years, filters, empty }: Props) {
                     ) : (
                         <span
                             aria-hidden="true"
-                            className="flex size-12 shrink-0 items-center justify-center rounded-md border border-dashed border-hairline text-muted-foreground"
+                            className="flex size-12 shrink-0 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground"
                         >
                             <Images className="size-4" />
                         </span>
                     )}
                     <div className="space-y-0.5">
-                        <Text as="p" variant="caption-strong">
+                        <Text as="p" variant="label">
                             {row.original.title}
                         </Text>
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             {row.original.slug}
                         </Text>
                     </div>
@@ -151,7 +151,7 @@ export default function Index({ albums, years, filters, empty }: Props) {
                             <Link
                                 href={albumPhotos(row.original.id)}
                                 aria-label="Kelola foto"
-                                className="cursor-pointer rounded-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                className="cursor-pointer rounded-sm text-primary-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                             >
                                 <Images className="size-4" aria-hidden="true" />
                             </Link>
@@ -199,7 +199,7 @@ export default function Index({ albums, years, filters, empty }: Props) {
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua status</option>
                         <option value="published">Terbit</option>
@@ -212,7 +212,7 @@ export default function Index({ albums, years, filters, empty }: Props) {
                         onChange={(event) =>
                             applyFilter({ tahun: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         <option value="">Semua tahun</option>
                         {years.map((year) => (

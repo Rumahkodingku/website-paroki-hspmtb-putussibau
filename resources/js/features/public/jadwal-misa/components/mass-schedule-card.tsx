@@ -1,7 +1,7 @@
 import { Text } from '@/components/text';
 import { formatWibTime } from '@/lib/datetime';
 import type { PublicMassSchedule } from '../types';
-import { LocationLink } from './next-mass-card';
+import { LocationLink } from '@/components/next-mass-card';
 
 /*
  * One row of the weekly schedule — DESIGN.md's MassScheduleCard.
@@ -26,12 +26,12 @@ type Props = {
 export function MassScheduleCard({ mass, dayLabels }: Props) {
     return (
         <li
-            className="grid gap-3 border-t border-hairline pt-5 sm:grid-cols-[7rem_1fr_auto] sm:gap-4"
+            className="grid gap-3 border-t border-border pt-5 sm:grid-cols-[7rem_1fr_auto] sm:gap-4"
             data-test="mass-schedule-card"
         >
             {/* The day is a fixed-width column so the times line up as a column
                 instead of a ragged left edge. */}
-            <Text as="p" variant="caption-strong" color="brand">
+            <Text as="p" variant="label" color="brand">
                 {dayLabels[mass.day_of_week] ?? ''}
             </Text>
 
@@ -39,22 +39,22 @@ export function MassScheduleCard({ mass, dayLabels }: Props) {
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <Text
                         as="p"
-                        variant="body-strong"
-                        className="text-primary tabular-nums"
+                        variant="heading-sm"
+                        className="text-primary-on-surface tabular-nums"
                     >
                         {formatWibTime(mass.start_time)}
                     </Text>
-                    <Text as="p" variant="body-strong">
+                    <Text as="p" variant="heading-sm">
                         {mass.name}
                     </Text>
                 </div>
 
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {mass.location.name}
                 </Text>
 
                 {mass.notes ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {mass.notes}
                     </Text>
                 ) : null}

@@ -230,7 +230,7 @@ function SidebarEntryLink({ entry }: { entry: Entry }) {
 
                     <Text
                         as="span"
-                        variant="micro-legal"
+                        variant="fine-print"
                         tracking="tight"
                         className="ml-auto text-muted-foreground/60"
                     >
@@ -259,7 +259,7 @@ function SidebarGroup({ label, entries }: { label: string; entries: Entry[] }) {
         <div className="px-2 py-1">
             <Text
                 as="p"
-                variant="micro-legal"
+                variant="fine-print"
                 weight="medium"
                 tracking="wider"
                 transform="uppercase"

@@ -21,10 +21,10 @@ export function CommunityProfileHeader({
                 <img
                     src={community.thumbnail_url}
                     alt=""
-                    className="aspect-video w-full rounded-xl border border-hairline object-cover"
+                    className="aspect-video w-full rounded-xl border border-border object-cover"
                 />
             ) : (
-                <div className="flex aspect-video w-full items-center justify-center rounded-xl border border-hairline bg-canvas-soft text-muted-foreground">
+                <div className="flex aspect-video w-full items-center justify-center rounded-xl border border-border bg-canvas-subtle text-muted-foreground">
                     <ImageIcon className="size-10" aria-hidden="true" />
                 </div>
             )}
@@ -34,7 +34,7 @@ export function CommunityProfileHeader({
                     <img
                         src={community.logo_url}
                         alt=""
-                        className="size-16 shrink-0 rounded-lg border border-hairline object-contain p-1"
+                        className="size-16 shrink-0 rounded-lg border border-border object-contain p-1"
                     />
                 ) : null}
 
@@ -52,7 +52,7 @@ export function CommunityProfileHeader({
                     {community.description ? (
                         <Text
                             as="p"
-                            variant="lead"
+                            variant="body-lg"
                             color="muted"
                             className="max-w-3xl"
                         >

@@ -6,7 +6,7 @@ import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
 import type { SharedProps } from '@/types';
 import { ContactDetails } from '../components/contact-details';
-import { ContactMap } from '../components/contact-map';
+import { ContactMap } from '@/components/contact-map';
 import { ContactSocial } from '../components/contact-social';
 
 /*

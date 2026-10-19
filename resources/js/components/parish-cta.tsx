@@ -46,11 +46,11 @@ export function ParishCta({
                 {description && (
                     /*
                      * brand-inverse, because the CTA sits on bg-navy. The
-                     * container already sets text-white; navy-light is the
+                     * container already sets text-white; navy-soft is the
                      * ramp read against that surface, and it measures 15.24:1
                      * there where white on navy measures less.
                      */
-                    <Text as="p" variant="lead" color="brand-inverse">
+                    <Text as="p" variant="body-lg" color="brand-inverse">
                         {description}
                     </Text>
                 )}
