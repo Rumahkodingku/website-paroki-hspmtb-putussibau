@@ -5,6 +5,7 @@ use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
 use App\Http\Controllers\Area\AreaController;
 use App\Http\Controllers\Area\PublicAreaController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\PublicDocumentController;
 use App\Http\Controllers\Galeri\GalleryController;
@@ -125,7 +126,7 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
          * Dashboard
          * ------------------------------------------------------------------
          */
-        Route::inertia('/', 'admin/dashboard')->name('dashboard');
+        Route::get('/', DashboardController::class)->name('dashboard');
 
         /*
          * ------------------------------------------------------------------
