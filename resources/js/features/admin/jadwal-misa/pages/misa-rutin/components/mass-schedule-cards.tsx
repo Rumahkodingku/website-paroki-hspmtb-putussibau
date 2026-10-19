@@ -37,20 +37,20 @@ export function MassScheduleCards({
             {rows.map((schedule) => (
                 <li
                     key={schedule.id}
-                    className="rounded-lg border border-hairline p-4"
+                    className="rounded-lg border border-border p-4"
                 >
                     <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
-                            <Text as="p" variant="body-strong">
+                            <Text as="p" variant="heading-sm">
                                 {schedule.name}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {dayLabel(schedule.day_of_week)},{' '}
                                 {formatWibTime(schedule.start_time)}
                             </Text>
 
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {schedule.location.name}
                             </Text>
                         </div>

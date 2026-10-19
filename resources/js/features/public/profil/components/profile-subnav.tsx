@@ -8,7 +8,7 @@ import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
  * ProfileSubNav - DESIGN.md, "Profile Components".
  *
  * A contextual navigation for the Profil section. Remains visually secondary to
- * the content: a hairline row that scrolls horizontally on a phone rather than a
+ * the content: a border row that scrolls horizontally on a phone rather than a
  * loud tab bar. The active item is marked by weight and a red underline, never
  * by colour alone (roadmap 6A-82).
  */
@@ -27,7 +27,7 @@ export function ProfileSubNav() {
     return (
         <nav
             aria-label="Navigasi Profil Paroki"
-            className="border-b border-divider-soft bg-background"
+            className="border-b border-border-subtle bg-background"
         >
             <PublicContainer>
                 <ul className="flex gap-1 overflow-x-auto">
@@ -46,7 +46,7 @@ export function ProfileSubNav() {
                                             : 'border-transparent text-muted-foreground hover:text-foreground',
                                     )}
                                 >
-                                    <Text as="span" variant="caption-strong">
+                                    <Text as="span" variant="label">
                                         {link.label}
                                     </Text>
                                 </Link>

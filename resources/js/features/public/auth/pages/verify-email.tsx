@@ -26,7 +26,7 @@ export default function VerifyEmail({ status }: Props) {
             {status === 'verification-link-sent' && (
                 <Text
                     as="p"
-                    variant="caption"
+                    variant="body-sm"
                     weight="medium"
                     color="brand"
                     align="center"
@@ -47,7 +47,7 @@ export default function VerifyEmail({ status }: Props) {
 
                         <TextLink
                             href={logout()}
-                            className="mx-auto block text-caption"
+                            className="mx-auto block text-body-sm"
                         >
                             Log out
                         </TextLink>

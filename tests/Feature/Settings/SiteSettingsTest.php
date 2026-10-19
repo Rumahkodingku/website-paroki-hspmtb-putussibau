@@ -5,6 +5,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\SiteSettingsService;
 use Database\Seeders\SiteSettingsSeeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -311,11 +312,18 @@ test('the configured key list matches PRD Lampiran B', function () {
     // The `profil` group joined in D-69 when the Informasi Profil module was
     // removed and its fields moved here (logo_alt, description, established_year,
     // cover, cover_alt, video_url, website, is_published).
-    expect($keys)->toHaveCount(37)
+    //
+    // Phase 9A added four homepage hero keys (D-70): title, description, image,
+    // and image alt. They are an approved divergence from PRD Lampiran B.
+    expect($keys)->toHaveCount(41)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
             'seo_default_og_image',
+            'home_hero_title',
+            'home_hero_description',
+            'home_hero_image',
+            'home_hero_image_alt',
             'home_show_contact',
             'privacy_policy_content',
             'logo_alt',
@@ -485,6 +493,98 @@ test('a guest cannot write a privacy policy', function () {
 | keys are edited only on the settings page now.
 |
 */
+
+/*
+|--------------------------------------------------------------------------
+| The homepage hero group (D-70)
+|--------------------------------------------------------------------------
+*/
+
+test('the homepage hero keys are configured', function () {
+    expect(config('site-settings.groups.beranda'))->toContain(
+        'home_hero_title',
+        'home_hero_description',
+        'home_hero_image',
+        'home_hero_image_alt',
+    )
+        ->and(config('site-settings.types.home_hero_image'))->toBe('media')
+        ->and(config('site-settings.rules.home_hero_title'))
+        ->toBe('nullable|string|max:255')
+        ->and(config('site-settings.rules.home_hero_description'))
+        ->toBe('nullable|string|max:1000');
+});
+
+test('the settings page renders the hero fields in the beranda tab', function () {
+    $this->actingAs(superAdmin())->get(route('settings.edit'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/pengaturan')
+            ->has('groups.beranda.home_hero_title')
+            ->has('groups.beranda.home_hero_description')
+            ->has('groups.beranda.home_hero_image')
+            ->has('groups.beranda.home_hero_image_alt')
+            ->where('meta.media', fn (Collection $media): bool => $media->contains('home_hero_image'))
+            ->where('meta.multiline', fn (Collection $multiline): bool => $multiline->contains('home_hero_description'))
+            ->has('meta.hints.home_hero_image_alt')
+        );
+});
+
+test('saving the homepage hero stores its text and ready media', function () {
+    $media = Media::factory()->ready()->create();
+
+    $this->actingAs(superAdmin())->put(route('settings.update'), [
+        'settings' => [
+            'home_hero_title' => 'Sambut umat di rumah',
+            'home_hero_description' => 'Jadwal misa, kabar, dan pelayanan paroki.',
+            'home_hero_image' => (string) $media->getKey(),
+            'home_hero_image_alt' => 'Gereja paroki pada malam hari',
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect(settingsService()->get('home_hero_title'))->toBe('Sambut umat di rumah')
+        ->and(settingsService()->get('home_hero_description'))
+        ->toBe('Jadwal misa, kabar, dan pelayanan paroki.')
+        ->and(settingsService()->get('home_hero_image'))->toBe((string) $media->getKey())
+        ->and(settingsService()->get('home_hero_image_alt'))
+        ->toBe('Gereja paroki pada malam hari');
+});
+
+test('home hero image rejects a media id that has not finished processing', function () {
+    $media = Media::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->put(route('settings.update'), [
+            'settings' => [
+                'home_hero_image' => (string) $media->getKey(),
+                'home_hero_image_alt' => 'Gambar hero',
+            ],
+        ])
+        ->assertSessionHasErrors('settings.home_hero_image');
+});
+
+test('home hero alt is required when an image is selected', function () {
+    $media = Media::factory()->ready()->create();
+
+    $this->actingAs(superAdmin())
+        ->put(route('settings.update'), [
+            'settings' => [
+                'home_hero_image' => (string) $media->getKey(),
+                'home_hero_image_alt' => '',
+            ],
+        ])
+        ->assertSessionHasErrors('settings.home_hero_image_alt');
+});
+
+test('home hero alt can be left empty when no image is selected', function () {
+    $this->actingAs(superAdmin())
+        ->put(route('settings.update'), [
+            'settings' => [
+                'home_hero_image' => '',
+                'home_hero_image_alt' => '',
+            ],
+        ])
+        ->assertSessionHasNoErrors();
+});
 
 test('the profil group and its key types are configured', function () {
     expect(config('site-settings.groups.profil'))->toBe([

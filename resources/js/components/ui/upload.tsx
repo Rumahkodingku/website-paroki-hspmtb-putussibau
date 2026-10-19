@@ -106,7 +106,7 @@ const uploadDropzoneVariants = cva(
             variant: {
                 default:
                     "border border-dashed border-input hover:border-ring/70 hover:bg-muted/40 data-drag-reject:border-destructive data-drag-reject:bg-destructive/5 data-dragging:border-primary data-dragging:bg-muted/60",
-                muted: "bg-muted/60 hover:bg-muted data-drag-reject:bg-destructive/10 data-drag-reject:ring-destructive/30 data-dragging:bg-muted data-dragging:ring-2 data-dragging:ring-primary/30",
+                muted: "bg-muted/60 hover:bg-muted data-drag-reject:bg-destructive/10 data-drag-reject:ring-destructive/30 data-dragging:bg-muted data-dragging:ring-2 data-dragging:ring-ring/30",
                 outline:
                     "border bg-card shadow-xs hover:bg-muted/30 data-drag-reject:border-destructive data-dragging:border-primary data-dragging:bg-muted/40",
             },
@@ -226,7 +226,7 @@ function UploadDropzoneDescription({
         <p
             data-slot="upload-dropzone-description"
             className={cn(
-                "text-sm/relaxed text-muted-foreground group-data-drag-reject/upload-dropzone:text-destructive [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+                "text-sm/relaxed text-muted-foreground group-data-drag-reject/upload-dropzone:text-destructive [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary-on-surface",
                 className,
             )}
             {...props}

@@ -21,7 +21,7 @@ export function PublicServiceCard({
     return (
         <Link
             href={show({ service: service.slug })}
-            className="group flex h-full flex-col overflow-hidden rounded-lg border border-hairline bg-card transition-colors hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary-on-surface/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
             {service.thumbnail ? (
                 <img
@@ -31,7 +31,7 @@ export function PublicServiceCard({
                     className="aspect-video w-full object-cover"
                 />
             ) : (
-                <div className="flex aspect-video w-full items-center justify-center bg-canvas-soft text-muted-foreground">
+                <div className="flex aspect-video w-full items-center justify-center bg-canvas-subtle text-muted-foreground">
                     <ImageIcon className="size-8" aria-hidden="true" />
                 </div>
             )}
@@ -43,7 +43,11 @@ export function PublicServiceCard({
                     </div>
                 ) : null}
 
-                <Text as="h3" variant="h3" className="group-hover:text-primary">
+                <Text
+                    as="h3"
+                    variant="h3"
+                    className="group-hover:text-primary-on-surface"
+                >
                     {service.title}
                 </Text>
 

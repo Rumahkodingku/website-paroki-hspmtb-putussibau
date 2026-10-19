@@ -19,7 +19,7 @@ export function locationColumns(
             header: 'Nama lokasi',
             sortKey: 'name',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.name}
                 </Text>
             ),

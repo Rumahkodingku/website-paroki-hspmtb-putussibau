@@ -19,14 +19,18 @@
             })();
         </script>
 
-        {{-- Inline style to set the HTML background color based on our theme in app.css --}}
+        {{--
+            Inline style for the HTML background, matching the DESIGN-v2 canvas
+            tokens so there is no flash before app.css loads. Light canvas is
+            #FFFFFF, dark canvas is #111318 (D-72).
+        --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #ffffff;
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: #111318;
             }
         </style>
 
@@ -103,9 +107,37 @@
                 return is_string($value) && trim($value) !== '' ? $value : null;
             };
             $seoSiteName = $seoRead('parish_name');
+            $isHome = request()->routeIs('home');
+
+            /*
+             * The homepage has three defaults the other pages do not need.
+             *
+             * The short name is a useful document title when the parish has not
+             * configured seo_default_title. The short description is the only
+             * honest meta description available before a page-specific one is
+             * written, and the approved hero photograph makes a valid Open
+             * Graph image even when seo_default_og_image is unset. Every value
+             * remains optional: an empty setting still omits the tag rather
+             * than emitting an empty one.
+             */
             $seoTitle = $seoRead('seo_default_title');
+
+            if ($isHome) {
+                $seoTitle ??= $seoRead('parish_short_name') ?? $seoRead('parish_name');
+            }
+
             $seoDescription = $seoRead('seo_default_description');
+
+            if ($isHome) {
+                $seoDescription ??= $seoRead('short_description');
+            }
+
             $seoOgImage = $seoRead('seo_default_og_image');
+
+            if ($isHome) {
+                $seoOgImage ??= (string) config('homepage.fallback_hero_og_image');
+            }
+
             $seoOgImage = $seoOgImage && ! str_starts_with($seoOgImage, 'http')
                 ? rtrim(config('app.url'), '/').'/'.ltrim($seoOgImage, '/')
                 : $seoOgImage;

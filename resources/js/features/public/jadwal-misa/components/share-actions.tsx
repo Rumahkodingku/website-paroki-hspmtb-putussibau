@@ -67,7 +67,7 @@ export function ShareActions({ url, title }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-test="share-whatsapp"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 Bagikan lewat WhatsApp
             </a>
@@ -76,7 +76,7 @@ export function ShareActions({ url, title }: Props) {
                 type="button"
                 onClick={copyLink}
                 data-test="share-copy"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 Salin tautan
             </button>
@@ -85,7 +85,7 @@ export function ShareActions({ url, title }: Props) {
                 type="button"
                 onClick={() => window.print()}
                 data-test="share-print"
-                className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >
                 Cetak jadwal
             </button>
@@ -104,12 +104,12 @@ export function ShareActions({ url, title }: Props) {
 export function LocationInfo({ location }: { location: PublicLocation }) {
     return (
         <div className="space-y-1">
-            <Text as="p" variant="body-strong">
+            <Text as="p" variant="heading-sm">
                 {location.name}
             </Text>
 
             {location.address ? (
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {location.address}
                 </Text>
             ) : null}
@@ -120,7 +120,7 @@ export function LocationInfo({ location }: { location: PublicLocation }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     data-test="location-maps-link"
-                    className="inline-flex items-center rounded-sm text-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    className="inline-flex items-center rounded-sm text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                     Buka di Google Maps
                 </a>

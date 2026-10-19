@@ -9,7 +9,7 @@ import { home } from '@/routes';
 import { index as beritaIndex, show as postArticle } from '@/routes/berita';
 import type { PublicPost, PublicPostDetail } from '../types';
 import { ShareActions } from '../components/share-actions';
-import { ArticleCard } from '../components/article-card';
+import { ArticleCard } from '@/components/article-card';
 
 type Props = {
     post: PublicPostDetail;
@@ -65,7 +65,7 @@ export default function Show({ post, related, adjacent }: Props) {
                     <article className="space-y-6">
                         <header className="space-y-3">
                             {post.category ? (
-                                <Text as="p" variant="tagline" color="brand">
+                                <Text as="p" variant="heading-md" color="brand">
                                     {post.category.name}
                                 </Text>
                             ) : null}
@@ -75,13 +75,13 @@ export default function Show({ post, related, adjacent }: Props) {
                             </Text>
 
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                <Text as="p" variant="caption" color="muted">
+                                <Text as="p" variant="body-sm" color="muted">
                                     {post.author_name}
                                 </Text>
                                 {post.published_at ? (
                                     <Text
                                         as="p"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                     >
                                         {formatWibDate(
@@ -103,7 +103,7 @@ export default function Show({ post, related, adjacent }: Props) {
 
                         {post.scripture_reference ? (
                             <blockquote className="border-l-4 border-primary pl-4">
-                                <Text as="p" variant="body-strong">
+                                <Text as="p" variant="heading-sm">
                                     {post.scripture_reference}
                                 </Text>
                             </blockquote>
@@ -123,17 +123,17 @@ export default function Show({ post, related, adjacent }: Props) {
                     {adjacent.previous || adjacent.next ? (
                         <nav
                             aria-label="Navigasi artikel"
-                            className="grid gap-4 border-t border-hairline pt-6 sm:grid-cols-2"
+                            className="grid gap-4 border-t border-border pt-6 sm:grid-cols-2"
                         >
                             {adjacent.previous ? (
                                 <Link
                                     href={postArticle(adjacent.previous.slug)}
                                     prefetch
-                                    className="rounded-sm text-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                    className="rounded-sm text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 >
                                     <Text
                                         as="span"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                     >
                                         Sebelumnya
@@ -149,11 +149,11 @@ export default function Show({ post, related, adjacent }: Props) {
                                 <Link
                                     href={postArticle(adjacent.next.slug)}
                                     prefetch
-                                    className="rounded-sm text-right text-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:col-start-2"
+                                    className="rounded-sm text-right text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:col-start-2"
                                 >
                                     <Text
                                         as="span"
-                                        variant="caption"
+                                        variant="body-sm"
                                         color="muted"
                                     >
                                         Berikutnya

@@ -13,17 +13,14 @@ use Inertia\Testing\AssertableInertia as Assert;
 | Phase 03 gave the public site its routes. Roadmap section 17 lists what the
 | public suite has to cover; this file is the backend half of it.
 |
-| What is asserted here is the contract, not the content. Every page is a
-| placeholder by design - roadmap section 10 permits placeholder public routes
-| for navigation testing and forbids everything else - so there is no
-| proposition, no taxonomy and no rendering of a record to check. What there is
-| to check is that the route exists, reaches the page it claims to, needs no
-| session, and does not shadow a path it should leave alone.
+| What is asserted here is the contract, not the content: the route exists,
+| reaches the page it claims to, needs no session, and does not shadow a path it
+| should leave aside. The module suites assert the props each page sends.
 |
-| The absence of props is asserted as carefully as their presence. A placeholder
-| page that starts receiving props before its module exists is how "no CRUD, no
-| domain query" quietly stops being true, and nothing else in the suite would
-| notice.
+| The absence of props is still asserted for the pages that remain placeholders.
+| A placeholder that starts receiving props before its module exists is how
+| "no CRUD, no domain query" quietly stops being true, and nothing else in the
+| suite would notice.
 |
 | @see docs/DECISIONS.md D-31
 |
@@ -84,6 +81,10 @@ dataset('public pages', fn (): array => [
  * the shared `contact` prop (no page-specific query), so it left this list. Its
  * contract is asserted by tests/Feature/Contact/ContactPageTest.php. See D-67.
  *
+ * Phase 09A did the same for /: it is now a controller that aggregates the
+ * published modules, so it left this list too. Its contract is asserted by
+ * tests/Feature/Public/PublicHomepageTest.php. See D-70.
+ *
  * Excluded by name rather than filtered by inspection, because the assertion
  * exists precisely to notice a page that starts receiving props before its module
  * exists. Deriving the list from what currently has no props would make the test
@@ -93,7 +94,6 @@ dataset('public pages', fn (): array => [
  * the moment to notice the placeholder set shrinking.
  */
 dataset('placeholder pages', fn (): array => [
-    '/' => ['/', 'public/beranda'],
     '/design-system' => ['/design-system', 'public/design-system'],
 ]);
 

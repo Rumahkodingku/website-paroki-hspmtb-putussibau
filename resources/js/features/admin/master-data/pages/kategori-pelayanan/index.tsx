@@ -71,10 +71,10 @@ export default function Index({ categories, filters, labels }: Props) {
             sortKey: 'name',
             cell: ({ row }) => (
                 <div className="space-y-0.5">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.name}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {row.original.slug}
                     </Text>
                 </div>
@@ -150,7 +150,7 @@ export default function Index({ categories, filters, labels }: Props) {
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {STATUS_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>

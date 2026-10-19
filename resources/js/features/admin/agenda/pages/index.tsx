@@ -117,10 +117,10 @@ export default function Index({
             sortKey: 'title',
             cell: ({ row }) => (
                 <div className="flex flex-col gap-1">
-                    <Text as="p" variant="caption-strong">
+                    <Text as="p" variant="label">
                         {row.original.title}
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {row.original.location_name ?? 'Lokasi menyusul'}
                     </Text>
                 </div>
@@ -141,7 +141,7 @@ export default function Index({
                 <div className="flex flex-col gap-1">
                     <span>{startCell(row.original, displayTimezone)}</span>
                     {row.original.is_all_day ? (
-                        <Text variant="caption" color="muted">
+                        <Text variant="body-sm" color="muted">
                             Sepanjang hari
                         </Text>
                     ) : null}
@@ -172,7 +172,7 @@ export default function Index({
                                     type="button"
                                     onClick={() => duplicate(row.original)}
                                     disabled={duplicating === row.original.id}
-                                    className="cursor-pointer rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
+                                    className="cursor-pointer rounded-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
                                 >
                                     {duplicating === row.original.id ? (
                                         <Loader className="ml-1 inline h-4 w-4" />
@@ -228,7 +228,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -243,7 +243,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ kategori: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {categoryOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -264,7 +264,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ bulan: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     />
 
                     <select
@@ -273,7 +273,7 @@ export default function Index({
                         onChange={(event) =>
                             applyFilter({ publikasi: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {/*
                          * yes/no, not 1/0. EventController whitelists exactly

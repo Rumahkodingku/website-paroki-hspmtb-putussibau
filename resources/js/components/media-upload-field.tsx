@@ -401,7 +401,7 @@ function DocumentVariant({
         >
             <div className="space-y-2">
                 {currentFileName ? (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Berkas saat ini: {currentFileName}
                     </Text>
                 ) : null}
@@ -425,7 +425,7 @@ function DocumentVariant({
                         setLocalError(null);
                         onFileChange(file);
                     }}
-                    className="block w-full cursor-pointer rounded-md border border-hairline bg-background px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-secondary/80 focus-visible:border-primary focus-visible:outline-none"
+                    className="block w-full cursor-pointer rounded-md border border-border bg-background px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-secondary/80 focus-visible:border-primary focus-visible:outline-none"
                 />
             </div>
         </Field>
@@ -452,7 +452,7 @@ function UnavailableUpload({ id, label, hint }: PlaceholderProps) {
     return (
         <Field id={id} label={label} hint={hint}>
             <div
-                className="flex items-start gap-3 rounded-lg border border-dashed border-hairline bg-canvas-soft p-4"
+                className="flex items-start gap-3 rounded-lg border border-dashed border-border bg-canvas-subtle p-4"
                 data-test="media-unavailable"
             >
                 <ConstructionIcon
@@ -460,10 +460,10 @@ function UnavailableUpload({ id, label, hint }: PlaceholderProps) {
                     className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                 />
                 <div className="space-y-1">
-                    <Text as="p" variant="body-strong">
+                    <Text as="p" variant="heading-sm">
                         Belum tersedia
                     </Text>
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Bidang ini belum tersedia. Tidak ada berkas yang dikirim
                         ke server sampai modulnya dibangun.
                     </Text>
@@ -507,7 +507,7 @@ function AltField({
                 maxLength={255}
                 onChange={(event) => onChange(event.target.value)}
                 placeholder="Contoh: Suasana acara di halaman depan Gereja Paroki"
-                className="h-11 w-full rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary focus-visible:outline-none"
+                className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary focus-visible:outline-none"
             />
         </Field>
     );
@@ -562,7 +562,7 @@ function ImageCarried({
 
     if (url === null) {
         return emptyHint === undefined ? null : (
-            <Text as="p" variant="caption" color="muted">
+            <Text as="p" variant="body-sm" color="muted">
                 {emptyHint}
             </Text>
         );
@@ -570,13 +570,13 @@ function ImageCarried({
 
     return (
         <div
-            className="flex flex-col gap-3 rounded-lg border border-hairline bg-canvas-soft p-3"
+            className="flex flex-col gap-3 rounded-lg border border-border bg-canvas-subtle p-3"
             data-test="media-current"
         >
             <img src={url} alt="" className={IMAGE_PREVIEW_CLASS} />
             <div className="flex items-center justify-between gap-3">
                 {removable ? null : (
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         Gambar yang sudah tersimpan pada data ini.
                     </Text>
                 )}

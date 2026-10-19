@@ -99,12 +99,12 @@ export function ContactDetails({ contact }: { contact: ContactDetailsData }) {
                         <ParishCardContent className="flex h-full flex-col gap-3 p-6">
                             <div className="flex items-center gap-2">
                                 <Icon
-                                    className="size-4 text-red-on-surface"
+                                    className="size-4 text-primary-on-surface"
                                     aria-hidden="true"
                                 />
                                 <Text
                                     as="h3"
-                                    variant="caption-strong"
+                                    variant="label"
                                     color="foreground"
                                 >
                                     {item.label}

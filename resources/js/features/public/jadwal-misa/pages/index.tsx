@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatWibDateTime } from '@/lib/datetime';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { DAY_LABELS, MassScheduleCard } from '../components/mass-schedule-card';
-import { NextMassCard } from '../components/next-mass-card';
+import { NextMassCard } from '@/components/next-mass-card';
 import { ScheduleFilter } from '../components/schedule-filter';
 import { ScheduleNoticeBanner } from '../components/schedule-notice-banner';
 import { LocationInfo, ShareActions } from '../components/share-actions';
@@ -177,16 +177,16 @@ export default function JadwalMisa({
                                     {specialMasses.map((mass) => (
                                         <li
                                             key={mass.id}
-                                            className="space-y-2 border-t border-hairline pt-5"
+                                            className="space-y-2 border-t border-border pt-5"
                                             data-test="special-mass-card"
                                         >
-                                            <Text as="p" variant="body-strong">
+                                            <Text as="p" variant="heading-sm">
                                                 {mass.title}
                                             </Text>
 
                                             <Text
                                                 as="p"
-                                                variant="caption"
+                                                variant="body-sm"
                                                 color="muted"
                                             >
                                                 {formatWibDateTime(
@@ -205,7 +205,7 @@ export default function JadwalMisa({
 
                                             <Text
                                                 as="p"
-                                                variant="caption"
+                                                variant="body-sm"
                                                 color="muted"
                                             >
                                                 {mass.location.name}
@@ -233,7 +233,7 @@ export default function JadwalMisa({
                                 {locations.map((location) => (
                                     <div
                                         key={location.id}
-                                        className="rounded-lg border border-hairline p-5"
+                                        className="rounded-lg border border-border p-5"
                                     >
                                         <LocationInfo location={location} />
                                     </div>

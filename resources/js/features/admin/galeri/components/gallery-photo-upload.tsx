@@ -191,7 +191,7 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
                 ) : null}
             </div>
 
-            <Text as="p" variant="caption" color="muted">
+            <Text as="p" variant="body-sm" color="muted">
                 {limits} Format lain ditolak secara otomatis.
             </Text>
 
@@ -209,7 +209,7 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
                     {entries.map((entry) => (
                         <li
                             key={entry.id}
-                            className="flex gap-3 rounded-lg border border-hairline p-3"
+                            className="flex gap-3 rounded-lg border border-border p-3"
                         >
                             <img
                                 src={entry.previewUrl}
@@ -220,14 +220,14 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
                             <div className="min-w-0 flex-1 space-y-1">
                                 <Text
                                     as="p"
-                                    variant="caption-strong"
+                                    variant="label"
                                     className="truncate"
                                 >
                                     {entry.file.name}
                                 </Text>
                                 <Text
                                     as="p"
-                                    variant="caption"
+                                    variant="body-sm"
                                     color={
                                         entry.status === 'failed'
                                             ? 'danger'
@@ -239,7 +239,7 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
                                 {entry.error ? (
                                     <Text
                                         as="p"
-                                        variant="micro-legal"
+                                        variant="fine-print"
                                         color="danger"
                                     >
                                         {entry.error}

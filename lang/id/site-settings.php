@@ -59,6 +59,11 @@ return [
         'seo_default_description' => 'Deskripsi default',
         'seo_default_og_image' => 'Gambar OG default',
 
+        'home_hero_title' => 'Judul hero beranda',
+        'home_hero_description' => 'Deskripsi hero beranda',
+        'home_hero_image' => 'Gambar hero beranda',
+        'home_hero_image_alt' => 'Teks alternatif gambar hero',
+
         'home_news_limit' => 'Jumlah berita di beranda',
         'home_events_limit' => 'Jumlah agenda di beranda',
         'home_gallery_limit' => 'Jumlah foto di galeri beranda',
@@ -79,6 +84,7 @@ return [
         'contact_address',
         'motto_verse',
         'seo_default_description',
+        'home_hero_description',
     ],
 
     /*
@@ -101,6 +107,10 @@ return [
         'office_hours' => 'Atur hari dan jam operasional pelayanan sekretariat paroki.',
         'logo' => 'Logo dipakai pada header dan footer situs.',
         'favicon' => 'Ikon kecil yang tampil di tab peramban. Unggah gambar persegi (PNG disarankan).',
+        'home_hero_title' => 'Kosongkan untuk memakai nama paroki sebagai judul hero.',
+        'home_hero_description' => 'Kosongkan untuk memakai deskripsi singkat paroki.',
+        'home_hero_image' => 'Gambar utama beranda. Bila kosong, situs memakai foto gereja bawaan. Rasio yang disarankan 16:9.',
+        'home_hero_image_alt' => 'Wajib diisi saat gambar hero dipilih. Jelaskan gambar secara singkat untuk pembaca layar.',
         'description' => 'Prosa profil paroki. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
         'established_year' => 'Isi hanya bila tahun berdiri memang diketahui.',
         'is_published' => 'Menandai profil paroki sebagai terbit.',

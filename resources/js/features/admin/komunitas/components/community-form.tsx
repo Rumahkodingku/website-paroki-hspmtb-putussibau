@@ -149,7 +149,7 @@ export function CommunityForm({
             >
                 <TabsList
                     variant="line"
-                    className="flex h-auto flex-wrap justify-start gap-1 border-b border-hairline bg-transparent p-0"
+                    className="flex h-auto flex-wrap justify-start gap-1 border-b border-border bg-transparent p-0"
                 >
                     {TAB_ORDER.map((key) => {
                         const count = errorCount(key);
@@ -158,7 +158,7 @@ export function CommunityForm({
                             <TabsTrigger
                                 key={key}
                                 value={key}
-                                className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary"
+                                className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary-on-surface"
                             >
                                 {sections[key] ?? key}
 

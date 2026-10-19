@@ -54,7 +54,7 @@ PHASE 11 — Production, Content Population & Handover
 | **Phase 6B** | Parish Services (Pelayanan)                | ✅ Done    |
 | **Phase 7**  | Communities                               | ✅ Done    |
 | **Phase 8**  | Gallery, Download & Contact               | 🟡 8A Galeri, 8B Dokumen & 8C Kontak selesai |
-| **Phase 9**  | Homepage & Admin Dashboard                | ⚪ Planned |
+| **Phase 9**  | Homepage & Admin Dashboard                | 🟡 9A Beranda selesai; 9B Dashboard planned |
 | **Phase 10** | QA, Performance & Security                | ⚪ Planned |
 | **Phase 11** | Production, Content Population & Handover | ⚪ Planned |
 
@@ -151,6 +151,42 @@ Kemudian lanjut ke phase berikutnya.
 ---
 
 ## Current Focus
+
+### Migrasi DESIGN-v2 (aktif)
+
+`docs/DESIGN-v2.md` menggantikan `docs/DESIGN.md` v1.1 sebagai satu-satunya
+acuan desain UI. Migrasi berjalan bertahap M0–M6: dokumentasi & token, lalu
+tipografi/primitif, shell publik, halaman publik per-route, **redesign admin
+penuh**, dan verifikasi. Primary tetap `#AB020E`; dark mode memakai kanvas
+netral. Rencana dan tabel pemetaan token ada di
+`plan-implementation/plan-design-v2-migration.md`; keputusan di `DECISIONS.md`
+D-72.
+
+### Phase 9A — Beranda Publik (selesai)
+
+Phase 9A mengganti placeholder Beranda dengan halaman publik final yang
+mengagregasi modul Berita, Agenda, Pelayanan, dan Galeri. Misa berikutnya tetap
+berasal dari `NextMassResolver`; berita dan agenda mengikuti scope publik
+masing-masing; renungan membaca post terbaru kategori `renungan`; galeri
+membatasi jumlah **foto** sesuai `home_gallery_limit`; dan blok kontak memakai
+shared prop `contact` beserta petanya.
+
+Hero sekarang dapat dikelola dari **Pengaturan Situs** melalui empat key baru:
+`home_hero_title`, `home_hero_description`, `home_hero_image`, dan
+`home_hero_image_alt`. Bila gambar belum diunggah, Beranda memakai aset
+`public/hero-section.webp` (OG memakai PNG). Announcement bar dan `hero_slides`
+**tidak** dibangun di fase ini; keputusan dan divergensinya dicatat di D-70.
+
+Dokumen implementasi:
+
+```text
+roadmap/phase-9a-homepage.md
+plan-implementation/plan-phase-9a-homepage.md
+```
+
+> **Engineering complete; konten belum.** Berita, agenda, pelayanan, galeri, dan
+> kontak tetap kosong sampai paroki mengisi dan memvalidasi kontennya. E2E
+> berjalan pada database bare dan sengaja menguji empty state.
 
 ### Phase 8A — Galeri (modul selesai)
 

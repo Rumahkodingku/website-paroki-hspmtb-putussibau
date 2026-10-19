@@ -66,15 +66,15 @@ export default function KomunitasIndex({
                             ))}
                         </div>
                     ) : (
-                        <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-                            <Text as="p" variant="body-strong">
+                        <div className="rounded-lg border border-dashed border-border p-10 text-center">
+                            <Text as="p" variant="heading-sm">
                                 {isFiltered
                                     ? 'Tidak ada komunitas untuk pencarian ini.'
                                     : 'Belum ada komunitas yang dipublikasikan.'}
                             </Text>
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 color="muted"
                                 className="mt-1"
                             >

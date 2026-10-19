@@ -112,7 +112,7 @@ export default function Index({ notices, filters, noticeScopes }: Props) {
                         onChange={(event) =>
                             applyFilter({ status: event.target.value })
                         }
-                        className="h-11 rounded-md border border-hairline bg-background px-3 text-sm focus-visible:border-primary"
+                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
                     >
                         {STATUS_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>

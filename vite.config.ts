@@ -31,9 +31,35 @@ export default defineConfig({
                   laravel({
                       input: ['resources/css/app.css', 'resources/js/app.tsx'],
                       refresh: true,
+                      /*
+                       * DESIGN-v2 §4 uses Mona Sans, then system-ui. Loaded
+                       * through the bunny provider so there is no npm font
+                       * dependency; `variable` is --font-sans, which
+                       * resources/css/app.css reads. See D-74.
+                       *
+                       * Two definitions rather than one, because the plugin
+                       * unions the weights and styles of definitions that share
+                       * an alias (cross-product). The italic definition needs a
+                       * distinct alias AND variable - validateFontsConfig
+                       * rejects duplicates - and carries only the two italic
+                       * weights the UI actually renders. Its optimized fallback
+                       * is off so a second "Mona Sans fallback" face is not
+                       * emitted for the same family.
+                       */
                       fonts: [
-                          bunny('Instrument Sans', {
-                              weights: [400, 500, 600],
+                          bunny('Mona Sans', {
+                              weights: [400, 500, 600, 700],
+                              styles: ['normal'],
+                              subsets: ['latin', 'latin-ext'],
+                              variable: '--font-sans',
+                          }),
+                          bunny('Mona Sans', {
+                              alias: 'mona-sans-italic',
+                              variable: '--font-sans-italic',
+                              weights: [400, 600],
+                              styles: ['italic'],
+                              subsets: ['latin', 'latin-ext'],
+                              optimizedFallbacks: false,
                           }),
                       ],
                   }),

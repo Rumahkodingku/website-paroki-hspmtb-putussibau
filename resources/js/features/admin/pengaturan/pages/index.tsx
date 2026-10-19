@@ -169,18 +169,18 @@ export default function Settings({ groups, meta }: Props) {
                         {/*
                             The same tab bar the two other tabbed admin forms
                             use (community-form.tsx, service-form.tsx): a line
-                            variant left-aligned under a hairline, rather than
+                            variant left-aligned under a border, rather than
                             this page's earlier centred pill row.
                         */}
                         <TabsList
                             variant="line"
-                            className="flex h-auto flex-wrap justify-start gap-1 border-b border-hairline bg-transparent p-0"
+                            className="flex h-auto flex-wrap justify-start gap-1 border-b border-border bg-transparent p-0"
                         >
                             {groupsInOrder.map((group) => (
                                 <TabsTrigger
                                     key={group}
                                     value={group}
-                                    className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary"
+                                    className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary-on-surface"
                                 >
                                     {meta.groupLabels[group] ?? group}
                                 </TabsTrigger>
@@ -263,7 +263,7 @@ export default function Settings({ groups, meta }: Props) {
                                                     <>
                                                         <Text
                                                             as="p"
-                                                            variant="body-strong"
+                                                            variant="heading-sm"
                                                             color="foreground"
                                                         >
                                                             {label}
@@ -416,7 +416,7 @@ export default function Settings({ groups, meta }: Props) {
                                                 kind !== 'media' ? (
                                                     <Text
                                                         as="p"
-                                                        variant="caption"
+                                                        variant="body-sm"
                                                         color="muted"
                                                     >
                                                         {meta.hints[key]}

@@ -58,7 +58,7 @@ export function GalleryPhotoGrid({
                         key={photo.id}
                         className={cn(
                             'overflow-hidden rounded-lg border bg-background',
-                            isCover ? 'border-primary' : 'border-hairline',
+                            isCover ? 'border-primary' : 'border-border',
                         )}
                     >
                         <div className="relative aspect-4/3 bg-muted">
@@ -92,7 +92,7 @@ export function GalleryPhotoGrid({
                         <div className="space-y-2 p-3">
                             <Text
                                 as="p"
-                                variant="caption"
+                                variant="body-sm"
                                 color="muted"
                                 className="line-clamp-2 min-h-8"
                             >
@@ -167,7 +167,7 @@ export function GalleryPhotoGrid({
                                             variant="ghost"
                                             size="icon"
                                             aria-label="Keluarkan foto"
-                                            className="text-red-on-surface"
+                                            className="text-primary-on-surface"
                                             onClick={() => onRemove(photo)}
                                         >
                                             <Trash

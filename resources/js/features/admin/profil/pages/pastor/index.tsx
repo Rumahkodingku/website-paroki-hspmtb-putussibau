@@ -55,10 +55,10 @@ export default function Index({ pastors, filters }: Props) {
                         src={row.original.photo_url}
                         alt={row.original.name}
                         loading="lazy"
-                        className="size-16 rounded-md border border-hairline object-cover"
+                        className="size-16 rounded-md border border-border object-cover"
                     />
                 ) : (
-                    <Text as="span" variant="caption" color="muted">
+                    <Text as="span" variant="body-sm" color="muted">
                         —
                     </Text>
                 ),
@@ -69,7 +69,7 @@ export default function Index({ pastors, filters }: Props) {
             header: 'Nama',
             sortKey: 'name',
             cell: ({ row }) => (
-                <Text as="p" variant="caption">
+                <Text as="p" variant="body-sm">
                     {row.original.title
                         ? `${row.original.title} ${row.original.name}`
                         : row.original.name}

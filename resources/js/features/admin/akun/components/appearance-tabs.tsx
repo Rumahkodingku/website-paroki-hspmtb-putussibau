@@ -48,13 +48,13 @@ export default function AppearanceToggleTab({
                     <Icon className="-ml-1 h-4 w-4" />
                     {/*
                         caption, the same 14px this was at as text-sm, now with
-                        the design system's own tracking. button-utility is the
+                        the design system's own tracking. label is the
                         14px step DESIGN.md documents for buttons, but it is
                         Button's to apply: its line height of 1.29 is measured
                         against a button box, and this label is a span inside a
                         button rather than the button's own type slot.
                     */}
-                    <Text as="span" variant="caption" className="ml-1.5">
+                    <Text as="span" variant="body-sm" className="ml-1.5">
                         {label}
                     </Text>
                 </button>

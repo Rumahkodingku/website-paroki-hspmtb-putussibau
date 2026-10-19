@@ -85,7 +85,7 @@ export default function Index({ eventCategories, filters }: Props) {
             cell: ({ row }) => (
                 <span
                     aria-hidden="true"
-                    className="inline-block size-5 rounded-sm border border-hairline"
+                    className="inline-block size-5 rounded-sm border border-border"
                     style={{
                         backgroundColor:
                             row.original.color_value ?? 'transparent',

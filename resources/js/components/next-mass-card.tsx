@@ -1,8 +1,27 @@
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { formatWibDateTime } from '@/lib/datetime';
-import { EmptyState } from '@/components/empty-state';
-import type { NextMass, PublicLocation } from '../types';
+
+/**
+ * The resolved "next mass" shape. It lives with the component because the
+ * homepage and the schedule page both render this card; each feature's own
+ * resource type is structurally compatible.
+ */
+export type NextMassLocation = {
+    id: number;
+    name: string;
+    type: string;
+    address: string | null;
+    mapsUrl: string | null;
+};
+
+export type NextMassCardData = {
+    kind: 'rutin' | 'khusus';
+    starts_at: string;
+    name: string;
+    location: NextMassLocation;
+};
 
 /*
  * The "Misa Berikutnya" card.
@@ -18,15 +37,32 @@ import type { NextMass, PublicLocation } from '../types';
  */
 
 type Props = {
-    nextMass: NextMass | null;
+    nextMass: NextMassCardData | null;
     displayTimezone: string;
+    /**
+     * Hide the card's own "Misa Berikutnya" label when the surrounding section
+     * already provides that heading. Defaults to true so /jadwal-misa is
+     * unchanged.
+     */
+    showLabel?: boolean;
+    /**
+     * The mass name is the page's principal heading on /jadwal-misa, but a
+     * homepage section already owns the h2. Defaults to h2 so the schedule page
+     * is unchanged.
+     */
+    headingLevel?: 'h2' | 'h3';
 };
 
-export function NextMassCard({ nextMass, displayTimezone }: Props) {
+export function NextMassCard({
+    nextMass,
+    displayTimezone,
+    showLabel = true,
+    headingLevel = 'h2',
+}: Props) {
     if (nextMass === null) {
         return (
-            <Card className="border-hairline bg-card p-6">
-                <Text as="h2" variant="h3">
+            <Card className="border-border bg-card p-6">
+                <Text as={headingLevel} variant="h3">
                     Misa Berikutnya
                 </Text>
                 <div className="mt-4">
@@ -46,15 +82,17 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
         >
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-2">
-                    <Text
-                        as="p"
-                        variant="micro-legal"
-                        className="text-primary uppercase"
-                    >
-                        Misa Berikutnya
-                    </Text>
+                    {showLabel ? (
+                        <Text
+                            as="p"
+                            variant="fine-print"
+                            className="text-primary-on-surface uppercase"
+                        >
+                            Misa Berikutnya
+                        </Text>
+                    ) : null}
 
-                    <Text as="h2" variant="h3">
+                    <Text as={headingLevel} variant="h3">
                         {nextMass.name}
                     </Text>
 
@@ -63,11 +101,11 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
                     </Text>
 
                     {nextMass.kind === 'rutin' ? (
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Jadwal rutin mingguan
                         </Text>
                     ) : (
-                        <Text as="p" variant="caption" color="muted">
+                        <Text as="p" variant="body-sm" color="muted">
                             Misa khusus
                         </Text>
                     )}
@@ -79,7 +117,7 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
                     location the parish has not given coordinates to — which is
                     most of them until the ministry adds them. */}
                 <div className="space-y-2 text-right sm:min-w-48">
-                    <Text as="p" variant="caption" color="muted">
+                    <Text as="p" variant="body-sm" color="muted">
                         {nextMass.location.name}
                     </Text>
 
@@ -99,7 +137,7 @@ export function NextMassCard({ nextMass, displayTimezone }: Props) {
  * pair — Location::mapsUrl() decides that server-side and the address is never
  * used, because a partial address produces a link to the wrong building.
  */
-export function LocationLink({ location }: { location: PublicLocation }) {
+export function LocationLink({ location }: { location: NextMassLocation }) {
     if (location.mapsUrl === null) {
         return null;
     }
@@ -110,7 +148,7 @@ export function LocationLink({ location }: { location: PublicLocation }) {
             target="_blank"
             rel="noopener noreferrer"
             data-test="maps-link"
-            className="inline-flex h-11 items-center rounded-md border border-hairline px-4 text-sm hover:border-primary focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+            className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
         >
             Buka di Google Maps
         </a>

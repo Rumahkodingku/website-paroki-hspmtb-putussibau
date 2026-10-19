@@ -17,11 +17,11 @@ export function FaqList({ items }: { items: PublicServiceFaq[] }) {
     }
 
     return (
-        <div className="divide-y divide-hairline rounded-lg border border-hairline">
+        <div className="divide-y divide-border rounded-lg border border-border">
             {items.map((item) => (
                 <details key={item.id} className="group px-5 py-4">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
-                        <Text as="span" variant="body-strong">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+                        <Text as="span" variant="heading-sm">
                             {item.question}
                         </Text>
 

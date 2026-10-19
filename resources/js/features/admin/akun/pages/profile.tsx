@@ -99,7 +99,7 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
                                         */}
                                         <Text
                                             as="p"
-                                            variant="caption"
+                                            variant="body-sm"
                                             color="muted"
                                             className="-mt-4"
                                         >
@@ -114,7 +114,7 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
                                             'verification-link-sent' && (
                                             <Text
                                                 as="p"
-                                                variant="caption"
+                                                variant="body-sm"
                                                 weight="medium"
                                                 color="brand"
                                                 className="mt-2"

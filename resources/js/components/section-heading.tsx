@@ -41,7 +41,7 @@ export function SectionHeading({
                 )}
             >
                 {eyebrow && (
-                    <Text as="p" variant="caption-strong" color="danger">
+                    <Text as="p" variant="label" color="danger">
                         {eyebrow}
                     </Text>
                 )}
@@ -60,7 +60,7 @@ export function SectionHeading({
                 {description && (
                     <Text
                         as="p"
-                        variant="lead"
+                        variant="body-lg"
                         color="muted"
                         className="max-w-2xl"
                     >

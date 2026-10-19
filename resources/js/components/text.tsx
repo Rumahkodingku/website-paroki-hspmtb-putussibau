@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils';
 /*
  * Text - the foundation for every piece of text in the application.
  *
- * DESIGN.md's typography block lists sixteen steps, and resources/css/app.css
- * declares all sixteen as Tailwind `--text-*` tokens, each carrying its own
- * size, line height, letter spacing and weight. Before this component those
- * tokens were reachable only by writing the class by hand, which is how
+ * DESIGN-v2 §4 lists eleven typography steps, and resources/css/app.css declares
+ * all eleven as Tailwind `--text-*` tokens, each carrying its own size, line
+ * height, letter spacing and weight. Before this component those tokens were
+ * reachable only by writing the class by hand, which is how
  * `font-display text-display-md` ended up written out in four separate files
- * and `text-caption-strong text-red-on-surface` in two more. Every one of those
+ * and `text-label text-primary-on-surface` in two more. Every one of those
  * copies is a place the design system can drift from.
  *
  * So this component owns the mapping from a role to a token and nothing else.
@@ -37,96 +37,73 @@ import { cn } from '@/lib/utils';
  *      else. A caller that needs a button uses Button, which keeps its own
  *      typography because a button's size is part of its hit target.
  *
- * @see docs/DESIGN.md "Typography"
- * @see docs/DECISIONS.md D-33
+ * @see docs/DESIGN-v2.md "Typography"
+ * @see docs/DECISIONS.md D-33, D-72
  */
 
 /**
- * The sixteen tokens, as role names.
+ * The eleven tokens, as role names.
  *
- * DESIGN.md defines display steps, lead, tagline, body, caption, button and
- * navigation roles. It never defines heading LEVELS, so `h1` through `h6` are
- * mapped here onto the steps that already existed rather than given tokens of
- * their own. That mapping is the reason `h1` is 40px rather than the 34px the
- * public pages used before: h1 through h3 all shared `display-md`, which meant
- * the document outline carried no visual hierarchy at all.
- *
- * Note that `h1` and `display-lg` are the same typography, as are `h2` and
- * `display-md`. That is deliberate and it is the pair worth reading together:
- * the display-* names are the scale step a caller reaches for when they want
- * that size and the element is something else, while h1..h6 are the semantic
- * anchor. Asking for `h3` and getting 21px is the point; asking for `h2` and
- * getting 34px is unchanged.
+ * DESIGN-v2 defines the display, heading, body, label and fine-print steps. It
+ * never defines heading LEVELS, so `h1` through `h6` are mapped here onto those
+ * steps. `h1` and `display-lg` are the same typography, as are `h2` and
+ * `display-md`: the display-* names are the scale step a caller reaches for when
+ * the element is something else, while h1..h6 are the semantic anchor.
  */
 const textVariants = cva('', {
     variants: {
         variant: {
-            /* DESIGN.md typography.hero-display - 56px, the homepage hero. */
-            hero: 'font-display text-hero-display text-balance',
-
             /*
-             * The two display steps, and the three heading steps above them.
-             *
-             * font-display is applied here rather than left to the caller
-             * because DESIGN.md's font family section is explicit that SF Pro
-             * Display is for hero and large editorial headings, and leaving it
-             * optional is how the same size ends up rendered in two families.
-             *
-             * text-balance is here for the same reason. Every display heading
-             * in the application was carrying it as a hand-written class - four
-             * separate copies of `className="text-balance"` - because a
-             * 34-to-56px heading is exactly where the browser's default line
-             * breaking produces the orphan that reads as a layout bug. A
-             * caller who disagrees can pass `className="text-pretty"`, which
-             * tailwind-merge resolves against text-balance as the later value.
+             * The three display steps and the three heading steps from
+             * DESIGN-v2 §4. font-display is applied here rather than left to
+             * the caller so the same size cannot render in two families.
+             * text-balance is applied to the display steps because a 32-to-52px
+             * heading is exactly where default line breaking produces the
+             * orphan that reads as a layout bug.
              */
+            hero: 'font-display text-display-xl text-balance',
+            'display-xl': 'font-display text-display-xl text-balance',
             'display-lg': 'font-display text-display-lg text-balance',
             'display-md': 'font-display text-display-md text-balance',
+
+            /*
+             * Heading levels map onto those steps rather than getting tokens of
+             * their own (D-72): h1 display-lg, h2 display-md, h3 heading-lg,
+             * h4 tagline, h5/h6 heading-sm. h4 and below are un-balanced —
+             * at 20px and under a heading is one or two lines.
+             */
             h1: 'font-display text-display-lg text-balance',
             h2: 'font-display text-display-md text-balance',
+            h3: 'font-display text-heading-lg',
+            h4: 'text-heading-md',
+            h5: 'text-heading-sm',
+            h6: 'text-heading-sm',
 
-            /*
-             * h3 and below are left un-balanced deliberately. At 21px and under
-             * a heading is one or two lines and text-balance mostly does
-             * nothing, so carrying it would be a class that exists to be
-             * overridden.
-             */
-            h3: 'font-display text-tagline',
-            h4: 'text-body-strong',
-            h5: 'text-caption-strong',
-            h6: 'text-caption-strong',
+            'heading-lg': 'font-display text-heading-lg',
+            'heading-md': 'font-display text-heading-md',
+            'heading-sm': 'text-heading-sm',
 
-            /* The remaining roles, one token each. */
-            lead: 'text-lead',
-            'lead-airy': 'text-lead-airy',
-            tagline: 'font-display text-tagline',
+            /* Body, label and legal roles, one token each. */
+            'body-lg': 'text-body-lg',
             body: 'text-body',
-            'body-strong': 'text-body-strong',
-            caption: 'text-caption',
-            'caption-strong': 'text-caption-strong',
+            'body-sm': 'text-body-sm',
+            label: 'text-label',
 
             /*
-             * typography.nav-link is 13px with a line height of 1.0, which is
-             * tuned for a link inside a bar rather than for a line of prose.
-             * It is offered under the name `nav` because that is what it is
-             * for; a caller reaching for body copy wants `body`.
+             * `nav` is the label token under the name a navigation bar reaches
+             * for; a caller writing prose wants `body`.
              */
-            nav: 'text-nav-link',
-
-            /* Footer and legal. */
+            nav: 'text-label',
             'fine-print': 'text-fine-print',
-            'micro-legal': 'text-micro-legal',
 
             /*
              * Identical to the `.rich-text blockquote` rule in app.css, on
-             * purpose rather than by coincidence: a quote typed into the
-             * editor and a quote rendered as a component have to look the
-             * same, or the administrator previews one thing and the visitor
-             * gets another. The dark override is not optional - text-navy on
-             * the dark canvas measures 1.25:1.
+             * purpose: a quote typed into the editor and a quote rendered as a
+             * component have to look the same. The dark override is not
+             * optional — text-navy on the dark canvas measures 1.25:1.
              */
             blockquote:
-                'border-s-4 border-primary ps-4 text-navy italic dark:text-navy-light',
+                'border-s-4 border-primary ps-4 text-navy italic dark:text-navy-soft',
         },
 
         /*
@@ -146,12 +123,12 @@ const textVariants = cva('', {
             default: '',
             foreground: 'text-foreground',
             muted: 'text-muted-foreground',
-            subtle: 'text-ink-muted-soft',
+            subtle: 'text-subtle',
 
             /*
              * navy as TEXT, and the dark override is not optional: navy is
              * #01266D and measures 1.25:1 against the dark canvas, which is
-             * invisible rather than subtle. navy-light is the same ramp read
+             * invisible rather than subtle. navy-soft is the same ramp read
              * the other way and measures 15.24:1.
              *
              * Carried inside the variant rather than left to the caller
@@ -159,11 +136,11 @@ const textVariants = cva('', {
              * pair by hand, and a caller who remembers it on one page and not
              * the next gets unreadable text on one screen of a flow.
              *
-             * This is the same split red-on-surface exists for, one hue down.
+             * This is the same split primary-on-surface exists for, one hue down.
              */
-            brand: 'text-navy dark:text-navy-light',
-            'brand-inverse': 'text-navy-light',
-            danger: 'text-red-on-surface',
+            brand: 'text-navy dark:text-navy-soft',
+            'brand-inverse': 'text-navy-soft',
+            danger: 'text-primary-on-surface',
             inherit: 'text-inherit',
         },
 
@@ -277,7 +254,7 @@ export type TextVariantProps = VariantProps<typeof textVariants>;
  * `span` is the default for everything that is not a heading or a quote,
  * because it is the only element that is valid in every position a piece of
  * text can appear: inside a `<p>`, inside a heading, inside a `<label>`, and
- * beside another span. Defaulting to `<p>` would make `<Text variant="caption">`
+ * beside another span. Defaulting to `<p>` would make `<Text variant="body-sm">`
  * inside a paragraph invalid HTML, and defaulting to `<div>` would break the
  * same way inside a heading.
  *
@@ -289,6 +266,7 @@ export type TextVariantProps = VariantProps<typeof textVariants>;
  */
 const DEFAULT_ELEMENT = {
     hero: 'h1',
+    'display-xl': 'h1',
     'display-lg': 'h2',
     'display-md': 'h2',
     h1: 'h1',

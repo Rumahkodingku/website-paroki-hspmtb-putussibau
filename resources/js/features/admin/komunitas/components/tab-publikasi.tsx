@@ -23,7 +23,7 @@ export function TabPublikasi({ form, labels, sections, statusLabel }: Props) {
                 activeLabel={labels.is_published ?? 'Publikasi'}
             />
 
-            <Text as="p" variant="caption" color="muted">
+            <Text as="p" variant="body-sm" color="muted">
                 {form.data.is_published && form.data.status === 'active'
                     ? (sections.publication_live ??
                       'Dipublikasikan: komunitas tampil di halaman publik.')

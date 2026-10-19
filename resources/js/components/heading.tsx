@@ -12,8 +12,8 @@ import { Text } from '@/components/text';
  * outside the design system. DESIGN.md has no admin-specific scale, so both
  * are mapped onto tokens that already exist:
  *
- *   default  text-xl  20px/600  ->  tagline  21px/600
- *   small    text-base 16px/500 ->  body-strong 17px/600 + medium
+ *   default  text-xl  20px/600  ->  heading-md  21px/600
+ *   small    text-base 16px/500 ->  heading-sm 17px/600 + medium
  *
  * Both are within a pixel of what they replace. What they buy is that the
  * tracking and line height now come from the same table as the public pages,
@@ -36,14 +36,14 @@ export default function Heading({
         <header className={variant === 'small' ? '' : 'mb-8 space-y-0.5'}>
             <Text
                 as="h2"
-                variant={variant === 'small' ? 'body-strong' : 'tagline'}
+                variant={variant === 'small' ? 'heading-sm' : 'heading-md'}
                 weight={variant === 'small' ? 'medium' : undefined}
                 className={variant === 'small' ? 'mb-0.5' : undefined}
             >
                 {title}
             </Text>
             {description && (
-                <Text as="p" variant="caption" color="muted">
+                <Text as="p" variant="body-sm" color="muted">
                     {description}
                 </Text>
             )}

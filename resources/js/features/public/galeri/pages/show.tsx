@@ -61,12 +61,12 @@ export default function GaleriShow({ album }: Props) {
                 {album.event_date || album.location ? (
                     <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1">
                         {album.event_date ? (
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {formatWibDate(album.event_date)}
                             </Text>
                         ) : null}
                         {album.location ? (
-                            <Text as="p" variant="caption" color="muted">
+                            <Text as="p" variant="body-sm" color="muted">
                                 {album.location}
                             </Text>
                         ) : null}
@@ -78,8 +78,8 @@ export default function GaleriShow({ album }: Props) {
                 {hasPhotos ? (
                     <PhotoGrid photos={album.photos} onOpen={setOpenIndex} />
                 ) : (
-                    <div className="rounded-lg border border-dashed border-hairline p-10 text-center">
-                        <Text as="p" variant="body-strong">
+                    <div className="rounded-lg border border-dashed border-border p-10 text-center">
+                        <Text as="p" variant="heading-sm">
                             Album ini belum memiliki foto.
                         </Text>
                     </div>
