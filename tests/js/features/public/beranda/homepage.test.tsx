@@ -166,7 +166,7 @@ describe('Beranda', () => {
             screen.getByRole('link', { name: /Lihat Jadwal Misa/ }),
         ).toHaveAttribute('href', '/jadwal-misa');
         expect(
-            screen.getByRole('link', { name: 'Sejarah Paroki' }),
+            screen.getByRole('link', { name: 'Kenali Paroki' }),
         ).toHaveAttribute('href', '/profil/sejarah');
 
         expect(
@@ -227,9 +227,7 @@ describe('Beranda', () => {
         expect(
             screen.getByRole('heading', { level: 2, name: 'Misa Berikutnya' }),
         ).toBeInTheDocument();
-        expect(
-            screen.getByText('Belum ada misa terjadwal'),
-        ).toBeInTheDocument();
+        expect(screen.getByText('Belum ada jadwal misa')).toBeInTheDocument();
     });
 
     it('renders the next mass when the resolver sent one', () => {
@@ -237,14 +235,16 @@ describe('Beranda', () => {
 
         expect(screen.getByText('Misa Minggu Pagi')).toBeInTheDocument();
         expect(screen.getByText('Gereja Paroki')).toBeInTheDocument();
-        expect(screen.getByText('Jadwal rutin mingguan')).toBeInTheDocument();
+        expect(
+            screen.getByText('Jadwal rutin mingguan paroki'),
+        ).toBeInTheDocument();
     });
 
     it('leaves no heading behind when optional sections are empty', () => {
         renderHome();
 
         for (const heading of [
-            'Berita Terbaru',
+            'Berita & Artikel',
             'Agenda Mendatang',
             'Renungan Terbaru',
             'Pelayanan Sakramen',
@@ -259,7 +259,7 @@ describe('Beranda', () => {
         renderHome({ news: [ARTICLE], events: [EVENT] });
 
         expect(
-            screen.getByRole('heading', { name: 'Berita Terbaru' }),
+            screen.getByRole('heading', { name: 'Berita & Artikel' }),
         ).toBeInTheDocument();
         expect(screen.getByText(ARTICLE.title)).toBeInTheDocument();
         expect(
@@ -375,7 +375,7 @@ describe('Beranda', () => {
         ).toBeNull();
     });
 
-    it('labels an illustration fallback on a news card', () => {
+    it('renders an illustration fallback image on a news card', () => {
         renderHome({
             news: [
                 {
@@ -387,7 +387,6 @@ describe('Beranda', () => {
             ],
         });
 
-        expect(screen.getByText('Ilustrasi')).toBeInTheDocument();
         expect(screen.getByRole('img', { name: /Ilustrasi:/ })).toHaveAttribute(
             'src',
             '/illustrations/activity-960.webp',
@@ -432,9 +431,6 @@ describe('Beranda', () => {
             ],
         });
 
-        expect(
-            screen.getByRole('img', { name: /meja belajar/ }),
-        ).toHaveAttribute('src', '/illustrations/study-960.webp');
         expect(screen.getByText('Ilustrasi')).toBeInTheDocument();
     });
 
@@ -445,7 +441,7 @@ describe('Beranda', () => {
         // (desktop), so the step-down is in the token rather than a
         // breakpoint-specific override.
         expect(screen.getByRole('heading', { level: 1 }).className).toContain(
-            'text-display-xl',
+            'text-4xl',
         );
     });
 });

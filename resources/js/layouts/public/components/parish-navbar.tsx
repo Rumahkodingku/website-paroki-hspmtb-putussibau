@@ -1,7 +1,8 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, Menu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { AppearanceToggle } from '@/components/appearance-toggle';
 import ParishLogo from '@/components/parish-logo';
 import { PublicContainer } from '@/components/public-container';
@@ -25,6 +26,7 @@ import {
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import type { IdentityDetails } from '@/types';
+
 import { home } from '@/routes';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
@@ -43,29 +45,19 @@ type NavEntry = {
     label: string;
     href: NavHref;
     /**
-     * How the current URL is matched against `href`.
-     *
-     * `exact`   only the same path (Beranda, because "/" prefixes everything).
-     * `section` the path or anything under it (the default).
-     * `prefix`  anything under the href's parent path. Profil links to
-     *           /profil/sejarah, but the whole /profil/* section should stay
-     *           active, so it matches on /profil.
+     * exact   : Hanya URL yang sama.
+     * section : URL dan turunannya.
+     * prefix  : Seluruh section induk dari sebuah URL.
      */
     match: 'exact' | 'section' | 'prefix';
 };
 
-/** The parent path of a section link, e.g. /profil/sejarah -> /profil. */
 function sectionPrefix(href: NavHref): string {
     const path = toUrl(href).split('?')[0];
 
     return path.replace(/\/[^/]+\/?$/, '') || '/';
 }
 
-/**
- * The mobile drawer's destinations. Kept flat and in DESIGN-v2 §8's order, so a
- * phone visitor sees every destination in one scroll and nothing is hidden one
- * tap deeper.
- */
 const DRAWER_ENTRIES: NavEntry[] = [
     { label: 'Beranda', href: home(), match: 'exact' },
     { label: 'Profil', href: sejarah(), match: 'prefix' },
@@ -85,7 +77,11 @@ const PROFIL_CHILDREN: NavEntry[] = [
     { label: 'Wilayah Pelayanan', href: wilayah(), match: 'section' },
     { label: 'Area', href: areaIndex(), match: 'section' },
     { label: 'Pastor', href: pastor(), match: 'section' },
-    { label: 'Struktur Kepengurusan', href: struktur(), match: 'section' },
+    {
+        label: 'Struktur Kepengurusan',
+        href: struktur(),
+        match: 'section',
+    },
 ];
 
 const PELAYANAN_CHILDREN: NavEntry[] = [
@@ -99,14 +95,11 @@ type DesktopEntry =
     | { kind: 'link'; entry: NavEntry }
     | { kind: 'group'; label: string; children: NavEntry[] };
 
-/**
- * The desktop bar, grouped so eleven destinations become seven controls with
- * room to breathe. The grouping reuses the same information architecture as the
- * footer (D-73). A group's landing page is its first child, so it stays one
- * click away inside the dropdown.
- */
 const DESKTOP_ENTRIES: DesktopEntry[] = [
-    { kind: 'link', entry: { label: 'Beranda', href: home(), match: 'exact' } },
+    {
+        kind: 'link',
+        entry: { label: 'Beranda', href: home(), match: 'exact' },
+    },
     { kind: 'group', label: 'Profil', children: PROFIL_CHILDREN },
     {
         kind: 'link',
@@ -118,20 +111,28 @@ const DESKTOP_ENTRIES: DesktopEntry[] = [
     },
     {
         kind: 'link',
-        entry: { label: 'Berita & Artikel', href: berita(), match: 'section' },
+        entry: {
+            label: 'Berita & Artikel',
+            href: berita(),
+            match: 'section',
+        },
     },
     {
         kind: 'link',
         entry: { label: 'Agenda', href: agenda(), match: 'section' },
     },
-    { kind: 'group', label: 'Pelayanan', children: PELAYANAN_CHILDREN },
+    {
+        kind: 'group',
+        label: 'Pelayanan',
+        children: PELAYANAN_CHILDREN,
+    },
     {
         kind: 'link',
         entry: { label: 'Kontak', href: kontak(), match: 'section' },
     },
 ];
 
-function Logo() {
+function Logo({ transparent }: { transparent: boolean }) {
     const { identity } = usePage<{ identity?: IdentityDetails }>().props;
 
     const primary = identity?.shortName ?? identity?.name ?? 'Paroki';
@@ -142,11 +143,30 @@ function Logo() {
             <ParishLogo width={40} height={42} />
 
             <span className="hidden flex-col leading-tight sm:flex">
-                <Text as="span" variant="label" color="foreground">
+                <Text
+                    as="span"
+                    variant="label"
+                    color="foreground"
+                    weight="medium"
+                    className={cn(
+                        'transition-colors duration-300',
+                        transparent && 'text-white!',
+                    )}
+                >
                     {primary}
                 </Text>
+
                 {secondary ? (
-                    <Text as="span" variant="fine-print" color="muted">
+                    <Text
+                        as="span"
+                        variant="fine-print"
+                        color="muted"
+                        weight="medium"
+                        className={cn(
+                            'transition-colors duration-300',
+                            transparent && 'text-white/75!',
+                        )}
+                    >
                         {secondary}
                     </Text>
                 ) : null}
@@ -155,16 +175,7 @@ function Logo() {
     );
 }
 
-/**
- * DESIGN-v2 marks the active route with red text and a thin marker. The marker
- * is the non-colour cue; primary-on-surface is used for it because the brand red
- * would dissolve on the dark canvas.
- */
-const ACTIVE_MARKER = {
-    boxShadow: 'inset 0 -2px 0 0 var(--primary-on-surface)',
-} as const;
-
-function DesktopNav() {
+function DesktopNav({ transparent }: { transparent: boolean }) {
     const { isCurrentUrl, isCurrentOrParentUrl } = useCurrentUrl();
 
     const isActive = (entry: NavEntry): boolean =>
@@ -173,6 +184,18 @@ function DesktopNav() {
             : entry.match === 'prefix'
               ? isCurrentOrParentUrl(sectionPrefix(entry.href))
               : isCurrentOrParentUrl(entry.href);
+
+    const activeMarker = {
+        boxShadow: transparent
+            ? 'inset 0 -2px 0 0 #DCA640'
+            : 'inset 0 -2px 0 0 var(--primary)',
+    } as const;
+
+    const linkColors = transparent
+        ? 'text-white hover:bg-white/10 hover:text-white focus-visible:text-white'
+        : 'text-foreground';
+
+    const activeColors = transparent ? 'text-white' : 'text-primary';
 
     return (
         <NavigationMenu
@@ -192,10 +215,11 @@ function DesktopNav() {
                                     aria-current={active ? 'page' : undefined}
                                     className={cn(
                                         navigationMenuTriggerStyle(),
-                                        'relative',
-                                        active && 'text-primary-on-surface',
+                                        'relative font-medium transition-colors duration-300',
+                                        linkColors,
+                                        active && activeColors,
                                     )}
-                                    style={active ? ACTIVE_MARKER : undefined}
+                                    style={active ? activeMarker : undefined}
                                 >
                                     {item.entry.label}
                                 </Link>
@@ -211,9 +235,11 @@ function DesktopNav() {
                                 data-active={active ? 'true' : undefined}
                                 aria-current={active ? 'page' : undefined}
                                 className={cn(
-                                    active && 'text-primary-on-surface',
+                                    'font-medium transition-colors duration-300',
+                                    linkColors,
+                                    active && activeColors,
                                 )}
-                                style={active ? ACTIVE_MARKER : undefined}
+                                style={active ? activeMarker : undefined}
                             >
                                 {item.label}
                             </NavigationMenuTrigger>
@@ -241,7 +267,7 @@ function DesktopNav() {
                                                                 ? 'page'
                                                                 : undefined
                                                         }
-                                                        className="block"
+                                                        className="block font-medium"
                                                     >
                                                         {child.label}
                                                     </Link>
@@ -259,107 +285,227 @@ function DesktopNav() {
     );
 }
 
-/** The flat mobile drawer. */
 function DrawerNav({ onNavigate }: { onNavigate?: () => void }) {
     const { isCurrentUrl, isCurrentOrParentUrl } = useCurrentUrl();
+    const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+    const isActive = (entry: NavEntry): boolean =>
+        entry.match === 'exact'
+            ? isCurrentUrl(entry.href)
+            : entry.match === 'prefix'
+              ? isCurrentOrParentUrl(sectionPrefix(entry.href))
+              : isCurrentOrParentUrl(entry.href);
+
+    const toggleMenu = (label: string) => {
+        setExpandedMenus((current) =>
+            current.includes(label)
+                ? current.filter((item) => item !== label)
+                : [...current, label],
+        );
+    };
+
+    const renderLink = (entry: NavEntry, nested = false) => {
+        const active = isActive(entry);
+
+        return (
+            <Link
+                key={entry.label}
+                href={entry.href}
+                onClick={onNavigate}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                    'flex min-h-11 items-center rounded-lg px-3 transition-colors',
+                    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                    nested && 'ml-4 border-l border-border pl-4',
+                    active
+                        ? 'bg-primary/10 font-medium text-primary'
+                        : 'text-foreground hover:bg-muted',
+                )}
+            >
+                <Text
+                    as="span"
+                    variant="nav"
+                    weight="medium"
+                    color={active ? 'danger' : undefined}
+                >
+                    {entry.label}
+                </Text>
+            </Link>
+        );
+    };
+
+    const renderGroup = (label: string, children: NavEntry[]) => {
+        const active = children.some(isActive);
+        const expanded = expandedMenus.includes(label) || active;
+
+        return (
+            <li key={label} className="space-y-1">
+                <button
+                    type="button"
+                    aria-expanded={expanded}
+                    onClick={() => toggleMenu(label)}
+                    className={cn(
+                        'flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-left transition-colors',
+                        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                        active
+                            ? 'bg-primary/10 font-medium text-primary'
+                            : 'text-foreground hover:bg-muted',
+                    )}
+                >
+                    <Text
+                        as="span"
+                        variant="nav"
+                        weight="medium"
+                        color={active ? 'danger' : undefined}
+                    >
+                        {label}
+                    </Text>
+
+                    <ChevronDown
+                        aria-hidden="true"
+                        className={cn(
+                            'size-4 shrink-0 transition-transform duration-200',
+                            expanded && 'rotate-180',
+                        )}
+                    />
+                </button>
+
+                {expanded && (
+                    <ul className="space-y-1">
+                        {children.map((child) => (
+                            <li key={child.label}>{renderLink(child, true)}</li>
+                        ))}
+                    </ul>
+                )}
+            </li>
+        );
+    };
 
     return (
         <ul className="flex flex-col gap-1">
-            {DRAWER_ENTRIES.map((entry) => {
-                const active =
-                    entry.match === 'exact'
-                        ? isCurrentUrl(entry.href)
-                        : entry.match === 'prefix'
-                          ? isCurrentOrParentUrl(sectionPrefix(entry.href))
-                          : isCurrentOrParentUrl(entry.href);
+            {renderLink(DRAWER_ENTRIES[0])}
 
-                return (
-                    <li key={entry.label}>
-                        <Link
-                            href={entry.href}
-                            onClick={onNavigate}
-                            aria-current={active ? 'page' : undefined}
-                            className="flex min-h-11 items-center rounded-md px-3 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        >
-                            <Text
-                                as="span"
-                                variant="nav"
-                                color={active ? 'danger' : undefined}
-                                className={
-                                    active
-                                        ? undefined
-                                        : 'hover:text-primary-on-surface'
-                                }
-                            >
-                                {entry.label}
-                            </Text>
-                        </Link>
-                    </li>
-                );
-            })}
+            {renderGroup('Profil', PROFIL_CHILDREN)}
+
+            {renderLink(DRAWER_ENTRIES[2])}
+            {renderLink(DRAWER_ENTRIES[3])}
+            {renderLink(DRAWER_ENTRIES[4])}
+
+            {renderGroup('Pelayanan', PELAYANAN_CHILDREN)}
+
+            {renderLink(DRAWER_ENTRIES[10])}
         </ul>
     );
 }
 
 export function ParishNavbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
 
-    const { identity } = usePage<{ identity?: IdentityDetails }>().props;
+    const { identity } = usePage<{
+        identity?: IdentityDetails;
+    }>().props;
+
+    const { isCurrentUrl } = useCurrentUrl();
+
+    const isHome = isCurrentUrl(home());
+    const isTransparent = isHome && !isScrolled;
 
     const closeMenu = () => setMenuOpen(false);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 24);
+        };
+
+        handleScroll();
+
+        window.addEventListener('scroll', handleScroll, {
+            passive: true,
+        });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
     return (
-        <header className="sticky top-0 z-40 h-16 w-full border-b border-border bg-background">
-            <PublicContainer className="flex h-full items-center justify-between gap-4">
+        <header
+            className={cn(
+                'z-50 w-full transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out',
+                isHome ? 'fixed top-0 right-0 left-0' : 'sticky top-0',
+                isTransparent
+                    ? 'border-b border-transparent bg-transparent shadow-none'
+                    : 'border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-md',
+            )}
+        >
+            <PublicContainer className="flex h-16 items-center justify-between gap-4">
                 <Link
                     href={home()}
                     onClick={closeMenu}
-                    className="shrink-0 rounded-md bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                    className="shrink-0 rounded-md bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                     <span className="sr-only">
                         {identity?.name ?? 'Paroki'}, beranda
                     </span>
+
                     <span aria-hidden="true">
-                        <Logo />
+                        <Logo transparent={isTransparent} />
                     </span>
                 </Link>
 
-                <DesktopNav />
+                <div className="flex flex-row gap-4">
+                    <DesktopNav transparent={isTransparent} />
+                    <div className="flex items-center gap-2">
+                        <span
+                            aria-hidden="true"
+                            className={cn(
+                                'mx-1 h-6 w-px transition-colors duration-300',
+                                isTransparent ? 'bg-white/30' : 'bg-border',
+                            )}
+                        />
 
-                <div className="flex items-center gap-2">
-                    <AppearanceToggle />
+                        <AppearanceToggle />
 
-                    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-                        <SheetTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="lg:hidden"
-                                aria-label="Buka navigasi"
+                        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+                            <SheetTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className={cn(
+                                        'transition-colors duration-300 lg:hidden',
+                                        isTransparent &&
+                                            'border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white',
+                                    )}
+                                    aria-label="Buka navigasi"
+                                >
+                                    <Menu />
+                                </Button>
+                            </SheetTrigger>
+
+                            <SheetContent
+                                side="right"
+                                className="flex w-80 max-w-[85vw] flex-col"
                             >
-                                <Menu />
-                            </Button>
-                        </SheetTrigger>
+                                <SheetTitle className="px-4 pt-4 text-left">
+                                    <span className="sr-only">
+                                        Navigasi utama
+                                    </span>
 
-                        <SheetContent
-                            side="right"
-                            className="flex w-80 max-w-[85vw] flex-col"
-                        >
-                            <SheetTitle className="px-4 pt-4 text-left">
-                                <span className="sr-only">Navigasi utama</span>
-                                <span aria-hidden="true">
-                                    <ParishLogo />
-                                </span>
-                            </SheetTitle>
+                                    <span aria-hidden="true">
+                                        <ParishLogo />
+                                    </span>
+                                </SheetTitle>
 
-                            <nav
-                                aria-label="Navigasi utama"
-                                className="min-h-0 flex-1 overflow-y-auto px-4 pb-6"
-                            >
-                                <DrawerNav onNavigate={closeMenu} />
-                            </nav>
-                        </SheetContent>
-                    </Sheet>
+                                <nav
+                                    aria-label="Navigasi utama"
+                                    className="min-h-0 flex-1 overflow-y-auto px-4 pb-6"
+                                >
+                                    <DrawerNav onNavigate={closeMenu} />
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
             </PublicContainer>
         </header>

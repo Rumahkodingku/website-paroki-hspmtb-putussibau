@@ -79,7 +79,7 @@ void createInertiaApp({
             <TooltipProvider delayDuration={0}>
                 <UploadConfig>
                     {app}
-                    <Toaster />
+                    <Toaster position="top-center" />
                 </UploadConfig>
             </TooltipProvider>
         );

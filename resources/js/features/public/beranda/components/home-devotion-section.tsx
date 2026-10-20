@@ -6,15 +6,6 @@ import { formatWibDate } from '@/lib/datetime';
 import { show as post } from '@/routes/berita';
 import type { ArticleCardData } from '@/components/article-card';
 
-/**
- * The newest reflection, set as a quiet editorial band between the agenda and
- * the parish services.
- *
- * DESIGN-v2 asks for restrained section backgrounds and warns against large
- * saturated navy blocks in dark mode, so this is a soft neutral band with a red
- * eyebrow rather than a navy slab. Body text uses the semantic tokens, so it
- * stays readable in either theme; the only accent is the category/eyebrow.
- */
 export function HomeDevotionSection({
     devotion,
     enabled,
