@@ -66,15 +66,53 @@ test.describe('autentikasi admin', () => {
         await loginButton(page).click();
 
         await expect(
-            page.getByText(
-                'Email atau kata sandi tidak cocok dengan data kami.',
-            ),
+            page.locator('form').getByText('Email atau password salah'),
         ).toBeVisible();
+
+        const toast = page
+            .locator('[data-sonner-toast]')
+            .filter({ hasText: 'Email atau password salah' });
+
+        await expect(toast).toBeVisible();
+        await expect(toast.locator('[data-description]')).toHaveText(
+            'Periksa kembali email dan password Anda, lalu coba lagi.',
+        );
 
         await expect(page).toHaveURL(/\/admin\/login$/);
 
         // And the session really is absent, rather than merely unredirected.
         await page.goto('/admin');
+        await expect(page).toHaveURL(/\/admin\/login$/);
+    });
+
+    test('percobaan masuk berulang menampilkan toast batas', async ({
+        page,
+    }) => {
+        await page.goto('/admin/login');
+
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+            await emailField(page).fill(admin.email);
+            await passwordField(page).fill('kata-sandi-yang-salah');
+            await loginButton(page).click();
+
+            if (attempt < 5) {
+                await expect(
+                    page.locator('form').getByText('Email atau password salah'),
+                ).toBeVisible();
+            }
+        }
+
+        const toast = page
+            .locator('[data-sonner-toast]')
+            .filter({ hasText: 'Terlalu banyak percobaan masuk' });
+
+        await expect(toast).toBeVisible();
+        await expect(toast.locator('[data-description]')).toHaveText(
+            'Silakan coba lagi dalam beberapa saat.',
+        );
+
+        // Returning false from onHttpException keeps Inertia on the login
+        // page instead of swapping in its error-response modal.
         await expect(page).toHaveURL(/\/admin\/login$/);
     });
 

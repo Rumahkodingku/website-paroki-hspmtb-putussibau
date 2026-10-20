@@ -25,15 +25,9 @@ import { renderWithInertia } from '../support/inertia';
 /** Every destination, as the flat mobile drawer lists them. */
 const DRAWER_MENU = [
     'Beranda',
-    'Profil',
     'Jadwal Misa',
     'Berita & Artikel',
     'Agenda',
-    'Pelayanan',
-    'Komunitas',
-    'Area',
-    'Galeri',
-    'Dokumen',
     'Kontak',
 ];
 
@@ -269,7 +263,7 @@ describe('ParishNavbar', () => {
             );
 
             const drawer = within(screen.getByRole('dialog'));
-            await user.click(drawer.getByRole('link', { name: 'Profil' }));
+            await user.click(drawer.getByRole('link', { name: 'Jadwal Misa' }));
 
             expect(screen.queryByRole('dialog')).toBeNull();
         });

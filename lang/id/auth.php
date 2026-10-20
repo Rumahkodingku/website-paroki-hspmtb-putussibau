@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'failed' => 'Email atau kata sandi tidak cocok dengan data kami.',
+    'failed' => 'Email atau password salah',
     'password' => 'Kata sandi yang dimasukkan salah.',
     'inactive' => 'Akun ini dinonaktifkan. Hubungi pengelola paroki untuk mengaktifkannya kembali.',
     'throttle' => 'Terlalu banyak percobaan masuk. Silakan coba lagi dalam :seconds detik.',

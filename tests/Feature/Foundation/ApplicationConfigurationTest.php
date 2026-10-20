@@ -90,7 +90,7 @@ test('validation attributes use Indonesian field names', function () {
 });
 
 test('authentication failure message is translated', function () {
-    expect(__('auth.failed'))->toBe('Email atau kata sandi tidak cocok dengan data kami.')
+    expect(__('auth.failed'))->toBe('Email atau password salah')
         ->and(__('auth.throttle'))->toContain(':seconds');
 });
 
