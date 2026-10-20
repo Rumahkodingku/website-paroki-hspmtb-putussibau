@@ -1,14 +1,15 @@
 import { type ReactNode } from 'react';
+
 import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
 
 export type SectionHeadingProps = {
-    /** The heading itself. Keep it short; the document asks for scannable ones. */
-    title: string;
-    /** Small label above the title. Red by design. */
+    /** Small label above the title. */
     eyebrow?: string;
+    /** The heading itself. */
+    title: string;
     description?: string;
-    /** Usually a "Lihat selengkapnya" link. Rendered beside the heading. */
+    /** Usually a link or button rendered beside the heading. */
     action?: ReactNode;
     level?: 2 | 3;
     align?: 'left' | 'center';
@@ -29,48 +30,60 @@ export function SectionHeading({
     return (
         <div
             className={cn(
-                'flex flex-col gap-6 md:flex-row md:items-end md:justify-between',
+                'flex flex-col gap-5 sm:gap-6',
+                'md:flex-row md:items-end md:justify-between',
                 centred && 'md:flex-col md:items-center',
                 className,
             )}
         >
             <div
                 className={cn(
-                    'flex flex-col gap-3',
+                    'flex min-w-0 flex-col gap-2',
                     centred && 'mx-auto max-w-2xl items-center text-center',
                 )}
             >
                 {eyebrow && (
-                    <Text as="p" variant="label" color="danger">
-                        {eyebrow}
-                    </Text>
-                )}
-
-                {/*
-                    `level` decides the element and `variant` decides the
-                    style, which is the separation that lets a subsection drop
-                    to h3 without the size changing with it. Spelled out as a
-                    ternary rather than a template so `as` stays a literal and
-                    keeps resolving its props against the right tag.
-                */}
-                <Text as={level === 2 ? 'h2' : 'h3'} variant="display-md">
-                    {title}
-                </Text>
-
-                {description && (
-                    <Text
-                        as="p"
-                        variant="body-lg"
-                        color="muted"
-                        className="max-w-2xl"
+                    <div
+                        className={cn(
+                            'flex items-center gap-3',
+                            centred && 'justify-center',
+                        )}
                     >
-                        {description}
-                    </Text>
+                        <span
+                            aria-hidden="true"
+                            className="h-0.5 w-8 shrink-0 bg-primary"
+                        />
+
+                        <Text
+                            as="p"
+                            variant="label"
+                            className="text-xs font-semibold tracking-[0.12em] text-primary uppercase"
+                        >
+                            {eyebrow}
+                        </Text>
+                    </div>
                 )}
+
+                <div className="mt-1">
+                    <Text as={level === 2 ? 'h2' : 'h3'} variant="display-md">
+                        {title}
+                    </Text>
+
+                    {description && (
+                        <Text as="p" variant="body" color="muted">
+                            {description}
+                        </Text>
+                    )}
+                </div>
             </div>
 
             {action && (
-                <div className="flex shrink-0 flex-wrap items-center gap-3">
+                <div
+                    className={cn(
+                        'flex shrink-0 flex-wrap items-center gap-3',
+                        centred && 'md:justify-center',
+                    )}
+                >
                     {action}
                 </div>
             )}

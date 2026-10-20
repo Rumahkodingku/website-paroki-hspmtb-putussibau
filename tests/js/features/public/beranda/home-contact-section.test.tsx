@@ -90,7 +90,7 @@ describe('HomeContactSection', () => {
          * getByText normalises whitespace, so a schedule whose lines are
          * separated by "\n" can only be matched line by line.
          */
-        const item = screen.getByText('Jam Layanan').closest('li');
+        const item = screen.getByText('Jam Layanan').closest('div');
 
         expect(item?.textContent).toContain('Senin–Jumat: 08.00–15.00 WIB');
         expect(item?.textContent).toContain('Sabtu: Tutup');
