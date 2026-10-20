@@ -1,17 +1,3 @@
-import { MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-/**
- * The map and the directions action, each only when its URL is valid.
- *
- * `maps_link` is never used as an iframe source (KON-07): it is a directions
- * destination, and the embed URL has already been through the Google Maps host
- * allowlist on the server. The frame is lazy and given a title so it is not an
- * unlabelled region to a screen reader.
- *
- * Lifted to components/ in Phase 9A: the contact page and the homepage contact
- * block both render it, and a feature may not import another feature.
- */
 export function ContactMap({
     embedUrl,
     directionsUrl,
@@ -36,19 +22,6 @@ export function ContactMap({
                         allowFullScreen
                     />
                 </div>
-            ) : null}
-
-            {directionsUrl ? (
-                <Button asChild>
-                    <a
-                        href={directionsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <MapPin aria-hidden="true" />
-                        Petunjuk Arah
-                    </a>
-                </Button>
             ) : null}
         </div>
     );

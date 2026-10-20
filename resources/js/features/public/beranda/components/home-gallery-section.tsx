@@ -13,23 +13,6 @@ import { index as galeri } from '@/routes/galeri';
 import { show as galleryShow } from '@/routes/galeri';
 import type { HomeGalleryPhoto, HomeIllustration } from '../types';
 
-/**
- * A short photographic strip from the published albums.
- *
- * The photos are the content, so there is no card chrome: a border radius and
- * the photograph itself carry the block. Every image links back to the album it
- * belongs to, which is the only useful destination from a teaser.
- *
- * The strip is a masonry grid (D-75): each photo keeps its own aspect ratio
- * instead of being cropped to a fixed 4:3, because a strip of identically
- * cropped tiles is not a masonry grid and the crop decides what survives of a
- * portrait. The ratio comes from the media row, so the height is reserved
- * before a lazy image arrives and the section does not jump.
- *
- * When the gallery is empty and the local illustration feature is on, a clearly
- * labelled illustration strip is shown instead. It has no album links and never
- * pretends to be parish photography (D-71).
- */
 export function HomeGallerySection({
     galleryPhotos,
     galleryIllustrations,
@@ -55,9 +38,10 @@ export function HomeGallerySection({
     }
 
     return (
-        <PublicSection surface="soft">
+        <PublicSection surface="default">
             <div className="space-y-8">
                 <SectionHeading
+                    eyebrow="Galeri Paroki"
                     title={hasPhotos ? 'Galeri Kegiatan' : 'Ilustrasi'}
                     description={
                         hasPhotos
@@ -65,10 +49,17 @@ export function HomeGallerySection({
                             : 'Belum ada album terbit. Gambar berikut adalah ilustrasi, bukan foto paroki.'
                     }
                     action={
-                        <Button asChild variant="outline">
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        >
                             <Link href={galeri()}>
                                 Semua Galeri
-                                <ArrowRight aria-hidden="true" />
+                                <ArrowRight
+                                    aria-hidden="true"
+                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                                />
                             </Link>
                         </Button>
                     }

@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
-import { Mail } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
@@ -75,6 +76,19 @@ export default function Kontak() {
                             title="Lokasi"
                             description="Peta dan petunjuk arah hanya ditampilkan bila tautannya valid."
                         />
+
+                        {contact.mapsLink ? (
+                            <Button asChild>
+                                <a
+                                    href={contact.mapsLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <MapPin aria-hidden="true" />
+                                    Petunjuk Arah
+                                </a>
+                            </Button>
+                        ) : null}
 
                         <ContactMap
                             embedUrl={contact.mapsEmbedUrl}
