@@ -5402,3 +5402,105 @@ karena semantik tombol/heading/tautan dipertahankan.
 @see `docs/DESIGN-v2.md` §10 `ParishGallery`, §7
 @see `docs/ARCHITECTURE.md` Part B §1.1
 @see `docs/DECISIONS.md` D-22, D-72
+
+---
+
+## D-76 — Admin Dashboard (Phase 9B): agregator read-only dan definisi statistik
+
+**Status:** Accepted · Phase 9B — Admin Dashboard · branch `feat/phase-9b-admin-dashboard`
+
+Dashboard admin yang sebelumnya `PlaceholderPattern` diganti menjadi halaman
+agregasi. Route `dashboard` berubah dari `Route::inertia('/', 'admin/dashboard')`
+menjadi controller tipis `App\Http\Controllers\Dashboard\DashboardController`;
+nama route, middleware, dan otorisasi tidak berubah. Tidak ada tabel statistik,
+schema, cache, dependency, atau seeder baru.
+
+### 1. Definisi setiap angka (mengikat)
+
+| Kartu | Angka | Definisi |
+| --- | --- | --- |
+| Berita | total / draf / terjadwal / terbit / arsip | total = semua non-deleted; terbit = `Post::published()` (`status=published AND published_at NOT NULL AND published_at <= now()`) |
+| Agenda | mendatang / draf / dibatalkan / ditunda | mendatang = `Event::published()->upcomingFromToday()` **dan** `status = scheduled`; draf = `is_published = false` |
+| Dokumen | total / draf / terbit / arsip / kedaluwarsa | terbit = `Document::published()`; kedaluwarsa = `expires_at NOT NULL AND expires_at < today(Asia/Pontianak)` |
+| Jadwal Misa | rutin / khusus / pemberitahuan | `MassSchedule::active()`, `SpecialMass::upcoming()`, `ScheduleNotice::currentlyVisible()` — tiga sumber terpisah, tidak dicampur |
+| Pelayanan | aktif / nonaktif | `is_active` |
+
+Keputusan penting: **"Agenda mendatang" tidak menghitung cancelled/postponed**
+(AC-02), jadi angkanya adalah `is_published = true AND start_at >= awal hari WIB
+AND status = scheduled`; cancelled/postponed punya angka sendiri. Publikasi
+berita mengikuti `published_at`, jadi scheduled dan `published` bertanggal masa
+depan tidak dihitung terbit.
+
+### 2. Daftar yang dibatasi
+
+Maksimum di backend: agenda terdekat **5**, berita terbaru **3**, konten terbaru
+**8** (gabungan berita+agenda+dokumen, merge urut `updated_at` lalu slice), item
+per indikator perhatian **5**. Tidak ada perhitungan dari daftar paginasi di
+React, dan tidak ada N+1 (relasi yang dibaca dieager-load; strict mode aktif).
+
+### 3. Kontrak props
+
+Label status selalu berasal dari enum backend (`status_label`), bukan salinan
+Indonesia di komponen. Konten terbaru mengirim `type`/`id`, dan React menyusun
+tautan edit lewat Wayfinder — tidak ada URL aplikasi yang di-hardcode. Props
+tidak memuat raw model, `deleted_at`, `uploaded_by`, atau `media_id`.
+
+### 4. Aksi Cepat
+
+Empat pintasan Wayfinder: Tulis Berita, Tambah Agenda, Kelola Jadwal Misa,
+Pengaturan Situs. Semuanya navigasi nyata.
+
+@see `docs/roadmap/phase-9b-admin-dashboard.md`
+@see `docs/plan-implementation/plan-phase-9b-admin-dashboard.md`
+@see `docs/DECISIONS.md` D-39, D-41
+
+---
+
+## D-77 — "Perlu Perhatian": hanya dua indikator, alt text dari kolom konten
+
+**Status:** Accepted · Phase 9B — Admin Dashboard · branch `feat/phase-9b-admin-dashboard`
+
+Roadmap §6.9 mencantumkan empat kandidat indikator kualitas konten. Hanya **dua**
+yang dapat dihitung dan ditindaklanjuti, jadi hanya dua yang ditampilkan. Prinsip
+yang dipakai: *alarm tanpa jalur perbaikan lebih buruk daripada tidak ada alarm*
+(roadmap §6.9), dan angka yang menyesatkan dilarang (AC-04).
+
+### 1. Yang ditampilkan
+
+1. **Dokumen kedaluwarsa** — `documents.expires_at` yang valid dan sudah lewat;
+   `null` diabaikan. Tindakan: buka dokumen (`documents.edit`) atau daftar
+   Dokumen. Indikator pertama, stabil.
+2. **Konten bergambar tanpa teks alternatif** — daftar konten (bukan hitungan
+   media mentah) dengan tautan ke halaman edit pemiliknya.
+
+### 2. Alt text dibaca dari kolom konten, bukan `media.alt_text`
+
+Ini koreksi sadar terhadap bacaan harfiah roadmap §6.9. Form berita/agenda/
+pelayanan menyimpan teks alternatif pada kolom kontennya sendiri —
+`posts.image_alt`, `events.poster_alt`, `services.thumbnail_alt` — dan itulah
+nilai yang **dirender** `PublicPostResource`, `PublicEventResource`, dan kartu
+pelayanan. `media.alt_text` diisi hanya bila pemanggilnya mengirimnya, dan pada
+tiga modul ini biasanya kosong; memeriksa `media.alt_text` akan menandai hampir
+setiap konten bergambar dan menghasilkan angka yang menyesatkan. Karena itu
+indikator memeriksa kolom konten, sambil tetap mensyaratkan baris `media` milik
+konten berstatus `ready` (agar unggahan yang belum selesai diproses tidak
+dihitung).
+
+Cakupan dibatasi ke modul dengan satu gambar dan satu halaman edit:
+`posts` (hanya `published`), `events` (hanya `is_published`), `services` (hanya
+`is_active`). Media yatim dan tabel lain (galeri, komunitas, pastor, pengurus,
+sejarah, wilayah, hero) **tidak** dihitung; ini gap yang dicatat, bukan kelalaian.
+
+### 3. Yang dikeluarkan (dan alasannya)
+
+- **Media gagal** (`MediaStatus::Failed`) — tidak ada tombol retry dan tidak ada
+  halaman pustaka media, jadi tidak ada tindakan lanjutan.
+- **"Google Form belum diisi" (ADM-06)** — `Service::usesGoogleForm()` hanya
+  berarti "punya URL", bukan "wajib punya URL". Tidak ada aturan yang menyatakan
+  sebuah pelayanan wajib berformulir, jadi menghitung yang kosong akan
+  menyesatkan. ADM-06 tetap SHOULD dan separuh terpenuhi lewat alt text.
+
+@see `docs/roadmap/phase-9b-admin-dashboard.md` §6.9
+@see `docs/plan-implementation/plan-phase-9b-admin-dashboard.md` §9
+@see `app/Http/Controllers/Dashboard/DashboardController.php`
+@see `docs/DECISIONS.md` D-76
