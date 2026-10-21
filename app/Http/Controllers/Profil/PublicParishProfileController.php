@@ -67,7 +67,7 @@ class PublicParishProfileController extends Controller
         $history = PastorAssignment::query()
             ->where('is_current', false)
             ->whereHas('pastor', fn ($query) => $query->where('is_published', true))
-            ->with('pastor')
+            ->with('pastor.photoMedia.variants')
             ->orderByDesc('end_year')
             ->orderByDesc('start_year')
             ->get();

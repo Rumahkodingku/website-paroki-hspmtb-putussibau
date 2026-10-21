@@ -1,19 +1,16 @@
 import { Head } from '@inertiajs/react';
-import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
-import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
-import { ProfileSubNav } from '../components/profile-subnav';
 import { HistoryTimeline } from '../components/history-timeline';
 import type { PublicHistoryItem } from '../types';
+import { ProfileHero } from '../components/profile-hero';
 
 type Props = {
     narrative: string | null;
     items: PublicHistoryItem[];
 };
 
-export default function Sejarah({ narrative, items }: Props) {
+export default function Sejarah({ items }: Props) {
     return (
         <>
             <Seo
@@ -23,34 +20,39 @@ export default function Sejarah({ narrative, items }: Props) {
 
             <Head title="Sejarah Paroki" />
 
-            <ProfileSubNav />
-
-            <PublicSection>
-                <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Profil"
-                        title="Sejarah Paroki"
-                        description="Kronologi berdirinya dan perjalanan paroki."
-                    />
-
-                    {narrative ? (
-                        <RichText html={narrative} className="max-w-3xl" />
-                    ) : null}
-
-                    {items.length === 0 ? (
-                        <Text
-                            as="p"
-                            variant="body"
-                            color="muted"
-                            className="rounded-lg border border-dashed border-border p-6"
-                        >
-                            Linimasa sejarah belum dipublikasikan.
+            <main>
+                <ProfileHero
+                    ariaLabelledBy="history-title"
+                    title="Sejarah Paroki"
+                    description={
+                        <Text as="p" variant="body" className="mt-5 max-w-lg">
+                            Mengenal perjalanan iman umat dan perkembangan
+                            pelayanan paroki dari masa ke masa.
                         </Text>
-                    ) : (
-                        <HistoryTimeline items={items} />
-                    )}
-                </div>
-            </PublicSection>
+                    }
+                />
+
+                {/* Timeline */}
+                <section
+                    aria-labelledby="history-timeline-title"
+                    className="bg-background py-14 sm:py-16 lg:py-20"
+                >
+                    <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+                        {items.length === 0 ? (
+                            <Text
+                                as="p"
+                                variant="body"
+                                color="muted"
+                                className="rounded-xl border border-dashed border-border p-6"
+                            >
+                                Linimasa sejarah belum dipublikasikan.
+                            </Text>
+                        ) : (
+                            <HistoryTimeline items={items} />
+                        )}
+                    </div>
+                </section>
+            </main>
         </>
     );
 }

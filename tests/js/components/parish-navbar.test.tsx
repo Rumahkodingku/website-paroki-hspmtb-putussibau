@@ -43,7 +43,7 @@ const DESKTOP_GROUPS: Record<string, { label: string; href: string }[]> = {
     Profil: [
         { label: 'Sejarah', href: '/profil/sejarah' },
         { label: 'Wilayah Pelayanan', href: '/profil/wilayah' },
-        { label: 'Area', href: '/area' },
+        { label: 'Area', href: '/profil/area' },
         { label: 'Pastor', href: '/profil/pastor' },
         { label: 'Struktur Kepengurusan', href: '/profil/struktur' },
     ],

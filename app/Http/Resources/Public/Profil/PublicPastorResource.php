@@ -27,15 +27,19 @@ class PublicPastorResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'title' => $this->title,
+            'photo_media_id' => $this->photo_media_id,
             'photo' => $this->whenLoaded('photoMedia', fn () => $this->mediaUrl($this->photoMedia, 'large')),
             'photo_alt' => $this->photo_alt,
             'bio' => $this->bio,
+            'sort_order' => $this->sort_order,
             // Null-safe: a published pastor with no current assignment still
             // renders, with the position left blank rather than crashing.
             'position' => $assignment?->position->value,
             'position_label' => $assignment?->position->label(),
             'start_year' => $assignment?->start_year,
             'end_year' => $assignment?->end_year,
+            'is_current' => $assignment?->is_current,
+            'description' => $assignment?->description,
         ];
     }
 }

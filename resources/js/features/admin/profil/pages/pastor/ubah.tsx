@@ -57,7 +57,7 @@ export default function Edit({ pastor, labels, hints, positions }: Props) {
                 <section className="border-t pt-8">
                     <Heading
                         title="Riwayat Penugasan"
-                        description="Satu pastor boleh memiliki beberapa periode. Hanya satu yang boleh berstatus sedang bertugas."
+                        description="Satu pastor boleh memiliki beberapa periode. Hanya satu penugasan per pastor yang boleh berstatus sedang bertugas."
                         variant="default"
                     />
 
