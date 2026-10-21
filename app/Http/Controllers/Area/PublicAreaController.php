@@ -37,7 +37,7 @@ class PublicAreaController extends Controller
             ->ordered()
             ->get();
 
-        return Inertia::render('public/area', [
+        return Inertia::render('public/profil/area/index', [
             'sections' => $this->sections($areas),
             'hasAreas' => $areas->isNotEmpty(),
         ]);
@@ -50,7 +50,7 @@ class PublicAreaController extends Controller
             'children' => fn ($query) => $query->active()->ordered(),
         ]);
 
-        return Inertia::render('public/area/show', [
+        return Inertia::render('public/profil/area/show', [
             'area' => PublicAreaDetailResource::make($area)->resolve(),
         ]);
     }
