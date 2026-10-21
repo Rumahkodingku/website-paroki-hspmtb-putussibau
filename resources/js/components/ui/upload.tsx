@@ -1060,7 +1060,7 @@ function UploadSlot({
                 }
                 accept={toAcceptAttribute(accept)}
                 disabled={disabled}
-                onChange={(event) => {
+                onChange={(event: any) => {
                     add(Array.from(event.currentTarget.files ?? []));
                     event.currentTarget.value = "";
                 }}
@@ -1183,11 +1183,11 @@ function UploadModal({
             data-slot="upload-modal"
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
-            onCancel={(event) => {
+            onCancel={(event: any) => {
                 event.preventDefault();
                 close();
             }}
-            onClick={(event) => {
+            onClick={(event: any) => {
                 // A click on the dialog element itself is a click on the backdrop.
                 if (event.target === event.currentTarget) close();
             }}

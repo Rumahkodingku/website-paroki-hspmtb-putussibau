@@ -226,7 +226,7 @@ test.describe('direktori publik', () => {
             'angrep-cari-e2e',
         );
 
-        await page.goto('/area');
+        await page.goto('/profil/area');
 
         // The card's whole area is one link, so its accessible name carries the
         // type label and the name together.
@@ -270,7 +270,7 @@ test.describe('direktori publik', () => {
             },
         );
 
-        await page.goto('/area/stasi-peta-e2e');
+        await page.goto('/profil/area/stasi-peta-e2e');
 
         await expect(
             page.getByText('Gereja Stasi Peta E2E, Jalan Peta No. 2'),

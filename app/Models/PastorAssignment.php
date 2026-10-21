@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
 /**
  * One assignment period of one pastor.
  *
- * `is_current` marks the pastor in office. At most one row in the whole table
+ * `is_current` marks the pastor in office. At most one row per pastor
  * may be current; that is enforced by SetCurrentPastorAction inside a
  * transaction, not by the database.
  *

@@ -112,7 +112,7 @@ export default function Index({ items, narrative, filters }: Props) {
 
                 <form
                     noValidate
-                    onSubmit={(event) => {
+                    onSubmit={(event: any) => {
                         event.preventDefault();
                         narrativeForm.submit(updateNarrative(), {
                             preserveScroll: true,

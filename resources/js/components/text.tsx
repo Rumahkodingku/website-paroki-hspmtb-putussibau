@@ -234,7 +234,7 @@ export type TextProps<T extends ElementType = 'span'> = {
 } & TextOwnProps &
     Omit<ComponentPropsWithoutRef<T>, keyof TextOwnProps | 'as'>;
 
-export function Text<T extends ElementType = 'span'>({
+export function Text<const T extends ElementType = 'span'>({
     as,
     variant,
     color,

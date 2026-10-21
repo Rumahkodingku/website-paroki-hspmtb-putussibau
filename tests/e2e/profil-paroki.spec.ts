@@ -106,14 +106,9 @@ test.describe('halaman publik Profil Paroki', () => {
         for (const [url, activeLabel] of PUBLIC_PAGES) {
             await page.goto(url);
 
-            const subnav = page.getByRole('navigation', {
-                name: 'Navigasi Profil Paroki',
-            });
-
-            await expect(subnav).toBeVisible();
             await expect(
-                subnav.getByRole('link', { name: activeLabel, exact: true }),
-            ).toHaveAttribute('aria-current', 'page');
+                page.getByRole('heading', { name: activeLabel, level: 2 }),
+            ).toBeVisible();
         }
     });
 

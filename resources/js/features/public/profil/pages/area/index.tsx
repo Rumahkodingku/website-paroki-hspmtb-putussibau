@@ -1,37 +1,30 @@
-import { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { MapPin, SearchX } from 'lucide-react';
-import { EmptyState } from '@/components/empty-state';
-import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
-import { Seo } from '@/components/seo';
-import { Text } from '@/components/text';
-import { Button } from '@/components/ui/button';
-import { AreaCard } from '../components/area-card';
-import { AreaSearch } from '../components/area-search';
-import type { PublicAreaSection } from '../types';
+import { useState } from "react";
+import { Head } from "@inertiajs/react";
+import { MapPin, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+import { PublicSection } from "@/components/public-section";
+import { Seo } from "@/components/seo";
+import { Text } from "@/components/text";
+import { Button } from "@/components/ui/button";
+import { AreaCard } from "../../components/area-card";
+import { AreaSearch } from "../../components/area-search";
+import type { PublicAreaSection } from "../../types";
+import { ProfileHero } from "../../components/profile-hero";
 
 type Props = {
     sections: PublicAreaSection[];
     hasAreas: boolean;
 };
 
-/**
- * The public directory.
- *
- * The list is small and already grouped by type on the server, so search is a
- * client-side name filter rather than a round trip: there is no pagination and
- * nothing to defer.
- */
 export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState("");
 
     const query = search.trim().toLowerCase();
 
     const filtered = sections.map((section) => ({
         ...section,
         areas: section.areas.filter(
-            (area) => query === '' || area.name.toLowerCase().includes(query),
+            (area) => query === "" || area.name.toLowerCase().includes(query),
         ),
     }));
 
@@ -49,14 +42,23 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
 
             <Head title="Area" />
 
+            <ProfileHero
+                ariaLabelledBy="area-title"
+                title="Area"
+                description={
+                    <Text
+                        as="p"
+                        variant="body"
+                        className="mt-5 max-w-lg"
+                    >
+                        Daftar stasi, wilayah, dan lingkungan Paroki Hati Santa
+                        Perawan Maria Tak Bernoda Putussibau.
+                    </Text>
+                }
+            />
+
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Area"
-                        title="Stasi & Lingkungan"
-                        description="Daftar stasi, wilayah, dan lingkungan di lingkungan paroki."
-                    />
-
                     {hasAreas ? (
                         <AreaSearch
                             value={search}
@@ -65,12 +67,6 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
                         />
                     ) : null}
 
-                    {/*
-                        Two different empty states, not one: an empty parish is
-                        a different fact from a search that missed. EmptyState
-                        already carries the heading level, the icon frame and
-                        the muted description, so neither needs a local box.
-                    */}
                     {!hasAreas ? (
                         <EmptyState
                             icon={MapPin}
@@ -86,7 +82,7 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setSearch('')}
+                                    onClick={() => setSearch("")}
                                 >
                                     Reset pencarian
                                 </Button>

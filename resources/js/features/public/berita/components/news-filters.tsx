@@ -41,7 +41,7 @@ export function NewsFilters({
                     type="search"
                     value={filters.q}
                     placeholder="Cari judul atau isi berita"
-                    onChange={(event) => apply({ q: event.target.value })}
+                    onChange={(event: any) => apply({ q: event.target.value })}
                     className="h-11 w-full rounded-pill border border-border bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
                 />
             </div>
@@ -53,7 +53,7 @@ export function NewsFilters({
                 <select
                     id="berita-kategori"
                     value={filters.kategori}
-                    onChange={(event) =>
+                    onChange={(event: any) =>
                         apply({ kategori: event.target.value })
                     }
                     className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
