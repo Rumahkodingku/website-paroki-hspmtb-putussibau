@@ -73,7 +73,7 @@ export function ListToolbar({
             <input
                 type="search"
                 value={search}
-                onChange={(event) => onSearch(event.target.value)}
+                onChange={(event: any) => onSearch(event.target.value)}
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
                 className="h-11 min-w-48 flex-1 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -122,7 +122,7 @@ export function FilterSelect({
             id={id}
             value={value}
             aria-label={label}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event: any) => onChange(event.target.value)}
             className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
         >
             {options.map((option) => (

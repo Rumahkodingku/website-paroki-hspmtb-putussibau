@@ -80,10 +80,12 @@ index ketahuan sejak awal.
   terpisah dari database pengembangan.
 - `php artisan db:create` **tidak ada** di Laravel 13, sehingga database harus
   dibuat manual sekali per mesin:
+
     ```sql
     CREATE DATABASE website_paroki_hspmtb_test
         CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
     ```
+
     Di CI, database dibuat otomatis oleh service container (lihat D-04).
 - Nilai database test ditulis **hard-code** di `phpunit.xml`, bukan dari
   `.env`, agar tidak mungkin "tidak sengaja" menunjuk database dev.
@@ -132,10 +134,10 @@ lingkungan yang tidak terisi bisa membuat seluruh workflow gagal.
 `fmt.ignorePatterns` pada `vite.config.ts`.
 
 **Alasan:** `PRD.md`, `ARCHITECTURE.md`, dan `DESIGN.md` bersifat normative dan
-dirujuk sebagai source of truth. `vp check --fix` akan merombak isinya dan
-berisiko mengubah kutipan requirement ID (`XC-M1`, `AC-HOME-3`, dan
-sebagainya). `npm run check` harus tetap hijau agar `composer ci:check`
-menjadi gate yang bermakna.
+dirujuk sebagai source of truth. `npm run lint:fix` / `prettier --write` akan
+merombak isinya dan berisiko mengubah kutipan requirement ID (`XC-M1`,
+`AC-HOME-3`, dan sebagainya). `npm run check` harus tetap hijau agar
+`composer ci:check` menjadi gate yang bermakna.
 
 ---
 
@@ -240,12 +242,12 @@ Final gate di Phase 01 §41 memanggil `composer lint`, `composer analyse`,
 §41 sendiri menyatakan _"sesuaikan command dengan script aktual"_. Yang
 dipakai:
 
-| Ganti | Dengan |
-| --- | --- |
-| `composer lint` | `composer lint:check` |
-| `composer analyse` | `composer types:check` |
-| `npm run lint` + `npm run typecheck` | `npm run check` + `npm run types:check` |
-| seluruhnya | `composer ci:check` lalu `composer test` |
+| Ganti                                | Dengan                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `composer lint`                      | `composer lint:check`                    |
+| `composer analyse`                   | `composer types:check`                   |
+| `npm run lint` + `npm run typecheck` | `npm run check` + `npm run types:check`  |
+| seluruhnya                           | `composer ci:check` lalu `composer test` |
 
 ---
 
@@ -323,10 +325,10 @@ melanggar `AGENTS.md` ("Never invent real parish data"), jadi dihapus.
 
 Pemanggilan seeder akan ditambahkan saat masing-masing seeder ada:
 
-| Seeder | Phase | Isi |
-| --- | --- | --- |
-| `SuperAdminSeeder` | P05 | akun Super Admin dari `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` |
-| `SiteSettingsSeeder` | P09 | kunci kanonik PRD Lampiran B |
+| Seeder               | Phase | Isi                                                                   |
+| -------------------- | ----- | --------------------------------------------------------------------- |
+| `SuperAdminSeeder`   | P05   | akun Super Admin dari `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` |
+| `SiteSettingsSeeder` | P09   | kunci kanonik PRD Lampiran B                                          |
 
 Dijaga oleh test `the seeder creates no fabricated parish or admin data`.
 
@@ -340,14 +342,14 @@ Phase 01 Workstream 04 (Docker Development Environment), item `P04` pada §33, d
 bagian §3.1.D **tidak dijalankan**. MySQL 8 dijalankan langsung di host
 pengembangan.
 
-**Mengapa ini tidak menyimpang dari PRD.** Aturan Phase 01 §1: *"Jika dokumen
+**Mengapa ini tidak menyimpang dari PRD.** Aturan Phase 01 §1: _"Jika dokumen
 Phase 01 ini berbeda dengan PRD, PRD harus diprioritaskan dan perbedaan harus
-dicatat di docs/DECISIONS.md."* PRD **tidak pernah menyebut Docker sama sekali**
+dicatat di docs/DECISIONS.md."_ PRD **tidak pernah menyebut Docker sama sekali**
 (`grep -i docker docs/PRD.md` → nol hasil). Yang PRD lakukan justru mengarahkan
 arsitektur deployment lain:
 
-> PRD §17.3 Q6 — *"Konfigurasi via `.env`; siapkan panduan deploy generik
-> (**VPS + Nginx + PHP-FPM + MySQL**)"*
+> PRD §17.3 Q6 — _"Konfigurasi via `.env`; siapkan panduan deploy generik
+> (**VPS + Nginx + PHP-FPM + MySQL**)"_
 
 Jadi Docker adalah temuan Phase 01 saja, dan menghapuskannya justru lebih
 cocok dengan PRD.
@@ -360,11 +362,11 @@ MySQL native.
 **Dampak ke dokumen Phase 01** — dicatat di sini, dokumen spec-nya sendiri
 **tidak** diedit supaya bukti divergensinya tetap ada:
 
-| Lokasi | Efek |
-| --- | --- |
-| §3.1.D | tidak dijalankan |
-| §9 Workstream 04 | tidak dijalankan |
-| §33 P04 | dihapus dari urutan |
+| Lokasi             | Efek                                              |
+| ------------------ | ------------------------------------------------- |
+| §3.1.D             | tidak dijalankan                                  |
+| §9 Workstream 04   | tidak dijalankan                                  |
+| §33 P04            | dihapus dari urutan                               |
 | §31 DEVELOPMENT.md | bullet "Docker" diganti bagian setup MySQL native |
 
 **Yang berubah secara praktis:**
@@ -444,7 +446,7 @@ Seeder adalah kode tepercaya, jadi melewati guard fillable di sini benar. Ini
 sudah ketahuan karena test gagal saat `updateOrCreate` dipakai.
 
 **Role `super_admin` di-seed oleh `PermissionSeeder`, bukan
-`SuperAdminSeeder`.** Phase 01 §10.3 menyebutnya *system role*, jadi harus ada
+`SuperAdminSeeder`.** Phase 01 §10.3 menyebutnya _system role_, jadi harus ada
 bahkan di mesin yang tidak punya `ADMIN_EMAIL` — tanpa akun pun. Ini juga
 ketahuan lewat pemeriksaan manual, bukan lewat test.
 
@@ -533,10 +535,10 @@ PRD D-08 mensyaratkan akun nonaktif tidak dapat login. Satu titik pengecekan
 tidak cukup, karena ada dua cara berbeda untuk membuat sesi: saat login, dan
 pada setiap request berikutnya.
 
-| Lapis | Kelas | Tugas |
-| --- | --- | --- |
-| Login | `EnsureAccountCanLogIn` | pipe di pipeline Fortify, menolak sebelum sesi dibuat |
-| Area admin | `EnsureAccountIsActive` | middleware `/admin/*`, yang benar-benar menegakkan |
+| Lapis      | Kelas                   | Tugas                                                 |
+| ---------- | ----------------------- | ----------------------------------------------------- |
+| Login      | `EnsureAccountCanLogIn` | pipe di pipeline Fortify, menolak sebelum sesi dibuat |
+| Area admin | `EnsureAccountIsActive` | middleware `/admin/*`, yang benar-benar menegakkan    |
 
 Pipe-nya disisipkan **setelah `CanonicalizeUsername` dan sebelum
 `Authenticate`**, sehingga akun nonaktif ditolak sebelum kredensial dicek dan
@@ -649,7 +651,7 @@ latar terang.
 
 ### 3. Dark mode diturunkan, bukan dari dokumen
 
-DESIGN.md §905 menyatakan *"Dark-mode requirements have not been established"*.
+DESIGN.md §905 menyatakan _"Dark-mode requirements have not been established"_.
 Keputusan: dark mode **dipertahankan** (switcher light/dark/system di halaman
 Akun tetap berfungsi) dan paletnya diturunkan dari ramp navy yang sudah
 dokumentasi, memakai `color-mix()` terhadap `navy-dark` sehingga setiap nilai
@@ -665,14 +667,14 @@ terbaca di atas navy. Hasil: body 16.73:1, muted 6.50:1, on-primary 6.59:1.
 Dokumen memakai `{colors.red-light}` untuk `components.profile-sidebar`
 (activeBackgroundColor) tapi **tidak pernah mendefinisikannya** di blok
 `colors`. Diturunkan dari `primary` dengan `color-mix(in oklab, #ab020e 8%,
-#ffffff)` → `#F8EBEC`, rasio teks 6.58:1. Dipakai juga untuk permukaan Alert
+# ffffff)` → `#F8EBEC`, rasio teks 6.58:1. Dipakai juga untuk permukaan Alert
 destructive.
 
 ### 5. Tidak ada warna sukses di palet
 
 Tiga pesan sukses (`text-green-600`) diganti `text-navy` / `text-navy-light`.
 Hijau tidak ada di palet DESIGN.md, dan menambahkan satu berarti melanggar
-*"Do not use arbitrary brand colors outside the documented palette"*. Navy
+_"Do not use arbitrary brand colors outside the documented palette"_. Navy
 struktural lebih tepat secara merek, tapi **kurang ideal secara semantik**.
 Kalau paroki ingin hijau konfirmasi, nilainya harus masuk DESIGN.md lebih dulu.
 
@@ -758,7 +760,7 @@ D-67.)
 
 ### 4. Field gambar = teks path/URL, dan janji P10 tidak ditepati
 
-D-23 §4 yang pertama pernah menulis: *"widget unggah menyusul di P10"*.
+D-23 §4 yang pertama pernah menulis: _"widget unggah menyusul di P10"_.
 
 **P10 selesai dan widget itu TIDAK ada.** P10 hanya membangun pipeline dan
 endpoint (D-24 §1), tanpa antarmuka. Jadi `logo`, `favicon`, dan
@@ -902,19 +904,19 @@ memuat skrip dan tidak bisa dirasterkan dengan aman tanpa sanitiser terpisah
 
 ## Known divergences (belum diselesaikan)
 
-| # | Deviasi | Risiko / alasan | Rencana |
-| --- | --- | --- | --- |
-| 1 | ~~`HandleInertiaRequests::share()` mengirim **seluruh model User**.~~ **Ditutup di P07** (D-21). Sekarang hanya `id`, `name`, `email`, `email_verified_at`. Catatan koreksi: yang bocor hanya metadata tidak sensitif — `#[Hidden]` sudah melindungi semua secret, jadi ini pelanggaran kontrak, bukan kebocoran. | — | Selesai |
-| 2 | ~~Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash`.~~ **Ditutup di P07** (D-21): ini memang mekanisme **Inertia v3** — flash dikirim sebagai event DOM `flash` dan sengaja tidak masuk history state. Hook yang sudah ada benar; tidak ada yang perlu diubah. | — | Selesai |
-| 3 | ~~`display_timezone` belum dikirim ke frontend.~~ **Ditutup di P07** (D-21): sudah jadi shared prop `displayTimezone`, bersanding dengan `locale`. | — | Selesai |
-| 4 | ~~`Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif.~~ **Ditutup di P13** (D-27): aktif di non-produksi sesuai PRD §3.3, karena `preventLazyLoading()` melempar exception dan satu lazy load di produksi akan jadi 500 di depan pengunjung. Ketiga guard diverifikasi hidup, bukan diasumsikan. | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya. | — | Selesai |
-| 5 | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14). | — | Selesai |
-| 6 | ~~`Features::registration()` masih aktif sehingga `/register` publik hidup.~~ **Ditutup di P06** (D-19). | — | Selesai |
-| 7 | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`. | Tidak ada single access point untuk pengaturan situs. | P09 (D-12) |
-| 8 | ~~`is_active` ada di skema tapi belum ditegakkan.~~ **Ditutup di P06** (D-20). | — | Selesai |
-| 9 | ~~PHP extensions `gd` / `imagick` tidak terpasang.~~ **Ditutup** — `gd` 2.3.3 dengan WebP support sudah terpasang. | — | Selesai |
-| 10 | Ekstensi PHP `intl` tidak terpasang. | Belum memblokir apa pun, tapi beberapa library dapat memakainya. | Bila perlu |
-| 11 | `super_admin` mendapat akses ke **semua** ability lewat `Gate::before`, termasuk ability yang di masa depan mungkin tidak boleh dimiliki siapa pun. | Otorisasi implisit: tidak ada daftar permission yang bisa dibaca untuk audit. Ini trade-off yang disepakati di D-16, bukan kelalaian. | P06 — kalau muncul ability yang harus dikecualikan, pakai `Gate::after` atau `deny` eksplisit |
+| #   | Deviasi                                                                                                                                                                                                                                                                                                           | Risiko / alasan                                                                                                                       | Rencana                                                                                       |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1   | ~~`HandleInertiaRequests::share()` mengirim **seluruh model User**.~~ **Ditutup di P07** (D-21). Sekarang hanya `id`, `name`, `email`, `email_verified_at`. Catatan koreksi: yang bocor hanya metadata tidak sensitif — `#[Hidden]` sudah melindungi semua secret, jadi ini pelanggaran kontrak, bukan kebocoran. | —                                                                                                                                     | Selesai                                                                                       |
+| 2   | ~~Flash message memakai `Inertia::flash('toast', ...)` + `useFlashToast()`, bukan shared prop `flash`.~~ **Ditutup di P07** (D-21): ini memang mekanisme **Inertia v3** — flash dikirim sebagai event DOM `flash` dan sengaja tidak masuk history state. Hook yang sudah ada benar; tidak ada yang perlu diubah.  | —                                                                                                                                     | Selesai                                                                                       |
+| 3   | ~~`display_timezone` belum dikirim ke frontend.~~ **Ditutup di P07** (D-21): sudah jadi shared prop `displayTimezone`, bersanding dengan `locale`.                                                                                                                                                                | —                                                                                                                                     | Selesai                                                                                       |
+| 4   | ~~`Model::preventLazyLoading()` / `shouldBeStrict()` belum aktif.~~ **Ditutup di P13** (D-27): aktif di non-produksi sesuai PRD §3.3, karena `preventLazyLoading()` melempar exception dan satu lazy load di produksi akan jadi 500 di depan pengunjung. Ketiga guard diverifikasi hidup, bukan diasumsikan.      | ARCHITECTURE.md Part A §6 dan PRD §3.3 mewajibkannya.                                                                                 | —                                                                                             | Selesai |
+| 5   | ~~`DatabaseSeeder` masih membuat `test@example.com`.~~ **Ditutup di P03** (D-14).                                                                                                                                                                                                                                 | —                                                                                                                                     | Selesai                                                                                       |
+| 6   | ~~`Features::registration()` masih aktif sehingga `/register` publik hidup.~~ **Ditutup di P06** (D-19).                                                                                                                                                                                                          | —                                                                                                                                     | Selesai                                                                                       |
+| 7   | Tabel `site_settings` sudah ada, tetapi belum ada model, `SiteSettingsService`, cache, maupun halaman `/admin/pengaturan`.                                                                                                                                                                                        | Tidak ada single access point untuk pengaturan situs.                                                                                 | P09 (D-12)                                                                                    |
+| 8   | ~~`is_active` ada di skema tapi belum ditegakkan.~~ **Ditutup di P06** (D-20).                                                                                                                                                                                                                                    | —                                                                                                                                     | Selesai                                                                                       |
+| 9   | ~~PHP extensions `gd` / `imagick` tidak terpasang.~~ **Ditutup** — `gd` 2.3.3 dengan WebP support sudah terpasang.                                                                                                                                                                                                | —                                                                                                                                     | Selesai                                                                                       |
+| 10  | Ekstensi PHP `intl` tidak terpasang.                                                                                                                                                                                                                                                                              | Belum memblokir apa pun, tapi beberapa library dapat memakainya.                                                                      | Bila perlu                                                                                    |
+| 11  | `super_admin` mendapat akses ke **semua** ability lewat `Gate::before`, termasuk ability yang di masa depan mungkin tidak boleh dimiliki siapa pun.                                                                                                                                                               | Otorisasi implisit: tidak ada daftar permission yang bisa dibaca untuk audit. Ini trade-off yang disepakati di D-16, bukan kelalaian. | P06 — kalau muncul ability yang harus dikecualikan, pakai `Gate::after` atau `deny` eksplisit |
 
 ---
 
@@ -982,14 +984,14 @@ menyatakan sanitasi klien saja tidak cukup. P11 membangunnya.
 
 ### 1. Pustaka, dan kenapa bukan yang lain
 
-PRD D-14 menyebut *"`mews/purifier` atau HTMLPurifier"* — **sebagai contoh, bukan
+PRD D-14 menyebut _"`mews/purifier` atau HTMLPurifier"_ — **sebagai contoh, bukan
 syarat**. Tiga opsi, dipertimbangkan dengan saksama:
 
-| Opsi | Verdict |
-| --- | --- |
-| `symfony/html-sanitizer` ^7.4 | **Dipakai.** Vendor resmi, API `allowlist()` persis kebutuhan PRD, satu dependency kecil, repo sudah 33 paket Symfony 7.4 di vendor |
-| Tulis sendiri di atas `DOMDocument` | Ditolak. Sanitasi HTML adalah salah satu area XSS paling rawan; allowlist sendiri harus diaudit, bukan diasumsikan benar |
-| `mews/purifier` | Ditolak. Menarik `ezyang/htmlpurifier` yang relatif lama, dan kompatibilitas Laravel 13 belum diverifikasi |
+| Opsi                                | Verdict                                                                                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `symfony/html-sanitizer` ^7.4       | **Dipakai.** Vendor resmi, API `allowlist()` persis kebutuhan PRD, satu dependency kecil, repo sudah 33 paket Symfony 7.4 di vendor |
+| Tulis sendiri di atas `DOMDocument` | Ditolak. Sanitasi HTML adalah salah satu area XSS paling rawan; allowlist sendiri harus diaudit, bukan diasumsikan benar            |
+| `mews/purifier`                     | Ditolak. Menarik `ezyang/htmlpurifier` yang relatif lama, dan kompatibilitas Laravel 13 belum diverifikasi                          |
 
 Ini **tidak** mencerminkan keputusan P10 menolak `intervention/image` demi GD.
 P10 menolak library karena masalahnya terisolasi dan GD cukup untuk itu. Sanitasi
@@ -1027,10 +1029,10 @@ Default Symfony tidak cocok untuk CMS, dan ketiganya diketatkan di
 `config/html.php`:
 
 - **`default_action` = `block`, bukan `drop`.** Default Symfony menghapus
-  *isi* setiap tag yang tidak dikenal. Itu artinya satu `<div>` nyasar dari
+  _isi_ setiap tag yang tidak dikenal. Itu artinya satu `<div>` nyasar dari
   hasil paste akan menghapus seluruh paragrafnya. Dengan `block`, tag tak
   dikenal kehilangan tagnya tapi teksnya selamat. Elemen berbahaya tetap
-  *drop* eksplisit lewat `drop_elements`, jadi setelan ini tidak pernah
+  _drop_ eksplisit lewat `drop_elements`, jadi setelan ini tidak pernah
   memutuskan nasib sebuah script.
 - **Skema media diketatkan ke `['http', 'https']`.** Symfony mengizinkan
   `data:` secara default. Tidak ada kebutuhan di sini, dan `data:` URL di
@@ -1119,7 +1121,7 @@ sanitasi HTML untuk memvalidasi host. (`maps_embed_url` tidak lagi ada sebagai
 kunci setelah D-67; `form_url` tetap berlaku.)
 
 `isClean()` ada untuk membuktikan idempotensi di test. Tidak ada kode aplikasi
-yang mempercayai hasilnya.
+yang mempercayai hasilnya
 ---
 
 ## D-26 — Infrastruktur: scheduler, halaman error, dan SEO tanpa SSR
@@ -1201,10 +1203,10 @@ halaman di mana pengunjung paling butuh satu jalan keluar yang jelas.
 
 ### 5. SSR ditunda — keputusan terbuka
 
-PRD NFR-SEO (baris 934): *"pertimbangkan Inertia SSR agar crawler dan pratinjau
+PRD NFR-SEO (baris 934): _"pertimbangkan Inertia SSR agar crawler dan pratinjau
 tautan membaca konten (bila SSR tidak diaktifkan, pastikan meta tag OG tetap
 dirender di server pada respons HTML awal untuk halaman Beranda, Berita, Agenda,
-Pelayanan)"*.
+Pelayanan)"_.
 
 SSR **tidak** diaktifkan di Phase 01. Alasannya:
 
@@ -1305,7 +1307,7 @@ Yang diuji adalah kontrak backend: status code, komponen Inertia, dan prop
 `status`. Persyaratan kebahasa dijamin oleh konstruksi dan ditinjau secara
 visual. Ini kesenjangan nyata, dan dicatat sebagai such.
 
-> **Ditutup oleh P16 (D-29).** Suite Playwright sekarang mem-*assert* copy
+> **Ditutup oleh P16 (D-29).** Suite Playwright sekarang mem-_assert_ copy
 > Bahasa Indonesia itu di browser, termasuk di halaman 404. Yang menarik dari
 > prosesnya: assertion pertamanya **hijau untuk alasan yang salah**, karena mesin
 > development punya `APP_DEBUG=true` sehingga callback `respond()` mengembalikan
@@ -1322,7 +1324,7 @@ bernama "a failure marks the row failed and keeps the original" yang memanggil
 
 Penyebabnya: `phpunit.xml` menyetel `QUEUE_CONNECTION=sync`, jadi `dispatch()`
 menjalankan job inline dan exception-nya masuk langsung ke test.
-`FailedJobTest` memaksa koneksi `database` dan menjalankan worker sungguhan.
+`FailedJobTest` memaksa koneksi `database` dan menjalankan worker sungguhan
 ---
 
 ## D-27 — Kualitas: strict mode, cakupan PHPStan, dan arch test
@@ -1363,16 +1365,16 @@ Sekarang `tests/` masuk, dan **tidak ada baseline**.
 
 Tiga `ignoreErrors`, masing-masing dipatok ke pesan, identifier, dan direktori:
 
-| Identifier | Pesan |
-| --- | --- |
-| `method.notFound` | `Call to an undefined method Pest\` |
-| `property.notFound` | `Access to an undefined property Pest\` |
+| Identifier              | Pesan                                                                   |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `method.notFound`       | `Call to an undefined method Pest\`                                     |
+| `property.notFound`     | `Access to an undefined property Pest\`                                 |
 | `argument.templateType` | `Unable to resolve the template type TValue in call to function expect` |
 
 Pola keduanya menuntut **tipe dari namespace `Pest\`**. Itu yang membuatnya sempit:
 kesalahan tipe asli pada kelas aplikasi tetap gagal.
 
-`vendor/pestphp/pest/phpstan-pest-extension.neon` ikut di-*include*, dan itu
+`vendor/pestphp/pest/phpstan-pest-extension.neon` ikut di-_include_, dan itu
 menyelesaikan rantai `expect()`. Yang tidak diselesaikan adalah metode HTTP
 fluent — itu bagian terbesar dari 176.
 
@@ -1383,7 +1385,7 @@ menarik:
   `HasRoles` yang menyediakannya. Assert itu tidak memberi informasi apa pun
   tentang apakah `User` mendeklarasikan `roles()` sendiri.
   `getDeclaringClass()` **nama `User`**, bukan trait, karena refleksi melaporkan
-  kelas yang *memakai* trait. `getTraitName()` adalah jawaban yang wajar dan
+  kelas yang _memakai_ trait. `getTraitName()` adalah jawaban yang wajar dan
   **dihapus di PHP 8**. Yang benar: bandingkan file tempat body method itu
   hidup. Kalau `User` meng-override, file itu `User.php`.
 - **`Media::find()` bertipe `Model|Collection`**, jadi setiap bacaan atributnya
@@ -1401,17 +1403,17 @@ build di momen itu juga.
 `tests/Unit/ArchitectureTest.php` menerjemahkan larangan yang tadinya hanya
 tertulis di dokumen:
 
-| Aturan | Menegakkan |
-| --- | --- |
-| tidak ada `App\Repositories`, `App\Domain`, repository provider | roadmap §5.2 |
-| `App\Services` tidak memakai `Illuminate\Http\Request` | ARCHITECTURE Part A §6 |
-| service tidak memakai controller | aturan yang sama, arah yang berbahaya |
-| tidak ada `RoleManagementController` / `PermissionManagementController` | roadmap §10.7 |
-| semua model memakai atribut `Fillable` | ARCHITECTURE Part A §6 |
-| `User` memakai trait `HasRoles` | PRD AUTH-R3 |
-| model tidak memakai facade `DB` | Eloquent adalah persistence layer |
-| `App\Http\Requests` memakai `HtmlSanitizer` | PRD XC-S1, D-25 |
-| hanya `rich-text.tsx` boleh memakai `dangerouslySetInnerHTML` | D-25 |
+| Aturan                                                                  | Menegakkan                            |
+| ----------------------------------------------------------------------- | ------------------------------------- |
+| tidak ada `App\Repositories`, `App\Domain`, repository provider         | roadmap §5.2                          |
+| `App\Services` tidak memakai `Illuminate\Http\Request`                  | ARCHITECTURE Part A §6                |
+| service tidak memakai controller                                        | aturan yang sama, arah yang berbahaya |
+| tidak ada `RoleManagementController` / `PermissionManagementController` | roadmap §10.7                         |
+| semua model memakai atribut `Fillable`                                  | ARCHITECTURE Part A §6                |
+| `User` memakai trait `HasRoles`                                         | PRD AUTH-R3                           |
+| model tidak memakai facade `DB`                                         | Eloquent adalah persistence layer     |
+| `App\Http\Requests` memakai `HtmlSanitizer`                             | PRD XC-S1, D-25                       |
+| hanya `rich-text.tsx` boleh memakai `dangerouslySetInnerHTML`           | D-25                                  |
 
 Kolom `users.role` **sengaja tidak** diulang: arch memantulkan kode dan tidak
 melihat skema, dan `RbacFoundationTest` sudah menjaganya terhadap database.
@@ -1423,14 +1425,14 @@ itu memberi hasil dua kali:
 - Aturan controller memakai `not->toContain()` dengan empat jarum, yang
   sebenarnya berarti "tidak mengandung semuanya", jadi **satu pelanggaran
   lolos diam-diam**. Sekarang himpunan irisan.
-- Aturan sanitasi **lebih lemah dari kelihatannya**, karena arch me-*resolve*
+- Aturan sanitasi **lebih lemah dari kelihatannya**, karena arch me-_resolve_
   import, bukan call site. Ia memperingatkan bahwa sebuah dependency
   menghilang, bukan membuktikan `clean()` masih dipanggil. Keduanya kini
   tertulis di docblock masing-masing, dan yang kedua menunjuk
   `SiteSettingsTest` sebagai jaminan perilaku yang sesungguhnya.
 
 Dua aturan tidak bisa ditulis sebagai arch assertion dan mengatakannya:
-namespace yang tidak ada tidak punya daftar kelas untuk di-*assert*, dan plugin
+namespace yang tidak ada tidak punya daftar kelas untuk di-_assert_, dan plugin
 menolak target path. Keduanya ditulis sebagai assertion biasa, bukan dipaksa
 menjadi aturan arch yang hanya terlihat seperti hal yang menggantikannya.
 
@@ -1468,7 +1470,7 @@ terjadi.
 Dua hal di dalamnya perlu perhatian. Script Composer berbentuk **array**, bukan
 string, jadi casting melempar "Array to string conversion" dan pencarian
 substring pada array berarti kesamaan elemen. Assertion urutan membandingkan
-offset dengan salinan yang sudah di-*sort*, bukan mengindeks, karena
+offset dengan salinan yang sudah di-_sort_, bukan mengindeks, karena
 `array_filter` atas list dua elemen meninggalkan key-nya opsional.
 
 Dokumen gate dibaca dari `docs/roadmap`, bukan `AGENTS.md`, karena yang kedua
@@ -1498,7 +1500,7 @@ dokumen yang menyebut level, jadi mengubahnya jadi keputusan tanpa dokumen.
 
 Satu catatan pengamatan, bukan pekerjaan P13: `laravel/sail` masih ada di
 `require-dev` padahal D-15 menghapus Docker. Itu milik butir P01 "remove
-starter artifacts".
+starter artifacts"
 ---
 
 ## D-28 — Git workflow: husky, commitlint, dan gate penuh saat commit
@@ -1511,7 +1513,7 @@ dua hook. Semuanya **tidak ada** sebelum P14 — tidak ada `.husky/`,
 
 Yang sebenarnya sudah ada adalah **disiplin Conventional Commits**: 42 commit
 di PR #1 dan seluruh commit di `main` sudah conforms. Yang belum ada adalah
-*paksaannya*.
+_paksaannya_.
 
 ### 1. `commitlint.config.js` dipakai apa adanya
 
@@ -1530,7 +1532,7 @@ melihatnya murah.
 ### 2. `npx husky init`, bukan menulis hook sendiri
 
 Nilai `npx husky init` bukan pada apa yang ia tulis, melainkan pada apa yang ia
-*tidak* izinkan. Hook yang ditulis tangan akan mengikuti versi. Pada 9.1.7, dua
+_tidak_ izinkan. Hook yang ditulis tangan akan mengikuti versi. Pada 9.1.7, dua
 baris yang muncul di hampir semua tutorial
 
 ```
@@ -1575,15 +1577,14 @@ bukan tertinggal di working tree untuk percobaan berikutnya.
 
 ### 4. `lint-staged` untuk PHP dan frontend
 
-Pint menerima path PHP yang di-staged; `vp check --fix` menerima path
-frontend. `--no-error-on-unmatched-pattern` mencegah gagal pada file yang tidak
-cocok globaunya.
+Pint menerima path PHP yang di-staged; `eslint --fix` dan `prettier --write`
+menerima path frontend.
 
-**YAML sengaja tidak dimasukkan.** `vp check` gagal keras pada berkas `.yml`
-dengan "Expected at least one target file", jadi menambah pola `*.{yml,yaml}`
-akan **merusak** commit, bukan merapikannya. Akibatnya commit yang hanya
-menyentuh YAML atau Markdown mencetak "lint-staged could not find any staged
-files matching configured tasks" — cosmetics, bukan kegagalan.
+**YAML sengaja tidak dimasukkan.** Prettier tidak menangani `.yml` dengan
+aturan yang sama, jadi menambah pola `*.{yml,yaml}` akan **merusak** commit,
+bukan merapikannya. Akibatnya commit yang hanya menyentuh YAML atau Markdown
+mencetak "lint-staged could not find any staged files matching configured
+tasks" — cosmetics, bukan kegagalan.
 
 ### 5. Job commitlint di CI
 
@@ -1622,13 +1623,13 @@ Empat commit memicu `footer-leading-blank`. itu **warning**, bukan error, dan
 rentang commit tetap keluar dengan exit 0.
 
 Penyebabnya sudah ditelusuri dan **bukan** kesalahan penulisan pesan: commitlint
-membaca **baris prose yang di-*wrap* dan mengandung titik dua** sebagai trailer
+membaca **baris prose yang di-_wrap_ dan mengandung titik dua** sebagai trailer
 footer. `foo:` dan `suggests:` mereproduksi peringatan yang sama, dan
 `feat(x): a` + satu baris `suggest: ...` sendirian **tidak** —
 hanya berhasil bila baris itu melanjutkan baris lain. Artinya peringatan muncul
-karena paragraf di-*wrap* pada 72 karakter dan salah satunya mengandung titik dua.
+karena paragraf di-_wrap_ pada 72 karakter dan salah satunya mengandung titik dua.
 
-Tidak diperbaiki, karena diperbaiki berarti berhenti menulis paragraf di-*wrap*
+Tidak diperbaiki, karena diperbaiki berarti berhenti menulis paragraf di-_wrap_
 dan editorisial yang tidak sebanding dengan warning yang memang tidak memblokir
 apa pun.
 
@@ -1653,20 +1654,20 @@ membuat `composer dev` bergantung pada Node untuk hal yang tidak memerlukannya.
 
 Kedua hook diuji dengan **merusaknya secara sengaja**, bukan dengan membacanya:
 
-| Yang dirusak | Hasil |
-| --- | --- |
-| commit dengan pesan `perbaiki stuff` | ditolak `commit-msg`, **exit 1**, HEAD tidak bergeser |
-| test yang sengaja gagal | ditolak `pre-commit`, **exit 1**, HEAD tidak bergeser |
-| commit yang baik | lolos, `lint-staged` → `composer ci:check` → 265 hijau |
+| Yang dirusak                         | Hasil                                                  |
+| ------------------------------------ | ------------------------------------------------------ |
+| commit dengan pesan `perbaiki stuff` | ditolak `commit-msg`, **exit 1**, HEAD tidak bergeser  |
+| test yang sengaja gagal              | ditolak `pre-commit`, **exit 1**, HEAD tidak bergeser  |
+| commit yang baik                     | lolos, `lint-staged` → `composer ci:check` → 265 hijau |
 
 **Di luar cakupan:** commitizen (CLI interaktif), hook `pre-push`, branch
 protection GitHub, dan `PULL_REQUEST_TEMPLATE.md`. Hook `pre-push` sengaja
 tidak ada: PR #1 sudah memberi bukti bahwa alur kerja repo ini adalah push
 branch ke PR terbuka, dan menambah satu gerbang di sana tidak menambah keamanan
-yang berarti.
+yang berarti
 ---
 
-## D-29 — Frontend testing: Vitest lewat vite-plus, Playwright untuk alur nyata
+## D-29 — Frontend testing: Vitest (toolchain standar), Playwright untuk alur nyata
 
 **Status:** Accepted · berlaku sejak P16 · branch `feat/phase-01-testing`
 
@@ -1676,24 +1677,18 @@ dari pilihan saat itu, jadi membukanya di sini adalah koreksi, bukan tambahan.
 
 Tidak ada frontend di Phase 01, jadi tidak ada test frontend yang perlu dibongkar.
 
-### 1. Unit test tidak memasang Vitest
+### 1. Unit test memakai Vitest langsung
 
-`vp test` sudah ada di vite-plus dan **adalah** Vitest: `vitest@4.1.11` sudah
-terpasang transitif, dan API-nya diambil dari `vite-plus/test`, bukan dari paket
-`vitest`. Jadi tidak ada dependensi test runner yang baru — hanya `happy-dom` dan
-Testing Library.
+Setelah migrasi toolchain (Vite Plus → Vite standar), Vitest dipasang langsung
+sebagai devDependency (`vitest@4.1.12`) dan API-nya diambil dari paket `vitest`,
+bukan dari `vite-plus/test`. Tidak ada `vitest.config.ts`: konfigurasinya
+tetap blok `test` di `vite.config.ts`. Yang ditambahkan hanya `happy-dom` dan
+Testing Library (sudah ada sebelumnya).
 
-Konfigurasinya blok `test` di `vite.config.ts`. Dokumentasi vite-plus secara
-eksplisit **tidak** menyarankan `vitest.config.ts`, dan alasannya masuk akal: satu
-berkas konfigurasi lebih mudah dibaca daripada dua yang sebagian besar isinya
-sama.
-
-> **Diverifikasi, bukan diasumsikan.** Dokumentasi itu menjelaskan vite-plus 1.0
-> dengan Vitest 5, sedangkan yang terpasang di sini **0.3.0 dengan Vitest
-> 4.1.11**. Blok `test` ternyata diterima, alias `@/` ke-resolve, dan JSX jalan
-> tanpa setup tambahan. Tidak ada efek samping: `git status` tetap bersih sesudah
-> `vp test`, jadi plugin Wayfinder **tidak** menulis ulang
-> `resources/js/routes/` saat test berjalan.
+Blok `test` ternyata diterima, alias `@/` ke-resolve, dan JSX jalan tanpa setup
+tambahan. Tidak ada efek samping: `git status` tetap bersih sesudah
+`npm run test:unit`, jadi plugin Wayfinder **tidak** menulis ulang
+`resources/js/routes/` saat test berjalan.
 
 ### 2. `tests/` sudah milik Pest, jadi frontend masuk ke dalamnya
 
@@ -1741,7 +1736,7 @@ konfigurasinya saja.
 **`.auth.json` ditulis oleh `app:e2e:prepare`, bukan diisi dua kali.** Email,
 password, **dan nama database**. Alasannya adalah kegagalan pertama: `php artisan
 serve` membaca koneksinya dari environment, jadi ia berbicara ke database di
-`.env`, sementara prepare sudah me-*rebuild* database test. Kredensialnya benar,
+`.env`, sementara prepare sudah me-_rebuild_ database test. Kredensialnya benar,
 loginnya tetap gagal. Kalau spec menyimpan sendiri nama database, tiga hal akan
 menyimpang satu per satu dan gejalanya selalu "login gagal" — yang mengarah ke
 form login, bukan ke wiring-nya.
@@ -1764,7 +1759,7 @@ halaman debug Laravel yang muncul — bukan halaman error Inertia. Status tetap 
 dan teks "404" tetap ada di layar, jadi kedua assertion hijau, terhadap halaman
 yang tidak ditulis siapa pun di sini.
 
-Specs sekarang meng-*assert* copy Bahasa Indonesia-nya, yang benar-benar menutup gap
+Specs sekarang meng-_assert_ copy Bahasa Indonesia-nya, yang benar-benar menutup gap
 D-26 §7: copy itu sebelumnya hanya diperiksa sebagai prop yang sampai ke React,
 yang tidak mengatakan apa pun soal apakah ia sampai ke layar.
 
@@ -1809,7 +1804,7 @@ milik seseorang — dan kegagalannya akan menyebut bug-nya.
 `npm run test:unit` masuk `composer ci:check`, jadi ikut pre-commit: **1,4
 detik**. Murah, dan test yang tidak dijalankan tiap commit akan membusuk.
 
-Playwright **tidak** masuk gate. Commit yang memulai web server, me-*rebuild*
+Playwright **tidak** masuk gate. Commit yang memulai web server, me-_rebuild_
 database, dan mengunduh browser mengubah perubahan satu baris menjadi beberapa
 menit — dan di mesin tanpa Chromium ia **gagal**, bukan dilewati. Gate-nya adalah
 job `e2e` di CI.
@@ -1833,11 +1828,11 @@ akan melaporkan server rusak setiap kali frontend-nya memang belum di-build.
 **Coverage.** Butuh `@vitest/coverage-v8` dan gate baru. Tidak ada yang memintanya,
 dan coverage yang tidak pernah gagal diverifikasi hanya menambah waktu ke gate.
 
-**Test komponen di browser sungguhan.** vite-plus sudah membundel Playwright
-sebagai provider browser-mode, jadi ini mungkin tanpa dependensi baru — tapi
-memaksa setiap developer dan setiap CI run mengunduh Chromium untuk memeriksa
-layout dan CSS, sementara suite 10 spec ini belum butuh itu. `--dom` (happy-dom)
-yang dipilih untuk itu.
+**Test komponen di browser sungguhan.** Playwright tersedia sebagai devDependency
+terpisah, jadi ini mungkin tanpa dependensi baru — tapi memaksa setiap
+developer dan setiap CI run mengunduh Chromium untuk memeriksa layout dan CSS,
+sementara suite 10 spec ini belum butuh itu. `--dom` (happy-dom) yang dipilih
+untuk itu.
 
 **Mock Inertia.** Komponen yang memakai `router` atau `useForm` belum diuji unit.
 Memock router bukan cara memverifikasi runner-nya, jadi itu pekerjaan berikutnya
@@ -2014,7 +2009,6 @@ dua tempat.
 diuji: mengimpor `app.tsx` dari test akan menjalankan `createInertiaApp()`
 berserta seluruh efek sampingnya.
 
-
 ### 8. Kesalahan yang muncul saat mengerjakan aturan ini
 
 - Klaim "lima komponen" meledak jadi lima, bukan empat — `location-cards` ikut
@@ -2056,13 +2050,13 @@ belum terbit.
 
 Ini penundaan bertanggal, bukan ketidaksengaja:
 
-| Route | Fase yang menggantinya |
-| --- | --- |
-| `berita.show` | Fase 4 |
-| `agenda.show`, `agenda.ics` | Fase 4 |
-| `pelayanan.show` | Fase 5 |
-| `komunitas.show` | Fase 5 |
-| `galeri.show` | Fase 6 |
+| Route                       | Fase yang menggantinya |
+| --------------------------- | ---------------------- |
+| `berita.show`               | Fase 4                 |
+| `agenda.show`, `agenda.ics` | Fase 4                 |
+| `pelayanan.show`            | Fase 5                 |
+| `komunitas.show`            | Fase 5                 |
+| `galeri.show`               | Fase 6                 |
 
 Setiap penggantian **harus** memakai route dengan model binding, sehingga slug yang
 tidak ada kembali 404 secara otomatis.
@@ -2205,13 +2199,13 @@ penegasan bahwa dark mode yang ada sebelumnya **tidak boleh dipakai**: navy seba
 global, dan navy-di-atas-navy, itu persis yang D-22 §3 buat dan
 dinyatakan masih perlu konfirmasi paroki. Dokumen sekarang mendefinisikan dark
 mode sebagai tema netral-charcoal dan menyebut hasilnya sebagai sesuatu yang
-*deprecated*.
+_deprecated_.
 
 **D-22 §3 superseded.** Palet dark tidak lagi diturunkan dari ramp navy dengan
 `color-mix()`. Seluruh nilai sekarang berasal dari empat belas token `dark-*`
 yang dokumen definisikan, dan tidak ada satu pun `color-mix()` di blok `.dark`.
-Ini memenuhi aturan yangolmendokumen nyatakan eksplisit: *"Do not use HSPMTB
-Navy as the global page background."*
+Ini memenuhi aturan yangolmendokumen nyatakan eksplisit: _"Do not use HSPMTB
+Navy as the global page background."_
 
 **D-22 §4 superseded.** `colors.red-light` yang tadinya tidak pernah
 didefinisikan kini bernama `red-soft` (#FDE7E9), dengan pasangan gelap
@@ -2224,12 +2218,12 @@ palet mulai melenceng.
 Ini keputusan paling menentukan di revisi ini, dan ia tidak bisa diambil
 hanya dengan membaca dokumen.
 
-| Pasangan di dark mode | Rasio | Status |
-| --- | --- | --- |
-| `text-primary` #AB020E di atas dark-canvas | 2.28:1 | gagal AA |
-| `text-primary` #AB020E di atas dark-surface | 1.89:1 | gagal AA |
-| `destructive` #AB020E di atas red-soft-dark | 2.08:1 | gagal AA |
-| ring #C51624 di atas dark-canvas | 2.92:1 | gagal SC 2.4.11 |
+| Pasangan di dark mode                       | Rasio  | Status          |
+| ------------------------------------------- | ------ | --------------- |
+| `text-primary` #AB020E di atas dark-canvas  | 2.28:1 | gagal AA        |
+| `text-primary` #AB020E di atas dark-surface | 1.89:1 | gagal AA        |
+| `destructive` #AB020E di atas red-soft-dark | 2.08:1 | gagal AA        |
+| ring #C51624 di atas dark-canvas            | 2.92:1 | gagal SC 2.4.11 |
 
 `semantic.dark.primary` adalah `primary` (#AB020E). Nilai itu **benar** untuk
 tombol terisi — putih di atasnya 7.65:1, dan merah merek memang harus tetap
@@ -2261,7 +2255,7 @@ merek; hanya perannya di dark mode yang hilang.
 Terverifikasi dan **sengaja diterima**. Tombol terisi teridentifikasi oleh
 **labelnya** (putih di atas merah, 7.65:1), bukan oleh warna isinya, jadi syarat
 3:1 WCAG 1.4.11 tidak berlaku untuk fill terhadap halaman. Yang wajib 3:1
-adalah *border* — dan border outline memakai `red-on-surface`, bukan
+adalah _border_ — dan border outline memakai `red-on-surface`, bukan
 `primary`.
 
 ### 4. Canvas admin tidak bisa berbagi `body` dengan canvas publik
@@ -2283,7 +2277,7 @@ warna `canvas`.
 
 `--sidebar-accent` berubah dari `navy-light` menjadi `red-soft`, dan
 `--sidebar-accent-foreground` dari `navy-dark` menjadi `primary`. DESIGN.md:
-*"The active item uses HSPMTB Red, a subtle red-tinted background."*
+_"The active item uses HSPMTB Red, a subtle red-tinted background."_
 
 Konsekuensinya dicatat, bukan disembunyikan: `ui/sidebar.tsx` memakai pasangan
 yang sama untuk `hover:` **dan** untuk `data-[active=true]:`, dan keduanya tidak
@@ -2293,22 +2287,22 @@ perubahan visualnya nyata dan perlu dilihat, bukan ditemukan kemudian.
 
 ### 6. Komponen yang harus berubah, dan alasannya
 
-| File | Perubahan | Rasio sebelum → sesudah |
-| --- | --- | --- |
-| `parish-card.tsx` | varian `agenda` pakai `secondary` | 1.04:1 → 11.09:1 |
-| `parish-image.tsx` | fallback `bg-secondary` | 1.04:1 → 7.63:1 |
-| `parish-navbar.tsx` | `border-border` sesuai `global-nav` | — |
-| `ui/alert.tsx` | `text-red-on-surface` | 2.08:1 → 5.61:1 |
-| `ui/button.tsx` | `outline` dan `link` pakai `red-on-surface` | 2.28:1 → 6.14:1 |
-| `error/pages/index.tsx` | `bg-red-soft text-red-on-surface` | — |
-| `app-shell.tsx` | kanvas `canvas-soft` | — |
-| `app-logo.tsx` | hapus `dark:text-black` | — |
-| `appearance-tabs.tsx` | hapus `dark:bg-secondary`, selected `bg-card` | 1.11:1 → 1.42:1 |
-| `app.css` `.rich-text blockquote` | `dark:text-navy-light` | 1.25:1 → 15.24:1 |
+| File                              | Perubahan                                     | Rasio sebelum → sesudah |
+| --------------------------------- | --------------------------------------------- | ----------------------- |
+| `parish-card.tsx`                 | varian `agenda` pakai `secondary`             | 1.04:1 → 11.09:1        |
+| `parish-image.tsx`                | fallback `bg-secondary`                       | 1.04:1 → 7.63:1         |
+| `parish-navbar.tsx`               | `border-border` sesuai `global-nav`           | —                       |
+| `ui/alert.tsx`                    | `text-red-on-surface`                         | 2.08:1 → 5.61:1         |
+| `ui/button.tsx`                   | `outline` dan `link` pakai `red-on-surface`   | 2.28:1 → 6.14:1         |
+| `error/pages/index.tsx`           | `bg-red-soft text-red-on-surface`             | —                       |
+| `app-shell.tsx`                   | kanvas `canvas-soft`                          | —                       |
+| `app-logo.tsx`                    | hapus `dark:text-black`                       | —                       |
+| `appearance-tabs.tsx`             | hapus `dark:bg-secondary`, selected `bg-card` | 1.11:1 → 1.42:1         |
+| `app.css` `.rich-text blockquote` | `dark:text-navy-light`                        | 1.25:1 → 15.24:1        |
 
 `ParishCard` dan `ParishImage` paling parah: keduanya memakai literal
 `bg-navy-light`, yang di dark mode menjadi permukaan nyaris putih dengan teks
-*nyaris* putih — 1.04:1, Placeholder yang tidak terlihat. `secondary` adalah
+_nyaris_ putih — 1.04:1, Placeholder yang tidak terlihat. `secondary` adalah
 `navy-light` di light mode, jadi tidak ada perubahan visual sama sekali di sana.
 
 ### 7. `--sidebar-accent` dan teks yang tidak berbalik
@@ -2317,12 +2311,12 @@ perubahan visualnya nyata dan perlu dilihat, bukan ditemukan kemudian.
 adalah warna merek yang **tidak** berubah antar tema. Dipakai sebagai teks di
 dark mode, mereka gagal:
 
-| | dark-canvas |
-| --- | --- |
-| `text-ink` | 1.02:1 |
-| `text-navy` | 1.25:1 |
-| `text-ink-muted-strong` | 2.27:1 |
-| `text-ink-muted` | 3.51:1 |
+|                         | dark-canvas |
+| ----------------------- | ----------- |
+| `text-ink`              | 1.02:1      |
+| `text-navy`             | 1.25:1      |
+| `text-ink-muted-strong` | 2.27:1      |
+| `text-ink-muted`        | 3.51:1      |
 
 Ini **bukan** regresi yang diperkenalkan revisi ini — token tersebut sudah
 seperti itu sejak Phase 01 — tapi dark mode v1.1 membuatnya terlihat, karena
@@ -2350,7 +2344,7 @@ tanpa harus-pressed.
 
 Penyimpanan tetap dua tempat: `localStorage` untuk klien, cookie untuk
 `HandleAppearance` dan `app.blade.php`, sehingga pilihan bertahan setelah
-*pemuatan ulang* dan bukan hanya setelah navigasi Inertia. Ini diuji di E2E
+_pemuatan ulang_ dan bukan hanya setelah navigasi Inertia. Ini diuji di E2E
 karena assertion yang hanya berjalan di sisi klien tidak akan menangkapnya.
 
 ### 9. Hasil verifikasi kontras
@@ -2375,7 +2369,7 @@ page", dan itu memang kontras yang rendah.
   2.28:1. Semuanya perlu `red-on-surface`, dan semuanya file generated yang
   tidak termasuk daftar yang AGENTS.md acknowledge sebagai restyled.
 - **`use-appearance.tsx` masih default `system`.** DESIGN.md §Theme Switching:
-  *"If no preference exists, default to light"* dan `light-priority: true`.
+  _"If no preference exists, default to light"_ dan `light-priority: true`.
   Ini perubahan perilaku, bukan styling, dan tidak dikerjakan di sini.
 - **Review visual dua tema** di lima halaman admin dan lima halaman publik
   belum dilakukan — yang di atas adalah angka, dan angka tidak sama dengan
@@ -2406,10 +2400,10 @@ cn('text-body', 'text-foreground')  =>  'text-foreground'
 
 Dua konsekuensi yang sudah aktif sebelum perubahan ini:
 
-| Komponen | Yang hilang | Akibat |
-| --- | --- | --- |
+| Komponen                   | Yang hilang                                             | Akibat                                                                          |
+| -------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `ui/button.tsx`, ketiganya | `text-body`, `text-button-utility`, `text-button-large` | **setiap Button di aplikasi** tampil pada 16px bawaan browser, bukan 17/14/18px |
-| `ui/badge.tsx` | `text-micro-legal` | Badge tampil pada 16px, bukan 10px |
+| `ui/badge.tsx`             | `text-micro-legal`                                      | Badge tampil pada 16px, bukan 10px                                              |
 
 Perbaikannya: daftarkan enam belas nama token itu pada class group `font-size`
 di `lib/utils.ts`. Warna **tidak** didaftarkan — sudah tertangani oleh group
@@ -2422,12 +2416,12 @@ menang seperti yang dimaksud, bukan kalah diam-diam.
 
 **Konsekuensi yang terlihat di layar**, dan disengaja:
 
-| Komponen | Sebelum | Sesudah |
-| --- | --- | --- |
-| Button `lg` | 16px | 18px |
-| Button `sm` | 16px | 14px |
-| Button default | 16px | 17px |
-| Badge | 16px | 10px |
+| Komponen       | Sebelum | Sesudah |
+| -------------- | ------- | ------- |
+| Button `lg`    | 16px    | 18px    |
+| Button `sm`    | 16px    | 14px    |
+| Button default | 16px    | 17px    |
+| Badge          | 16px    | 10px    |
 
 Menutup ini dengan "Button memang selalu 16px selama ini" akan membiarkan bug
 tetap ada dan mengabadikannya.
@@ -2437,13 +2431,13 @@ tetap ada dan mengabadikannya.
 DESIGN.md mendefinisikan tiga langkah display dan **tidak pernah** mendefinisikan
 level heading. Pemetaan yang dipilih:
 
-| variant | token | px |
-| --- | --- | ---: |
-| `h1` | `display-lg` | 40 |
-| `h2` | `display-md` | 34 |
-| `h3` | `tagline` | 21 |
-| `h4` | `body-strong` | 17 |
-| `h5`, `h6` | `caption-strong` | 14 |
+| variant    | token            |   px |
+| ---------- | ---------------- | ---: |
+| `h1`       | `display-lg`     |   40 |
+| `h2`       | `display-md`     |   34 |
+| `h3`       | `tagline`        |   21 |
+| `h4`       | `body-strong`    |   17 |
+| `h5`, `h6` | `caption-strong` |   14 |
 
 Sebelum ini `h1`, `h2` **dan** `h3` semuanya `font-display text-display-md`, jadi
 outline dokumen tidak membawa hierarki visual sama sekali.
@@ -2559,10 +2553,10 @@ termasuk di mesin pengembang yang kebetulan punya dev server menyala.
 Tiga jebakan yang harus dilalui, semuanya karena `happy-dom` menyimpan state
 XHR di private field:
 
-| Kesalahan | Gejala |
-| --- | --- |
-| `open` dijadikan no-op | `setRequestHeader` menolak: state harus OPENED |
-| memakai `this.OPENED` | `undefined` — konstantanya ada di constructor, bukan di instance |
+| Kesalahan                         | Gejala                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `open` dijadikan no-op            | `setRequestHeader` menolak: state harus OPENED                                                               |
+| memakai `this.OPENED`             | `undefined` — konstantanya ada di constructor, bukan di instance                                             |
 | hanya mendefinisikan `readyState` | `Cannot read properties of null (reading 'headers')` — `open()`lah yang membangun record request private itu |
 
 Akhirnya `open()` mendefinisikan `readyState` sebagai own property dan
@@ -2682,10 +2676,10 @@ Konsekuensi:
 
 Dua opsi tersedia dan satu dipilih:
 
-| Opsi | Bentuk | Konsekuensi |
-| --- | --- | --- |
-| **A (dipilih)** | 12 permission `resource.action` satu kata: `locations.*`, `massschedules.*`, `specialmasses.*`, `schedulenotices.*` | Nol perubahan pada test yang ada |
-| B | 3 permission `mass-schedule.{view,create,update}` | `RbacFoundationTest` harus dilonggarkan |
+| Opsi            | Bentuk                                                                                                              | Konsekuensi                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| **A (dipilih)** | 12 permission `resource.action` satu kata: `locations.*`, `massschedules.*`, `specialmasses.*`, `schedulenotices.*` | Nol perubahan pada test yang ada        |
+| B               | 3 permission `mass-schedule.{view,create,update}`                                                                   | `RbacFoundationTest` harus dilonggarkan |
 
 Opsi A dipilih karena `RbacFoundationTest` mengunci
 `/^[a-z]+\.[a-z]+$/` untuk setiap nama permission, dan `mass-schedules.view`
@@ -2733,11 +2727,11 @@ dan `/admin/pemberitahuan-jadwal` ke empat fungsi. Roadmap §6.1 meminta satu
 
 Tiga cara memenuhi keduanya:
 
-| Opsi | Bentuk | Masalah |
-| --- | --- | --- |
+| Opsi            | Bentuk                                                                                       | Masalah                    |
+| --------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
 | **A (dipilih)** | `/admin/jadwal-misa` = ringkasan + daftar Misa Rutin; tiga URL lain = halaman daftar sendiri | 13 halaman, tanpa redirect |
-| B | Ringkasan di `/admin/jadwal-misa`, daftar rutin di `/admin/jadwal-misa/jadwal-rutin` | menyimpang dari PRD §5.2 |
-| C | Satu halaman dengan `?tab=`, URL lain redirect | redirect yang tidak perlu |
+| B               | Ringkasan di `/admin/jadwal-misa`, daftar rutin di `/admin/jadwal-misa/jadwal-rutin`         | menyimpang dari PRD §5.2   |
+| C               | Satu halaman dengan `?tab=`, URL lain redirect                                               | redirect yang tidak perlu  |
 
 Opsi A dipilih: URL PRD tetap persis, dan keempat pintasan tetap ada.
 
@@ -2839,7 +2833,7 @@ satu migration baru, dan satu dialog konfirmasi bersama.
 
 **Roadmap §5.6 dilanggar secara eksplisit.** Ia berbunyi "jangan menambahkan
 endpoint delete permanen bila kebutuhan PRD cukup dengan nonaktifkan". Yang
-yang ditambahkan adalah endpoint *soft* delete, dan alasannya justru karena PRD
+yang ditambahkan adalah endpoint _soft_ delete, dan alasannya justru karena PRD
 belum terpenuhi dengan nonaktifkan saja: ADM-05 — sebuah **MUST** — meminta
 soft delete pada operasi hapus, dan tanpa endpoint hapus sama sekali ADM-05
 tidak bisa terpenuhi.
@@ -2985,7 +2979,7 @@ tetap lulus kalau sebagian rusaknya, jadi tes yang hanya assert link masih ada
 justru akan gagal dengan pesan yang menunjuk ke tes, bukan ke komponennya.
 
 **Ini membatalkan D-38.** D-38 memakai empat kartu pintasan di halaman
-ringkasan *karena* `ArchitectureTest` melarang `layouts/` meng-import
+ringkasan _karena_ `ArchitectureTest` melarang `layouts/` meng-import
 `features/`, sehingga larik navigasi tidak bisa tinggal di sana. Dampanya yang
 dihindari sudah ada: sub-menu dideklarasikan di `layouts/app/components/app-sidebar.tsx`
 dengan import Wayfinder — pola yang sudah dipakai file itu sendiri untuk
@@ -2996,10 +2990,10 @@ Akibatnya kartu pintasan dihapus, dan **PRD §5.2 berubah makna**. D-38
 sengaja menahan `/admin/jadwal-misa` sebagai daftar misa rutin agar URL PRD
 tetap persis tanpa redirect. Sekarang:
 
-| URL | D-38 | D-41 | D-42 |
-| --- | --- | --- | --- |
-| `/admin/jadwal-misa` | ringkasan + tabel Misa Rutin | ringkasan saja | redirect ke tabel Misa Rutin |
-| `/admin/jadwal-misa/misa-rutin` | — | tabel Misa Rutin | tabel Misa Rutin |
+| URL                             | D-38                         | D-41             | D-42                         |
+| ------------------------------- | ---------------------------- | ---------------- | ---------------------------- |
+| `/admin/jadwal-misa`            | ringkasan + tabel Misa Rutin | ringkasan saja   | redirect ke tabel Misa Rutin |
+| `/admin/jadwal-misa/misa-rutin` | —                            | tabel Misa Rutin | tabel Misa Rutin             |
 
 PRD §5.2 dipetakan ke daftar misa rutin, jadi ini **divergensi yang harus
 dinyatakan**, bukan penyederhanaan. Konsekuensinya:
@@ -3217,8 +3211,8 @@ menunjuk ke artikel atau kegiatan yang berbeda. Ini kebalikan dari
 
 **Konsekuensi yang harus diketahui.** Dua tabel ini **sengaja** berbeda dari
 `mass_schedules` dan `locations` di@@@@
-atas alasan yang sama. `EventTest` punya test bernama *"does not free the slug
-once removed"* yang mengunci perbedaan ini; `MassScheduleTest` mengunci yang
+atas alasan yang sama. `EventTest` punya test bernama _"does not free the slug
+once removed"_ yang mengunci perbedaan ini; `MassScheduleTest` mengunci yang
 sebaliknya. Kalau seseorang membuat modul berikutnya yang punya route publik per
 baris, aturan yang benar adalah **yang kedua**, dan itu harus ditulis di test-nya
 dari awal.
@@ -3313,6 +3307,7 @@ D-48.
 ---
 
 ## D-48 — Master Data: satu feature, satu prefix, dan satu bug yang tidak
+
 ## pernah terlihat sampai ada yang mengkliknya
 
 **Konteks.** D-47 menyatukan tiga tabel referensi di sidebar. Itu menyelesaikan
@@ -3364,8 +3359,8 @@ di sini supaya bukan kejutan.
 
 Bukan dokumentasi, ini load-bearing. Redirect tanpa nama tidak punya controller
 untuk Wayfinder memfilenya, sehingga ia mendarat di modul yang dihasilkan untuk
-route bernama yang di-redirect-*dari*-nya, dan menghasilkan `export const index`
-dua kali. Build mati dengan *"Identifier 'index' has already been declared"*.
+route bernama yang di-redirect-_dari_-nya, dan menghasilkan `export const index`
+dua kali. Build mati dengan _"Identifier 'index' has already been declared"_.
 
 Semuanya diberi nama `legacy.*` supaya menghasilkan file sendiri. Test
 `no route name is declared twice` ada karena bentuk kegagalan yang sama bisa
@@ -3396,7 +3391,7 @@ ada yang membandingkannya.
 
 Server bahagia: `PageChunk::source()` membangun path dari nama, berkasnya ada,
 respons 200 dengan component yang belum pernah didengar sisi klien. Inertia
-melempar *"Page not found"* di console dan **tinggal di halaman lama** — itulah
+melempar _"Page not found"_ di console dan **tinggal di halaman lama** — itulah
 sebabnya kliknya tampak tidak melakukan apa pun.
 
 Bug yang sama membuat dua layar lain tidak bisa dibuka: daftar admin Berita
@@ -3886,7 +3881,7 @@ yang mengikat:
    maksimal dua tingkat, tanpa siklus, `lingkungan` tidak boleh punya anak.
    Aturan ini divalidasi di server.
 
-4. **(*D-58 terbaru:* field `prayer_schedule` sudah tidak ada.)
+4. **(_D-58 terbaru:_ field `prayer_schedule` sudah tidak ada.)
    `leader_name`/`contact_phone`/`prayer_schedule` area dipublikasikan di
    halaman detail komunitas, dengan privasi server-side.** Roadmap §7 hanya
    mendefinisikan `/komunitas` dan `/komunitas/{slug}`; tidak ada halaman area
@@ -5121,15 +5116,15 @@ dibuat dengan `cwebp` dari foto Unsplash berlisensi. Keuntungannya: offline,
 deterministik, tanpa ketergantungan pihak ketiga, dan bisa `srcset`. Sumber asli
 dan fotografernya:
 
-| Slot | Foto Unsplash | Fotografer |
-| --- | --- | --- |
-| activity | https://unsplash.com/photos/LNRyGwIJr5c | Alejandro Escamilla |
-| study | https://unsplash.com/photos/nJdwUHmaY8A | Aleks Dorohovich |
-| gathering | https://unsplash.com/photos/pwaaqfoMibI | Tina Rataj |
-| journey | https://unsplash.com/photos/OokBLPrkCNk | Dorothy Lin |
-| nature-lake | https://unsplash.com/photos/6J--NXulQCs | Paul Jarvis |
-| nature-detail | https://unsplash.com/photos/Y2PYfopoz-k | Sonja Langford |
-| craft | https://unsplash.com/photos/qVj3KuEikvg | Rula Sibai |
+| Slot          | Foto Unsplash                             | Fotografer          |
+| ------------- | ----------------------------------------- | ------------------- |
+| activity      | <https://unsplash.com/photos/LNRyGwIJr5c> | Alejandro Escamilla |
+| study         | <https://unsplash.com/photos/nJdwUHmaY8A> | Aleks Dorohovich    |
+| gathering     | <https://unsplash.com/photos/pwaaqfoMibI> | Tina Rataj          |
+| journey       | <https://unsplash.com/photos/OokBLPrkCNk> | Dorothy Lin         |
+| nature-lake   | <https://unsplash.com/photos/6J--NXulQCs> | Paul Jarvis         |
+| nature-detail | <https://unsplash.com/photos/Y2PYfopoz-k> | Sonja Langford      |
+| craft         | <https://unsplash.com/photos/qVj3KuEikvg> | Rula Sibai          |
 
 Semua subjek dipilih agar tidak menampilkan bangunan gereja yang bisa
 disalahartikan sebagai Paroki HSPMTB.
@@ -5163,7 +5158,7 @@ ilustrasi otomatis hilang.
 **Status:** Accepted · migrasi presentasi (M0–M6) · branch `feat/design-v2-migration`
 
 `docs/DESIGN-v2.md` menggantikan `docs/DESIGN.md` v1.1 sebagai **satu-satunya
-acuan desain UI**. DESIGN.md ditandai *superseded* di baris awal tetapi isinya
+acuan desain UI**. DESIGN.md ditandai _superseded_ di baris awal tetapi isinya
 dikekalkan sebagai rekam jejak; aturan visualnya tidak lagi mengikat. Rencana
 implementasi bertahap ada di
 `docs/plan-implementation/plan-design-v2-migration.md`.
@@ -5172,7 +5167,7 @@ implementasi bertahap ada di
 
 1. **Jangkauan** — restyle publik **dan** redesign admin. Variabel CSS bersifat
    global, jadi token baru wajib konsisten di kedua audiens.
-2. **Strategi token** — *staged hard replace*: token v2 diperkenalkan,
+2. **Strategi token** — _staged hard replace_: token v2 diperkenalkan,
    pemakaian dimigrasikan per-fitur, lalu token v1 dihapus. Tidak ada alias
    permanen, sehingga tidak ada dua kosakata yang bisa bertolak.
 3. **Font** — awalnya `Inter` lewat provider `bunny` `laravel-vite-plugin`
@@ -5190,25 +5185,25 @@ permukaan tertentu; ini tidak mengubah token `primary`.
 
 ### 3. Pemetaan peran komponen DESIGN-v2 → komponen aktual
 
-| Peran v2 | Komponen aktual |
-| --- | --- |
-| `ParishNavbar` | `layouts/public/components/parish-navbar.tsx` |
-| `ParishHero` | `features/public/beranda/components/home-hero.tsx` |
-| `QuickAccessBar` | `features/public/beranda/components/home-quick-links.tsx` |
-| `FeaturedNews` | `features/public/berita/components/pinned-strip.tsx` |
-| `NewsCard` | `components/article-card.tsx` |
-| `MassScheduleCard` | `features/public/jadwal-misa/components/mass-schedule-card.tsx` |
-| `UpcomingMassPanel` | `components/next-mass-card.tsx` + `home-next-mass-section.tsx` |
-| `AgendaCard` | `components/event-card.tsx` |
-| `SacramentServiceCard` | `features/public/pelayanan/components/service-card.tsx` |
-| `CommunityCard` | `features/public/komunitas/components/community-card.tsx` |
-| `ParishTimeline` | `features/public/profil/components/history-timeline.tsx` |
-| `PastorCard` | `features/public/profil/components/pastor-card.tsx` |
-| `OrganizationChart` | `features/public/profil/components/organization-chart.tsx` |
-| `ServiceAreaMap` | `components/contact-map.tsx` + `features/public/area/*` |
-| `ParishGallery` | `features/public/galeri/components/photo-grid.tsx` (+ lightbox) |
-| `ParishCTA` | `components/parish-cta.tsx` |
-| `ParishFooter` | `layouts/public/components/parish-footer.tsx` |
+| Peran v2               | Komponen aktual                                                 |
+| ---------------------- | --------------------------------------------------------------- |
+| `ParishNavbar`         | `layouts/public/components/parish-navbar.tsx`                   |
+| `ParishHero`           | `features/public/beranda/components/home-hero.tsx`              |
+| `QuickAccessBar`       | `features/public/beranda/components/home-quick-links.tsx`       |
+| `FeaturedNews`         | `features/public/berita/components/pinned-strip.tsx`            |
+| `NewsCard`             | `components/article-card.tsx`                                   |
+| `MassScheduleCard`     | `features/public/jadwal-misa/components/mass-schedule-card.tsx` |
+| `UpcomingMassPanel`    | `components/next-mass-card.tsx` + `home-next-mass-section.tsx`  |
+| `AgendaCard`           | `components/event-card.tsx`                                     |
+| `SacramentServiceCard` | `features/public/pelayanan/components/service-card.tsx`         |
+| `CommunityCard`        | `features/public/komunitas/components/community-card.tsx`       |
+| `ParishTimeline`       | `features/public/profil/components/history-timeline.tsx`        |
+| `PastorCard`           | `features/public/profil/components/pastor-card.tsx`             |
+| `OrganizationChart`    | `features/public/profil/components/organization-chart.tsx`      |
+| `ServiceAreaMap`       | `components/contact-map.tsx` + `features/public/area/*`         |
+| `ParishGallery`        | `features/public/galeri/components/photo-grid.tsx` (+ lightbox) |
+| `ParishCTA`            | `components/parish-cta.tsx`                                     |
+| `ParishFooter`         | `layouts/public/components/parish-footer.tsx`                   |
 
 ### 4. Tabrakan `text-body`
 
@@ -5252,15 +5247,15 @@ meluber di 1024–1280px. Baris desktop sekarang memakai Radix `NavigationMenu`
 
 ### 1. Pengelompokan (mengikuti IA footer)
 
-| Kontrol | Jenis | Isi |
-| --- | --- | --- |
-| Beranda | tautan | `/` |
-| Profil | dropdown | Sejarah, Wilayah Pelayanan, Area, Pastor, Struktur Kepengurusan |
-| Jadwal Misa | tautan | `/jadwal-misa` |
-| Berita & Artikel | tautan | `/berita` |
-| Agenda | tautan | `/agenda` |
-| Pelayanan | dropdown | Pelayanan, Komunitas, Galeri, Dokumen |
-| Kontak | tautan | `/kontak` |
+| Kontrol          | Jenis    | Isi                                                             |
+| ---------------- | -------- | --------------------------------------------------------------- |
+| Beranda          | tautan   | `/`                                                             |
+| Profil           | dropdown | Sejarah, Wilayah Pelayanan, Area, Pastor, Struktur Kepengurusan |
+| Jadwal Misa      | tautan   | `/jadwal-misa`                                                  |
+| Berita & Artikel | tautan   | `/berita`                                                       |
+| Agenda           | tautan   | `/agenda`                                                       |
+| Pelayanan        | dropdown | Pelayanan, Komunitas, Galeri, Dokumen                           |
+| Kontak           | tautan   | `/kontak`                                                       |
 
 Gruparnya sama dengan grup footer (`Profil Paroki`, `Pelayanan & Komunitas`),
 jadi tidak ada kosakata IA kedua. Halaman pendarat sebuah grup adalah anak
@@ -5417,13 +5412,13 @@ schema, cache, dependency, atau seeder baru.
 
 ### 1. Definisi setiap angka (mengikat)
 
-| Kartu | Angka | Definisi |
-| --- | --- | --- |
-| Berita | total / draf / terjadwal / terbit / arsip | total = semua non-deleted; terbit = `Post::published()` (`status=published AND published_at NOT NULL AND published_at <= now()`) |
-| Agenda | mendatang / draf / dibatalkan / ditunda | mendatang = `Event::published()->upcomingFromToday()` **dan** `status = scheduled`; draf = `is_published = false` |
-| Dokumen | total / draf / terbit / arsip / kedaluwarsa | terbit = `Document::published()`; kedaluwarsa = `expires_at NOT NULL AND expires_at < today(Asia/Pontianak)` |
-| Jadwal Misa | rutin / khusus / pemberitahuan | `MassSchedule::active()`, `SpecialMass::upcoming()`, `ScheduleNotice::currentlyVisible()` — tiga sumber terpisah, tidak dicampur |
-| Pelayanan | aktif / nonaktif | `is_active` |
+| Kartu       | Angka                                       | Definisi                                                                                                                         |
+| ----------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Berita      | total / draf / terjadwal / terbit / arsip   | total = semua non-deleted; terbit = `Post::published()` (`status=published AND published_at NOT NULL AND published_at <= now()`) |
+| Agenda      | mendatang / draf / dibatalkan / ditunda     | mendatang = `Event::published()->upcomingFromToday()` **dan** `status = scheduled`; draf = `is_published = false`                |
+| Dokumen     | total / draf / terbit / arsip / kedaluwarsa | terbit = `Document::published()`; kedaluwarsa = `expires_at NOT NULL AND expires_at < today(Asia/Pontianak)`                     |
+| Jadwal Misa | rutin / khusus / pemberitahuan              | `MassSchedule::active()`, `SpecialMass::upcoming()`, `ScheduleNotice::currentlyVisible()` — tiga sumber terpisah, tidak dicampur |
+| Pelayanan   | aktif / nonaktif                            | `is_active`                                                                                                                      |
 
 Keputusan penting: **"Agenda mendatang" tidak menghitung cancelled/postponed**
 (AC-02), jadi angkanya adalah `is_published = true AND start_at >= awal hari WIB
@@ -5462,7 +5457,7 @@ Pengaturan Situs. Semuanya navigasi nyata.
 
 Roadmap §6.9 mencantumkan empat kandidat indikator kualitas konten. Hanya **dua**
 yang dapat dihitung dan ditindaklanjuti, jadi hanya dua yang ditampilkan. Prinsip
-yang dipakai: *alarm tanpa jalur perbaikan lebih buruk daripada tidak ada alarm*
+yang dipakai: _alarm tanpa jalur perbaikan lebih buruk daripada tidak ada alarm_
 (roadmap §6.9), dan angka yang menyesatkan dilarang (AC-04).
 
 ### 1. Yang ditampilkan

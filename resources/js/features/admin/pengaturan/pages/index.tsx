@@ -372,7 +372,7 @@ export default function Settings({ groups, meta }: Props) {
                                                                     stringValue
                                                                 }
                                                                 onChange={(
-                                                                    event,
+                                                                    event: any,
                                                                 ) =>
                                                                     set(
                                                                         event
@@ -399,7 +399,7 @@ export default function Settings({ groups, meta }: Props) {
                                                                     stringValue
                                                                 }
                                                                 onChange={(
-                                                                    event,
+                                                                    event: any,
                                                                 ) =>
                                                                     set(
                                                                         event

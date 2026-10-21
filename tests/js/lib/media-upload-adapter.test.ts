@@ -1,11 +1,4 @@
-import {
-    afterEach,
-    beforeEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     MediaUploadError,
@@ -58,7 +51,7 @@ function json(body: unknown, status = 200): Response {
     return {
         ok: status >= 200 && status < 300,
         status,
-        json: async () => body,
+        json: () => Promise.resolve(body),
     } as Response;
 }
 
@@ -81,23 +74,21 @@ function stubPipeline(states: MediaState[]) {
 
     const sent: { url: string; init: RequestInit | undefined }[] = [];
 
-    const fetchMock = vi.fn(
-        async (input: RequestInfo | URL, init?: RequestInit) => {
-            const url = urlOf(input);
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = urlOf(input);
 
-            sent.push({ url, init });
+        sent.push({ url, init });
 
-            if (url === '/admin/media') {
-                return json({ media: states[0] });
-            }
+        if (url === '/admin/media') {
+            return json({ media: states[0] });
+        }
 
-            const index = reads;
+        const index = reads;
 
-            reads += 1;
+        reads += 1;
 
-            return json({ media: states[Math.min(index, states.length - 1)] });
-        },
-    );
+        return json({ media: states[Math.min(index, states.length - 1)] });
+    });
 
     vi.stubGlobal('fetch', fetchMock);
 
@@ -199,9 +190,7 @@ describe('uploadMediaFile', () => {
     it('does not report a network failure as something retrying cannot fix', async () => {
         vi.stubGlobal(
             'fetch',
-            vi.fn(async () => {
-                throw new TypeError('Failed to fetch');
-            }),
+            vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))),
         );
 
         const assertion = uploadMediaFile(FILE).catch(
@@ -218,7 +207,7 @@ describe('uploadMediaFile', () => {
     it('does not report a rejection as something retrying cannot fix', async () => {
         vi.stubGlobal(
             'fetch',
-            vi.fn(async () =>
+            vi.fn(() =>
                 json({ message: 'Ukuran gambar maksimal 3072 kilobyte.' }, 422),
             ),
         );

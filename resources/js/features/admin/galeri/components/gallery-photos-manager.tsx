@@ -70,7 +70,7 @@ export function GalleryPhotosManager({
             return;
         }
 
-        next[index] = next[target] as GalleryPhotoItem;
+        next[index] = next[target];
         next[target] = moved;
 
         setPhotos(next);

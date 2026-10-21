@@ -142,7 +142,7 @@ export default function Index({
                     <select
                         aria-label={copy.filter_all_categories}
                         value={filters.category}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ category: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -157,7 +157,7 @@ export default function Index({
                     <select
                         aria-label={copy.filter_all_status}
                         value={filters.status}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ status: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

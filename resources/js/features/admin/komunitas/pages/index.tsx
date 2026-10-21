@@ -168,7 +168,7 @@ export default function Index({
                     <select
                         aria-label="Filter kategori"
                         value={filters.category}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ category: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -184,7 +184,7 @@ export default function Index({
                     <select
                         aria-label="Filter status"
                         value={filters.status}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ status: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -200,7 +200,7 @@ export default function Index({
                     <select
                         aria-label="Filter publikasi"
                         value={filters.publication}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ publication: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DocumentCard } from '@/components/document-card';
 import type { PublicDocumentCard } from '@/types/document';

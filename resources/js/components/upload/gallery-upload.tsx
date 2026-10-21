@@ -11,7 +11,6 @@ import {
     useUploadContext,
     useUploadItem,
     useUploadProgress,
-    type UploadRootProps,
 } from '@uploadcn/react';
 import {
     Upload,
@@ -61,7 +60,7 @@ function GalleryUpload<TResult = unknown>({
 }: GalleryUploadProps<TResult>) {
     return (
         <Upload
-            {...((uploader
+            {...(uploader
                 ? { uploader }
                 : {
                       adapter,
@@ -70,7 +69,7 @@ function GalleryUpload<TResult = unknown>({
                       concurrency: 4,
                       transform: shouldOptimize ? optimize : undefined,
                       onComplete,
-                  }) as UploadRootProps<TResult>)}
+                  })}
             className={className}
         >
             <UploadDropzone

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import type { UploadItem } from '@uploadcn/core';
 import { useUploadContext, useUploadSelector } from '@uploadcn/react';
@@ -410,7 +410,7 @@ function DocumentVariant({
                     id={id}
                     type="file"
                     accept={accept}
-                    onChange={(event) => {
+                    onChange={(event: any) => {
                         const file = event.currentTarget.files?.[0] ?? null;
 
                         if (file !== null && file.size > maxBytes) {
@@ -505,7 +505,7 @@ function AltField({
                 type="text"
                 value={value ?? ''}
                 maxLength={255}
-                onChange={(event) => onChange(event.target.value)}
+                onChange={(event: any) => onChange(event.target.value)}
                 placeholder="Contoh: Suasana acara di halaman depan Gereja Paroki"
                 className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary focus-visible:outline-none"
             />
@@ -668,16 +668,13 @@ function useAttachedMedia(
  * looking at.
  */
 function useFieldAdapter(altValue: string | undefined, fieldName: string) {
-    const altRef = useRef(altValue);
-    altRef.current = altValue;
-
     return useMemo(
         () =>
             createMediaUploadAdapter({
-                getAltText: () => altRef.current ?? '',
+                getAltText: () => altValue ?? '',
                 getFieldName: () => fieldName,
             }),
-        [fieldName],
+        [altValue, fieldName],
     );
 }
 

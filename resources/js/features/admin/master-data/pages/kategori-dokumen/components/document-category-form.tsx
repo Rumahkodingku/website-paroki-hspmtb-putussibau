@@ -42,7 +42,7 @@ export function DocumentCategoryForm({
     return (
         <form
             noValidate
-            onSubmit={(event) => {
+            onSubmit={(event: any) => {
                 event.preventDefault();
                 onSubmit(form);
             }}

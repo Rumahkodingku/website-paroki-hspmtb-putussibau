@@ -245,7 +245,7 @@ function FaqDialog({
 
                 <form
                     noValidate
-                    onSubmit={(event) => {
+                    onSubmit={(event: any) => {
                         event.preventDefault();
                         submit();
                     }}

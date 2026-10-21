@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GalleryPhotosManager } from '@/features/admin/galeri/components/gallery-photos-manager';
@@ -81,12 +81,8 @@ describe('GalleryPhotosManager', () => {
 
         const items = screen.getAllByRole('listitem');
 
-        expect(
-            within(items[0] as HTMLElement).getByText('Pertama'),
-        ).toBeInTheDocument();
-        expect(
-            within(items[1] as HTMLElement).getByText('Kedua'),
-        ).toBeInTheDocument();
+        expect(within(items[0]).getByText('Pertama')).toBeInTheDocument();
+        expect(within(items[1]).getByText('Kedua')).toBeInTheDocument();
     });
 
     it('reorders locally when the down arrow is used', async () => {
@@ -95,17 +91,13 @@ describe('GalleryPhotosManager', () => {
         await userEvent.click(
             screen.getAllByRole('button', {
                 name: 'Turunkan urutan',
-            })[0] as HTMLElement,
+            })[0],
         );
 
         const items = screen.getAllByRole('listitem');
 
-        expect(
-            within(items[0] as HTMLElement).getByText('Kedua'),
-        ).toBeInTheDocument();
-        expect(
-            within(items[1] as HTMLElement).getByText('Pertama'),
-        ).toBeInTheDocument();
+        expect(within(items[0]).getByText('Kedua')).toBeInTheDocument();
+        expect(within(items[1]).getByText('Pertama')).toBeInTheDocument();
     });
 
     it('asks for confirmation before detaching a photo', async () => {

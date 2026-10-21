@@ -1,7 +1,7 @@
 import type { SharedProps } from '@/types';
 
 declare module 'react' {
-    interface InputHTMLAttributes<T> {
+    interface InputHTMLAttributes<_T> {
         passwordrules?: string;
     }
 }
