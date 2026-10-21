@@ -59,7 +59,7 @@ export function EventCategoryForm({
             // validates first and the server never runs, so the Indonesian
             // message in lang/id never appears.
             noValidate
-            onSubmit={(event) => {
+            onSubmit={(event: any) => {
                 event.preventDefault();
                 onSubmit(form);
             }}

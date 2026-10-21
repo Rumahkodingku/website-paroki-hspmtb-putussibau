@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { home } from '@/routes';
 import { index as areaIndex, show as areaShow } from '@/routes/area';
-import type { PublicAreaDetail } from '../types';
+import type { PublicAreaDetail } from '../../types';
 
 type Props = {
     area: PublicAreaDetail;

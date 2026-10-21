@@ -77,7 +77,7 @@ export default function DokumenIndex({
                                 id="document-search"
                                 type="search"
                                 value={search}
-                                onChange={(event) =>
+                                onChange={(event: any) =>
                                     setSearch(event.target.value)
                                 }
                                 placeholder="Cari judul atau deskripsi dokumen"
@@ -99,7 +99,7 @@ export default function DokumenIndex({
                             <select
                                 id="document-category"
                                 value={filters.kategori}
-                                onChange={(event) =>
+                                onChange={(event: any) =>
                                     applyFilters({
                                         kategori: event.target.value,
                                     })

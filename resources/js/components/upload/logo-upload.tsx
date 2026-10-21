@@ -10,7 +10,6 @@ import {
     UploadItemContext,
     useUploadContext,
     useUploadSelector,
-    type UploadRootProps,
 } from '@uploadcn/react';
 import { cn } from '@/lib/utils';
 
@@ -95,7 +94,7 @@ function LogoUpload<TResult = unknown>({
 }: LogoUploadProps<TResult>) {
     return (
         <Upload
-            {...((uploader
+            {...(uploader
                 ? { uploader }
                 : {
                       adapter,
@@ -103,7 +102,7 @@ function LogoUpload<TResult = unknown>({
                       maxFiles: 1,
                       maxSize,
                       onSuccess,
-                  }) as UploadRootProps<TResult>)}
+                  })}
             multiple={false}
             className={className}
         >

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import Index from '@/features/admin/master-data/pages/kategori-dokumen/index';
 import type { Paginated } from '@/types';

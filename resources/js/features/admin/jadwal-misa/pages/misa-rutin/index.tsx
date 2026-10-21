@@ -117,7 +117,7 @@ export default function MisaRutin({
                     <select
                         aria-label="Filter lokasi"
                         value={filters.location_id}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ location_id: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -136,7 +136,7 @@ export default function MisaRutin({
                     <select
                         aria-label="Filter status"
                         value={filters.status}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ status: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

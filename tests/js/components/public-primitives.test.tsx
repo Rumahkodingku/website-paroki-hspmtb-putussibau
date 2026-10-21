@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { EmptyState } from '@/components/empty-state';
 import { SectionHeading } from '@/components/section-heading';

@@ -225,7 +225,7 @@ export default function Index({
                     <select
                         aria-label="Filter status"
                         value={filters.status}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ status: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -240,7 +240,7 @@ export default function Index({
                     <select
                         aria-label="Filter kategori"
                         value={filters.kategori}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ kategori: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -261,7 +261,7 @@ export default function Index({
                         type="month"
                         aria-label="Filter bulan"
                         value={filters.bulan}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ bulan: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
@@ -270,7 +270,7 @@ export default function Index({
                     <select
                         aria-label="Filter pengumuman"
                         value={filters.publikasi}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ publikasi: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

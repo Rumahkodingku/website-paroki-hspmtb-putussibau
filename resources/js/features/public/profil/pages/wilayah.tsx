@@ -1,14 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import { ExternalLink } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
 import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as areaIndex } from '@/routes/area';
-import { ProfileSubNav } from '../components/profile-subnav';
 import type { PublicServiceArea } from '../types';
+import { ProfileHero } from '../components/profile-hero';
 
 type Props = {
     area: PublicServiceArea | null;
@@ -24,16 +23,19 @@ export default function Wilayah({ area }: Props) {
 
             <Head title="Wilayah Pelayanan" />
 
-            <ProfileSubNav />
+            <ProfileHero
+                ariaLabelledBy="wilayah-title"
+                title="Wilayah Pelayanan"
+                description={
+                    <Text as="p" variant="body" className="mt-5 max-w-lg">
+                        Cakupan wilayah pelayanan Paroki Hati Santa Perawan
+                        Maria Tak Bernoda Putussibau.
+                    </Text>
+                }
+            />
 
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Profil"
-                        title="Wilayah Pelayanan"
-                        description="Cakupan wilayah dan stasi pelayanan paroki."
-                    />
-
                     {area?.content ? (
                         <RichText html={area.content} className="max-w-3xl" />
                     ) : (

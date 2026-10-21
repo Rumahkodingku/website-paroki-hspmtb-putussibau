@@ -109,7 +109,7 @@ export default function Index({ notices, filters, noticeScopes }: Props) {
                     <select
                         aria-label="Filter status"
                         value={filters.status}
-                        onChange={(event) =>
+                        onChange={(event: any) =>
                             applyFilter({ status: event.target.value })
                         }
                         className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

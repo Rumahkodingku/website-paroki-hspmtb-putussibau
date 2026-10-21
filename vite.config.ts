@@ -6,10 +6,10 @@ import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import { defineConfig, lazyPlugins } from 'vite-plus';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
-    plugins: lazyPlugins(() => [
+    plugins: [
         /*
          * Omitted while Vitest runs.
          *
@@ -73,7 +73,7 @@ export default defineConfig({
         wayfinder({
             formVariants: true,
         }),
-    ]),
+    ],
     server: {
         watch: {
             ignored: [
@@ -118,49 +118,9 @@ export default defineConfig({
         // on every commit via pre-commit.
         environment: 'happy-dom',
         // Deliberately off. Explicit imports make it obvious that test APIs come
-        // from vite-plus/test rather than from a global, and explicit
+        // from vitest rather than from a global, and explicit
         // afterEach(cleanup) below is what keeps React state from leaking.
         globals: false,
         setupFiles: ['./tests/js/setup.ts'],
-    },
-    lint: {
-        ignorePatterns: [
-            'vendor/**',
-            'node_modules/**',
-            'public/**',
-            'bootstrap/ssr/**',
-            'tailwind.config.js',
-            'resources/js/actions/**',
-            'resources/js/components/ui/*',
-            'resources/js/routes/**',
-            'resources/js/wayfinder/**',
-        ],
-        options: {
-            denyWarnings: true,
-            typeAware: true,
-        },
-    },
-    fmt: {
-        printWidth: 80,
-        tabWidth: 4,
-        singleQuote: true,
-        semi: true,
-        singleAttributePerLine: false,
-        htmlWhitespaceSensitivity: 'css',
-        ignorePatterns: [
-            '.github/**',
-            '*.md',
-            'docs/**',
-            '.codex/**',
-            'skills-lock.json',
-            'composer.json',
-            'public/**',
-            'resources/js/components/ui/*',
-            'resources/views/mail/*',
-        ],
-        sortTailwindcss: {
-            functions: ['clsx', 'cn', 'cva'],
-            stylesheet: 'resources/css/app.css',
-        },
     },
 });

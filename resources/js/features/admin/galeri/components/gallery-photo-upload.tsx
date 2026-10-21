@@ -50,8 +50,11 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
     const [entries, setEntries] = useState<UploadEntry[]>([]);
     const [submitting, setSubmitting] = useState(false);
 
-    const entriesRef = useRef<UploadEntry[]>([]);
-    entriesRef.current = entries;
+    const entriesRef = useRef<UploadEntry[]>(entries);
+
+    useEffect(() => {
+        entriesRef.current = entries;
+    });
 
     useEffect(() => {
         return () => {
@@ -201,7 +204,7 @@ export function GalleryPhotoUpload({ albumId }: { albumId: number }) {
                 accept={media.mimeTypes.join(',')}
                 multiple
                 className="sr-only"
-                onChange={(event) => onSelect(event.target.files)}
+                onChange={(event: any) => onSelect(event.target.files)}
             />
 
             {entries.length > 0 ? (

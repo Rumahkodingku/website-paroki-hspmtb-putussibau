@@ -129,7 +129,7 @@ function ImageCropper({
                     max={crop.maxZoom}
                     step={0.01}
                     value={crop.zoom}
-                    onChange={(event) =>
+                    onChange={(event: any) =>
                         crop.setZoom(Number(event.target.value))
                     }
                     className="h-1.5 w-full cursor-pointer accent-primary"

@@ -27,13 +27,23 @@ export function PastorCard({ pastor }: { pastor: PublicPastor }) {
                         <Text as="p" variant="label" color="danger">
                             {pastor.position_label}
                             {pastor.start_year
-                                ? ` · sejak ${pastor.start_year}`
+                                ? ` · ${pastor.start_year}${
+                                      pastor.end_year
+                                          ? `–${pastor.end_year}`
+                                          : pastor.is_current
+                                            ? '–sekarang'
+                                            : ''
+                                  }`
                                 : ''}
                         </Text>
                     ) : null}
                 </div>
 
                 {pastor.bio ? <RichText html={pastor.bio} /> : null}
+
+                {pastor.description ? (
+                    <RichText html={pastor.description} />
+                ) : null}
             </div>
         </article>
     );

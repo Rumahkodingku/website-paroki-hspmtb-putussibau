@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ParishNavbar } from '@/layouts/public/components/parish-navbar';
@@ -43,7 +43,7 @@ const DESKTOP_GROUPS: Record<string, { label: string; href: string }[]> = {
     Profil: [
         { label: 'Sejarah', href: '/profil/sejarah' },
         { label: 'Wilayah Pelayanan', href: '/profil/wilayah' },
-        { label: 'Area', href: '/area' },
+        { label: 'Area', href: '/profil/area' },
         { label: 'Pastor', href: '/profil/pastor' },
         { label: 'Struktur Kepengurusan', href: '/profil/struktur' },
     ],

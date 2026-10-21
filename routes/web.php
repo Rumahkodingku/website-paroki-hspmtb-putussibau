@@ -88,8 +88,8 @@ Route::get('/komunitas/{community:slug}', [PublicCommunityController::class, 'sh
     ->where('slug', '[a-z0-9-]+')
     ->name('komunitas.show');
 
-Route::get('/area', [PublicAreaController::class, 'index'])->name('area.index');
-Route::get('/area/{area:slug}', [PublicAreaController::class, 'show'])
+Route::get('/profil/area', [PublicAreaController::class, 'index'])->name('area.index');
+Route::get('/profil/area/{area:slug}', [PublicAreaController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('area.show');
 

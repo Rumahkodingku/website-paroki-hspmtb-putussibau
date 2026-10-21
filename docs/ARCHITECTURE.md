@@ -902,7 +902,7 @@ interchangeable:
 
 | Suite | Runner | Location | Runs on |
 | --- | --- | --- | --- |
-| Unit / component | Vitest via `vp test`, happy-dom | `tests/js/` | every commit, via `composer ci:check` |
+| Unit / component | Vitest (`vitest`), happy-dom | `tests/js/` | every commit, via `composer ci:check` |
 | End-to-end | Playwright, Chromium | `tests/e2e/` | the `e2e` CI job, and by hand |
 
 Both live under `tests/`, beside the Pest suites. Vitest cannot collect the

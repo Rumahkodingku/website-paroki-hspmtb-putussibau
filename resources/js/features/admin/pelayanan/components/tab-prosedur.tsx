@@ -252,7 +252,7 @@ function StepDialog({
 
                 <form
                     noValidate
-                    onSubmit={(event) => {
+                    onSubmit={(event: any) => {
                         event.preventDefault();
                         submit();
                     }}

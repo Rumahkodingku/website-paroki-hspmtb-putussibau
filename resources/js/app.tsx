@@ -10,7 +10,8 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { pageName } from '@/lib/page-name';
 import { UploadConfig } from '@/components/upload/upload-config';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName =
+    (import.meta.env.VITE_APP_NAME as string | undefined) || 'Laravel';
 
 /**
  * Pages live at `features/<audience>/<feature>/pages/`, and the Inertia name is
@@ -58,7 +59,7 @@ void createInertiaApp({
 
         return load().then((module) => module.default);
     },
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title: string) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
             case name === 'public/error':

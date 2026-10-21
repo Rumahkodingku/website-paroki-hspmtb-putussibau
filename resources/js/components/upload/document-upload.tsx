@@ -7,7 +7,7 @@ import {
     type Uploader,
     type UploadItem as UploadItemData,
 } from '@uploadcn/core';
-import { useUploadItem, type UploadRootProps } from '@uploadcn/react';
+import { useUploadItem } from '@uploadcn/react';
 import { Badge } from '@/components/ui/badge';
 import {
     Upload,
@@ -93,7 +93,7 @@ function DocumentUpload<TResult = unknown>({
     const single = (maxFiles ?? preset.maxFiles) === 1;
     return (
         <Upload
-            {...((uploader
+            {...(uploader
                 ? { uploader }
                 : {
                       adapter,
@@ -101,7 +101,7 @@ function DocumentUpload<TResult = unknown>({
                       maxFiles: maxFiles ?? preset.maxFiles,
                       maxSize: maxSize ?? preset.maxSize,
                       onSuccess,
-                  }) as UploadRootProps<TResult>)}
+                  })}
             name={name}
             className={className}
         >

@@ -74,7 +74,7 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
 
             <button
                 type="button"
-                onClick={copyLink}
+                onClick={() => void copyLink()}
                 data-test="share-copy"
                 className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
             >

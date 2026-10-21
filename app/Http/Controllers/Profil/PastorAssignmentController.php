@@ -18,8 +18,8 @@ use Inertia\Response;
 /**
  * Riwayat penugasan seorang pastor.
  *
- * Satu pastor boleh punya banyak penugasan; hanya satu yang is_current di
- * seluruh tabel. Penyimpanan yang menandai current memakai
+ * Satu pastor boleh punya banyak penugasan; hanya satu penugasan per pastor
+ * yang is_current. Penyimpanan yang menandai current memakai
  * SetCurrentPastorAction agar transaksional.
  *
  * @see docs/DECISIONS.md D-52

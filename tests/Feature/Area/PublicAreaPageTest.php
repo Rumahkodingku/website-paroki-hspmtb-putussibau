@@ -21,7 +21,7 @@ it('lists only active areas, grouped by type', function () {
     $this->get(route('area.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/area')
+            ->component('public/profil/area/index')
             ->where('hasAreas', true)
             ->has('sections', 2)
             ->where('sections.0.type', 'stasi')
@@ -34,7 +34,7 @@ it('renders an empty directory when nothing is active', function () {
     $this->get(route('area.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/area')
+            ->component('public/profil/area/index')
             ->where('hasAreas', false)
             ->has('sections', 0));
 });
@@ -45,7 +45,7 @@ it('shows an active area detail', function () {
     $this->get(route('area.show', $area->slug))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('public/area/show')
+            ->component('public/profil/area/show')
             ->where('area.name', 'Stasi Jaras')
             ->has('area.children'));
 });
