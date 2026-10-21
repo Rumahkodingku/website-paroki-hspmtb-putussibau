@@ -62,7 +62,7 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
                             <select
                                 id="gallery-year"
                                 value={filters.tahun}
-                                onChange={(event) =>
+                                onChange={(event: any) =>
                                     applyYear(event.target.value)
                                 }
                                 className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"

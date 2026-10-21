@@ -8,11 +8,7 @@ import {
     type UploadItem as UploadItemData,
     type ValidationOptions,
 } from '@uploadcn/core';
-import {
-    useUploadContext,
-    useUploadProgress,
-    type UploadRootProps,
-} from '@uploadcn/react';
+import { useUploadContext, useUploadProgress } from '@uploadcn/react';
 
 import {
     Upload,
@@ -91,12 +87,12 @@ function FileUpload<TResult = unknown>({
 }: FileUploadProps<TResult>) {
     return (
         <Upload
-            {...((uploader
+            {...(uploader
                 ? { uploader }
                 : {
                       adapter,
                       ...options,
-                  }) as UploadRootProps<TResult>)}
+                  })}
             className={className}
         >
             <UploadDropzone>

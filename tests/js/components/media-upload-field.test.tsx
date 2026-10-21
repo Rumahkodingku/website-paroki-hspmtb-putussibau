@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { UploadConfigProvider } from '@uploadcn/react';
 import { MediaUploadField } from '@/components/media-upload-field';
@@ -39,7 +39,7 @@ function renderField(props: Record<string, unknown> = {}) {
     const view = renderWithInertia(
         withUploader(
             <MediaUploadField
-                {...({
+                {...{
                     id: 'post-media',
                     label: 'Gambar utama',
                     altLabel: 'Teks alternatif gambar',
@@ -50,7 +50,7 @@ function renderField(props: Record<string, unknown> = {}) {
                     aspect: 16 / 9,
                     fieldName: 'featured_image',
                     ...props,
-                } as React.ComponentProps<typeof MediaUploadField>)}
+                }}
             />,
         ),
     );
@@ -125,7 +125,7 @@ describe('MediaUploadField', () => {
                         fieldName="featured_image"
                     />,
                 ),
-                { props: { media: undefined } as never },
+                { props: { media: undefined } },
             ),
         ).toThrow(/Shared prop `media` is missing/);
     });

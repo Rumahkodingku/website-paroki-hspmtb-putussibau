@@ -1,12 +1,12 @@
-import { Head } from '@inertiajs/react';
-import { SectionHeading } from '@/components/section-heading';
-import { Text } from '@/components/text';
-import { Seo } from '@/components/seo';
-import { PublicSection } from '@/components/public-section';
-import { PublicBoardPeriod } from '../types';
-import { OrganizationChart } from '../components/organization-chart';
-import { BoardPeriodArchive } from '../components/board-period-archive';
-import { ProfileHero } from '../components/profile-hero';
+import { Head } from "@inertiajs/react";
+import { SectionHeading } from "@/components/section-heading";
+import { Text } from "@/components/text";
+import { Seo } from "@/components/seo";
+import { PublicSection } from "@/components/public-section";
+import { PublicBoardPeriod } from "../types";
+import { OrganizationChart } from "../components/organization-chart";
+import { BoardPeriodArchive } from "../components/board-period-archive";
+import { ProfileHero } from "../components/profile-hero";
 
 type Props = {
     periods: PublicBoardPeriod[];

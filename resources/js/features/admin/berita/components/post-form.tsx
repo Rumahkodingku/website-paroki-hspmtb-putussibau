@@ -144,7 +144,7 @@ export function PostForm({
             // never fires submit, and the Indonesian message from lang/id never
             // appears because the server never runs.
             noValidate
-            onSubmit={(event) => {
+            onSubmit={(event: any) => {
                 event.preventDefault();
                 onSubmit(form);
             }}

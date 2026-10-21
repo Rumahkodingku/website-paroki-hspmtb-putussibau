@@ -1398,7 +1398,7 @@ Roadmap §11 Tahap B: "Jalankan backend tests sebelum membangun UI penuh."
 npm run check                 # oxlint type-aware + denyWarnings + format check
 npm run check:fix             # hanya bila ada failure format; review diff CSS
 npm run types:check           # tsc --noEmit ( mencakup tests/js & tests/e2e)
-npm run test:unit             # Vitest via vite-plus
+npm run test:unit             # Vitest
 ```
 
 ## 3. Gate penuh = yang CI jalankan

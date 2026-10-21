@@ -148,8 +148,7 @@ function SidebarEntry({ entry }: { entry: Entry }) {
         }
 
         return [entry.href, ...children.map((child) => child.href)].some(
-            (href) =>
-                href !== undefined && isCurrentOrParentUrl(href as string),
+            (href) => href !== undefined && isCurrentOrParentUrl(href),
         );
     });
 
@@ -202,7 +201,7 @@ function SidebarEntry({ entry }: { entry: Entry }) {
                                         : false
                                 }
                             >
-                                <Link href={child.href!} prefetch>
+                                <Link href={child.href} prefetch>
                                     <span className="truncate">
                                         {child.title}
                                     </span>

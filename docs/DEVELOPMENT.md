@@ -15,7 +15,7 @@ file is only about getting work done.
 | --- | --- | --- |
 | PHP | 8.3 | With `pdo_mysql`, `gd`, `mbstring`, `intl`, `fileinfo` |
 | Composer | 2.x | |
-| Node | 22.18+, 24.11+ or 26+ | Required by vite-plus; CI uses 22 |
+| Node | 22.18+, 24.11+ or 26+ | Required by Vite; CI uses 22 |
 | npm | 11+ | This project uses npm, not pnpm or yarn |
 | MySQL | 8 | Native install. **There is no Docker**, see D-15 |
 
@@ -249,12 +249,13 @@ npm run test:unit          # once
 npm run test:unit:watch    # on change
 ```
 
-Eleven tests, in `tests/js/`. `vp test` **is** Vitest — it is already installed
-inside `vite-plus`, so there is no `vitest` dependency to add, and no
+Eleven tests, in `tests/js/`. Vitest is installed directly as a dev
+  dependency; the APIs come from `vitest`, and the config is the `test` block in
+  `vite.config.ts`. There is no
 `vitest.config.ts`: the config is the `test` block in `vite.config.ts`.
 
 Environment is `happy-dom` and globals are off, so `tests/js/setup.ts` calls
-`cleanup()` itself. Import test APIs from `vite-plus/test`, not from a global.
+`cleanup()` itself. Import test APIs from `vitest`, not from a global.
 
 Two things that cost an hour if you do not know them:
 

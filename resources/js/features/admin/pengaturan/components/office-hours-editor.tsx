@@ -151,7 +151,7 @@ export function OfficeHoursEditor({
                                 value={day.open_time ?? ''}
                                 disabled={!day.is_open}
                                 aria-label={`Jam buka ${label}`}
-                                onChange={(event) =>
+                                onChange={(event: any) =>
                                     update(key, {
                                         open_time:
                                             event.target.value === ''
@@ -171,7 +171,7 @@ export function OfficeHoursEditor({
                                 value={day.close_time ?? ''}
                                 disabled={!day.is_open}
                                 aria-label={`Jam tutup ${label}`}
-                                onChange={(event) =>
+                                onChange={(event: any) =>
                                     update(key, {
                                         close_time:
                                             event.target.value === ''

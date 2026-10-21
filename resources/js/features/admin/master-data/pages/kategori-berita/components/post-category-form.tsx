@@ -37,7 +37,7 @@ export function PostCategoryForm({
             // message from lang/id never appears — the server is the only
             // validator. See AGENTS.md.
             noValidate
-            onSubmit={(event) => {
+            onSubmit={(event: any) => {
                 event.preventDefault();
                 onSubmit(form);
             }}

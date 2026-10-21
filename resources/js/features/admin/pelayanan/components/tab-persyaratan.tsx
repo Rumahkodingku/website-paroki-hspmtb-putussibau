@@ -280,7 +280,7 @@ function RequirementDialog({
 
                 <form
                     noValidate
-                    onSubmit={(event) => {
+                    onSubmit={(event: any) => {
                         event.preventDefault();
                         submit();
                     }}

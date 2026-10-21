@@ -100,7 +100,7 @@ export function Lightbox({ photos, index, title, onClose, onNavigate }: Props) {
                     size="icon"
                     aria-label="Tutup"
                     className="text-white hover:bg-white/10 hover:text-white"
-                    onClick={(event) => {
+                    onClick={(event: any) => {
                         event.stopPropagation();
                         onClose();
                     }}
@@ -111,7 +111,7 @@ export function Lightbox({ photos, index, title, onClose, onNavigate }: Props) {
 
             <div
                 className="flex flex-1 items-center justify-center gap-2"
-                onClick={(event) => event.stopPropagation()}
+                onClick={(event: any) => event.stopPropagation()}
             >
                 <Button
                     type="button"

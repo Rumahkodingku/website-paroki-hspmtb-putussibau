@@ -163,7 +163,6 @@ function AvatarPreview({ fallbackSrc }: { fallbackSrc: string | null }) {
                         />
                     </UploadPrimitive.Item>
                 ) : fallbackSrc ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- remote avatar URL of unknown origin
                     <img
                         src={fallbackSrc}
                         alt=""
@@ -188,7 +187,7 @@ function AvatarPreview({ fallbackSrc }: { fallbackSrc: string | null }) {
                         )}
                         render={(props, state) => (
                             <svg
-                                {...(props as React.ComponentProps<'svg'>)}
+                                {...props}
                                 viewBox="0 0 100 100"
                                 aria-hidden={!uploading}
                             >

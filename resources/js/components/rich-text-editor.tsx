@@ -681,10 +681,10 @@ export function RichTextEditor({
                             inputMode="url"
                             placeholder="https://contoh.test atau /halaman"
                             value={linkValue}
-                            onChange={(event) =>
+                            onChange={(event: any) =>
                                 setLinkValue(event.target.value)
                             }
-                            onKeyDown={(event) => {
+                            onKeyDown={(event: any) => {
                                 if (event.key === 'Enter') {
                                     event.preventDefault();
                                     applyLink(linkValue);
@@ -735,7 +735,7 @@ export function RichTextEditor({
                             maxLength={255}
                             placeholder="Contoh: Suasana acara di halaman depan Gereja Paroki"
                             value={imageAlt}
-                            onChange={(event) =>
+                            onChange={(event: any) =>
                                 setImageAlt(event.target.value)
                             }
                         />
@@ -747,7 +747,7 @@ export function RichTextEditor({
                         type="file"
                         accept="image/jpeg,image/png"
                         className="sr-only"
-                        onChange={(event) => {
+                        onChange={(event: any) => {
                             const file = event.target.files?.[0];
 
                             if (file) {

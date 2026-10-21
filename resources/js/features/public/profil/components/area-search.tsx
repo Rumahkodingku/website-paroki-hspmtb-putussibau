@@ -33,7 +33,7 @@ export function AreaSearch({
                     type="search"
                     value={value}
                     placeholder="Cari nama stasi atau lingkungan"
-                    onChange={(event) => onChange(event.target.value)}
+                    onChange={(event: any) => onChange(event.target.value)}
                     className="h-11 w-full rounded-pill border border-border bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
                 />
             </div>

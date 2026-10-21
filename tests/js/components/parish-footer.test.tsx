@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { ParishFooter } from '@/layouts/public/components/parish-footer';
 import type { ContactDetails } from '@/types';

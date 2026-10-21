@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { HomeContactSection } from '@/features/public/beranda/components/home-contact-section';
 import type { ContactDetails } from '@/types';

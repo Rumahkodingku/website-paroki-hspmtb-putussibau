@@ -52,7 +52,7 @@ export function ScheduleFilter({
                 <select
                     id="filter-location"
                     value={locationId ?? ''}
-                    onChange={(event) =>
+                    onChange={(event: any) =>
                         onChange({
                             location_id: event.target.value
                                 ? Number(event.target.value)
@@ -78,7 +78,7 @@ export function ScheduleFilter({
                 <select
                     id="filter-day"
                     value={day ?? ''}
-                    onChange={(event) =>
+                    onChange={(event: any) =>
                         onChange({
                             location_id: locationId,
                             day: event.target.value

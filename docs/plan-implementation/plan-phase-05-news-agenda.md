@@ -1323,8 +1323,8 @@ composer test                               # config:clear + pint --test + phpst
 composer ci:check                           # npm check + types:check + test:unit + artisan test
 npm run check                               # oxlint type-aware, denyWarnings
 npm run types:check                         # tsc --noEmit
-npm run test:unit                           # Vitest via vite-plus
-npm run build                               # vp build
+npm run test:unit                           # Vitest
+npm run build                               # vite build
 npm run e2e                                 # app:e2e:prepare + Playwright
 ```
 
