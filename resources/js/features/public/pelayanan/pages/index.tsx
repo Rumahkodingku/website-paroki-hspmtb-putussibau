@@ -1,10 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { PublicServiceCard } from '../components/service-card';
 import type { PublicServiceGroup } from '../types';
+import { home } from '@/routes';
 
 type Props = {
     groups: PublicServiceGroup[];
@@ -21,13 +22,17 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
 
             <Head title="Pelayanan" />
 
-            <PublicSection>
-                <SectionHeading
-                    eyebrow="Pelayanan"
-                    title="Pelayanan Sakramen & Pastoral"
-                    description="Informasi syarat, prosedur, dan cara mendaftar untuk pelayanan sakramen dan pastoral di paroki."
-                />
+            <PublicHeroBanner
+                eyebrow="Pelayanan"
+                title="Pelayanan Sakramen & Pastoral"
+                description="Informasi syarat, prosedur, dan cara mendaftar untuk pelayanan sakramen dan pastoral di paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Pelayanan' },
+                ]}
+            />
 
+            <PublicSection>
                 {!hasServices ? (
                     <Text
                         as="p"

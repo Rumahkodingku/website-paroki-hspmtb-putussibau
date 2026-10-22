@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { wibMonthLabel, wibShiftMonth } from '@/lib/datetime';
@@ -8,6 +8,7 @@ import type { AgendaIndexProps } from '../types';
 import { AgendaCalendar } from '../components/agenda-calendar';
 import { AgendaControls } from '../components/agenda-controls';
 import { EventCard } from '@/components/event-card';
+import { home } from '@/routes';
 
 /*
  * The public agenda.
@@ -44,14 +45,18 @@ export default function Index({
 
             <Head title="Agenda Kegiatan" />
 
+            <PublicHeroBanner
+                eyebrow="Agenda"
+                title="Agenda Kegiatan"
+                description="Agenda synodal, rapat, dan kegiatan lainnya di paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Agenda Kegiatan' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Agenda"
-                        title="Agenda Kegiatan"
-                        description="Agenda synodal, rapat, dan kegiatan lainnya di paroki."
-                    />
-
                     <AgendaControls
                         mode={mode}
                         month={filters.bulan}

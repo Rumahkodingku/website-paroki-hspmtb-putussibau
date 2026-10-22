@@ -30,10 +30,7 @@ export type PublicServiceGroup = {
 
 /** The four CTA states of PRD 7.6, decided on the server. */
 export type PublicServiceCtaState =
-    | 'form_open'
-    | 'form_closed'
-    | 'contact'
-    | 'emergency';
+    'form_open' | 'form_closed' | 'contact' | 'emergency';
 
 export type PublicServiceCta = {
     state: PublicServiceCtaState;

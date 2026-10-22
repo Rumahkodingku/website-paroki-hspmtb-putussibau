@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { Head } from "@inertiajs/react";
-import { MapPin, SearchX } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
-import { PublicSection } from "@/components/public-section";
-import { Seo } from "@/components/seo";
-import { Text } from "@/components/text";
-import { Button } from "@/components/ui/button";
-import { AreaCard } from "../../components/area-card";
-import { AreaSearch } from "../../components/area-search";
-import type { PublicAreaSection } from "../../types";
-import { ProfileHero } from "../../components/profile-hero";
+import { useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { MapPin, SearchX } from 'lucide-react';
+import { EmptyState } from '@/components/empty-state';
+import { PublicSection } from '@/components/public-section';
+import { Seo } from '@/components/seo';
+import { Text } from '@/components/text';
+import { Button } from '@/components/ui/button';
+import { AreaCard } from '../../components/area-card';
+import { AreaSearch } from '../../components/area-search';
+import type { PublicAreaSection } from '../../types';
+import PublicHeroBanner from '@/components/public-hero-banner';
+import { home } from '@/routes';
 
 type Props = {
     sections: PublicAreaSection[];
@@ -17,14 +18,14 @@ type Props = {
 };
 
 export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState('');
 
     const query = search.trim().toLowerCase();
 
     const filtered = sections.map((section) => ({
         ...section,
         areas: section.areas.filter(
-            (area) => query === "" || area.name.toLowerCase().includes(query),
+            (area) => query === '' || area.name.toLowerCase().includes(query),
         ),
     }));
 
@@ -42,19 +43,15 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
 
             <Head title="Area" />
 
-            <ProfileHero
-                ariaLabelledBy="area-title"
+            <PublicHeroBanner
+                eyebrow="PROFIL PAROKI"
                 title="Area"
-                description={
-                    <Text
-                        as="p"
-                        variant="body"
-                        className="mt-5 max-w-lg"
-                    >
-                        Daftar stasi, wilayah, dan lingkungan Paroki Hati Santa
-                        Perawan Maria Tak Bernoda Putussibau.
-                    </Text>
-                }
+                description="Daftar stasi, wilayah, dan lingkungan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Profil', href: home() },
+                    { title: 'Area' },
+                ]}
             />
 
             <PublicSection>
@@ -82,7 +79,7 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setSearch("")}
+                                    onClick={() => setSearch('')}
                                 >
                                     Reset pencarian
                                 </Button>

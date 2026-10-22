@@ -107,7 +107,7 @@ test.describe('halaman publik Profil Paroki', () => {
             await page.goto(url);
 
             await expect(
-                page.getByRole('heading', { name: activeLabel, level: 2 }),
+                page.getByRole('heading', { name: activeLabel, level: 1 }),
             ).toBeVisible();
         }
     });

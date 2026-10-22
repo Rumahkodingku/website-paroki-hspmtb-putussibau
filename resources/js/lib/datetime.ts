@@ -54,6 +54,68 @@ export function formatWibTime(time: string): string {
 }
 
 /**
+ * Format an ISO instant as a long Indonesian date ("Senin, 5 Oktober 2026").
+ *
+ * Mirrors the helper previously duplicated in the home and jadwal-misa features.
+ * Returns the formatted string; an invalid instant yields an empty string.
+ */
+export function formatMassDate(date: string, timeZone?: string | null): string {
+    const parsed = new Date(date);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(parsed);
+}
+
+/**
+ * Format an ISO instant as a short clock ("07.30") without a trailing "WIB".
+ *
+ * The "WIB" suffix is rendered separately by callers, so it is intentionally
+ * omitted here to match the previous feature-local helper.
+ */
+export function formatMassTime(date: string, timeZone?: string | null): string {
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    }).format(new Date(date));
+}
+
+/**
+ * Format an ISO instant as "HH.MM WIB", matching the clock portion of
+ * `formatWibDateTime`. Used by the special-mass card so it no longer has to
+ * split a formatted string.
+ */
+export function formatWibClock(iso: string, timeZone?: string | null): string {
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timezone(timeZone),
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }).formatToParts(date);
+
+    const hour = parts.find((part) => part.type === 'hour')?.value ?? '00';
+    const minute = parts.find((part) => part.type === 'minute')?.value ?? '00';
+
+    return `${hour}.${minute} WIB`;
+}
+
+/**
  * "2026-10-04T00:00:00+00:00" to "Minggu, 5 Oktober 2026" (XC-T2).
  *
  * An invalid date is returned as an empty string rather than "Invalid Date": a
@@ -432,9 +494,7 @@ export function googleCalendarUrl(options: {
     // and widely accepted in a query string — but not universal, and a title
     // that reads "Retreat+Rekoleksi" in a calendar client is a bug somebody
     // files. `%20` is unambiguous everywhere.
-    return `https://calendar.google.com/calendar/render?${params
-        .toString()
-        .replace(/\+/g, '%20')}`;
+    return `https://calendar.google.com/calendar/render?${params.toString().replace(/\+/g, '%20')}`;
 }
 
 /** An ISO instant as Google's `YYYYMMDDTHHMMSSZ`. */
