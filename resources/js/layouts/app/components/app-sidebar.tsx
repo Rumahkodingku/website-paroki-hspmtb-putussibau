@@ -181,9 +181,7 @@ function SidebarEntry({ entry }: { entry: Entry }) {
 
                 <ChevronRight
                     aria-hidden="true"
-                    className={`ml-auto size-4 shrink-0 transition-transform duration-200 ${
-                        open ? 'rotate-90' : ''
-                    }`}
+                    className={`ml-auto size-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
                 />
             </SidebarMenuButton>
 

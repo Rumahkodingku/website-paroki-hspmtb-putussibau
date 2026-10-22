@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
@@ -9,6 +9,7 @@ import type { PublicCategory, PublicPost, PublicPostFilters } from '../types';
 import { ArticleCard } from '@/components/article-card';
 import { NewsFilters } from '../components/news-filters';
 import { PinnedStrip } from '../components/pinned-strip';
+import { home } from '@/routes';
 
 type Props = {
     pinned: PublicPost[];
@@ -43,14 +44,18 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
 
             <Head title="Berita & Artikel" />
 
+            <PublicHeroBanner
+                eyebrow="Berita & Artikel"
+                title="Berita & Artikel"
+                description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Berita & Artikel' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-12">
-                    <SectionHeading
-                        eyebrow="Berita & Artikel"
-                        title="Berita & Artikel"
-                        description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi paroki."
-                    />
-
                     {/*
                      * The strip is hidden while a filter is on. A pinned article
                      * is an editorial choice about the front page; under a

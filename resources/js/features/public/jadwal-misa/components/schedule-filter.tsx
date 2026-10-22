@@ -1,23 +1,19 @@
+import { CalendarDays, MapPin, RotateCcw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Text } from '@/components/text';
-
-/*
- * The location and day filter.
- *
- * Both live in the query string rather than in component state, because roadmap
- * 7.2 asks for a filter a visitor can share, and a URL is the only version of
- * that which survives a reload and works in a printed page.
- *
- * Native selects again, for the reason the admin forms use them: a filter is a
- * control that has to work before JavaScript does, and it is the first thing a
- * visitor on a phone will touch.
- *
- * The two are applied together, never one at a time — roadmap 7.2 asks that they
- * can be used in combination and that a filter which is still valid is not
- * discarded by changing the other.
- */
+import type { PublicLocation } from '../types';
 
 type Props = {
-    locations: Array<{ id: number; name: string }>;
+    locations: Pick<PublicLocation, 'id' | 'name'>[];
     /** 0 = Minggu. */
     dayLabels: Record<number, string>;
     locationId: number | null;
@@ -36,82 +32,170 @@ export function ScheduleFilter({
     onChange,
 }: Props) {
     const hasFilter = locationId !== null || day !== null;
+    const activeFilterCount =
+        Number(locationId !== null) + Number(day !== null);
 
     return (
-        <div
-            className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4 print:hidden"
+        <section
+            aria-label="Filter jadwal misa"
+            className="print:hidden"
             data-test="schedule-filter"
         >
-            <div className="space-y-2">
-                <label
-                    htmlFor="filter-location"
-                    className="text-sm font-medium"
-                >
-                    Lokasi
-                </label>
-                <select
-                    id="filter-location"
-                    value={locationId ?? ''}
-                    onChange={(event: any) =>
-                        onChange({
-                            location_id: event.target.value
-                                ? Number(event.target.value)
-                                : null,
-                            day,
-                        })
-                    }
-                    className="h-11 w-full min-w-44 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                >
-                    <option value="">Semua lokasi</option>
-                    {locations.map((location) => (
-                        <option key={location.id} value={String(location.id)}>
-                            {location.name}
-                        </option>
-                    ))}
-                </select>
+            <div className="">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="min-w-0 space-y-0.5">
+                            <Text
+                                as="h2"
+                                className="text-sm font-semibold tracking-tight sm:text-base"
+                            >
+                                Temukan Jadwal Misa
+                            </Text>
+                            <p className="text-sm text-muted-foreground">
+                                Saring jadwal berdasarkan lokasi dan hari.
+                            </p>
+                        </div>
+                    </div>
+
+                    {hasFilter ? (
+                        <Badge
+                            variant="secondary"
+                            className="gap-1.5 rounded-full bg-primary px-3 py-1 text-white"
+                        >
+                            {activeFilterCount} filter aktif
+                        </Badge>
+                    ) : null}
+                </div>
+
+                <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(11rem,0.8fr)_auto]">
+                    <div className="min-w-0 space-y-2">
+                        <Label
+                            htmlFor="filter-location"
+                            className="flex items-center gap-2 text-sm font-medium"
+                        >
+                            <MapPin
+                                className="size-4 text-muted-foreground"
+                                aria-hidden="true"
+                            />
+                            Lokasi misa
+                        </Label>
+
+                        <Select
+                            value={
+                                locationId === null ? 'all' : String(locationId)
+                            }
+                            onValueChange={(value) =>
+                                onChange({
+                                    location_id:
+                                        value === 'all' ? null : Number(value),
+                                    day,
+                                })
+                            }
+                        >
+                            <SelectTrigger
+                                id="filter-location"
+                                className="h-11 w-full cursor-pointer rounded-md py-6 shadow-none"
+                                aria-label="Filter berdasarkan lokasi"
+                            >
+                                <SelectValue placeholder="Pilih lokasi" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer rounded-md py-4"
+                                >
+                                    Semua lokasi
+                                </SelectItem>
+
+                                {locations.map((location) => (
+                                    <SelectItem
+                                        key={location.id}
+                                        value={String(location.id)}
+                                        className="cursor-pointer rounded-md py-4"
+                                    >
+                                        {location.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="min-w-0 space-y-2">
+                        <Label
+                            htmlFor="filter-day"
+                            className="flex items-center gap-2 text-sm font-medium"
+                        >
+                            <CalendarDays
+                                className="size-4 text-muted-foreground"
+                                aria-hidden="true"
+                            />
+                            Hari misa
+                        </Label>
+
+                        <Select
+                            value={day === null ? 'all' : String(day)}
+                            onValueChange={(value) =>
+                                onChange({
+                                    location_id: locationId,
+                                    day: value === 'all' ? null : Number(value),
+                                })
+                            }
+                        >
+                            <SelectTrigger
+                                id="filter-day"
+                                className="h-11 w-full cursor-pointer rounded-md py-6 shadow-none"
+                                aria-label="Filter berdasarkan hari"
+                            >
+                                <SelectValue placeholder="Pilih hari" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer rounded-md py-4"
+                                >
+                                    Semua hari
+                                </SelectItem>
+
+                                {[0, 1, 2, 3, 4, 5, 6].map((value) => (
+                                    <SelectItem
+                                        key={value}
+                                        value={String(value)}
+                                        className="cursor-pointer rounded-md py-4"
+                                    >
+                                        {dayLabels[value]}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {hasFilter ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                                onChange({
+                                    location_id: null,
+                                    day: null,
+                                })
+                            }
+                            className="w-full sm:w-auto"
+                        >
+                            <RotateCcw className="size-4" aria-hidden="true" />
+                            Reset filter
+                        </Button>
+                    ) : null}
+                </div>
+
+                {hasFilter ? (
+                    <p className="mt-4 border-t border-border pt-3 text-sm leading-relaxed text-muted-foreground">
+                        Jadwal sedang difilter. Tautan halaman dapat dibagikan
+                        agar orang lain membuka pilihan filter yang sama.
+                    </p>
+                ) : null}
             </div>
-
-            <div className="space-y-2">
-                <label htmlFor="filter-day" className="text-sm font-medium">
-                    Hari
-                </label>
-                <select
-                    id="filter-day"
-                    value={day ?? ''}
-                    onChange={(event: any) =>
-                        onChange({
-                            location_id: locationId,
-                            day: event.target.value
-                                ? Number(event.target.value)
-                                : null,
-                        })
-                    }
-                    className="h-11 w-full min-w-36 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                >
-                    <option value="">Semua hari</option>
-                    {[0, 1, 2, 3, 4, 5, 6].map((value) => (
-                        <option key={value} value={String(value)}>
-                            {dayLabels[value]}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {hasFilter ? (
-                <button
-                    type="button"
-                    onClick={() => onChange({ location_id: null, day: null })}
-                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                >
-                    Reset filter
-                </button>
-            ) : null}
-
-            {hasFilter ? (
-                <Text as="p" variant="body-sm" color="muted" className="w-full">
-                    Filter aktif. Tautan di bilah alamat bisa dibagikan.
-                </Text>
-            ) : null}
-        </div>
+        </section>
     );
 }

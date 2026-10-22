@@ -1,8 +1,8 @@
-import * as React from "react";
-import type { ImageTransformOptions } from "@uploadcn/core/image";
-import { useFilePreview, useImageCrop } from "@uploadcn/react";
-import { cn } from "@/lib/utils";
-import Cropper from "react-easy-crop";
+import * as React from 'react';
+import type { ImageTransformOptions } from '@uploadcn/core/image';
+import { useFilePreview, useImageCrop } from '@uploadcn/react';
+import { cn } from '@/lib/utils';
+import Cropper from 'react-easy-crop';
 import {
     NativeButton,
     UploadModal,
@@ -11,14 +11,14 @@ import {
     UploadModalHeader,
     UploadModalTitle,
     UploadSpinner,
-} from "@/components/ui/upload";
+} from '@/components/ui/upload';
 import {
     ZoomOutIcon,
     ZoomInIcon,
     RotateCcwIcon,
     RotateCwIcon,
     FlipHorizontal2Icon,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface ImageCropperProps {
     /** The image to crop. The dialog opens while a file is set. */
@@ -29,11 +29,11 @@ interface ImageCropperProps {
     onCancel: () => void;
     /** Width / height. Default `1`. */
     aspect?: number;
-    cropShape?: "rect" | "round";
+    cropShape?: 'rect' | 'round';
     /** Output size and encoding for the cropped image. */
     output?: Omit<
         ImageTransformOptions,
-        "crop" | "rotate" | "flipHorizontal" | "flipVertical"
+        'crop' | 'rotate' | 'flipHorizontal' | 'flipVertical'
     >;
     title?: React.ReactNode;
     description?: React.ReactNode;
@@ -45,10 +45,10 @@ function ImageCropper({
     onCrop,
     onCancel,
     aspect = 1,
-    cropShape = "rect",
+    cropShape = 'rect',
     output,
-    title = "Crop image",
-    description = "Drag to reposition. Use the slider, scroll or pinch to zoom.",
+    title = 'Crop image',
+    description = 'Drag to reposition. Use the slider, scroll or pinch to zoom.',
     className,
 }: ImageCropperProps) {
     const url = useFilePreview(file);
@@ -83,7 +83,7 @@ function ImageCropper({
                 if (!open && !isApplying) onCancel();
             }}
             data-slot="image-cropper"
-            className={cn("sm:max-w-lg", className)}
+            className={cn('sm:max-w-lg', className)}
         >
             <UploadModalHeader>
                 <UploadModalTitle>{title}</UploadModalTitle>
@@ -100,14 +100,14 @@ function ImageCropper({
                         cropShape={cropShape}
                         minZoom={crop.minZoom}
                         maxZoom={crop.maxZoom}
-                        showGrid={cropShape === "rect"}
+                        showGrid={cropShape === 'rect'}
                         transform={`translate(${crop.position.x}px, ${crop.position.y}px) rotate(${crop.rotation}deg) scale(${crop.zoom * (crop.flipHorizontal ? -1 : 1)}, ${crop.zoom * (crop.flipVertical ? -1 : 1)})`}
                         onCropChange={crop.setPosition}
                         onZoomChange={crop.setZoom}
                         onRotationChange={crop.setRotation}
                         onCropComplete={(_, pixels) => crop.setArea(pixels)}
                         cropperProps={{
-                            "aria-label": "Crop area. Use arrow keys to move.",
+                            'aria-label': 'Crop area. Use arrow keys to move.',
                         }}
                     />
                 ) : (
@@ -162,7 +162,7 @@ function ImageCropper({
                         size="default"
                         aria-label="Flip horizontally"
                         aria-pressed={crop.flipHorizontal}
-                        onClick={() => crop.flip("horizontal")}
+                        onClick={() => crop.flip('horizontal')}
                     >
                         <FlipHorizontal2Icon />
                     </NativeButton>

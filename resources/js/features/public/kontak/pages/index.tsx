@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import type { SharedProps } from '@/types';
 import { ContactDetails } from '../components/contact-details';
 import { ContactMap } from '@/components/contact-map';
 import { ContactSocial } from '../components/contact-social';
+import { home } from '@/routes';
 
 /*
  * /kontak — PRD 7.9.
@@ -47,14 +49,18 @@ export default function Kontak() {
                 description="Alamat, telepon, WhatsApp, surel, jam layanan, dan peta lokasi Paroki HSPMTB Putussibau."
             />
 
+            <PublicHeroBanner
+                eyebrow="Kontak"
+                title="Hubungi Kami"
+                description="Gunakan kanal di bawah ini untuk menghubungi sekretariat paroki. Tidak semua kanal tersedia; hanya yang sudah diisi pengelola situs yang ditampilkan."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Hubungi Kami' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-8">
-                    <SectionHeading
-                        eyebrow="Kontak"
-                        title="Hubungi Kami"
-                        description="Gunakan kanal di bawah ini untuk menghubungi sekretariat paroki. Tidak semua kanal tersedia; hanya yang sudah diisi pengelola situs yang ditampilkan."
-                    />
-
                     {hasDetails ? <ContactDetails contact={contact} /> : null}
 
                     {isEmpty ? (

@@ -12,30 +12,12 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { NextMassCardData } from '@/components/next-mass-card';
+import { formatMassDate, formatMassTime } from '@/lib/datetime';
 
 type HomeNextMassSectionProps = {
     nextMass: NextMassCardData | null;
     displayTimezone: string;
 };
-
-function formatMassDate(date: string, timezone: string): string {
-    return new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: timezone,
-    }).format(new Date(date));
-}
-
-function formatMassTime(date: string, timezone: string): string {
-    return new Intl.DateTimeFormat('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23',
-        timeZone: timezone,
-    }).format(new Date(date));
-}
 
 export function HomeNextMassSection({
     nextMass,
@@ -115,7 +97,9 @@ export function HomeNextMassSection({
                                         variant="body-sm"
                                         color="muted"
                                     >
-                                        Jadwal rutin mingguan paroki
+                                        {nextMass.kind === 'khusus'
+                                            ? 'Misa khusus'
+                                            : 'Jadwal rutin mingguan paroki'}
                                     </Text>
                                 </div>
                             </div>

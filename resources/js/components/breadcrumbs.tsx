@@ -29,9 +29,9 @@ export function Breadcrumbs({
 
                     return (
                         <Fragment key={`${item.title}-${index}`}>
-                            <BreadcrumbItem className="min-w-0">
+                            <BreadcrumbItem className="min-w-0 italic">
                                 {isLast || !item.href ? (
-                                    <BreadcrumbPage className="min-w-0 truncate">
+                                    <BreadcrumbPage className="min-w-0 truncate font-semibold text-primary">
                                         {item.title}
                                     </BreadcrumbPage>
                                 ) : (
