@@ -9,32 +9,18 @@ import { home } from '@/routes';
 import { index as beritaIndex, show as postArticle } from '@/routes/berita';
 import type { PublicPost, PublicPostDetail } from '../types';
 import { ShareActions } from '../components/share-actions';
-import { ArticleCard } from '@/components/article-card';
+import { RelatedArticleItem } from '../components/related-article-card';
+import { Badge } from '@/components/ui/badge';
 
 type Props = {
     post: PublicPostDetail;
     related: PublicPost[];
-    adjacent: { previous: PublicPost | null; next: PublicPost | null };
+    adjacent: {
+        previous: PublicPost | null;
+        next: PublicPost | null;
+    };
 };
 
-/*
- * The article page.
- *
- * Three things the PRD asks for and that are easy to get wrong:
- *
- * A reading measure. DESIGN.md puts text-heavy content at 980–1120px; max-w-3xl
- * is narrower than that, which is the point — 17px body text across 1100px is
- * about 130 characters a line and nobody reads that. This is the one page on
- * the site that is a column of prose.
- *
- * The scripture reference above the body, and only when it was filled in. A
- * Renungan without one is normal; a Renungan with an empty quotation mark
- * under it is not.
- *
- * Previous and next. PRD 7.4 calls them optional. They are here because a reader
- * who reaches the end of an article usually wants the next one, and a list page
- * is a worse way to get it.
- */
 export default function Show({ post, related, adjacent }: Props) {
     const { displayTimezone } = usePage().props;
     const url = typeof window === 'undefined' ? '' : window.location.href;
@@ -52,140 +38,248 @@ export default function Show({ post, related, adjacent }: Props) {
             <Head title={post.title} />
 
             <PublicSection>
-                <Breadcrumbs
-                    className="mb-8"
-                    breadcrumbs={[
-                        { title: 'Beranda', href: home() },
-                        { title: 'Berita', href: beritaIndex() },
-                        { title: post.title },
-                    ]}
-                />
+                <div className="mx-auto max-w-7xl">
+                    <Breadcrumbs
+                        className="mb-8"
+                        breadcrumbs={[
+                            { title: 'Beranda', href: home() },
+                            { title: 'Berita', href: beritaIndex() },
+                            ...(post.category
+                                ? [
+                                      {
+                                          title: post.category.name,
+                                          href: beritaIndex({
+                                              query: {
+                                                  kategori: post.category.slug,
+                                              },
+                                          }),
+                                      },
+                                  ]
+                                : []),
+                            { title: post.title },
+                        ]}
+                    />
 
-                <div className="mx-auto max-w-3xl space-y-8">
-                    <article className="space-y-6">
-                        <header className="space-y-3">
-                            {post.category ? (
-                                <Text as="p" variant="heading-md" color="brand">
-                                    {post.category.name}
+                    <div className="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
+                        {/* Main article */}
+                        <article className="min-w-0 space-y-8 lg:col-span-8">
+                            <header className="space-y-4">
+                                {post.category ? (
+                                    <Badge
+                                        variant="secondary"
+                                        className="px-3 py-1 text-xs font-semibold tracking-wide uppercase"
+                                    >
+                                        {post.category.name}
+                                    </Badge>
+                                ) : null}
+
+                                <Text
+                                    as="h1"
+                                    variant="h1"
+                                    className="max-w-4xl text-balance"
+                                >
+                                    {post.title}
                                 </Text>
-                            ) : null}
 
-                            <Text as="h1" variant="h1">
-                                {post.title}
-                            </Text>
-
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                <Text as="p" variant="body-sm" color="muted">
-                                    {post.author_name}
-                                </Text>
-                                {post.published_at ? (
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-muted-foreground">
                                     <Text
                                         as="p"
                                         variant="body-sm"
                                         color="muted"
                                     >
-                                        {formatWibDate(
-                                            post.published_at,
-                                            displayTimezone,
-                                        )}
+                                        {post.author_name}
                                     </Text>
-                                ) : null}
-                            </div>
-                        </header>
 
-                        {post.image ? (
-                            <img
-                                src={post.image}
-                                alt={post.image_alt ?? ''}
-                                className="w-full rounded-md object-cover"
-                            />
-                        ) : null}
+                                    {post.published_at ? (
+                                        <>
+                                            <span
+                                                aria-hidden="true"
+                                                className="text-border"
+                                            >
+                                                ·
+                                            </span>
+                                            <Text
+                                                as="p"
+                                                variant="body-sm"
+                                                color="muted"
+                                            >
+                                                {formatWibDate(
+                                                    post.published_at,
+                                                    displayTimezone,
+                                                )}
+                                            </Text>
+                                        </>
+                                    ) : null}
 
-                        {post.scripture_reference ? (
-                            <blockquote className="border-l-4 border-primary pl-4">
-                                <Text as="p" variant="heading-sm">
-                                    {post.scripture_reference}
-                                </Text>
-                            </blockquote>
-                        ) : null}
+                                    {typeof post.view_count === 'number' ? (
+                                        <>
+                                            <span
+                                                aria-hidden="true"
+                                                className="text-border"
+                                            >
+                                                ·
+                                            </span>
+                                            <Text
+                                                as="p"
+                                                variant="body-sm"
+                                                color="muted"
+                                            >
+                                                {post.view_count.toLocaleString(
+                                                    'id-ID',
+                                                )}{' '}
+                                                kali dibaca
+                                            </Text>
+                                        </>
+                                    ) : null}
+                                </div>
+                            </header>
 
-                        <RichText html={post.content} />
-                    </article>
+                            {post.image ? (
+                                <figure className="space-y-2">
+                                    <div className="overflow-hidden rounded-xl bg-muted">
+                                        <img
+                                            src={post.image}
+                                            alt={post.image_alt ?? ''}
+                                            fetchPriority="high"
+                                            className="aspect-video w-full object-cover"
+                                        />
+                                    </div>
 
-                    <ShareActions url={url} title={post.title} />
-
-                    {/*
-                     * Both arrows, or neither. A single "back to the list" on
-                     * one side and a "next article" on the other is a layout
-                     * that reads as broken when one of them is missing, so the
-                     * block only appears when there is something to go to.
-                     */}
-                    {adjacent.previous || adjacent.next ? (
-                        <nav
-                            aria-label="Navigasi artikel"
-                            className="grid gap-4 border-t border-border pt-6 sm:grid-cols-2"
-                        >
-                            {adjacent.previous ? (
-                                <Link
-                                    href={postArticle(adjacent.previous.slug)}
-                                    prefetch
-                                    className="rounded-sm text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                                >
-                                    <Text
-                                        as="span"
-                                        variant="body-sm"
-                                        color="muted"
-                                    >
-                                        Sebelumnya
-                                    </Text>
-                                    <br />
-                                    {adjacent.previous.title}
-                                </Link>
-                            ) : (
-                                <span />
-                            )}
-
-                            {adjacent.next ? (
-                                <Link
-                                    href={postArticle(adjacent.next.slug)}
-                                    prefetch
-                                    className="rounded-sm text-right text-sm text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:col-start-2"
-                                >
-                                    <Text
-                                        as="span"
-                                        variant="body-sm"
-                                        color="muted"
-                                    >
-                                        Berikutnya
-                                    </Text>
-                                    <br />
-                                    {adjacent.next.title}
-                                </Link>
+                                    {post.image_alt ? (
+                                        <figcaption>
+                                            <Text
+                                                as="p"
+                                                variant="fine-print"
+                                                color="muted"
+                                                className="text-center italic"
+                                            >
+                                                {post.image_alt}
+                                            </Text>
+                                        </figcaption>
+                                    ) : null}
+                                </figure>
                             ) : null}
-                        </nav>
-                    ) : null}
+
+                            {post.scripture_reference ? (
+                                <blockquote className="rounded-r-lg border-l-4 border-primary bg-muted/50 px-5 py-4">
+                                    <Text as="p" variant="heading-sm">
+                                        {post.scripture_reference}
+                                    </Text>
+                                </blockquote>
+                            ) : null}
+
+                            <div className="max-w-3xl min-w-0">
+                                <RichText html={post.content} />
+                            </div>
+
+                            {/* Previous and next articles */}
+                            {adjacent.previous || adjacent.next ? (
+                                <nav
+                                    aria-label="Navigasi artikel"
+                                    className="grid gap-4 border-t border-border pt-6 sm:grid-cols-2"
+                                >
+                                    {adjacent.previous ? (
+                                        <Link
+                                            href={postArticle(
+                                                adjacent.previous.slug,
+                                            )}
+                                            prefetch
+                                            className="group rounded-lg border border-border p-4 transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                        >
+                                            <Text
+                                                as="p"
+                                                variant="fine-print"
+                                                color="muted"
+                                            >
+                                                ← Artikel sebelumnya
+                                            </Text>
+                                            <Text
+                                                as="p"
+                                                variant="body-sm"
+                                                className="mt-2 font-semibold transition-colors group-hover:text-primary"
+                                            >
+                                                {adjacent.previous.title}
+                                            </Text>
+                                        </Link>
+                                    ) : (
+                                        <span />
+                                    )}
+
+                                    {adjacent.next ? (
+                                        <Link
+                                            href={postArticle(
+                                                adjacent.next.slug,
+                                            )}
+                                            prefetch
+                                            className="group rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:text-right"
+                                        >
+                                            <Text
+                                                as="p"
+                                                variant="fine-print"
+                                                color="muted"
+                                            >
+                                                Artikel selanjutnya →
+                                            </Text>
+                                            <Text
+                                                as="p"
+                                                variant="body-sm"
+                                                className="mt-2 font-semibold transition-colors group-hover:text-primary"
+                                            >
+                                                {adjacent.next.title}
+                                            </Text>
+                                        </Link>
+                                    ) : null}
+                                </nav>
+                            ) : null}
+                        </article>
+
+                        {/* Editorial sidebar */}
+                        <aside className="min-w-0 space-y-6 lg:col-span-4">
+                            {related.length > 0 ? (
+                                <section aria-labelledby="berita-terkait">
+                                    <div className="mb-5 flex items-center justify-between gap-3">
+                                        <Text
+                                            as="h2"
+                                            variant="heading-md"
+                                            id="berita-terkait"
+                                        >
+                                            Berita & artikel terkait
+                                        </Text>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {related.map((article) => (
+                                            <RelatedArticleItem
+                                                key={article.id}
+                                                article={article}
+                                                displayTimezone={
+                                                    displayTimezone
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                </section>
+                            ) : null}
+
+                            <section
+                                aria-labelledby="bagikan-artikel"
+                                className="border-t py-4"
+                            >
+                                <Text
+                                    as="h2"
+                                    variant="heading-md"
+                                    id="bagikan-artikel"
+                                    className="mb-4"
+                                    weight="semibold"
+                                >
+                                    Bagikan artikel
+                                </Text>
+
+                                <ShareActions url={url} title={post.title} />
+                            </section>
+                        </aside>
+                    </div>
                 </div>
-
-                {related.length > 0 ? (
-                    <section
-                        aria-labelledby="berita-terkait"
-                        className="mx-auto mt-16 max-w-3xl space-y-6"
-                    >
-                        <Text as="h2" variant="h3" id="berita-terkait">
-                            Berita terkait
-                        </Text>
-
-                        <div className="grid gap-6 sm:grid-cols-3">
-                            {related.map((article) => (
-                                <ArticleCard
-                                    key={article.id}
-                                    article={article}
-                                    displayTimezone={displayTimezone}
-                                />
-                            ))}
-                        </div>
-                    </section>
-                ) : null}
             </PublicSection>
         </>
     );

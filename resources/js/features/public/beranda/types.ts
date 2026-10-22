@@ -1,4 +1,4 @@
-import type { ArticleCardData } from '@/components/article-card';
+import type { ArticleCardData } from '@/types/news-agenda';
 import type { EventCardData } from '@/components/event-card';
 import type { NextMassCardData } from '@/components/next-mass-card';
 
