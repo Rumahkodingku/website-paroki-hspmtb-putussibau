@@ -1,22 +1,11 @@
 import { toast } from 'sonner';
-import { Text } from '@/components/text';
+import { FacebookIcon } from '@/components/icons/facebook-icon';
+import { InstagramIcon } from '@/components/icons/instagram-icon';
+import { LinkedInIcon } from '@/components/icons/linkedin';
+import { WhatsAppIcon } from '@/components/icons/whatsapp-icon';
+import { Link } from 'lucide-react';
 
-/**
- * Share an article over WhatsApp, Facebook, or the clipboard.
- *
- * PRD 7.4 asks for all three. The URL is the page's own — read from the window
- * rather than rebuilt from a stored slug — so a link that includes a filter or
- * a share is what gets shared, which is the whole point of the filters living
- * in the query string.
- */
 export function ShareActions({ url, title }: { url: string; title: string }) {
-    /**
-     * Copy, with a fallback.
-     *
-     * navigator.clipboard is undefined on an insecure origin, and a parish site
-     * is very likely to be opened over plain HTTP on a shared machine at some
-     * point. Doing nothing there would leave the button looking broken.
-     */
     const copyLink = async () => {
         try {
             if (navigator.clipboard?.writeText) {
@@ -43,22 +32,23 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
         }
     };
 
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+        url,
+    )}`;
+
     return (
         <div
             className="flex flex-wrap items-center gap-3"
             data-test="share-actions"
         >
-            <Text as="p" variant="label" color="muted">
-                Bagikan
-            </Text>
-
             <a
                 href={`https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-test="share-whatsapp"
-                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-medium"
             >
+                <WhatsAppIcon className="size-4" aria-hidden="true" />
                 WhatsApp
             </a>
 
@@ -67,17 +57,40 @@ export function ShareActions({ url, title }: { url: string; title: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-test="share-facebook"
-                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-semibold"
             >
+                <FacebookIcon className="size-4" aria-hidden="true" />
                 Facebook
+            </a>
+
+            <a
+                href={linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-test="share-linkedin"
+                className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-semibold"
+            >
+                <LinkedInIcon className="size-4" aria-hidden="true" />
+                LinkedIn
             </a>
 
             <button
                 type="button"
                 onClick={() => void copyLink()}
-                data-test="share-copy"
-                className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+                data-test="share-instagram"
+                className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-semibold"
             >
+                <InstagramIcon className="size-4" aria-hidden="true" />
+                Salin untuk Instagram
+            </button>
+
+            <button
+                type="button"
+                onClick={() => void copyLink()}
+                data-test="share-copy"
+                className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm font-semibold"
+            >
+                <Link width={20} height={20} />
                 Salin tautan
             </button>
         </div>

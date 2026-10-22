@@ -13,6 +13,7 @@ use App\Models\PostCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class DemoNewsAndAgendaSeeder extends Seeder
 {
@@ -23,83 +24,75 @@ class DemoNewsAndAgendaSeeder extends Seeder
         $categories = PostCategory::query()->pluck('id', 'slug');
         $eventCategories = EventCategory::query()->pluck('id', 'slug');
 
-        $content = '<p>Paroki menggelar kegiatan bersama umat pada pekan ini. '
-            .'Kegiatan diisi dengan doa, sharing, dan ramah tamah.</p>'
-            .'<h2>Rangkaian kegiatan</h2>'
-            .'<ul><li>Doa pembuka</li><li>Renungan singkat</li><li>Ramah tamah</li></ul>'
-            .'<p>Seluruh umat diundang untuk hadir dan membawa keluarga.</p>';
+        // Clean up the five posts the previous version of this seeder created,
+        // so the total stays at 50 instead of 5 + 50.
+        Post::query()->whereIn('slug', [
+            'misa-syukur-pesta-pelindung-paroki',
+            'kegiatan-bakti-sosial-lingkungan',
+            'renungan-pekan-biasa',
+            'pengumuman-jadwal-misa-harian',
+            'pendaftaran-katekese-anak',
+        ])->forceDelete();
+        Post::query()->where('slug', 'like', 'demo-berita-%')->forceDelete();
 
-        /** @var list<array{slug: string, category: string, title: string, excerpt: string, days: int, pinned: bool, scripture: ?string}> $posts */
-        $posts = [
-            [
-                'slug' => 'misa-syukur-pesta-pelindung-paroki',
-                'category' => 'berita',
-                'title' => 'Misa Syukur Pesta Pelindung Paroki',
-                'excerpt' => 'Umat diajak hadir dalam misa syukur tahunan pesta pelindung paroki.',
-                'days' => 2,
-                'pinned' => true,
-                'scripture' => null,
-            ],
-            [
-                'slug' => 'kegiatan-bakti-sosial-lingkungan',
-                'category' => 'kegiatan',
-                'title' => 'Kegiatan Bakti Sosial Lingkungan',
-                'excerpt' => 'Aksi bakti sosial bersama warga di sekitar lingkungan gereja.',
-                'days' => 5,
-                'pinned' => false,
-                'scripture' => null,
-            ],
-            [
-                'slug' => 'renungan-pekan-biasa',
-                'category' => 'renungan',
-                'title' => 'Renungan Pekan Biasa: Hidup dalam Kasih',
-                'excerpt' => 'Bacaan pekan ini mengajak umat menghidupi kasih dalam perbuatan nyata.',
-                'days' => 7,
-                'pinned' => false,
-                'scripture' => 'Yohanes 15:13',
-            ],
-            [
-                'slug' => 'pengumuman-jadwal-misa-harian',
-                'category' => 'pengumuman',
-                'title' => 'Pengumuman Jadwal Misa Harian',
-                'excerpt' => 'Terjadi penyesuaian jam misa harian selama pekan ini.',
-                'days' => 9,
-                'pinned' => false,
-                'scripture' => null,
-            ],
-            [
-                'slug' => 'pendaftaran-katekese-anak',
-                'category' => 'pengumuman',
-                'title' => 'Pendaftaran Katekese Anak Dibuka',
-                'excerpt' => 'Pendaftaran katekese untuk anak dibuka di sekretariat paroki.',
-                'days' => 12,
-                'pinned' => false,
-                'scripture' => null,
-            ],
-        ];
+        fake()->seed(20250309);
 
-        foreach ($posts as $post) {
-            $categoryId = $categories[$post['category']] ?? null;
+        $categorySlugs = ['berita', 'kegiatan', 'renungan', 'pengumuman'];
+        $scriptures = ['Yohanes 15:13', 'Matius 5:14', 'Roma 8:28', 'Mazmur 23:1', 'Filipi 4:13'];
+
+        for ($i = 0; $i < 50; $i++) {
+            $categorySlug = $categorySlugs[$i % count($categorySlugs)];
+            $categoryId = $categories[$categorySlug] ?? null;
 
             if ($categoryId === null) {
                 continue;
             }
 
+            $title = (string) Str::title(fake()->unique()->sentence(4));
+            $slug = 'demo-berita-'.$i;
+
+            $paragraphs = fake()->paragraphs(random_int(6, 8));
+            if (is_string($paragraphs)) {
+                $paragraphs = [$paragraphs];
+            }
+
+            $paragraphHtml = implode('', array_map(
+                static fn (string $paragraph): string => '<p>'.$paragraph.'</p>',
+                $paragraphs
+            ));
+
+            $words = fake()->words(4);
+            if (is_string($words)) {
+                $words = [$words];
+            }
+
+            $listItems = implode('', array_map(
+                static fn (string $item): string => '<li>'.$item.'</li>',
+                $words
+            ));
+
+            $content = '<h2>'.fake()->sentence(4).'</h2>'
+                .$paragraphHtml
+                .'<ul>'.$listItems.'</ul>'
+                .'<p>'.fake()->paragraph(3).'</p>';
+
             Post::query()->updateOrCreate(
-                ['slug' => $post['slug']],
+                ['slug' => $slug],
                 [
                     'post_category_id' => $categoryId,
                     'author_id' => $author->getKey(),
                     'author_name' => null,
-                    'title' => $post['title'],
-                    'excerpt' => $post['excerpt'],
+                    'title' => $title,
+                    'excerpt' => fake()->sentence(12),
                     'content' => $content,
                     'featured_image' => $imagePath,
                     'image_alt' => 'Ilustrasi kegiatan Paroki',
-                    'scripture_reference' => $post['scripture'],
+                    'scripture_reference' => $categorySlug === 'renungan'
+                        ? $scriptures[array_rand($scriptures)]
+                        : null,
                     'status' => PostStatus::Published,
-                    'published_at' => Carbon::now()->subDays($post['days'])->utc(),
-                    'is_pinned' => $post['pinned'],
+                    'published_at' => Carbon::now()->subDays(random_int(0, 60))->utc(),
+                    'is_pinned' => $i < 5,
                     'view_count' => random_int(20, 400),
                     'meta_title' => null,
                     'meta_description' => null,
