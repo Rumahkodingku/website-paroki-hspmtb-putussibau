@@ -7,21 +7,10 @@ import { wibMonthLabel, wibShiftMonth } from '@/lib/datetime';
 import type { AgendaIndexProps } from '../types';
 import { AgendaCalendar } from '../components/agenda-calendar';
 import { AgendaControls } from '../components/agenda-controls';
-import { EventCard } from '@/components/event-card';
-import { home } from '@/routes';
 
-/*
- * The public agenda.
- *
- * Two readings of the same data, and the list is the default. A calendar is
- * the better answer to "what is on the 14th" and the worse answer to "what is
- * coming up" — a grid answers the second question only by making the reader
- * read it cell by cell. PRD EVT-10 asks for both, so both are here, and the
- * list is what a visitor lands on.
- *
- * The server sends both sets in one payload, so switching modes is a URL change
- * that re-renders without a round trip to discover the month has activities.
- */
+import { home } from '@/routes';
+import { EventCard } from '../components/event-card';
+
 export default function Index({
     mode,
     upcoming,
@@ -35,6 +24,11 @@ export default function Index({
     const monthLabel = wibMonthLabel(filters.bulan);
     const isCalendar = mode === 'kalender';
     const shown = isCalendar ? monthly : upcoming;
+
+    console.log('Mode', mode);
+    console.log('Upcoming', upcoming);
+    console.log('Monthly', monthly);
+    console.log('today', today);
 
     return (
         <>
@@ -83,15 +77,8 @@ export default function Index({
                                 />
                             </div>
 
-                            {/*
-                             * The list under the grid is not a duplicate. It is
-                             * the only place the month reads as a whole: a grid
-                             * hides a title behind a two-character cell, and the
-                             * reader who wants to know what is on the 14th
-                             * still has to read the 14th.
-                             */}
                             {monthly.length > 0 ? (
-                                <div className="mt-10 grid gap-8 sm:grid-cols-2">
+                                <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-5">
                                     {monthly.map((event) => (
                                         <EventCard
                                             key={event.id}
@@ -118,7 +105,7 @@ export default function Index({
                             </Text>
 
                             {shown.length > 0 ? (
-                                <div className="mt-6 grid gap-8 sm:grid-cols-2">
+                                <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-5">
                                     {shown.map((event) => (
                                         <EventCard
                                             key={event.id}

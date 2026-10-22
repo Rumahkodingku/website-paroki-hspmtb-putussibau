@@ -7,8 +7,8 @@ import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import {
+    formatWibClock,
     formatWibDate,
-    formatWibTime,
     googleCalendarUrl,
 } from '@/lib/datetime';
 import { home } from '@/routes';
@@ -117,11 +117,12 @@ export default function Show({ event, related }: AgendaShowProps) {
                                                 </span>
                                             ) : (
                                                 <span className="ml-2 font-normal text-muted-foreground">
-                                                    {formatWibTime(
+                                                    {formatWibClock(
                                                         event.start_at,
+                                                        displayTimezone,
                                                     )}
                                                     {event.end_at
-                                                        ? ` – ${formatWibTime(event.end_at)}`
+                                                        ? ` – ${formatWibClock(event.end_at, displayTimezone)}`
                                                         : ''}
                                                 </span>
                                             )}
