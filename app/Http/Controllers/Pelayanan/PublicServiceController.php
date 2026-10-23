@@ -31,6 +31,7 @@ class PublicServiceController extends Controller
             ->map(fn (ServiceCategory $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
+                'description' => $category->description,
                 'slug' => $category->slug,
                 'services' => array_values(
                     PublicServiceCardResource::collection(

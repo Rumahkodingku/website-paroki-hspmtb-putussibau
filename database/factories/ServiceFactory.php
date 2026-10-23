@@ -38,6 +38,8 @@ class ServiceFactory extends Factory
             'thumbnail_alt' => null,
             'summary' => fake()->sentence(12),
             'introduction' => '<p>'.fake()->paragraph(2).'</p>',
+            'audience_info' => null,
+            'preparation_info' => null,
             'schedule_info' => null,
             'fee_info' => null,
             'contact_name' => null,

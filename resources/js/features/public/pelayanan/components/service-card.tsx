@@ -1,22 +1,16 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, HeartPulse, Image as ImageIcon } from 'lucide-react';
-
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { show } from '@/routes/pelayanan';
-
 import type { PublicServiceCard as PublicServiceCardData } from '../types';
 
 type Props = {
     service: PublicServiceCardData;
-    index?: number;
 };
 
-export function PublicServiceCard({ service, index }: Props) {
+export function PublicServiceCard({ service }: Props) {
     const isEmergency = service.is_emergency;
-
-    const sequenceNumber =
-        index !== undefined ? String(index + 1).padStart(2, '0') : null;
 
     return (
         <Link
@@ -70,20 +64,6 @@ export function PublicServiceCard({ service, index }: Props) {
                     </div>
                 )}
             </div>
-
-            {/* Sequence number */}
-            {sequenceNumber ? (
-                <span
-                    aria-hidden="true"
-                    className={[
-                        'hidden shrink-0 text-lg font-semibold',
-                        'tabular-nums sm:block',
-                        isEmergency ? 'text-primary' : 'text-muted-foreground',
-                    ].join(' ')}
-                >
-                    {sequenceNumber}
-                </span>
-            ) : null}
 
             {/* Service information */}
             <div className="flex min-w-0 flex-1 flex-col items-start">
@@ -143,21 +123,6 @@ export function PublicServiceCard({ service, index }: Props) {
                         aria-hidden="true"
                     />
                 </span>
-            </div>
-
-            {/* Desktop navigation indicator */}
-            <div
-                aria-hidden="true"
-                className={[
-                    'hidden size-10 shrink-0 items-center justify-center',
-                    'rounded-full transition-all duration-200 sm:flex',
-                    'group-hover:translate-x-0.5',
-                    isEmergency
-                        ? 'text-destructive'
-                        : 'text-muted-foreground group-hover:text-primary-on-surface',
-                ].join(' ')}
-            >
-                <ArrowRight className="size-5" />
             </div>
         </Link>
     );

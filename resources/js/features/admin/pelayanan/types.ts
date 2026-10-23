@@ -38,6 +38,8 @@ export type ServiceDetail = {
     thumbnail_url: string | null;
     summary: string | null;
     introduction: string | null;
+    audience_info: string | null;
+    preparation_info: string | null;
     schedule_info: string | null;
     fee_info: string | null;
     contact_name: string | null;
@@ -68,6 +70,8 @@ export type ServiceRequirementRow = {
     id: number;
     text: string;
     note: string | null;
+    requirement_condition: 'required' | 'conditional' | 'upon_request';
+    applies_to: string | null;
     sort_order: number;
 };
 
@@ -98,6 +102,7 @@ export type ServiceFormMeta = {
     labels: Record<string, string>;
     hints: Record<string, string>;
     methods: Record<string, RegistrationMethod>;
+    conditions: Record<string, string>;
     /** Interface copy: headings, buttons, dialogs, tabs, placeholders. */
     copy: Record<string, string>;
     /** Empty-state copy. */
@@ -120,6 +125,8 @@ export type ServiceFormData = {
     thumbnail_alt: string;
     summary: string;
     introduction: string;
+    audience_info: string;
+    preparation_info: string;
     schedule_info: string;
     fee_info: string;
     contact_name: string;

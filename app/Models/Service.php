@@ -40,6 +40,8 @@ use Illuminate\Support\Collection;
  * @property string|null $thumbnail_alt
  * @property string|null $summary
  * @property string|null $introduction
+ * @property string|null $audience_info
+ * @property string|null $preparation_info
  * @property string|null $schedule_info
  * @property string|null $fee_info
  * @property string|null $contact_name
@@ -68,6 +70,8 @@ use Illuminate\Support\Collection;
     'thumbnail_alt',
     'summary',
     'introduction',
+    'audience_info',
+    'preparation_info',
     'schedule_info',
     'fee_info',
     'contact_name',

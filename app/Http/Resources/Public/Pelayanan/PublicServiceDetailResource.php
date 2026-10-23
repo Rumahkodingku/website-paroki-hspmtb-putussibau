@@ -47,6 +47,8 @@ class PublicServiceDetailResource extends JsonResource
             'summary' => $this->summary,
             // Sanitized HTML. Only rendered through RichText.
             'introduction' => $this->introduction,
+            'audience_info' => $this->audience_info,
+            'preparation_info' => $this->preparation_info,
             'schedule_info' => $this->schedule_info,
             'fee_info' => $this->fee_info,
             'is_emergency' => $this->is_emergency,

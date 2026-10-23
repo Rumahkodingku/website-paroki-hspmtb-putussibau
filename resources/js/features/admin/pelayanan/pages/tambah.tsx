@@ -13,6 +13,7 @@ export default function Tambah({
     labels,
     hints,
     methods,
+    conditions,
     copy,
     empty,
 }: Props) {
@@ -26,6 +27,7 @@ export default function Tambah({
                 labels={labels}
                 hints={hints}
                 methods={methods}
+                conditions={conditions}
                 copy={copy}
                 empty={empty}
             />
