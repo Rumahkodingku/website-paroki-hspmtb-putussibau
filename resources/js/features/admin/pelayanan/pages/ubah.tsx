@@ -31,6 +31,7 @@ export default function Ubah({
     labels,
     hints,
     methods,
+    conditions,
     copy,
     empty,
 }: Props) {
@@ -49,6 +50,7 @@ export default function Ubah({
                 labels={labels}
                 hints={hints}
                 methods={methods}
+                conditions={conditions}
                 copy={copy}
                 empty={empty}
             />

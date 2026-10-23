@@ -26,6 +26,8 @@ use Illuminate\Support\Carbon;
  * @property int $service_id
  * @property string $text
  * @property string|null $note
+ * @property string $requirement_condition
+ * @property string|null $applies_to
  * @property int $sort_order
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -35,6 +37,8 @@ use Illuminate\Support\Carbon;
     'service_id',
     'text',
     'note',
+    'requirement_condition',
+    'applies_to',
     'sort_order',
 ])]
 class ServiceRequirement extends Model

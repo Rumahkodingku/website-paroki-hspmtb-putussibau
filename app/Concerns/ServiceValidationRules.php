@@ -69,6 +69,8 @@ trait ServiceValidationRules
             'thumbnail_alt' => ['nullable', 'string', 'max:255'],
             'summary' => ['nullable', 'string', 'max:2000'],
             'introduction' => ['nullable', 'string', 'max:500000'],
+            'audience_info' => ['nullable', 'string', 'max:5000'],
+            'preparation_info' => ['nullable', 'string', 'max:5000'],
             'schedule_info' => ['nullable', 'string', 'max:5000'],
             'fee_info' => ['nullable', 'string', 'max:5000'],
             'contact_name' => ['nullable', 'string', 'max:255'],
@@ -113,6 +115,8 @@ trait ServiceValidationRules
             'thumbnail_media_id.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'thumbnail_alt.max' => 'Teks alternatif gambar maksimal :max karakter.',
             'summary.max' => 'Ringkasan maksimal :max karakter.',
+            'audience_info.max' => 'Sasaran layanan maksimal :max karakter.',
+            'preparation_info.max' => 'Persiapan maksimal :max karakter.',
             'form_url.max' => 'Tautan Google Form terlalu panjang.',
             'form_button_label.required' => 'Label tombol pendaftaran wajib diisi.',
             'form_closed_message.max' => 'Pesan penutupan maksimal :max karakter.',
@@ -135,6 +139,8 @@ trait ServiceValidationRules
             'thumbnail_alt' => 'teks alternatif thumbnail',
             'summary' => 'ringkasan',
             'introduction' => 'pengantar',
+            'audience_info' => 'sasaran layanan',
+            'preparation_info' => 'persiapan',
             'schedule_info' => 'jadwal',
             'fee_info' => 'biaya',
             'contact_name' => 'nama penanggung jawab',
@@ -158,7 +164,7 @@ trait ServiceValidationRules
     {
         $input = [];
 
-        foreach (['title', 'slug', 'summary', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
+        foreach (['title', 'slug', 'summary', 'audience_info', 'preparation_info', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
             $value = $this->input($field);
 
             if (is_string($value)) {
@@ -169,7 +175,7 @@ trait ServiceValidationRules
         }
 
         // An untouched optional text input is absent, not an empty string.
-        foreach (['summary', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
+        foreach (['summary', 'audience_info', 'preparation_info', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
             if (($input[$field] ?? null) === '') {
                 $input[$field] = null;
             }

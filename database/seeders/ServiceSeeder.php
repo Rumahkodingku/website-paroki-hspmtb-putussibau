@@ -34,7 +34,7 @@ class ServiceSeeder extends Seeder
      *     form_closed_message: string|null,
      *     is_emergency: bool,
      *     sort_order: int,
-     *     requirements: list<array{text: string, note?: string|null}>,
+     *     requirements: list<array{text: string, note?: string|null, requirement_condition?: string|null, applies_to?: string|null}>,
      *     steps: list<array{title: string, description?: string|null}>,
      *     faqs: list<array{question: string, answer: string}>
      * }>
@@ -67,7 +67,7 @@ class ServiceSeeder extends Seeder
                 ['text' => 'Fotokopi Kartu Keluarga'],
                 ['text' => 'Surat keterangan dari ketua lingkungan/wilayah'],
                 ['text' => 'Data wali baptis beserta surat baptis dan krisma wali', 'note' => 'Wali baptis beragama Katolik, telah menerima Komuni dan Krisma, serta bersedia mendampingi pertumbuhan iman.'],
-                ['text' => 'Pas foto sesuai ketentuan sekretariat', 'note' => 'Bila diminta.'],
+                ['text' => 'Pas foto sesuai ketentuan sekretariat', 'note' => 'Bila diminta.', 'requirement_condition' => 'upon_request'],
                 ['text' => 'Surat permohonan menjadi Katolik bagi calon baptis dewasa', 'note' => 'Disertai keterangan pernah/belum dibaptis bila diperlukan.'],
             ],
             'steps' => [
@@ -109,7 +109,7 @@ class ServiceSeeder extends Seeder
                 ['text' => 'Fotokopi Kartu Keluarga'],
                 ['text' => 'Surat keterangan telah mengikuti katekese persiapan Krisma'],
                 ['text' => 'Data wali krisma beserta surat baptis/krisma wali'],
-                ['text' => 'Surat pengantar dari lingkungan', 'note' => 'Bila diminta.'],
+                ['text' => 'Surat pengantar dari lingkungan', 'note' => 'Bila diminta.', 'requirement_condition' => 'upon_request'],
             ],
             'steps' => [
                 ['title' => 'Mengisi pendaftaran peserta'],
@@ -268,7 +268,7 @@ class ServiceSeeder extends Seeder
                 ['text' => 'Surat permohonan dan rekomendasi dari pastor paroki'],
                 ['text' => 'Dokumen administrasi sesuai ketentuan keuskupan'],
                 ['text' => 'Hasil pembinaan dan penilaian rohani'],
-                ['text' => 'Surat keterangan kesehatan dan psikologis', 'note' => 'Bila diminta oleh keuskupan.'],
+                ['text' => 'Surat keterangan kesehatan dan psikologis', 'note' => 'Bila diminta oleh keuskupan.', 'requirement_condition' => 'upon_request'],
             ],
             'steps' => [
                 ['title' => 'Berkonsultasi dengan pastor paroki'],
@@ -345,14 +345,18 @@ class ServiceSeeder extends Seeder
                     'thumbnail_alt' => 'Ilustrasi layanan '.$service['title'].'.',
                     'summary' => $service['summary'],
                     'introduction' => $service['introduction'],
+                    'audience_info' => $this->detailContent($service['slug'])['audience_info'],
+                    'preparation_info' => $this->detailContent($service['slug'])['preparation_info'],
                     'schedule_info' => $service['schedule_info'],
-                    'fee_info' => $service['fee_info'],
+                    'fee_info' => $service['fee_info'] ?? 'Persembahan bersifat sukarela. Silakan menghubungi sekretariat paroki untuk informasi lebih lanjut.',
                     'contact_name' => $service['contact_name'],
                     'contact_phone' => $service['contact_phone'],
                     'form_url' => $service['form_url'],
                     'form_button_label' => 'Daftar Sekarang',
                     'is_form_open' => $service['is_form_open'],
-                    'form_closed_message' => $service['form_closed_message'],
+                    'form_closed_message' => $service['form_closed_message'] ?? ($service['form_url'] !== null
+                        ? 'Pendaftaran sedang ditutup. Hubungi sekretariat untuk informasi periode berikutnya.'
+                        : 'Layanan ini tidak menggunakan pendaftaran online. Silakan hubungi sekretariat paroki.'),
                     'is_emergency' => $service['is_emergency'],
                     'is_active' => true,
                     'sort_order' => $service['sort_order'],
@@ -421,7 +425,7 @@ class ServiceSeeder extends Seeder
     }
 
     /**
-     * @param  list<array{text: string, note?: string|null}>  $requirements
+     * @param  list<array{text: string, note?: string|null, requirement_condition?: string|null, applies_to?: string|null}>  $requirements
      * @param  list<array{title: string, description?: string|null}>  $steps
      * @param  list<array{question: string, answer: string}>  $faqs
      */
@@ -439,7 +443,9 @@ class ServiceSeeder extends Seeder
             ServiceRequirement::query()->create([
                 'service_id' => $service->getKey(),
                 'text' => $requirement['text'],
-                'note' => $requirement['note'] ?? null,
+                'note' => $requirement['note'] ?? 'Tidak ada catatan tambahan.',
+                'requirement_condition' => $requirement['requirement_condition'] ?? 'required',
+                'applies_to' => $requirement['applies_to'] ?? 'Umum',
                 'sort_order' => $index,
             ]);
         }
@@ -448,7 +454,7 @@ class ServiceSeeder extends Seeder
             ServiceStep::query()->create([
                 'service_id' => $service->getKey(),
                 'title' => $step['title'],
-                'description' => $step['description'] ?? null,
+                'description' => $step['description'] ?? 'Ikuti tahapan ini sesuai arahan pastor/sekretariat paroki.',
                 'sort_order' => $index,
             ]);
         }
@@ -461,5 +467,49 @@ class ServiceSeeder extends Seeder
                 'sort_order' => $index,
             ]);
         }
+    }
+
+    /**
+     * Konten sasaran & persiapan yang diturunkan dari data existing (heuristik).
+     * Menunggu persetujuan paroki sebelum dianggap resmi.
+     *
+     * @return array{audience_info: string|null, preparation_info: string|null}
+     */
+    private function detailContent(string $slug): array
+    {
+        return match ($slug) {
+            'baptis' => [
+                'audience_info' => 'Bayi dan anak kecil dari keluarga Katolik, serta calon baptis dewasa yang mempersiapkan diri melalui katekumenat; juga orang tua dan wali baptis.',
+                'preparation_info' => 'Orang tua dan wali baptis mengikuti pembekalan; calon baptis dewasa mengikuti masa katekumenat. Siapkan dokumen yang diminta dan tentukan jadwal bersama pastor/sekretariat.',
+            ],
+            'penguatan-krisma' => [
+                'audience_info' => 'Umat yang telah dibaptis dan mempersiapkan diri sesuai ketentuan paroki, beserta wali krisma.',
+                'preparation_info' => 'Mengikuti katekese persiapan Krisma, pengakuan dosa, dan persiapan akhir sebelum perayaan.',
+            ],
+            'ekaristi' => [
+                'audience_info' => 'Anak-anak yang siap mengikuti katekese Komuni Pertama, serta umat dewasa yang ingin memperdalam pemahaman Ekaristi.',
+                'preparation_info' => 'Mengikuti pelajaran persiapan (termasuk pengakuan dosa pertama), gladi bersama, dan perayaan Komuni Pertama.',
+            ],
+            'tobat-rekonsiliasi' => [
+                'audience_info' => 'Seluruh umat yang ingin menerima pengampunan dosa dan berdamai dengan Tuhan dan Gereja.',
+                'preparation_info' => 'Mempersiapkan diri melalui pemeriksaan batin; pengakuan dosa rutin atau pribadi sesuai jadwal paroki.',
+            ],
+            'pengurapan-orang-sakit' => [
+                'audience_info' => 'Umat Katolik yang sakit berat atau lanjut usia, beserta keluarga pendamping.',
+                'preparation_info' => 'Hubungi nomor pelayanan darurat paroki; siapkan data dasar dan lokasi orang sakit.',
+            ],
+            'tahbisan-suci' => [
+                'audience_info' => 'Pria yang merasa dipanggil untuk ditahbiskan sebagai uskup, imam, atau diakon.',
+                'preparation_info' => 'Berkonsultasi dengan pastor paroki; mengikuti pembinaan dan tahapan persiapan keuskupan.',
+            ],
+            'perkawinan' => [
+                'audience_info' => 'Pasangan calon suami-istri yang hendak menikah secara Katolik.',
+                'preparation_info' => 'Hubungi pastor/sekretariat beberapa bulan sebelum rencana; pemeriksaan kanonik, kursus persiapan, pengumuman.',
+            ],
+            default => [
+                'audience_info' => null,
+                'preparation_info' => null,
+            ],
+        };
     }
 }

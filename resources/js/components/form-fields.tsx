@@ -159,6 +159,7 @@ export function FormInput({
     min,
     max,
     placeholder,
+    list,
 }: {
     id: string;
     value: string;
@@ -169,6 +170,7 @@ export function FormInput({
     min?: string | number;
     max?: string | number;
     placeholder?: string;
+    list?: string;
 }) {
     return (
         <Input
@@ -179,6 +181,7 @@ export function FormInput({
             required={required}
             min={min}
             max={max}
+            list={list}
             onChange={(event: any) => onChange(event.target.value)}
             className="border-border focus-visible:border-primary"
             placeholder={placeholder}

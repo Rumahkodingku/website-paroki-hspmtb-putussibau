@@ -35,6 +35,8 @@ class ServiceResource extends JsonResource
             'thumbnail_url' => $this->whenLoaded('thumbnailMedia', fn (): ?string => $this->thumbnailMedia->url('medium')),
             'summary' => $this->summary,
             'introduction' => $this->introduction,
+            'audience_info' => $this->audience_info,
+            'preparation_info' => $this->preparation_info,
             'schedule_info' => $this->schedule_info,
             'fee_info' => $this->fee_info,
             'contact_name' => $this->contact_name,

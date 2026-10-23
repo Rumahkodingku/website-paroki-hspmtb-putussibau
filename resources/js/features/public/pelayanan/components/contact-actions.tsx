@@ -1,14 +1,7 @@
 import { MessageCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Text } from '@/components/text';
 import type { PublicServiceContact } from '../types';
 
-/**
- * The telephone and WhatsApp buttons a contact produces.
- *
- * Renders nothing when the number did not normalize, so a service with no usable
- * contact shows no button rather than a dead `tel:` link (roadmap 9.2.2).
- */
 export function ContactActions({
     contact,
     labels,
@@ -24,9 +17,9 @@ export function ContactActions({
 
     return (
         <div className={className}>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                 {contact.tel ? (
-                    <Button asChild>
+                    <Button asChild className="w-full text-sm sm:w-auto">
                         <a href={contact.tel}>
                             <Phone className="size-4" aria-hidden="true" />
                             {labels.call}
@@ -35,7 +28,11 @@ export function ContactActions({
                 ) : null}
 
                 {contact.whatsapp ? (
-                    <Button asChild variant="outline">
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="w-full text-sm sm:w-auto"
+                    >
                         <a
                             href={contact.whatsapp}
                             target="_blank"
@@ -50,12 +47,6 @@ export function ContactActions({
                     </Button>
                 ) : null}
             </div>
-
-            {contact.phone ? (
-                <Text as="p" variant="body-sm" color="muted" className="mt-3">
-                    {contact.phone}
-                </Text>
-            ) : null}
         </div>
     );
 }

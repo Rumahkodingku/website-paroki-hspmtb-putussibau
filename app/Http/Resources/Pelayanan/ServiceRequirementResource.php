@@ -25,6 +25,8 @@ class ServiceRequirementResource extends JsonResource
             'id' => $this->id,
             'text' => $this->text,
             'note' => $this->note,
+            'requirement_condition' => $this->requirement_condition,
+            'applies_to' => $this->applies_to,
             'sort_order' => $this->sort_order,
         ];
     }

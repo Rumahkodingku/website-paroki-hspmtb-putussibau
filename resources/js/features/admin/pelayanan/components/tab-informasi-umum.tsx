@@ -142,6 +142,38 @@ export function TabInformasiUmum({
                         />
                     </Field>
 
+                    <Field
+                        id="service-audience-info"
+                        label={labels.audience_info}
+                        hint={hints.audience_info}
+                        error={form.errors.audience_info}
+                    >
+                        <FormTextarea
+                            id="service-audience-info"
+                            value={form.data.audience_info}
+                            onChange={(value) =>
+                                form.setData('audience_info', value)
+                            }
+                            rows={3}
+                        />
+                    </Field>
+
+                    <Field
+                        id="service-preparation-info"
+                        label={labels.preparation_info}
+                        hint={hints.preparation_info}
+                        error={form.errors.preparation_info}
+                    >
+                        <FormTextarea
+                            id="service-preparation-info"
+                            value={form.data.preparation_info}
+                            onChange={(value) =>
+                                form.setData('preparation_info', value)
+                            }
+                            rows={3}
+                        />
+                    </Field>
+
                     <div className="space-y-2">
                         <Label htmlFor="service-introduction">
                             {labels.introduction}
