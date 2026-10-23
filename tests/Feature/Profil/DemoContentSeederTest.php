@@ -59,7 +59,7 @@ it('fills and activates the service module for preview', function () {
 
     // ServiceSeeder creates the six services inactive; the demo seeder activates
     // them so /pelayanan is populated. Production never reaches this branch.
-    expect($services)->toHaveCount(6);
+    expect($services)->toHaveCount(7);
 
     foreach ($services as $service) {
         expect($service->requirements()->count())->toBeGreaterThan(0)

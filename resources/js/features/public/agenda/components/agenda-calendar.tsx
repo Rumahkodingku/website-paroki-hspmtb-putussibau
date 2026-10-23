@@ -1,19 +1,14 @@
-import { Link } from '@inertiajs/react';
-import { Text } from '@/components/text';
-import { CALENDAR_DAY_NAMES, wibDateKey, wibMonthGrid } from '@/lib/datetime';
-import { show as eventShow } from '@/routes/agenda';
-import type { PublicEvent } from '../types';
+import { useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-/**
- * A month, as a grid.
- *
- * A wall of seven equal columns is the wrong shape for a parish whose month has
- * four activities in it. So this is a real grid — it answers "is anything on
- * the 14th" without scrolling — but a day with nothing on it is a quiet square,
- * a day with something is a number, and the list below the grid is what a
- * reader actually reads. Nothing is reachable in the calendar that is not also
- * in the list; the grid is a way of locating it, not a second copy of it.
- */
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/text';
+import { wibDateKey, wibMonthGrid } from '@/lib/datetime';
+import type { PublicEvent } from '../types';
+import { AgendaCalendarGrid } from './agenda-calendar-grid';
+import { AgendaSelectedDayPanel } from './agenda-selected-day-panel';
+import { useSelectedDate } from '../hooks/use-selected-date';
+
 export function AgendaCalendar({
     monthKey,
     today,
@@ -25,125 +20,169 @@ export function AgendaCalendar({
     events: PublicEvent[];
     displayTimezone: string;
 }) {
-    const grid = wibMonthGrid(monthKey, today);
+    const grid = useMemo(
+        () => wibMonthGrid(monthKey, today),
+        [monthKey, today],
+    );
 
-    /*
-     * Grouped once, in WIB.
-     *
-     * wibDateKey is an Intl.DateTimeFormat call under the hood and a grid asks
-     * for it once per event per render; doing it inside the cell loop would call
-     * it a hundred times to answer one question.
-     *
-     * The timezone is not cosmetic here. An activity at 23:00 WIB is 16:00 UTC
-     * on the previous day, so slicing the ISO string would file last night's
-     * activities in tonight's row. wibDateKey is what makes the square correct.
-     */
-    const byDate = new Map<string, PublicEvent[]>();
+    const byDate = useMemo(() => {
+        const result = new Map<string, PublicEvent[]>();
 
-    for (const event of events) {
-        const key = wibDateKey(event.start_at, displayTimezone);
-        const bucket = byDate.get(key);
+        for (const event of events) {
+            const key = wibDateKey(event.start_at, displayTimezone);
 
-        if (bucket) {
-            bucket.push(event);
-        } else {
-            byDate.set(key, [event]);
+            const bucket = result.get(key);
+
+            if (bucket) {
+                bucket.push(event);
+            } else {
+                result.set(key, [event]);
+            }
         }
-    }
+
+        return result;
+    }, [events, displayTimezone]);
+
+    const monthDays = useMemo(
+        () => grid.weeks.flat().filter((day) => day.inMonth && day.key),
+        [grid],
+    );
+
+    const firstEventDate = useMemo(
+        () => monthDays.find((day) => byDate.has(day.key))?.key ?? null,
+        [monthDays, byDate],
+    );
+
+    const [selectedDate, setSelectedDate] = useSelectedDate(
+        monthDays,
+        today,
+        firstEventDate,
+    );
+
+    const selectedEvents = byDate.get(selectedDate) ?? [];
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-                <caption className="sr-only">{grid.label}</caption>
-                <thead>
-                    <tr>
-                        {CALENDAR_DAY_NAMES.map((name) => (
-                            <th
-                                key={name}
-                                scope="col"
-                                className="pb-2 text-center text-fine-print text-muted-foreground uppercase"
+        <section
+            aria-label="Kalender agenda paroki"
+            className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.95fr)] lg:gap-5"
+        >
+            {/* Monthly calendar */}
+            <div className="min-w-0 rounded-xl p-3 sm:p-4 lg:p-5">
+                {/* Month navigation */}
+                <div className="mb-4 flex items-center justify-between gap-2 sm:mb-5">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-9 shrink-0 rounded-full"
+                        aria-label="Tanggal sebelumnya"
+                        onClick={() => {
+                            const index = monthDays.findIndex(
+                                (day) => day.key === selectedDate,
+                            );
+
+                            if (index > 0) {
+                                setSelectedDate(monthDays[index - 1].key);
+                            }
+                        }}
+                    >
+                        <ChevronLeft className="size-4" />
+                    </Button>
+
+                    <div className="mb-4 min-w-0 text-center">
+                        <Text as="h3" variant="h3" className="truncate">
+                            {grid.label}
+                        </Text>
+
+                        <Text
+                            as="p"
+                            variant="fine-print"
+                            color="muted"
+                            className="mt-1 hidden sm:block"
+                        >
+                            Pilih tanggal untuk melihat agenda
+                        </Text>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                        {selectedDate !== today && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    const todayInMonth = monthDays.some(
+                                        (day) => day.key === today,
+                                    );
+
+                                    if (todayInMonth) {
+                                        setSelectedDate(today);
+                                    }
+                                }}
+                                disabled={
+                                    !monthDays.some((day) => day.key === today)
+                                }
+                                className="hidden sm:inline-flex"
                             >
-                                {name}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {grid.weeks.map((week, weekIndex) => (
-                        <tr key={`week-${weekIndex}`}>
-                            {week.map((day, dayIndex) => {
-                                const dayEvents = day.key
-                                    ? (byDate.get(day.key) ?? [])
-                                    : [];
+                                Hari ini
+                            </Button>
+                        )}
 
-                                return (
-                                    <td
-                                        key={
-                                            day.key ||
-                                            `blank-${weekIndex}-${dayIndex}`
-                                        }
-                                        className="border border-border p-0 align-top"
-                                    >
-                                        <div
-                                            className={`flex h-16 min-h-16 flex-col gap-1 p-1.5 ${
-                                                day.inMonth ? '' : 'bg-muted/40'
-                                            }`}
-                                        >
-                                            <span
-                                                className={`text-fine-print tabular-nums ${
-                                                    day.isToday
-                                                        ? 'font-semibold text-primary-on-surface'
-                                                        : 'text-muted-foreground'
-                                                }`}
-                                            >
-                                                {day.inMonth ? day.date : ''}
-                                            </span>
-
-                                            {/*
-                                             * At most two, because a third would
-                                             * overflow a 16-row-high cell. The
-                                             * count of what is left links to the
-                                             * same list the grid is drawn from,
-                                             * so nothing is hidden by the cap.
-                                             */}
-                                            {dayEvents
-                                                .slice(0, 2)
-                                                .map((event) => (
-                                                    <Link
-                                                        key={event.id}
-                                                        href={eventShow(
-                                                            event.slug,
-                                                        )}
-                                                        prefetch
-                                                        title={event.title}
-                                                        className={`block truncate rounded-sm px-1 py-0.5 text-fine-print ${
-                                                            event.status ===
-                                                            'cancelled'
-                                                                ? 'bg-destructive/10 text-destructive line-through'
-                                                                : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
-                                                        }`}
-                                                    >
-                                                        {event.title}
-                                                    </Link>
-                                                ))}
-
-                                            {dayEvents.length > 2 ? (
-                                                <Text
-                                                    as="span"
-                                                    variant="fine-print"
-                                                    color="muted"
-                                                >
-                                                    +{dayEvents.length - 2} lagi
-                                                </Text>
-                                            ) : null}
-                                        </div>
-                                    </td>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="size-9 shrink-0 rounded-full"
+                            aria-label="Tanggal berikutnya"
+                            onClick={() => {
+                                const index = monthDays.findIndex(
+                                    (day) => day.key === selectedDate,
                                 );
-                            })}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+
+                                if (
+                                    index >= 0 &&
+                                    index < monthDays.length - 1
+                                ) {
+                                    setSelectedDate(monthDays[index + 1].key);
+                                }
+                            }}
+                        >
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
+                </div>
+
+                {selectedDate !== today &&
+                    monthDays.some((day) => day.key === today) && (
+                        <div className="mb-3 flex justify-end sm:hidden">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedDate(today)}
+                            >
+                                Kembali ke hari ini
+                            </Button>
+                        </div>
+                    )}
+
+                {/* Calendar grid */}
+                <AgendaCalendarGrid
+                    grid={grid}
+                    byDate={byDate}
+                    selectedDate={selectedDate}
+                    today={today}
+                    onSelectDate={setSelectedDate}
+                />
+            </div>
+
+            {/* Selected-day agenda panel */}
+            <AgendaSelectedDayPanel
+                selectedDate={selectedDate}
+                selectedEvents={selectedEvents}
+                displayTimezone={displayTimezone}
+                events={events}
+            />
+        </section>
     );
 }

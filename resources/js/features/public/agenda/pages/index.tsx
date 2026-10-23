@@ -7,7 +7,6 @@ import { wibMonthLabel, wibShiftMonth } from '@/lib/datetime';
 import type { AgendaIndexProps } from '../types';
 import { AgendaCalendar } from '../components/agenda-calendar';
 import { AgendaControls } from '../components/agenda-controls';
-
 import { home } from '@/routes';
 import { EventCard } from '../components/event-card';
 
@@ -24,11 +23,6 @@ export default function Index({
     const monthLabel = wibMonthLabel(filters.bulan);
     const isCalendar = mode === 'kalender';
     const shown = isCalendar ? monthly : upcoming;
-
-    console.log('Mode', mode);
-    console.log('Upcoming', upcoming);
-    console.log('Monthly', monthly);
-    console.log('today', today);
 
     return (
         <>
@@ -64,7 +58,12 @@ export default function Index({
 
                     {isCalendar ? (
                         <section aria-labelledby="agenda-bulan">
-                            <Text as="h2" variant="h3" id="agenda-bulan">
+                            <Text
+                                as="h2"
+                                variant="h3"
+                                id="agenda-bulan"
+                                className="sr-only"
+                            >
                                 {monthLabel}
                             </Text>
 
@@ -76,27 +75,6 @@ export default function Index({
                                     displayTimezone={displayTimezone}
                                 />
                             </div>
-
-                            {monthly.length > 0 ? (
-                                <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-5">
-                                    {monthly.map((event) => (
-                                        <EventCard
-                                            key={event.id}
-                                            event={event}
-                                            displayTimezone={displayTimezone}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <Text
-                                    as="p"
-                                    variant="body"
-                                    color="muted"
-                                    className="mt-6"
-                                >
-                                    Belum ada agenda pada bulan ini.
-                                </Text>
-                            )}
                         </section>
                     ) : (
                         <section aria-labelledby="agenda-mendatang">

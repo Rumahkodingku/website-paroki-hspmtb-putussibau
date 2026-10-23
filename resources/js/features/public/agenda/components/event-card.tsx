@@ -11,37 +11,16 @@ import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatWibClock } from '@/lib/datetime';
+import { formatWibClock, formatWibDate } from '@/lib/datetime';
 import { show as eventShow } from '@/routes/agenda';
-
-export type EventCardData = {
-    id: number;
-    title: string;
-    slug: string;
-    summary: string | null;
-    start_at: string;
-    end_at: string | null;
-    is_all_day: boolean;
-    location_name: string | null;
-    location_url: string | null;
-    poster: string | null;
-    poster_alt: string | null;
-    status: 'scheduled' | 'cancelled' | 'postponed';
-    status_label: string;
-    category: {
-        id: number;
-        name: string;
-        slug: string;
-        color_value: string;
-    } | null;
-};
+import type { PublicEvent } from '../types';
 
 export function EventCard({
     event,
     displayTimezone,
     headingLevel = 'h3',
 }: {
-    event: EventCardData;
+    event: PublicEvent;
     displayTimezone: string;
     headingLevel?: 'h2' | 'h3';
 }) {
@@ -71,20 +50,19 @@ export function EventCard({
         <article
             className={cn(
                 'group relative grid min-w-0 grid-cols-1 overflow-hidden',
-                'hover:border-primary/30',
                 isNotHappening && 'opacity-80',
                 'sm:grid-cols-[minmax(0,225px)_minmax(0,1fr)_52px]',
             )}
         >
             {/* Poster and date */}
-            <div className="grid grid-cols-[minmax(0,1fr)_84px] gap-2 bg-muted/40 sm:grid-cols-[minmax(0,1fr)_92px]">
+            <div className="grid grid-cols-[minmax(0,1fr)_84px] gap-2 sm:grid-cols-[minmax(0,1fr)_92px]">
                 <div className="relative min-h-29 overflow-hidden sm:min-h-33">
                     {event.poster ? (
                         <img
                             src={event.poster}
                             alt={event.poster_alt || `Poster ${event.title}`}
                             loading="lazy"
-                            className="absolute inset-0 size-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                            className="absolute inset-0 size-full rounded-2xl object-cover transition-transform duration-300"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted">
@@ -100,7 +78,7 @@ export function EventCard({
                     <Text
                         as="span"
                         variant="label"
-                        color="brand"
+
                         className="text-xs font-semibold tracking-wide uppercase"
                     >
                         {month}
@@ -188,13 +166,11 @@ export function EventCard({
                             aria-hidden="true"
                             className="size-4 shrink-0"
                         />
+
                         <Text as="span" variant="body-sm">
                             {event.is_all_day
                                 ? 'Sepanjang hari'
-                                : formatWibClock(
-                                      event.start_at,
-                                      displayTimezone,
-                                  )}
+                                : `${formatWibDate(event.start_at)} - ${formatWibClock(event.start_at)}`}
                         </Text>
                     </div>
 

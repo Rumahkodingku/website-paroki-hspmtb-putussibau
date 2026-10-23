@@ -1,5 +1,14 @@
 import { Head } from '@inertiajs/react';
-import { CheckCircle2, Image as ImageIcon, Printer } from 'lucide-react';
+import {
+    ArrowDown,
+    CalendarDays,
+    CheckCircle2,
+    Clock3,
+    Image as ImageIcon,
+    MessageCircle,
+    Users,
+} from 'lucide-react';
+
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { DocumentCard } from '@/components/document-card';
 import { PublicSection } from '@/components/public-section';
@@ -7,14 +16,12 @@ import { RichText } from '@/components/rich-text';
 import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { formatWibDate } from '@/lib/datetime';
 import { home } from '@/routes';
 import { index as pelayananIndex } from '@/routes/pelayanan';
-import { PublicServiceCard } from '../components/service-card';
 import { FaqList } from '../components/faq-list';
 import { ServiceCta } from '../components/service-cta';
+
 import type {
     PublicServiceCard as PublicServiceCardData,
     PublicServiceDetail,
@@ -35,267 +42,478 @@ const CTA_LABELS = {
     whatsapp: 'WhatsApp',
 };
 
-const FLOW_STEPS = [
-    {
-        title: 'Baca syarat',
-        description: 'Pahami syarat dan persiapan layanan.',
-    },
-    {
-        title: 'Siapkan dokumen',
-        description: 'Lengkapi berkas yang dibutuhkan.',
-    },
-    {
-        title: 'Isi Google Form',
-        description: 'Daftar melalui tautan pendaftaran yang tersedia.',
-    },
-    {
-        title: 'Tunggu konfirmasi',
-        description: 'Sekretariat akan menindaklanjuti pendaftaran Anda.',
-    },
-];
+export default function PelayananShow({ service }: Props) {
+    const isRegistrationOpen =
+        service.cta.state === 'form_open' &&
+        !service.is_emergency &&
+        Boolean(service.cta.url);
 
-export default function PelayananShow({ service, otherServices }: Props) {
-    const showFlow = !service.is_emergency && service.cta.state === 'form_open';
+    const hasContact =
+        Boolean(service.contact.tel) || Boolean(service.contact.whatsapp);
 
     return (
         <>
             <Seo
-                title={service.seo.title}
-                description={service.seo.description}
+                title={service.seo.title || service.title}
+                description={service.seo.description || service.summary}
             />
 
-            <Head title={service.title} />
+            <Head title={service.seo.title || service.title} />
 
+            {/* Breadcrumb and editorial hero */}
             <PublicSection>
                 <Breadcrumbs
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },
-                        { title: 'Pelayanan', href: pelayananIndex() },
+                        {
+                            title: 'Pelayanan',
+                            href: pelayananIndex(),
+                        },
                         { title: service.title },
                     ]}
                 />
 
-                {service.thumbnail ? (
-                    <img
-                        src={service.thumbnail}
-                        alt={service.thumbnail_alt ?? ''}
-                        className="mt-8 aspect-video w-full rounded-xl border border-border object-cover"
-                    />
-                ) : (
-                    <div className="mt-8 flex aspect-video w-full items-center justify-center rounded-xl border border-border bg-canvas-subtle text-muted-foreground">
-                        <ImageIcon className="size-10" aria-hidden="true" />
-                    </div>
-                )}
-
-                <div className="mt-8 grid gap-10 lg:grid-cols-3">
-                    <div className="space-y-6 lg:col-span-2">
-                        <div className="space-y-2">
-                            {service.category ? (
-                                <Badge variant="secondary">
-                                    {service.category.name}
-                                </Badge>
-                            ) : null}
-
-                            <Text as="h1" variant="display-lg">
-                                {service.title}
-                            </Text>
-
-                            {service.summary ? (
-                                <Text
-                                    as="p"
-                                    variant="body-lg"
-                                    color="muted"
-                                    className="max-w-2xl"
-                                >
-                                    {service.summary}
-                                </Text>
-                            ) : null}
-                        </div>
-
-                        <ServiceCta
-                            cta={service.cta}
-                            contact={service.contact}
-                            labels={CTA_LABELS}
-                        />
-
-                        {service.introduction ? (
-                            <RichText
-                                html={service.introduction}
-                                className="max-w-3xl"
-                            />
+                <div className="mt-6 grid items-center gap-8 lg:mt-10 lg:grid-cols-2 lg:gap-12">
+                    {/* Hero content */}
+                    <div className="order-2 min-w-0 lg:order-1">
+                        {service.category ? (
+                            <p className="text-xs font-semibold tracking-[0.16em] text-primary-on-surface uppercase sm:text-sm">
+                                {service.category.name}
+                            </p>
                         ) : null}
-                    </div>
 
-                    <aside className="space-y-4 rounded-lg border border-border bg-canvas-subtle p-6">
-                        <Text as="h2" variant="h3">
-                            Kontak & Pendaftaran
+                        <Text
+                            as="h1"
+                            variant="display-lg"
+                            className="mt-3 max-w-2xl text-3xl leading-tight font-semibold tracking-tight sm:text-4xl lg:text-5xl"
+                        >
+                            {service.title}
                         </Text>
 
-                        <ServiceCta
-                            cta={service.cta}
-                            contact={service.contact}
-                            labels={CTA_LABELS}
-                        />
-
-                        {service.contact.name ? (
-                            <Text as="p" variant="body-sm" color="muted">
-                                Penanggung jawab: {service.contact.name}
+                        {service.summary ? (
+                            <Text
+                                as="p"
+                                variant="body-lg"
+                                color="muted"
+                                className="mt-4 max-w-xl text-base leading-relaxed sm:text-lg"
+                            >
+                                {service.summary}
                             </Text>
                         ) : null}
-                    </aside>
+
+                        {service.is_emergency ? (
+                            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-sm font-medium text-destructive">
+                                <Clock3 className="size-4" aria-hidden="true" />
+                                Pelayanan membutuhkan perhatian segera
+                            </div>
+                        ) : null}
+
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                            <ServiceCta
+                                cta={service.cta}
+                                contact={service.contact}
+                                labels={CTA_LABELS}
+                            />
+
+                            <a
+                                href="#requirements"
+                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                            >
+                                Lihat Persyaratan
+                                <ArrowDown
+                                    className="size-4"
+                                    aria-hidden="true"
+                                />
+                            </a>
+                        </div>
+
+                        {service.cta.message ? (
+                            <Text
+                                as="p"
+                                variant="body-sm"
+                                color="muted"
+                                className="mt-3"
+                            >
+                                {service.cta.message}
+                            </Text>
+                        ) : null}
+                    </div>
+
+                    {/* Hero image */}
+                    <div className="order-1 min-w-0 lg:order-2">
+                        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-muted sm:aspect-16/10 lg:aspect-5/4">
+                            {service.thumbnail ? (
+                                <img
+                                    src={service.thumbnail}
+                                    alt={service.thumbnail_alt ?? ''}
+                                    fetchPriority="high"
+                                    decoding="async"
+                                    className="size-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex size-full items-center justify-center text-muted-foreground">
+                                    <ImageIcon
+                                        className="size-12"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </PublicSection>
 
-            {showFlow ? (
-                <PublicSection surface="soft">
-                    <SectionHeading title="Alur Pendaftaran" />
-                    <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                        {FLOW_STEPS.map((step, index) => (
-                            <li
-                                key={step.title}
-                                className="rounded-lg border border-border bg-card p-5"
-                            >
-                                <span
-                                    aria-hidden="true"
-                                    className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground"
-                                >
-                                    {index + 1}
-                                </span>
-                                <Text
-                                    as="p"
-                                    variant="heading-sm"
-                                    className="mt-3"
-                                >
-                                    {step.title}
-                                </Text>
-                                <Text as="p" variant="body-sm" color="muted">
-                                    {step.description}
-                                </Text>
-                            </li>
-                        ))}
-                    </ol>
-                </PublicSection>
-            ) : null}
-
-            {service.requirements.length > 0 ? (
-                <PublicSection>
-                    <SectionHeading title="Syarat Dokumen" />
-                    <ul className="mt-8 space-y-3">
-                        {service.requirements.map((requirement) => (
-                            <li
-                                key={requirement.id}
-                                className="flex items-start gap-3"
-                            >
-                                <CheckCircle2
-                                    className="mt-0.5 size-5 shrink-0 text-primary-on-surface"
-                                    aria-hidden="true"
-                                />
-                                <div>
-                                    <Text as="p" variant="body">
-                                        {requirement.text}
-                                    </Text>
-                                    {requirement.note ? (
-                                        <Text
-                                            as="p"
-                                            variant="body-sm"
-                                            color="muted"
-                                        >
-                                            {requirement.note}
-                                        </Text>
-                                    ) : null}
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </PublicSection>
-            ) : null}
-
-            {service.steps.length > 0 ? (
-                <PublicSection surface="soft">
-                    <SectionHeading title="Prosedur Pendaftaran" />
-                    <ol className="mt-8 space-y-4">
-                        {service.steps.map((step, index) => (
-                            <li
-                                key={step.id}
-                                className="flex items-start gap-4"
-                            >
-                                <span
-                                    aria-hidden="true"
-                                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-medium text-white"
-                                >
-                                    {index + 1}
-                                </span>
-                                <div>
-                                    <Text as="p" variant="heading-sm">
-                                        {step.title}
-                                    </Text>
-                                    {step.description ? (
-                                        <Text
-                                            as="p"
-                                            variant="body"
-                                            color="muted"
-                                        >
-                                            {step.description}
-                                        </Text>
-                                    ) : null}
-                                </div>
-                            </li>
-                        ))}
-                    </ol>
-                </PublicSection>
-            ) : null}
-
-            {service.schedule_info || service.fee_info ? (
-                <PublicSection>
-                    <div className="grid gap-10 md:grid-cols-2">
+                {/* Quick information */}
+                {(service.schedule_info ||
+                    service.fee_info ||
+                    service.contact.name ||
+                    service.contact.phone) && (
+                    <div className="mt-8 grid overflow-hidden rounded-2xl border border-border/70 bg-muted/30 sm:mt-10 md:grid-cols-2 lg:grid-cols-3">
                         {service.schedule_info ? (
-                            <div>
-                                <SectionHeading
-                                    title="Jadwal & Persiapan"
-                                    level={3}
-                                />
-                                <Text
-                                    as="p"
-                                    variant="body"
-                                    className="mt-4 whitespace-pre-line"
-                                >
-                                    {service.schedule_info}
-                                </Text>
+                            <div className="flex items-start gap-4 p-5 sm:p-6">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-background text-primary-on-surface">
+                                    <CalendarDays
+                                        className="size-5"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <Text as="h2" variant="heading-sm">
+                                        Jadwal Pelaksanaan
+                                    </Text>
+
+                                    <Text
+                                        as="p"
+                                        variant="body-sm"
+                                        color="muted"
+                                        className="mt-1 leading-relaxed"
+                                    >
+                                        {service.schedule_info}
+                                    </Text>
+                                </div>
                             </div>
                         ) : null}
 
                         {service.fee_info ? (
-                            <div>
+                            <div className="flex items-start gap-4 border-t border-border/70 p-5 sm:p-6 md:border-t-0 md:border-l">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-background text-primary-on-surface">
+                                    <CheckCircle2
+                                        className="size-5"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <Text as="h2" variant="heading-sm">
+                                        Biaya / Persembahan
+                                    </Text>
+
+                                    <Text
+                                        as="p"
+                                        variant="body-sm"
+                                        color="muted"
+                                        className="mt-1 leading-relaxed"
+                                    >
+                                        {service.fee_info}
+                                    </Text>
+                                </div>
+                            </div>
+                        ) : null}
+
+                        {service.contact.name || service.contact.phone ? (
+                            <div className="flex items-start gap-4 border-t border-border/70 p-5 sm:p-6 lg:border-t-0 lg:border-l">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-background text-primary-on-surface">
+                                    <Users
+                                        className="size-5"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <Text as="h2" variant="heading-sm">
+                                        Kontak Sekretariat
+                                    </Text>
+
+                                    {service.contact.name ? (
+                                        <Text
+                                            as="p"
+                                            variant="body-sm"
+                                            color="muted"
+                                            className="mt-1"
+                                        >
+                                            {service.contact.name}
+                                        </Text>
+                                    ) : null}
+
+                                    {service.contact.phone ? (
+                                        <Text
+                                            as="p"
+                                            variant="body-sm"
+                                            className="mt-1 font-medium"
+                                        >
+                                            {service.contact.phone}
+                                        </Text>
+                                    ) : null}
+
+                                    {service.contact.whatsapp ? (
+                                        <a
+                                            href={service.contact.whatsapp}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-full border border-emerald-600/30 bg-background px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                                        >
+                                            <MessageCircle
+                                                className="size-4"
+                                                aria-hidden="true"
+                                            />
+                                            Chat via WhatsApp
+                                        </a>
+                                    ) : null}
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+                )}
+            </PublicSection>
+
+            {/* Sacrament introduction */}
+            {service.introduction ? (
+                <PublicSection surface="soft">
+                    <div className="mx-auto max-w-3xl">
+                        <p className="text-xs font-semibold tracking-[0.16em] text-primary-on-surface uppercase">
+                            Tentang Sakramen
+                        </p>
+
+                        <SectionHeading
+                            title={`Makna ${service.title}`}
+                            level={2}
+                        />
+
+                        <RichText
+                            html={service.introduction}
+                            className="prose-p:leading-8 mt-5 max-w-none"
+                        />
+                    </div>
+                </PublicSection>
+            ) : null}
+
+            {/* Requirements and registration timeline */}
+            {(service.requirements.length > 0 || service.steps.length > 0) && (
+                <PublicSection>
+                    <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
+                        {/* Requirements */}
+                        {service.requirements.length > 0 ? (
+                            <section
+                                id="requirements"
+                                aria-labelledby="requirements-heading"
+                                className="scroll-mt-24 border-r p-5 sm:p-7 lg:p-8"
+                            >
                                 <SectionHeading
-                                    title="Biaya/Persembahan"
-                                    level={3}
+                                    title="Syarat Dokumen"
+                                    level={2}
                                 />
+
+                                <Text
+                                    as="p"
+                                    variant="body-sm"
+                                    color="muted"
+                                    className="mt-2"
+                                >
+                                    Persiapkan dokumen berikut sesuai ketentuan
+                                    paroki.
+                                </Text>
+
+                                <ul className="mt-6 space-y-5">
+                                    {service.requirements.map(
+                                        (requirement, index) => (
+                                            <li
+                                                key={requirement.id}
+                                                className="flex items-start gap-3"
+                                            >
+                                                <span
+                                                    className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-on-surface text-xs font-semibold text-white"
+                                                    aria-hidden="true"
+                                                >
+                                                    {String(index + 1).padStart(
+                                                        2,
+                                                        '0',
+                                                    )}
+                                                </span>
+
+                                                <div className="min-w-0 pt-0.5">
+                                                    <Text
+                                                        as="p"
+                                                        variant="body"
+                                                        className="leading-relaxed"
+                                                    >
+                                                        {requirement.text}
+                                                    </Text>
+
+                                                    {requirement.note ? (
+                                                        <Text
+                                                            as="p"
+                                                            variant="body-sm"
+                                                            color="muted"
+                                                            className="mt-1.5 leading-relaxed"
+                                                        >
+                                                            {requirement.note}
+                                                        </Text>
+                                                    ) : null}
+                                                </div>
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            </section>
+                        ) : null}
+
+                        {/* Registration timeline */}
+                        {service.steps.length > 0 ? (
+                            <section
+                                aria-labelledby="steps-heading"
+                                className="p-5 sm:p-7 lg:p-8"
+                            >
+                                <SectionHeading
+                                    title="Alur Pendaftaran"
+                                    level={2}
+                                />
+
+                                <Text
+                                    as="p"
+                                    variant="body-sm"
+                                    color="muted"
+                                    className="mt-2"
+                                >
+                                    Ikuti tahapan berikut untuk mempersiapkan{' '}
+                                    {service.title}.
+                                </Text>
+
+                                <ol className="mt-6 space-y-6">
+                                    {service.steps.map((step, index) => (
+                                        <li
+                                            key={step.id}
+                                            className="relative flex items-start gap-4"
+                                        >
+                                            {index <
+                                            service.steps.length - 1 ? (
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="absolute top-9 -bottom-6 left-4 w-px bg-border"
+                                                />
+                                            ) : null}
+
+                                            <span
+                                                className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-on-surface text-xs font-semibold text-white"
+                                                aria-hidden="true"
+                                            >
+                                                {String(index + 1).padStart(
+                                                    2,
+                                                    '0',
+                                                )}
+                                            </span>
+
+                                            <div className="min-w-0 pt-0.5">
+                                                <Text
+                                                    as="h3"
+                                                    variant="heading-sm"
+                                                    className="leading-snug"
+                                                >
+                                                    {step.title}
+                                                </Text>
+
+                                                {step.description ? (
+                                                    <Text
+                                                        as="p"
+                                                        variant="body-sm"
+                                                        color="muted"
+                                                        className="mt-1.5 leading-relaxed"
+                                                    >
+                                                        {step.description}
+                                                    </Text>
+                                                ) : null}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ol>
+                            </section>
+                        ) : null}
+                    </div>
+                </PublicSection>
+            )}
+
+            {/* Schedule and fee details */}
+            {service.schedule_info || service.fee_info ? (
+                <PublicSection surface="soft">
+                    <div className="mx-auto max-w-3xl">
+                        <SectionHeading title="Jadwal & Persiapan" level={2} />
+
+                        {service.schedule_info ? (
+                            <Text
+                                as="p"
+                                variant="body"
+                                color="muted"
+                                className="mt-4 leading-relaxed whitespace-pre-line"
+                            >
+                                {service.schedule_info}
+                            </Text>
+                        ) : null}
+
+                        {service.fee_info ? (
+                            <div className="mt-6 border-t border-border/70 pt-5">
+                                <Text as="h3" variant="heading-sm">
+                                    Biaya / Persembahan
+                                </Text>
+
                                 <Text
                                     as="p"
                                     variant="body"
-                                    className="mt-4 whitespace-pre-line"
+                                    color="muted"
+                                    className="mt-2 leading-relaxed whitespace-pre-line"
                                 >
                                     {service.fee_info}
                                 </Text>
                             </div>
                         ) : null}
+
+                        {hasContact ? (
+                            <div className="mt-6">
+                                <ServiceCta
+                                    cta={{
+                                        ...service.cta,
+                                        url: '',
+                                        label: 'Hubungi Sekretariat',
+                                    }}
+                                    contact={service.contact}
+                                    labels={CTA_LABELS}
+                                />
+                            </div>
+                        ) : null}
                     </div>
                 </PublicSection>
             ) : null}
 
+            {/* FAQ */}
             {service.faqs.length > 0 ? (
-                <PublicSection surface="soft">
-                    <SectionHeading title="Pertanyaan yang Sering Diajukan" />
-                    <div className="mt-8">
-                        <FaqList items={service.faqs} />
+                <PublicSection>
+                    <div className="mx-auto max-w-3xl">
+                        <SectionHeading
+                            title="Pertanyaan yang Sering Diajukan"
+                            level={2}
+                        />
+
+                        <div className="mt-6 sm:mt-8">
+                            <FaqList items={service.faqs} />
+                        </div>
                     </div>
                 </PublicSection>
             ) : null}
 
+            {/* Related documents */}
             {service.documents.length > 0 ? (
                 <PublicSection surface="soft">
                     <SectionHeading title="Dokumen Terkait" />
-                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {service.documents.map((document) => (
                             <DocumentCard
                                 key={document.id}
@@ -306,58 +524,103 @@ export default function PelayananShow({ service, otherServices }: Props) {
                 </PublicSection>
             ) : null}
 
+            {/* Final CTA */}
             <PublicSection>
-                <div className="flex flex-col items-start gap-6 rounded-lg border border-border p-6 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <Text as="p" variant="heading-sm">
-                            Siap mendaftar?
-                        </Text>
-                        <Text as="p" variant="body-sm" color="muted">
-                            {service.cta.state === 'form_open'
-                                ? 'Buka tautan pendaftaran atau hubungi penanggung jawab.'
-                                : 'Hubungi kontak yang tersedia untuk informasi lebih lanjut.'}
-                        </Text>
+                <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/30 p-6 sm:p-8 lg:p-10">
+                    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                        <div className="max-w-xl">
+                            <Text as="p" variant="heading-sm" color="muted">
+                                Mulai Persiapan
+                            </Text>
+
+                            <Text
+                                as="h2"
+                                variant="display-md"
+                                className="mt-2 text-2xl leading-tight font-semibold sm:text-3xl"
+                            >
+                                Siap mempersiapkan {service.title}?
+                            </Text>
+
+                            <Text
+                                as="p"
+                                variant="body"
+                                color="muted"
+                                className="mt-3 leading-relaxed"
+                            >
+                                {service.cta.state === 'form_open'
+                                    ? 'Mulai pendaftaran melalui tautan yang tersedia atau hubungi sekretariat paroki jika membutuhkan bantuan.'
+                                    : 'Hubungi sekretariat paroki untuk memperoleh informasi terbaru mengenai persyaratan dan jadwal pelayanan.'}
+                            </Text>
+
+                            {service.contact.name ? (
+                                <Text
+                                    as="p"
+                                    variant="body-sm"
+                                    color="muted"
+                                    className="mt-3"
+                                >
+                                    Kontak: {service.contact.name}
+                                </Text>
+                            ) : null}
+                        </div>
+
+                        <div className="flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap md:flex-col lg:flex-row">
+                            <ServiceCta
+                                cta={service.cta}
+                                contact={service.contact}
+                                labels={CTA_LABELS}
+                            />
+                        </div>
                     </div>
 
-                    <ServiceCta
-                        cta={service.cta}
-                        contact={service.contact}
-                        labels={CTA_LABELS}
-                    />
+                    {service.updated_at ? (
+                        <Text
+                            as="p"
+                            variant="body-sm"
+                            color="muted"
+                            className="mt-6 border-t border-border/70 pt-4"
+                        >
+                            Terakhir diperbarui:{' '}
+                            {formatWibDate(service.updated_at)}
+                        </Text>
+                    ) : null}
                 </div>
-
-                {service.updated_at ? (
-                    <Text
-                        as="p"
-                        variant="body-sm"
-                        color="muted"
-                        className="mt-6"
-                    >
-                        Terakhir diperbarui: {formatWibDate(service.updated_at)}
-                    </Text>
-                ) : null}
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-4 print:hidden"
-                    onClick={() => window.print()}
-                >
-                    <Printer className="size-4" aria-hidden="true" />
-                    Cetak
-                </Button>
             </PublicSection>
 
-            {otherServices.length > 0 ? (
-                <PublicSection surface="soft">
-                    <SectionHeading title="Layanan Lainnya" />
-                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        {otherServices.map((other) => (
-                            <PublicServiceCard key={other.id} service={other} />
-                        ))}
+            {/* Mobile registration bar */}
+            {isRegistrationOpen ? (
+                <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:hidden print:hidden">
+                    <div className="mx-auto flex max-w-lg items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                            <Text
+                                as="p"
+                                variant="body-sm"
+                                className="truncate font-semibold"
+                            >
+                                {service.title}
+                            </Text>
+
+                            <Text
+                                as="p"
+                                variant="body-sm"
+                                color="muted"
+                                className="text-xs"
+                            >
+                                Pendaftaran tersedia
+                            </Text>
+                        </div>
+
+                        <ServiceCta
+                            cta={service.cta}
+                            contact={{
+                                ...service.contact,
+                                tel: null,
+                                whatsapp: null,
+                            }}
+                            labels={CTA_LABELS}
+                        />
                     </div>
-                </PublicSection>
+                </div>
             ) : null}
         </>
     );
