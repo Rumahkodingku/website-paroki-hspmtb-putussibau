@@ -39,9 +39,6 @@ class DemoContentSeeder extends Seeder
             'media' => $media,
             'imagePath' => $imagePath,
         ]);
-        $this->call(DemoServicesSeeder::class, false, [
-            'media' => $media,
-        ]);
         $this->call(DemoCommunitiesSeeder::class, false, [
             'media' => $media,
         ]);

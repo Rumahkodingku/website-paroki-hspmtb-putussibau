@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { index as agendaIndex } from '@/routes/agenda';
+import { agendaUrl, formatMonthLabel } from '../lib/url';
 
 import type { AgendaMode, PublicEventCategory } from '../types';
 
@@ -20,45 +20,6 @@ const MODE_LABEL: Record<AgendaMode, string> = {
     daftar: 'Daftar',
     kalender: 'Kalender',
 };
-
-/**
- * Build a shareable agenda URL while omitting default and empty parameters.
- */
-function agendaUrl(params: {
-    mode: AgendaMode;
-    kategori: string;
-    bulan: string;
-}): string {
-    const query = new URLSearchParams();
-
-    if (params.mode !== 'daftar') {
-        query.set('mode', params.mode);
-    }
-
-    if (params.kategori !== '') {
-        query.set('kategori', params.kategori);
-    }
-
-    if (params.bulan !== '') {
-        query.set('bulan', params.bulan);
-    }
-
-    const search = query.toString();
-
-    return search === '' ? agendaIndex().url : `${agendaIndex().url}?${search}`;
-}
-
-/**
- * Format a YYYY-MM value as an Indonesian month and year.
- * UTC prevents the first day of a month from shifting across timezones.
- */
-function formatMonthLabel(month: string): string {
-    return new Intl.DateTimeFormat('id-ID', {
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-    }).format(new Date(`${month}-01T12:00:00Z`));
-}
 
 export function AgendaControls({
     mode,
@@ -111,13 +72,14 @@ export function AgendaControls({
 
                     <Tabs value={mode} className="w-full sm:w-fit">
                         <TabsList
+                            variant="line"
                             aria-label="Tampilan agenda"
-                            className="h-11 w-full justify-start gap-4"
+                            className="h-11 w-full justify-start gap-4 rounded-md shadow-none"
                         >
                             <TabsTrigger
                                 value="daftar"
                                 asChild
-                                className="h-9 gap-2 rounded-md px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                className="h-9 gap-2 rounded-md px-4 data-[state=active]:text-primary"
                             >
                                 <Link
                                     href={agendaUrl({
@@ -141,7 +103,7 @@ export function AgendaControls({
                             <TabsTrigger
                                 value="kalender"
                                 asChild
-                                className="h-9 gap-2 rounded-md px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                className="h-9 gap-2 rounded-md px-4 data-[state=active]:text-primary"
                             >
                                 <Link
                                     href={agendaUrl({
