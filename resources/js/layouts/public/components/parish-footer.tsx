@@ -21,7 +21,13 @@ import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
 import { index as areaIndex } from '@/routes/area';
-import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
+import {
+    index as profilIndex,
+    pastor,
+    sejarah,
+    struktur,
+    wilayah,
+} from '@/routes/profil';
 
 type FooterLink = {
     label: string;
@@ -37,7 +43,7 @@ const MENU_UTAMA: FooterGroup = {
     title: 'Menu Utama',
     links: [
         { label: 'Beranda', href: home() },
-        { label: 'Profil', href: sejarah() },
+        { label: 'Profil', href: profilIndex() },
         { label: 'Jadwal Misa', href: jadwalMisa() },
         { label: 'Berita & Artikel', href: berita() },
         { label: 'Agenda', href: agenda() },
@@ -47,6 +53,7 @@ const MENU_UTAMA: FooterGroup = {
 const PROFIL_PAROKI: FooterGroup = {
     title: 'Profil Paroki',
     links: [
+        { label: 'Ringkasan', href: profilIndex() },
         { label: 'Sejarah', href: sejarah() },
         { label: 'Wilayah Pelayanan', href: wilayah() },
         { label: 'Area', href: areaIndex() },

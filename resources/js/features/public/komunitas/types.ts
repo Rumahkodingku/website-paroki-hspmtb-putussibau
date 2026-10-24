@@ -20,6 +20,7 @@ export type PublicCommunityCard = {
     slug: string;
     description: string | null;
     thumbnail_url: string | null;
+    logo_url: string | null;
     category?: PublicCommunityCategory;
 };
 

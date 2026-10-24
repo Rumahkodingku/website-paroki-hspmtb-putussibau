@@ -20,13 +20,6 @@ type Props = {
     filters: PublicCommunityFilters;
 };
 
-/**
- * The directory.
- *
- * DESIGN.md asks whitespace to do the work, so the grid is cards on the page
- * background with one heading and one filter row above it, not a stack of
- * rounded containers.
- */
 export default function KomunitasIndex({
     communities,
     categories,

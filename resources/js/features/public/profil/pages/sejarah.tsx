@@ -5,6 +5,7 @@ import { HistoryTimeline } from '../components/history-timeline';
 import type { PublicHistoryItem } from '../types';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     narrative: string | null;
@@ -28,7 +29,7 @@ export default function Sejarah({ items }: Props) {
                     description="Mengenal perjalanan iman umat dan perkembangan pelayanan Paroki HSPMTB Putussibau dari masa ke masa."
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },
-                        { title: 'Profil', href: home() },
+                        { title: 'Profil', href: profilIndex() },
                         { title: 'Sejarah Paroki' },
                     ]}
                 />

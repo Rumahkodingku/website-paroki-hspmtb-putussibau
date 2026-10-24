@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\Media;
 use App\Models\ParishBoardMember;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryItem;
 use App\Models\ParishHistoryNarrative;
+use App\Models\ParishProfile;
 use App\Models\ParishServiceArea;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
@@ -14,9 +16,9 @@ use Inertia\Testing\AssertableInertia as Assert;
 | Halaman publik Profil Paroki
 |--------------------------------------------------------------------------
 |
-| The Informasi Profil summary page (/profil) was removed in D-69. What
-| remains are the four section pages. Every published row reaches a visitor
-| only through a published() scope.
+| The summary page (/profil) renders the profile content that moved back into
+| the Profil module (D-78); the four section pages keep their own published()
+| scopes.
 */
 
 it('renders the history page with its narrative and published items', function () {
@@ -38,8 +40,35 @@ it('sends a null narrative when none has been written', function () {
         ->assertInertia(fn (Assert $page) => $page->where('narrative', null));
 });
 
-it('does not serve the removed summary page', function () {
-    $this->get('/profil')->assertNotFound();
+it('renders the profile summary with its editorial content', function () {
+    $media = Media::factory()->ready()->create();
+    ParishProfile::factory()->create([
+        'description' => '<p>Profil paroki.</p>',
+        'established_year' => 1956,
+        'cover_media_id' => $media->getKey(),
+        'cover_alt' => 'Sampul paroki',
+        'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    ]);
+
+    $this->get('/profil')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('public/profil')
+            ->where('profile.description', '<p>Profil paroki.</p>')
+            ->where('profile.established_year', 1956)
+            ->where('profile.cover_alt', 'Sampul paroki')
+            ->where('profile.video_embed_url', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'));
+});
+
+it('renders the summary without a profile row', function () {
+    $this->get('/profil')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('public/profil')
+            ->where('profile.description', null)
+            ->where('profile.established_year', null)
+            ->where('profile.cover_url', null)
+            ->where('profile.video_embed_url', null));
 });
 
 it('shows only published history items', function () {

@@ -1,13 +1,7 @@
 import type { Auth } from '@/types';
 
 export type SettingsGroupName =
-    | 'identitas'
-    | 'kontak'
-    | 'profil'
-    | 'sosial'
-    | 'seo'
-    | 'beranda'
-    | 'privasi';
+    'identitas' | 'kontak' | 'sosial' | 'seo' | 'beranda' | 'privasi';
 
 /** The seven days, keyed the way the stored JSON is keyed. */
 export type OfficeHoursDayKey =

@@ -76,7 +76,7 @@ class PublicCommunityController extends Controller
     {
         return Community::query()
             ->published()
-            ->with(['communityCategory', 'thumbnailMedia.variants'])
+            ->with(['communityCategory', 'thumbnailMedia.variants', 'logoMedia.variants'])
             ->when($search !== '', fn (Builder $query) => $query
                 ->where('name', 'like', "%{$search}%"))
             ->when($category !== null, fn (Builder $query) => $query

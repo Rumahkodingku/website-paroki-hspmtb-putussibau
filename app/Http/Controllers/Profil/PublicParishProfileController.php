@@ -11,24 +11,44 @@ use App\Http\Resources\Public\Profil\PublicPastorResource;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryItem;
 use App\Models\ParishHistoryNarrative;
+use App\Models\ParishProfile;
 use App\Models\ParishServiceArea;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
+use App\Support\YoutubeEmbed;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Profil Paroki — the public sub-pages.
+ * Profil Paroki — the summary and the four section pages.
  *
- * The Informasi Profil summary page was removed (D-69): identity now lives in
- * site settings and is rendered by the shared layout. What remains here are the
- * four section pages, each starting from a `published()` scope so a draft row
- * cannot reach a visitor even by editing a URL.
+ * The summary at /profil renders the editorial profile content that moved back
+ * into the Profil module (D-78). Identity stays in site settings and is
+ * rendered by the shared layout. Each section starts from a `published()` scope
+ * so a draft row cannot reach a visitor even by editing a URL.
  *
- * @see docs/DECISIONS.md D-69
+ * @see docs/DECISIONS.md D-78
  */
 class PublicParishProfileController extends Controller
 {
+    /**
+     * The profile summary: editorial content plus links to the four sections.
+     */
+    public function index(): Response
+    {
+        $profile = ParishProfile::current()->loadMissing('coverMedia.variants');
+
+        return Inertia::render('public/profil', [
+            'profile' => [
+                'description' => $profile->description,
+                'established_year' => $profile->established_year,
+                'cover_url' => $profile->coverMedia?->url('large'),
+                'cover_alt' => $profile->cover_alt,
+                'video_embed_url' => YoutubeEmbed::url($profile->video_url),
+            ],
+        ]);
+    }
+
     public function sejarah(): Response
     {
         $narrative = ParishHistoryNarrative::current();

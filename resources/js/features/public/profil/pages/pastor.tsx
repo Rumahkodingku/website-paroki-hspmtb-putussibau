@@ -6,6 +6,7 @@ import PublicHeroBanner from '@/components/public-hero-banner';
 import { PastorCurrentSection } from '../components/pastor-current-section';
 import { PastorHistorySection } from '../components/pastor-history-section';
 import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     current: PublicPastor[];
@@ -28,7 +29,7 @@ export default function Pastor({ current, history }: Props) {
                 description="Mengenal para imam yang melayani dan mendampingi umat Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
                 breadcrumbs={[
                     { title: 'Beranda', href: home() },
-                    { title: 'Profil', href: home() },
+                    { title: 'Profil', href: profilIndex() },
                     { title: 'Pastor Paroki' },
                 ]}
             />

@@ -8,6 +8,7 @@ use App\Models\ParishBoardMember;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryItem;
 use App\Models\ParishHistoryNarrative;
+use App\Models\ParishProfile;
 use App\Models\ParishServiceArea;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
@@ -20,16 +21,22 @@ class DemoParishIdentitySeeder extends Seeder
     {
         app(SiteSettingsService::class)->setMany([
             'short_description' => 'Komunitas umat Katolik di Putussibau, Kabupaten Kapuas Hulu, Keuskupan Sintang.',
-            'description' => '<p>Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau '
-                .'melayani umat di wilayah Putussibau dan sekitarnya. '
-                .'Hidup menggereja diwujudkan melalui peribadatan, katekese, dan karya sosial.</p>',
-            'established_year' => 1956,
             'logo' => $media->getKey(),
             'logo_alt' => 'Logo Paroki',
-            'cover' => $media->getKey(),
-            'cover_alt' => 'Gambar sampul Paroki',
-            'is_published' => true,
         ]);
+
+        ParishProfile::query()->updateOrCreate(
+            [],
+            [
+                'description' => '<p>Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau '
+                    .'melayani umat di wilayah Putussibau dan sekitarnya. '
+                    .'Hidup menggereja diwujudkan melalui peribadatan, katekese, dan karya sosial.</p>',
+                'established_year' => 1956,
+                'cover_media_id' => $media->getKey(),
+                'cover_alt' => 'Gambar sampul Paroki',
+                'video_url' => null,
+            ],
+        );
 
         ParishHistoryNarrative::query()->updateOrCreate(
             [],

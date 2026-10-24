@@ -37,7 +37,13 @@ import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
 import { index as areaIndex } from '@/routes/area';
-import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
+import {
+    index as profilIndex,
+    pastor,
+    sejarah,
+    struktur,
+    wilayah,
+} from '@/routes/profil';
 
 type NavHref = NonNullable<InertiaLinkProps['href']>;
 
@@ -60,7 +66,7 @@ function sectionPrefix(href: NavHref): string {
 
 const DRAWER_ENTRIES: NavEntry[] = [
     { label: 'Beranda', href: home(), match: 'exact' },
-    { label: 'Profil', href: sejarah(), match: 'prefix' },
+    { label: 'Profil', href: profilIndex(), match: 'prefix' },
     { label: 'Jadwal Misa', href: jadwalMisa(), match: 'section' },
     { label: 'Berita & Artikel', href: berita(), match: 'section' },
     { label: 'Agenda', href: agenda(), match: 'section' },
@@ -73,6 +79,7 @@ const DRAWER_ENTRIES: NavEntry[] = [
 ];
 
 const PROFIL_CHILDREN: NavEntry[] = [
+    { label: 'Ringkasan', href: profilIndex(), match: 'section' },
     { label: 'Sejarah', href: sejarah(), match: 'section' },
     { label: 'Wilayah Pelayanan', href: wilayah(), match: 'section' },
     { label: 'Area', href: areaIndex(), match: 'section' },

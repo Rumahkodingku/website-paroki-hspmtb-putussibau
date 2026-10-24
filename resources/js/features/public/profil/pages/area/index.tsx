@@ -11,6 +11,7 @@ import { AreaSearch } from '../../components/area-search';
 import type { PublicAreaSection } from '../../types';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     sections: PublicAreaSection[];
@@ -49,7 +50,7 @@ export default function StasiLingkunganIndex({ sections, hasAreas }: Props) {
                 description="Daftar stasi, wilayah, dan lingkungan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
                 breadcrumbs={[
                     { title: 'Beranda', href: home() },
-                    { title: 'Profil', href: home() },
+                    { title: 'Profil', href: profilIndex() },
                     { title: 'Area' },
                 ]}
             />

@@ -309,13 +309,13 @@ test('the configured key list matches PRD Lampiran B', function () {
     // maps_embed_url left the list in Phase 8C (D-67): the embed iframe is now
     // derived from maps_link, so the parish never pastes an embed URL by hand.
     //
-    // The `profil` group joined in D-69 when the Informasi Profil module was
-    // removed and its fields moved here (logo_alt, description, established_year,
-    // cover, cover_alt, video_url, website, is_published).
+    // The `profil` group left the list in D-78: its editorial fields moved
+    // back to the Profil module. logo_alt stays in identitas and website in
+    // sosial, so neither key is lost.
     //
     // Phase 9A added four homepage hero keys (D-70): title, description, image,
     // and image alt. They are an approved divergence from PRD Lampiran B.
-    expect($keys)->toHaveCount(41)
+    expect($keys)->toHaveCount(35)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
@@ -327,8 +327,6 @@ test('the configured key list matches PRD Lampiran B', function () {
             'home_show_contact',
             'privacy_policy_content',
             'logo_alt',
-            'description',
-            'cover',
             'website',
         )
         ->and($keys)->not->toContain('maps_embed_url');
@@ -471,7 +469,7 @@ test('the settings page renders the privacy group with the field marked as rich 
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/pengaturan')
             ->has('groups.privasi')
-            ->where('meta.richtext', ['privacy_policy_content', 'description'])
+            ->where('meta.richtext', ['privacy_policy_content'])
             ->where('meta.groupLabels.privasi', 'Privasi')
         );
 });
@@ -483,16 +481,6 @@ test('a guest cannot write a privacy policy', function () {
 
     expect(SiteSetting::query()->where('key', 'privacy_policy_content')->exists())->toBeFalse();
 });
-
-/*
-|--------------------------------------------------------------------------
-| The profil group (D-69)
-|--------------------------------------------------------------------------
-|
-| The Informasi Profil module was removed and its fields moved here, so these
-| keys are edited only on the settings page now.
-|
-*/
 
 /*
 |--------------------------------------------------------------------------
@@ -586,49 +574,19 @@ test('home hero alt can be left empty when no image is selected', function () {
         ->assertSessionHasNoErrors();
 });
 
-test('the profil group and its key types are configured', function () {
-    expect(config('site-settings.groups.profil'))->toBe([
-        'description',
-        'established_year',
-        'cover',
-        'cover_alt',
-        'video_url',
-        'is_published',
+test('the social group still holds the parish website', function () {
+    expect(config('site-settings.groups.sosial'))->toBe([
+        'social_facebook',
+        'social_instagram',
+        'social_youtube',
+        'social_whatsapp_channel',
+        'website',
     ])
-        ->and(config('site-settings.groups.sosial'))->toBe([
-            'social_facebook',
-            'social_instagram',
-            'social_youtube',
-            'social_whatsapp_channel',
-            'website',
-        ])
         ->and(config('site-settings.types.logo'))->toBe('media')
-        ->and(config('site-settings.types.favicon'))->toBe('media')
-        ->and(config('site-settings.types.cover'))->toBe('media')
-        ->and(config('site-settings.types.description'))->toBe('html')
-        ->and(config('site-settings.types.is_published'))->toBe('boolean');
+        ->and(config('site-settings.types.favicon'))->toBe('media');
 });
 
-test('saving the profil group stores values and sanitizes the description', function () {
-    $this->actingAs(superAdmin())->put(route('settings.update'), [
-        'settings' => [
-            'description' => '<p>Profil</p><script>alert(1)</script>',
-            'established_year' => 1956,
-            'video_url' => 'https://www.youtube.com/watch?v=abc',
-            'is_published' => '1',
-            'logo_alt' => 'Logo paroki',
-        ],
-    ])->assertSessionHasNoErrors();
-
-    $service = settingsService();
-
-    expect($service->get('description'))->toBe('<p>Profil</p>')
-        ->and($service->get('established_year'))->toBe(1956)
-        ->and($service->get('is_published'))->toBeTrue()
-        ->and($service->get('logo_alt'))->toBe('Logo paroki');
-});
-
-test('logo and cover reject a media id that has not finished processing', function () {
+test('logo rejects a media id that has not finished processing', function () {
     $media = Media::factory()->create(); // pending
 
     $this->actingAs(superAdmin())
@@ -664,7 +622,7 @@ test('favicon accepts a ready media id', function () {
     expect(settingsService()->get('favicon'))->toBe((string) $media->getKey());
 });
 
-test('the profil fields may all be left empty', function () {
+test('optional settings may all be left empty', function () {
     // The settings form posts every key, so an untouched optional field arrives
     // as an empty string (ConvertEmptyStringsToNull turns it into null). A rule
     // without `nullable` would reject the whole form — the regression the E2E
@@ -672,20 +630,13 @@ test('the profil fields may all be left empty', function () {
     $this->actingAs(superAdmin())
         ->put(route('settings.update'), [
             'settings' => [
-                'description' => '',
-                'established_year' => '',
-                'cover' => '',
-                'cover_alt' => '',
-                'video_url' => '',
                 'website' => '',
-                'is_published' => '0',
                 'logo' => '',
                 'logo_alt' => '',
             ],
         ])->assertSessionHasNoErrors();
 
-    expect(settingsService()->get('established_year'))->toBeNull()
-        ->and(settingsService()->get('website'))->toBeNull();
+    expect(settingsService()->get('website'))->toBeNull();
 });
 
 /*
