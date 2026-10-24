@@ -22,7 +22,7 @@ import { renderWithInertia } from '../support/inertia';
 
 const EXPECTED_LINKS: Record<string, string> = {
     Beranda: '/',
-    Profil: '/profil/sejarah',
+    Profil: '/profil',
     'Jadwal Misa': '/jadwal-misa',
     'Berita & Artikel': '/berita',
     Agenda: '/agenda',
@@ -31,6 +31,7 @@ const EXPECTED_LINKS: Record<string, string> = {
     Galeri: '/galeri',
     Dokumen: '/dokumen',
     'Halaman kontak': '/kontak',
+    Ringkasan: '/profil',
     Sejarah: '/profil/sejarah',
     'Wilayah Pelayanan': '/profil/wilayah',
     Area: '/profil/area',

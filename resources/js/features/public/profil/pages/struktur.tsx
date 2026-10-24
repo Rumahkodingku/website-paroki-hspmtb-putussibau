@@ -8,6 +8,7 @@ import { OrganizationChart } from '../components/organization-chart';
 import { BoardPeriodArchive } from '../components/board-period-archive';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     periods: PublicBoardPeriod[];
@@ -36,7 +37,7 @@ export default function Struktur({ periods }: Props) {
                 description="Susunan pengurus Dewan Pastoral Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau dalam setiap periode pelayanan."
                 breadcrumbs={[
                     { title: 'Beranda', href: home() },
-                    { title: 'Profil', href: home() },
+                    { title: 'Profil', href: profilIndex() },
                     { title: 'Struktur Kepengurusan' },
                 ]}
             />

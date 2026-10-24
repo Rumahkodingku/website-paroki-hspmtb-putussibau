@@ -9,6 +9,7 @@ import { index as areaIndex } from '@/routes/area';
 import type { PublicServiceArea } from '../types';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     area: PublicServiceArea | null;
@@ -30,7 +31,7 @@ export default function Wilayah({ area }: Props) {
                 description="Cakupan wilayah pelayanan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
                 breadcrumbs={[
                     { title: 'Beranda', href: home() },
-                    { title: 'Profil', href: home() },
+                    { title: 'Profil', href: profilIndex() },
                     { title: 'Wilayah Pelayanan' },
                 ]}
             />

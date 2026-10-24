@@ -41,6 +41,7 @@ const DESKTOP_LINKS = [
 
 const DESKTOP_GROUPS: Record<string, { label: string; href: string }[]> = {
     Profil: [
+        { label: 'Ringkasan', href: '/profil' },
         { label: 'Sejarah', href: '/profil/sejarah' },
         { label: 'Wilayah Pelayanan', href: '/profil/wilayah' },
         { label: 'Area', href: '/profil/area' },
