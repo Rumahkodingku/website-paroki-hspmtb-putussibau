@@ -6,6 +6,7 @@ import {
     FormInput,
     FormTextarea,
 } from '@/components/form-fields';
+import { DatePicker } from '@/components/date-picker';
 import { Text } from '@/components/text';
 import type { GalleryAlbumFormData } from '../types';
 import type { GalleryAlbumFormInstance } from './gallery-form-instance';
@@ -105,9 +106,8 @@ export function GalleryForm({
                     hint={hints.event_date}
                     error={form.errors.event_date}
                 >
-                    <FormInput
+                    <DatePicker
                         id="gallery-event-date"
-                        type="date"
                         value={form.data.event_date}
                         onChange={(value) => form.setData('event_date', value)}
                     />

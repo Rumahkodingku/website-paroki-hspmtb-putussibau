@@ -11,14 +11,6 @@ import type { RecentPost } from '../types';
 import { ContentStatusBadge } from './content-status-badge';
 import { Panel } from './panel';
 
-/*
- * Berita Terbaru: the three newest published articles.
- *
- * The thumbnail is the article's own featured_image, the same picture the
- * public card shows, and it falls back to a neutral icon tile when the article
- * has no picture. There is no stock image and no invented URL — a missing image
- * is simply a missing image.
- */
 export function RecentPostsPanel({
     posts,
     displayTimezone,
@@ -35,10 +27,16 @@ export function RecentPostsPanel({
             action={
                 <Link
                     href={postsList().url}
-                    className="inline-flex items-center gap-1 text-label text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    className={cn(
+                        'inline-flex min-h-9 items-center gap-1.5 rounded-md',
+                        'text-sm font-medium text-primary',
+                        'transition-colors hover:text-primary/80',
+                        'focus-visible:ring-2 focus-visible:outline-none',
+                        'focus-visible:ring-ring focus-visible:ring-offset-2',
+                    )}
                 >
                     Lihat semua
-                    <ArrowRight className="size-3.5" aria-hidden="true" />
+                    <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
             }
         >
@@ -50,7 +48,7 @@ export function RecentPostsPanel({
                     action={
                         <Link
                             href={createPost().url}
-                            className="text-label text-primary-on-surface underline-offset-4 hover:underline"
+                            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                         >
                             Tulis Berita
                         </Link>
@@ -58,51 +56,70 @@ export function RecentPostsPanel({
                 />
             ) : (
                 <ul className="divide-y divide-border">
-                    {posts.map((post) => (
+                    {posts.slice(0, 3).map((post) => (
                         <li key={post.id}>
                             <Link
                                 href={contentEditHref('post', post.id)}
-                                className="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                className={cn(
+                                    'group flex min-w-0 items-center gap-3 px-4 py-3.5',
+                                    'transition-colors hover:bg-muted/50',
+                                    'focus-visible:relative focus-visible:z-10',
+                                    'focus-visible:ring-2 focus-visible:outline-none',
+                                    'focus-visible:ring-ring focus-visible:ring-inset',
+                                    'sm:gap-4 sm:px-5 sm:py-4',
+                                )}
                             >
+                                {/* Thumbnail */}
                                 {post.image ? (
                                     <ParishImage
                                         src={post.image}
                                         alt={post.image_alt ?? ''}
-                                        width={96}
-                                        height={96}
+                                        width={128}
+                                        height={128}
                                         aspectRatio="1 / 1"
-                                        className="size-14 shrink-0 rounded-md"
+                                        className={cn(
+                                            'size-14 shrink-0 rounded-lg object-cover',
+                                            'ring-1 ring-border/60 sm:size-16',
+                                        )}
                                     />
                                 ) : (
                                     <span
-                                        className="flex size-14 shrink-0 items-center justify-center rounded-md bg-secondary text-subtle"
+                                        className={cn(
+                                            'flex size-14 shrink-0 items-center justify-center',
+                                            'rounded-lg border border-border bg-muted/50',
+                                            'text-muted-foreground sm:size-16',
+                                        )}
                                         aria-hidden="true"
                                     >
                                         <Newspaper className="size-5" />
                                     </span>
                                 )}
 
-                                <span className="min-w-0 flex-1 space-y-1.5">
+                                {/* News information */}
+                                <span className="min-w-0 flex-1 space-y-2">
                                     <Text
                                         as="span"
                                         variant="label"
                                         lineClamp={2}
-                                        className="block"
+                                        className={cn(
+                                            'block leading-snug text-foreground',
+                                            'transition-colors group-hover:text-primary',
+                                        )}
                                     >
                                         {post.title}
                                     </Text>
 
-                                    <span className="flex flex-wrap items-center gap-2">
+                                    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
                                         <ContentStatusBadge
-                                            type="post"
                                             status={post.status}
                                             label={post.status_label}
                                         />
+
                                         <Text
                                             as="span"
                                             variant="fine-print"
                                             color="muted"
-                                            className="tabular-nums"
+                                            className="leading-5 tabular-nums"
                                         >
                                             {formatWibDate(
                                                 post.published_at ??

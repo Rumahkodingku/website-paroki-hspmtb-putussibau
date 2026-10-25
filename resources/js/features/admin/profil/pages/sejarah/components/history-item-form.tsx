@@ -5,6 +5,7 @@ import {
     FormActions,
     FormInput,
 } from '@/components/form-fields';
+import { DatePicker } from '@/components/date-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type {
@@ -112,9 +113,8 @@ export function HistoryItemForm({
                     hint={hints.date}
                     error={form.errors.date}
                 >
-                    <FormInput
+                    <DatePicker
                         id="history-date"
-                        type="date"
                         value={form.data.date}
                         onChange={(value) => form.setData('date', value)}
                     />

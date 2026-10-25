@@ -63,7 +63,7 @@ const PROFIL_PAROKI_SUB_MENU = [
 function renderSidebar(url = '/admin') {
     return renderWithInertia(
         <TooltipProvider delayDuration={0}>
-            <AppShell variant="sidebar">
+            <AppShell>
                 <AppSidebar />
             </AppShell>
         </TooltipProvider>,

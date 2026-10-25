@@ -146,7 +146,7 @@ export function HomeHero({
                                         <Text
                                             as="span"
                                             variant="body"
-                                            className="font-semibold"
+                                            className="text-sm font-semibold"
                                         >
                                             Lihat Jadwal Misa
                                         </Text>
@@ -173,7 +173,7 @@ export function HomeHero({
                                         <Text
                                             as="span"
                                             variant="body"
-                                            className="font-semibold"
+                                            className="text-sm font-semibold"
                                         >
                                             Kenali Paroki
                                         </Text>

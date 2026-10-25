@@ -7,6 +7,7 @@ import { DeleteDialog } from '@/components/delete-dialog';
 import InputError from '@/components/input-error';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { dashboard } from '@/routes';
 import {
     create as createHistory,
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export default function Index({ items, narrative, filters }: Props) {
+    const [activeTab, setActiveTab] = useState('narasi');
     const [deleting, setDeleting] = useState<ParishHistoryItemRow | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -110,66 +112,82 @@ export default function Index({ items, narrative, filters }: Props) {
                     }
                 />
 
-                <form
-                    noValidate
-                    onSubmit={(event: any) => {
-                        event.preventDefault();
-                        narrativeForm.submit(updateNarrative(), {
-                            preserveScroll: true,
-                        });
-                    }}
-                    className="space-y-4 rounded-lg border border-border p-4"
-                >
-                    <RichTextEditor
-                        id="history-narrative"
-                        label="Narasi sejarah"
-                        value={narrativeForm.data.narrative}
-                        onChange={(html) =>
-                            narrativeForm.setData('narrative', html)
-                        }
-                    />
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList variant="line" className="mb-8">
+                        <TabsTrigger value="narasi">Narasi</TabsTrigger>
+                        <TabsTrigger value="peristiwa">Peristiwa</TabsTrigger>
+                    </TabsList>
 
-                    {narrativeForm.errors.narrative ? (
-                        <InputError message={narrativeForm.errors.narrative} />
-                    ) : null}
+                    <TabsContent value="narasi" className="space-y-4">
+                        <form
+                            noValidate
+                            onSubmit={(event: any) => {
+                                event.preventDefault();
+                                narrativeForm.submit(updateNarrative(), {
+                                    preserveScroll: true,
+                                });
+                            }}
+                            className="space-y-4"
+                        >
+                            <RichTextEditor
+                                id="history-narrative"
+                                label="Narasi sejarah"
+                                value={narrativeForm.data.narrative}
+                                onChange={(html) =>
+                                    narrativeForm.setData('narrative', html)
+                                }
+                            />
 
-                    <Button type="submit" disabled={narrativeForm.processing}>
-                        Simpan narasi
-                    </Button>
-                </form>
+                            {narrativeForm.errors.narrative ? (
+                                <InputError
+                                    message={narrativeForm.errors.narrative}
+                                />
+                            ) : null}
 
-                <ListToolbar
-                    search={filters.search}
-                    searchPlaceholder="Cari judul peristiwa"
-                    onSearch={(search) => applyFilter({ search })}
-                />
+                            <Button
+                                type="submit"
+                                disabled={narrativeForm.processing}
+                            >
+                                Simpan narasi
+                            </Button>
+                        </form>
+                    </TabsContent>
 
-                <DataTable
-                    columns={columns}
-                    rows={items.data}
-                    sort={filters.sort}
-                    direction={filters.direction}
-                    onSort={(sort, direction) =>
-                        applyFilter({ sort, direction })
-                    }
-                    rowId={(row) => row.id}
-                    empty={
-                        <ListEmpty
-                            title={
-                                filters.search !== ''
-                                    ? 'Tidak ada peristiwa untuk pencarian ini.'
-                                    : 'Belum ada peristiwa sejarah.'
-                            }
-                            description="Tambahkan peristiwa pertama untuk mulai menyusun linimasa."
+                    <TabsContent value="peristiwa" className="space-y-4">
+                        <ListToolbar
+                            search={filters.search}
+                            searchPlaceholder="Cari judul peristiwa"
+                            onSearch={(search) => applyFilter({ search })}
                         />
-                    }
-                />
 
-                <ListPagination
-                    meta={items.meta}
-                    previous={items.links.prev}
-                    next={items.links.next}
-                />
+                        <DataTable
+                            columns={columns}
+                            rows={items.data}
+                            sort={filters.sort}
+                            direction={filters.direction}
+                            onSort={(sort, direction) =>
+                                applyFilter({ sort, direction })
+                            }
+                            rowId={(row) => row.id}
+                            empty={
+                                <ListEmpty
+                                    title={
+                                        filters.search !== ''
+                                            ? 'Tidak ada peristiwa untuk pencarian ini.'
+                                            : 'Belum ada peristiwa sejarah.'
+                                    }
+                                    description="Tambahkan peristiwa pertama untuk mulai menyusun linimasa."
+                                />
+                            }
+                        />
+
+                        <ListPagination
+                            meta={items.meta}
+                            previous={items.links.prev}
+                            next={items.links.next}
+                        />
+                    </TabsContent>
+                </Tabs>
             </div>
 
             {deleting ? (

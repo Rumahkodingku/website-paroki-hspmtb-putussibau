@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { toDateTimeLocalValue } from '@/lib/datetime';
 import type { LocationOption } from '../../../types';
 import {
@@ -105,12 +106,10 @@ export function SpecialMassForm({
                     hint={hints.start_at}
                     error={form.errors.start_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="special-start-at"
-                        type="datetime-local"
                         value={form.data.start_at}
                         onChange={(value) => form.setData('start_at', value)}
-                        required
                     />
                 </Field>
 
@@ -120,9 +119,8 @@ export function SpecialMassForm({
                     hint={hints.end_at}
                     error={form.errors.end_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="special-end-at"
-                        type="datetime-local"
                         value={form.data.end_at}
                         onChange={(value) => form.setData('end_at', value)}
                     />
