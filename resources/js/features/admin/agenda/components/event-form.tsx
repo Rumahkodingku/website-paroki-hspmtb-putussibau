@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import {
@@ -260,12 +261,10 @@ export function EventForm({
                     error={form.errors.start_at}
                     required
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="event-start-at"
-                        type="datetime-local"
                         value={form.data.start_at}
                         onChange={(value) => form.setData('start_at', value)}
-                        required
                     />
                 </Field>
 
@@ -299,9 +298,8 @@ export function EventForm({
                         hint={hints.end_at}
                         error={form.errors.end_at}
                     >
-                        <FormInput
+                        <DateTimePicker
                             id="event-end-at"
-                            type="datetime-local"
                             value={form.data.end_at}
                             onChange={(value) => form.setData('end_at', value)}
                         />

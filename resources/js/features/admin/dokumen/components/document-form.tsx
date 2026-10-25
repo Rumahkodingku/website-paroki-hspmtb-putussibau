@@ -7,6 +7,7 @@ import {
     FormInput,
     FormTextarea,
 } from '@/components/form-fields';
+import { DatePicker } from '@/components/date-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
 import type {
@@ -167,9 +168,8 @@ export function DocumentForm({
                     hint={meta.hints.document_date}
                     error={form.errors.document_date}
                 >
-                    <FormInput
+                    <DatePicker
                         id="document-date"
-                        type="date"
                         value={form.data.document_date}
                         onChange={(value) =>
                             form.setData('document_date', value)
@@ -183,9 +183,8 @@ export function DocumentForm({
                     hint={meta.hints.expires_at}
                     error={form.errors.expires_at}
                 >
-                    <FormInput
+                    <DatePicker
                         id="document-expires"
-                        type="date"
                         value={form.data.expires_at}
                         onChange={(value) => form.setData('expires_at', value)}
                     />

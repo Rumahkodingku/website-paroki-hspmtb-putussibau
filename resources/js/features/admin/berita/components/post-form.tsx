@@ -12,6 +12,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/text';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { toDateTimeLocalValue } from '@/lib/datetime';
 import type { Option } from '@/types/news-agenda';
 import type { PostFormData, PostFormMeta } from '../types';
@@ -306,9 +307,8 @@ export function PostForm({
                             form.errors.published_at !== undefined
                         }
                     >
-                        <FormInput
+                        <DateTimePicker
                             id="post-published-at"
-                            type="datetime-local"
                             value={form.data.published_at}
                             onChange={(value) =>
                                 form.setData('published_at', value)

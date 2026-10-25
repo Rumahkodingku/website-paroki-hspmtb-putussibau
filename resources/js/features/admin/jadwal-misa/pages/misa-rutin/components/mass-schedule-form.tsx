@@ -1,3 +1,4 @@
+import { TimePicker } from '@/components/time-picker';
 import { useForm } from '@inertiajs/react';
 import type { DayOfWeek, LocationOption } from '../../../types';
 import {
@@ -109,12 +110,10 @@ export function MassScheduleForm({
                     hint={hints.start_time}
                     error={form.errors.start_time}
                 >
-                    <FormInput
+                    <TimePicker
                         id="schedule-time"
-                        type="time"
                         value={form.data.start_time}
                         onChange={(value) => form.setData('start_time', value)}
-                        required
                     />
                 </Field>
 
