@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\ServiceFaq;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class ServiceFaqController extends Controller
 {
@@ -24,8 +25,9 @@ class ServiceFaqController extends Controller
         ServiceFaq::create($data);
         $service->touch();
 
-        return to_route('services.edit', ['service' => $service, 'tab' => 'faq'])
-            ->with('success', __('pelayanan.flash.faq_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_created')]);
+
+        return to_route('services.edit', ['service' => $service, 'tab' => 'faq']);
     }
 
     public function update(
@@ -38,7 +40,9 @@ class ServiceFaqController extends Controller
         $faq->update($request->validated());
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.faq_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_updated')]);
+
+        return back();
     }
 
     public function destroy(Service $service, ServiceFaq $faq): RedirectResponse
@@ -49,7 +53,9 @@ class ServiceFaqController extends Controller
         $faq->delete();
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.faq_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_deleted')]);
+
+        return back();
     }
 
     public function reorder(
@@ -61,7 +67,9 @@ class ServiceFaqController extends Controller
 
         $action->handle($service, ServiceFaq::class, $ids);
 
-        return back()->with('success', __('pelayanan.flash.faq_reordered'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_reordered')]);
+
+        return back();
     }
 
     private function ensureBelongsTo(Service $service, ServiceFaq $faq): void

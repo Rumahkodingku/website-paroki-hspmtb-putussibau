@@ -10,6 +10,7 @@ import {
     destroy as destroyPastor,
     edit as editPastor,
 } from '@/routes/pastors';
+import { create as createAssignment } from '@/routes/pastor-assignments';
 import {
     ListEmpty,
     ListHeader,
@@ -18,6 +19,12 @@ import {
 } from '@/components/list-parts';
 import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Plus } from 'lucide-react';
 import { Text } from '@/components/text';
 import type { Paginated } from '@/types';
 import type { PastorRow } from '@/features/admin/profil/types';
@@ -99,12 +106,37 @@ export default function Index({ pastors, filters }: Props) {
             id: 'actions',
             header: 'Aksi',
             cell: ({ row }) => (
-                <RowActions
-                    canUpdate={row.original.can.update}
-                    canDelete={row.original.can.delete}
-                    updateHref={editPastor(row.original.id)}
-                    onDelete={() => setDeleting(row.original)}
-                />
+                <div className="flex items-center gap-3">
+                    {row.original.can.update ? (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Link
+                                    href={createAssignment({
+                                        pastor: row.original.id,
+                                    })}
+                                    aria-label="Tambah riwayat penugasan"
+                                    className="cursor-pointer rounded-sm text-primary-on-surface hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    <Plus
+                                        className="size-4"
+                                        aria-hidden="true"
+                                    />
+                                </Link>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                                <p>Tambah riwayat penugasan</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    ) : null}
+
+                    <RowActions
+                        canUpdate={row.original.can.update}
+                        canDelete={row.original.can.delete}
+                        updateHref={editPastor(row.original.id)}
+                        onDelete={() => setDeleting(row.original)}
+                    />
+                </div>
             ),
         },
     ];

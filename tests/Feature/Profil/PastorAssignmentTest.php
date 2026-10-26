@@ -30,7 +30,7 @@ it('adds an assignment to a pastor', function () {
 
     $this->actingAs(superAdmin())
         ->post(route('pastor-assignments.store', $pastor), validAssignment())
-        ->assertRedirect(route('pastors.edit', $pastor));
+        ->assertRedirect(route('pastor-assignments.create', $pastor));
 
     expect($pastor->assignments()->count())->toBe(1);
 });
@@ -79,7 +79,7 @@ it('activates an assignment and clears the previous one', function () {
             'pastor' => $pastor->getKey(),
             'assignment' => $next->getKey(),
         ]))
-        ->assertRedirect(route('pastors.edit', $pastor));
+        ->assertRedirect(route('pastor-assignments.create', $pastor));
 
     expect($next->fresh()->is_current)->toBeTrue()
         ->and($current->fresh()->is_current)->toBeFalse()

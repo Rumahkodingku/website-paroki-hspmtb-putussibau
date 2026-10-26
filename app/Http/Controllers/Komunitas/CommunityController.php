@@ -103,8 +103,9 @@ class CommunityController extends Controller
         $community = new Community;
         $action->handle($community, $request->validated());
 
-        return to_route('communities.edit', $community)
-            ->with('success', __('komunitas.flash.community_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.community_created')]);
+
+        return to_route('communities.edit', $community);
     }
 
     public function edit(Community $community): Response
@@ -128,8 +129,9 @@ class CommunityController extends Controller
     {
         $action->handle($community, $request->validated());
 
-        return to_route('communities.edit', $community)
-            ->with('success', __('komunitas.flash.community_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.community_updated')]);
+
+        return to_route('communities.edit', $community);
     }
 
     public function destroy(Community $community, DeleteCommunityAction $action): RedirectResponse
@@ -138,8 +140,9 @@ class CommunityController extends Controller
 
         $action->handle($community);
 
-        return to_route('communities.index')
-            ->with('success', __('komunitas.flash.community_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.community_deleted')]);
+
+        return to_route('communities.index');
     }
 
     /**

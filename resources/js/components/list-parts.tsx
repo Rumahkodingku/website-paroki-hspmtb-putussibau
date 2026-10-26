@@ -1,6 +1,35 @@
+import { useEffect, useRef, useState } from 'react';
+import { CalendarDays, X } from 'lucide-react';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { wibMonthLabel } from '@/lib/datetime';
+import { SEARCH_DEBOUNCE_MS } from '@/lib/search-debouce';
 import { cn } from '@/lib/utils';
+
+const EMPTY_VALUE = '__empty__';
+
+function toSelectValue(value: string): string {
+    return value === '' ? EMPTY_VALUE : value;
+}
+
+function fromSelectValue(value: string): string {
+    return value === EMPTY_VALUE ? '' : value;
+}
 
 /*
  * The parts of an admin list page that are not about what is being listed.
@@ -68,16 +97,61 @@ export function ListToolbar({
     children?: React.ReactNode;
     className?: string;
 }) {
+    const [value, setValue] = useState(search);
+    const onSearchRef = useRef(onSearch);
+
+    useEffect(() => {
+        onSearchRef.current = onSearch;
+    });
+
+    useEffect(() => {
+        setValue(search);
+    }, [search]);
+
+    useEffect(() => {
+        if (value === search) {
+            return;
+        }
+
+        const timeout = window.setTimeout(() => {
+            onSearchRef.current(value.trim());
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => window.clearTimeout(timeout);
+    }, [value, search]);
+
     return (
-        <div className={cn('flex flex-wrap items-center gap-3', className)}>
-            <input
+        <div
+            className={cn(
+                'relative flex flex-wrap items-center gap-3',
+                className,
+            )}
+        >
+            <Input
                 type="search"
-                value={search}
-                onChange={(event: any) => onSearch(event.target.value)}
+                value={value}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    setValue(event.target.value)
+                }
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
-                className="h-11 min-w-48 flex-1 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
+                className="h-11 min-w-48 flex-1 border-border bg-background pr-10 shadow-none focus-visible:border-primary"
             />
+
+            {value !== '' ? (
+                <button
+                    type="button"
+                    onClick={() => {
+                        setValue('');
+                        onSearchRef.current('');
+                    }}
+                    aria-label="Hapus pencarian"
+                    className="absolute top-1/2 right-3 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                    <X className="size-4" aria-hidden="true" />
+                </button>
+            ) : null}
+
             {children}
         </div>
     );
@@ -118,19 +192,105 @@ export function FilterSelect({
     label: string;
 }) {
     return (
-        <select
-            id={id}
-            value={value}
-            aria-label={label}
-            onChange={(event: any) => onChange(event.target.value)}
-            className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
+        <Select
+            value={toSelectValue(value)}
+            onValueChange={(next) => onChange(fromSelectValue(next))}
         >
-            {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
+            <SelectTrigger
+                id={id}
+                aria-label={label}
+                className="h-11 min-w-36 cursor-pointer rounded-md border-border bg-background py-6 shadow-none focus-visible:border-primary"
+            >
+                <SelectValue />
+            </SelectTrigger>
+
+            <SelectContent>
+                {options.map((option) => (
+                    <SelectItem
+                        key={option.value}
+                        value={toSelectValue(option.value)}
+                        className="cursor-pointer rounded-md py-2.5"
+                    >
+                        {option.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    );
+}
+
+export function FilterMonth({
+    id,
+    value,
+    onChange,
+    label,
+}: {
+    id: string;
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const [year = '', month = ''] = value.split('-');
+    const selected =
+        year !== '' && month !== ''
+            ? new Date(Number(year), Number(month) - 1, 1, 12)
+            : undefined;
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    id={id}
+                    type="button"
+                    variant="secondary"
+                    aria-label={label}
+                    className="h-11 min-w-40 cursor-pointer justify-start gap-2 rounded-md border-border bg-background text-sm font-normal text-foreground shadow-none focus-visible:border-primary"
+                >
+                    <CalendarDays
+                        className="size-4 text-muted-foreground"
+                        aria-hidden="true"
+                    />
+                    {value === '' ? 'Semua bulan' : wibMonthLabel(value)}
+                </Button>
+            </PopoverTrigger>
+
+            <PopoverContent align="start" className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={selected}
+                    defaultMonth={selected}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                        if (!date) {
+                            return;
+                        }
+
+                        onChange(
+                            `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+                        );
+                        setOpen(false);
+                    }}
+                />
+
+                {value !== '' ? (
+                    <div className="border-t p-2">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => {
+                                onChange('');
+                                setOpen(false);
+                            }}
+                        >
+                            Hapus filter bulan
+                        </Button>
+                    </div>
+                ) : null}
+            </PopoverContent>
+        </Popover>
     );
 }
 

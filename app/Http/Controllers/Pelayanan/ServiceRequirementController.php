@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\ServiceRequirement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class ServiceRequirementController extends Controller
 {
@@ -24,8 +25,9 @@ class ServiceRequirementController extends Controller
         ServiceRequirement::create($data);
         $service->touch();
 
-        return to_route('services.edit', ['service' => $service, 'tab' => 'persyaratan'])
-            ->with('success', __('pelayanan.flash.requirement_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_created')]);
+
+        return to_route('services.edit', ['service' => $service, 'tab' => 'persyaratan']);
     }
 
     public function update(
@@ -38,7 +40,9 @@ class ServiceRequirementController extends Controller
         $requirement->update($request->validated());
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.requirement_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_updated')]);
+
+        return back();
     }
 
     public function destroy(Service $service, ServiceRequirement $requirement): RedirectResponse
@@ -49,7 +53,9 @@ class ServiceRequirementController extends Controller
         $requirement->delete();
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.requirement_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_deleted')]);
+
+        return back();
     }
 
     public function reorder(
@@ -60,7 +66,9 @@ class ServiceRequirementController extends Controller
         $ids = $request->validated('ids');
         $action->handle($service, ServiceRequirement::class, $ids);
 
-        return back()->with('success', __('pelayanan.flash.requirement_reordered'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_reordered')]);
+
+        return back();
     }
 
     private function ensureBelongsTo(Service $service, ServiceRequirement $requirement): void

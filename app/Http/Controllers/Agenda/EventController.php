@@ -125,8 +125,9 @@ class EventController extends Controller
     {
         $event = $action->handle(new Event, $request->eventPayload());
 
-        return to_route('events.edit', $event)
-            ->with('success', __('Agenda berhasil disimpan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Agenda berhasil disimpan.')]);
+
+        return to_route('events.edit', $event);
     }
 
     public function edit(Event $event): Response
@@ -144,8 +145,9 @@ class EventController extends Controller
     {
         $action->handle($event, $request->eventPayload());
 
-        return to_route('events.edit', $event)
-            ->with('success', __('Agenda berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Agenda berhasil diperbarui.')]);
+
+        return to_route('events.edit', $event);
     }
 
     /**
@@ -165,8 +167,9 @@ class EventController extends Controller
         // Straight to the edit form rather than to the list: a duplicate opens
         // with a start date a month out that nobody has confirmed, and the form
         // is where that gets confirmed.
-        return to_route('events.edit', $copy)
-            ->with('success', __('Agenda berhasil digandakan. Periksa tanggal dan lokasi sebelum diterbitkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Agenda berhasil digandakan. Periksa tanggal dan lokasi sebelum diterbitkan.')]);
+
+        return to_route('events.edit', $copy);
     }
 
     /**
@@ -179,8 +182,9 @@ class EventController extends Controller
 
         $event->delete();
 
-        return to_route('events.list')
-            ->with('success', __('Agenda berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Agenda berhasil dihapus.')]);
+
+        return to_route('events.list');
     }
 
     /**

@@ -13,6 +13,7 @@ import { DataTable } from '@/components/data-table';
 import { scheduleNoticeColumns } from '../../components/columns';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -106,20 +107,13 @@ export default function Index({ notices, filters, noticeScopes }: Props) {
                     searchPlaceholder="Cari judul atau isi pemberitahuan"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {STATUS_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={STATUS_OPTIONS}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters

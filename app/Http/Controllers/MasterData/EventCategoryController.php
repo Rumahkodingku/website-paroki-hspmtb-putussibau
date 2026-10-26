@@ -82,8 +82,9 @@ class EventCategoryController extends Controller
     {
         EventCategory::create($request->eventCategoryPayload());
 
-        return to_route('event-categories.index')
-            ->with('success', __('Kategori agenda berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil ditambahkan.')]);
+
+        return to_route('event-categories.index');
     }
 
     public function edit(EventCategory $eventCategory): Response
@@ -100,8 +101,9 @@ class EventCategoryController extends Controller
     {
         $eventCategory->update($request->eventCategoryPayload());
 
-        return to_route('event-categories.index')
-            ->with('success', __('Kategori agenda berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil diperbarui.')]);
+
+        return to_route('event-categories.index');
     }
 
     public function destroy(EventCategory $eventCategory): RedirectResponse
@@ -125,7 +127,8 @@ class EventCategoryController extends Controller
 
         $eventCategory->delete();
 
-        return to_route('event-categories.index')
-            ->with('success', __('Kategori agenda berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil dihapus.')]);
+
+        return to_route('event-categories.index');
     }
 }

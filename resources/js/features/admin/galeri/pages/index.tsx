@@ -4,6 +4,7 @@ import { Images } from 'lucide-react';
 import { DataTable, type DataColumn } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -193,34 +194,31 @@ export default function Index({ albums, years, filters, empty }: Props) {
                     searchPlaceholder="Cari judul album"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua status</option>
-                        <option value="published">Terbit</option>
-                        <option value="draft">Draf</option>
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={[
+                            { value: '', label: 'Semua status' },
+                            { value: 'published', label: 'Terbit' },
+                            { value: 'draft', label: 'Draf' },
+                        ]}
+                    />
 
-                    <select
-                        aria-label="Filter tahun"
+                    <FilterSelect
+                        id="filter-tahun"
+                        label="Filter tahun"
                         value={filters.tahun}
-                        onChange={(event: any) =>
-                            applyFilter({ tahun: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua tahun</option>
-                        {years.map((year) => (
-                            <option key={year} value={String(year)}>
-                                {year}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(tahun) => applyFilter({ tahun })}
+                        options={[
+                            { value: '', label: 'Semua tahun' },
+                            ...years.map((year) => ({
+                                value: String(year),
+                                label: String(year),
+                            })),
+                        ]}
+                    />
 
                     {hasFilter ? <ResetFilters onReset={reset} /> : null}
                 </ListToolbar>

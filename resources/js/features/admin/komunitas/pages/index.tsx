@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { DataTable, type DataColumn } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -165,50 +166,45 @@ export default function Index({
                     searchPlaceholder="Cari nama komunitas"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter kategori"
+                    <FilterSelect
+                        id="filter-kategori"
+                        label="Filter kategori"
                         value={filters.category}
-                        onChange={(event: any) =>
-                            applyFilter({ category: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua kategori</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(category) => applyFilter({ category })}
+                        options={[
+                            { value: '', label: 'Semua kategori' },
+                            ...categories.map((category) => ({
+                                value: String(category.id),
+                                label: category.name,
+                            })),
+                        ]}
+                    />
 
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua status</option>
-                        {statuses.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={[
+                            { value: '', label: 'Semua status' },
+                            ...statuses.map((option) => ({
+                                value: option.value,
+                                label: option.label,
+                            })),
+                        ]}
+                    />
 
-                    <select
-                        aria-label="Filter publikasi"
+                    <FilterSelect
+                        id="filter-publikasi"
+                        label="Filter publikasi"
                         value={filters.publication}
-                        onChange={(event: any) =>
-                            applyFilter({ publication: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua publikasi</option>
-                        <option value="published">Dipublikasikan</option>
-                        <option value="draft">Draf</option>
-                    </select>
+                        onChange={(publication) => applyFilter({ publication })}
+                        options={[
+                            { value: '', label: 'Semua publikasi' },
+                            { value: 'published', label: 'Dipublikasikan' },
+                            { value: 'draft', label: 'Draf' },
+                        ]}
+                    />
 
                     {hasFilter ? <ResetFilters onReset={reset} /> : null}
                 </ListToolbar>

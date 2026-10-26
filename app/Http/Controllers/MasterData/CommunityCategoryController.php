@@ -78,8 +78,9 @@ class CommunityCategoryController extends Controller
     {
         CommunityCategory::create($request->validated());
 
-        return to_route('community-categories.index')
-            ->with('success', __('komunitas.flash.category_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_created')]);
+
+        return to_route('community-categories.index');
     }
 
     public function edit(CommunityCategory $communityCategory): Response
@@ -96,8 +97,9 @@ class CommunityCategoryController extends Controller
     {
         $communityCategory->update($request->validated());
 
-        return to_route('community-categories.index')
-            ->with('success', __('komunitas.flash.category_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_updated')]);
+
+        return to_route('community-categories.index');
     }
 
     public function destroy(CommunityCategory $communityCategory): RedirectResponse
@@ -118,7 +120,8 @@ class CommunityCategoryController extends Controller
 
         $communityCategory->delete();
 
-        return to_route('community-categories.index')
-            ->with('success', __('komunitas.flash.category_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_deleted')]);
+
+        return to_route('community-categories.index');
     }
 }

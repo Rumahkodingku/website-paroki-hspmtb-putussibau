@@ -393,6 +393,7 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::patch('/profil/pastor/{pastor}', [PastorController::class, 'update'])->name('pastors.update');
         Route::delete('/profil/pastor/{pastor}', [PastorController::class, 'destroy'])->name('pastors.destroy');
 
+        Route::get('/profil/pastor/{pastor}/penugasan/tambah', [PastorAssignmentController::class, 'create'])->name('pastor-assignments.create');
         Route::post('/profil/pastor/{pastor}/penugasan', [PastorAssignmentController::class, 'store'])->name('pastor-assignments.store');
         Route::get('/profil/pastor/{pastor}/penugasan/{assignment}/ubah', [PastorAssignmentController::class, 'edit'])->name('pastor-assignments.edit');
         Route::patch('/profil/pastor/{pastor}/penugasan/{assignment}', [PastorAssignmentController::class, 'update'])->name('pastor-assignments.update');

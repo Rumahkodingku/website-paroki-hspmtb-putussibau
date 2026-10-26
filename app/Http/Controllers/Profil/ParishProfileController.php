@@ -46,7 +46,8 @@ class ParishProfileController extends Controller
             ->fill($request->validated())
             ->save();
 
-        return to_route('parish-profile.edit')
-            ->with('success', __('Informasi profil berhasil disimpan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Informasi profil berhasil disimpan.')]);
+
+        return to_route('parish-profile.edit');
     }
 }
