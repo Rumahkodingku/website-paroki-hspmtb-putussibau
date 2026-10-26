@@ -79,8 +79,9 @@ class ParishBoardPeriodController extends Controller
             $activate->handle($period);
         }
 
-        return to_route('board-periods.index')
-            ->with('success', __('Periode kepengurusan berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Periode kepengurusan berhasil ditambahkan.')]);
+
+        return to_route('board-periods.index');
     }
 
     public function edit(ParishBoardPeriod $period): Response
@@ -110,8 +111,9 @@ class ParishBoardPeriodController extends Controller
             $activate->handle($period);
         }
 
-        return to_route('board-periods.index')
-            ->with('success', __('Periode kepengurusan berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Periode kepengurusan berhasil diperbarui.')]);
+
+        return to_route('board-periods.index');
     }
 
     public function activate(ParishBoardPeriod $period, ActivateBoardPeriodAction $activate): RedirectResponse
@@ -120,10 +122,11 @@ class ParishBoardPeriodController extends Controller
 
         $activate->handle($period);
 
-        return to_route('board-periods.index')
-            ->with('success', __(':name ditetapkan sebagai periode aktif.', [
-                'name' => $period->name,
-            ]));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':name ditetapkan sebagai periode aktif.', [
+            'name' => $period->name,
+        ])]);
+
+        return to_route('board-periods.index');
     }
 
     public function destroy(ParishBoardPeriod $period): RedirectResponse
@@ -136,11 +139,12 @@ class ParishBoardPeriodController extends Controller
         // they are about to lose.
         $period->delete();
 
-        return to_route('board-periods.index')
-            ->with('success', $members === 0
-                ? __('Periode kepengurusan berhasil dihapus.')
-                : __('Periode kepengurusan beserta :count anggotanya berhasil dihapus.', [
-                    'count' => $members,
-                ]));
+        Inertia::flash('toast', ['type' => 'success', 'message' => $members === 0
+            ? __('Periode kepengurusan berhasil dihapus.')
+            : __('Periode kepengurusan beserta :count anggotanya berhasil dihapus.', [
+                'count' => $members,
+            ])]);
+
+        return to_route('board-periods.index');
     }
 }

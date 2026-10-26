@@ -79,8 +79,9 @@ class PostCategoryController extends Controller
     {
         PostCategory::create($request->postCategoryPayload());
 
-        return to_route('post-categories.index')
-            ->with('success', __('Kategori berita berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil ditambahkan.')]);
+
+        return to_route('post-categories.index');
     }
 
     public function edit(PostCategory $postCategory): Response
@@ -97,8 +98,9 @@ class PostCategoryController extends Controller
     {
         $postCategory->update($request->postCategoryPayload());
 
-        return to_route('post-categories.index')
-            ->with('success', __('Kategori berita berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil diperbarui.')]);
+
+        return to_route('post-categories.index');
     }
 
     public function destroy(PostCategory $postCategory): RedirectResponse
@@ -125,7 +127,8 @@ class PostCategoryController extends Controller
 
         $postCategory->delete();
 
-        return to_route('post-categories.index')
-            ->with('success', __('Kategori berita berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil dihapus.')]);
+
+        return to_route('post-categories.index');
     }
 }

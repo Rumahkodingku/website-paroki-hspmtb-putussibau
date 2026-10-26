@@ -113,8 +113,9 @@ class PostController extends Controller
     {
         $post = $action->handle(new Post, $request->postPayload(), $request->user());
 
-        return to_route('posts.edit', $post)
-            ->with('success', __('Artikel berhasil disimpan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Artikel berhasil disimpan.')]);
+
+        return to_route('posts.edit', $post);
     }
 
     public function edit(Post $post): Response
@@ -134,8 +135,9 @@ class PostController extends Controller
     {
         $action->handle($post, $request->postPayload(), $request->user());
 
-        return to_route('posts.edit', $post)
-            ->with('success', __('Artikel berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Artikel berhasil diperbarui.')]);
+
+        return to_route('posts.edit', $post);
     }
 
     /**
@@ -152,8 +154,9 @@ class PostController extends Controller
 
         $post->delete();
 
-        return to_route('posts.list')
-            ->with('success', __('Artikel berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Artikel berhasil dihapus.')]);
+
+        return to_route('posts.list');
     }
 
     /**

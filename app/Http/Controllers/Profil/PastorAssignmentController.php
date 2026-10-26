@@ -28,6 +28,27 @@ class PastorAssignmentController extends Controller
 {
     use ProfilFormMeta;
 
+    public function create(Pastor $pastor): Response
+    {
+        Gate::authorize('update', $pastor);
+
+        return Inertia::render('admin/profil/pastor/penugasan-tambah', [
+            'pastor' => [
+                'id' => $pastor->getKey(),
+                'name' => $pastor->name,
+            ],
+            'assignments' => array_values(
+                PastorAssignmentResource::collection(
+                    $pastor->assignments()
+                        ->orderByDesc('is_current')
+                        ->orderByDesc('start_year')
+                        ->get(),
+                )->resolve(),
+            ),
+            ...$this->profilFormMeta(),
+        ]);
+    }
+
     public function store(
         StorePastorAssignmentRequest $request,
         Pastor $pastor,
@@ -46,8 +67,9 @@ class PastorAssignmentController extends Controller
             $setCurrent->handle($assignment);
         }
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __('Riwayat penugasan berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil ditambahkan.')]);
+
+        return to_route('pastor-assignments.create', $pastor);
     }
 
     public function edit(Pastor $pastor, PastorAssignment $assignment): Response
@@ -80,8 +102,9 @@ class PastorAssignmentController extends Controller
             $setCurrent->handle($assignment);
         }
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __('Riwayat penugasan berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil diperbarui.')]);
+
+        return to_route('pastor-assignments.create', $pastor);
     }
 
     public function activate(
@@ -94,10 +117,11 @@ class PastorAssignmentController extends Controller
 
         $setCurrent->handle($assignment);
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __(':name ditetapkan sebagai pastor yang bertugas.', [
-                'name' => $pastor->name,
-            ]));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __(':name ditetapkan sebagai pastor yang bertugas.', [
+            'name' => $pastor->name,
+        ])]);
+
+        return to_route('pastor-assignments.create', $pastor);
     }
 
     public function destroy(Pastor $pastor, PastorAssignment $assignment): RedirectResponse
@@ -107,7 +131,8 @@ class PastorAssignmentController extends Controller
 
         $assignment->delete();
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __('Riwayat penugasan berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil dihapus.')]);
+
+        return to_route('pastor-assignments.create', $pastor);
     }
 }

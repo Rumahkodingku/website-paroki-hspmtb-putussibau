@@ -506,7 +506,7 @@ export function ParishNavbar() {
 
                                 <nav
                                     aria-label="Navigasi utama"
-                                    className="min-h-0 flex-1 overflow-y-auto px-4 pb-6"
+                                    className="scrollbar-thin min-h-0 flex-1 scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overflow-y-auto px-4 pb-6"
                                 >
                                     <DrawerNav onNavigate={closeMenu} />
                                 </nav>

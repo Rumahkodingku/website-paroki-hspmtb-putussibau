@@ -98,8 +98,9 @@ class GalleryController extends Controller
         $album = new GalleryAlbum;
         $action->handle($album, $request->validated(), $request->user());
 
-        return to_route('galleries.photos', $album)
-            ->with('success', __('galeri.flash.album_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.album_created')]);
+
+        return to_route('galleries.photos', $album);
     }
 
     public function edit(GalleryAlbum $gallery): Response
@@ -122,8 +123,9 @@ class GalleryController extends Controller
     {
         $action->handle($gallery, $request->validated(), $request->user());
 
-        return to_route('galleries.edit', $gallery)
-            ->with('success', __('galeri.flash.album_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.album_updated')]);
+
+        return to_route('galleries.edit', $gallery);
     }
 
     public function destroy(GalleryAlbum $gallery): RedirectResponse
@@ -132,8 +134,9 @@ class GalleryController extends Controller
 
         $gallery->delete();
 
-        return to_route('galleries.index')
-            ->with('success', __('galeri.flash.album_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.album_deleted')]);
+
+        return to_route('galleries.index');
     }
 
     /**

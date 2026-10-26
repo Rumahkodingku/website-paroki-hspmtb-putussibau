@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin 'tailwind-scrollbar';
 
 @import 'tw-animate-css';
 
@@ -367,7 +368,7 @@
     }
 
     .rich-text pre {
-        @apply overflow-x-auto rounded-md bg-navy-deep p-4 text-body-sm text-white;
+        @apply scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overflow-x-auto rounded-md bg-navy-deep p-4 text-body-sm text-white;
     }
 
     .rich-text pre code {

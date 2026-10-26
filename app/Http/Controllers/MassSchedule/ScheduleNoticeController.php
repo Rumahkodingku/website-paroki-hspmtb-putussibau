@@ -123,8 +123,9 @@ class ScheduleNoticeController extends Controller
     {
         ScheduleNotice::create($request->scheduleNoticePayload());
 
-        return to_route('schedule-notices.index')
-            ->with('success', __('Pemberitahuan berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil ditambahkan.')]);
+
+        return to_route('schedule-notices.index');
     }
 
     public function edit(ScheduleNotice $scheduleNotice): Response
@@ -144,8 +145,9 @@ class ScheduleNoticeController extends Controller
     {
         $scheduleNotice->update($request->scheduleNoticePayload());
 
-        return to_route('schedule-notices.index')
-            ->with('success', __('Pemberitahuan berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil diperbarui.')]);
+
+        return to_route('schedule-notices.index');
     }
 
     /**
@@ -182,8 +184,9 @@ class ScheduleNoticeController extends Controller
 
         $scheduleNotice->delete();
 
-        return to_route('schedule-notices.index')
-            ->with('success', __('Pemberitahuan berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil dihapus.')]);
+
+        return to_route('schedule-notices.index');
     }
 
     /**

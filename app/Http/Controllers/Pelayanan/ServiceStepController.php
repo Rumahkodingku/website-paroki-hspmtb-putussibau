@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\ServiceStep;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class ServiceStepController extends Controller
 {
@@ -24,8 +25,9 @@ class ServiceStepController extends Controller
         ServiceStep::create($data);
         $service->touch();
 
-        return to_route('services.edit', ['service' => $service, 'tab' => 'prosedur'])
-            ->with('success', __('pelayanan.flash.step_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_created')]);
+
+        return to_route('services.edit', ['service' => $service, 'tab' => 'prosedur']);
     }
 
     public function update(
@@ -38,7 +40,9 @@ class ServiceStepController extends Controller
         $step->update($request->validated());
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.step_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_updated')]);
+
+        return back();
     }
 
     public function destroy(Service $service, ServiceStep $step): RedirectResponse
@@ -49,7 +53,9 @@ class ServiceStepController extends Controller
         $step->delete();
         $service->touch();
 
-        return back()->with('success', __('pelayanan.flash.step_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_deleted')]);
+
+        return back();
     }
 
     public function reorder(
@@ -60,7 +66,9 @@ class ServiceStepController extends Controller
         $ids = $request->validated('ids');
         $action->handle($service, ServiceStep::class, $ids);
 
-        return back()->with('success', __('pelayanan.flash.step_reordered'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_reordered')]);
+
+        return back();
     }
 
     private function ensureBelongsTo(Service $service, ServiceStep $step): void

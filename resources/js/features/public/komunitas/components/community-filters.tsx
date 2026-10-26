@@ -130,7 +130,7 @@ export function CommunityFilters({
 
             {/* Category chips */}
             <div
-                className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
+                className="-mx-1 scrollbar-thin flex scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
                 aria-label="Kategori komunitas"
             >
                 <button

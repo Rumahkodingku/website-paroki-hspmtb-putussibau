@@ -147,8 +147,9 @@ class MassScheduleController extends Controller
     {
         MassSchedule::create($request->massSchedulePayload());
 
-        return to_route('mass-schedules.list')
-            ->with('success', __('Jadwal misa rutin berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil ditambahkan.')]);
+
+        return to_route('mass-schedules.list');
     }
 
     /**
@@ -178,8 +179,9 @@ class MassScheduleController extends Controller
     {
         $massSchedule->update($request->massSchedulePayload());
 
-        return to_route('mass-schedules.list')
-            ->with('success', __('Jadwal misa rutin berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil diperbarui.')]);
+
+        return to_route('mass-schedules.list');
     }
 
     /**
@@ -210,11 +212,12 @@ class MassScheduleController extends Controller
                 throw $exception;
             }
 
-            return back()->with('error', __('Sudah ada jadwal pada lokasi, hari, dan jam tersebut.'));
+            return back()->withErrors(['error' => __('Sudah ada jadwal pada lokasi, hari, dan jam tersebut.')]);
         }
 
-        return to_route('mass-schedules.list')
-            ->with('success', __('Jadwal berhasil diduplikasi ke lokasi tujuan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal berhasil diduplikasi ke lokasi tujuan.')]);
+
+        return to_route('mass-schedules.list');
     }
 
     /**
@@ -232,8 +235,9 @@ class MassScheduleController extends Controller
 
         $massSchedule->delete();
 
-        return to_route('mass-schedules.list')
-            ->with('success', __('Jadwal misa rutin berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil dihapus.')]);
+
+        return to_route('mass-schedules.list');
     }
 
     /**
