@@ -3,6 +3,7 @@
 namespace App\Actions\Galeri;
 
 use App\Models\GalleryAlbum;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +23,8 @@ use Illuminate\Validation\ValidationException;
  */
 class ReorderGalleryPhotosAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  list<int|string>  $ids  the new order, first photo first
      */
@@ -46,6 +49,19 @@ class ReorderGalleryPhotosAction
             }
 
             $album->touch();
+
+            $this->audit->recordModel(
+                'galleries',
+                'reordered',
+                'success',
+                $album,
+                [],
+                [],
+                [
+                    'count' => count($ordered),
+                    'photo_ids' => array_slice($ordered, 0, 100),
+                ],
+            );
         });
     }
 }

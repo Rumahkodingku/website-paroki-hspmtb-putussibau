@@ -5,6 +5,7 @@ import {
     FileText,
     Globe,
     HandHeart,
+    History,
     Images,
     ListChecks,
     MapPin,
@@ -41,13 +42,38 @@ import { edit as editParishProfile } from '@/routes/parish-profile';
 import { edit as editServiceArea } from '@/routes/parish-service-area';
 import { index as pastorsIndex } from '@/routes/pastors';
 import { index as boardPeriodsIndex } from '@/routes/board-periods';
+import { index as auditLogsIndex } from '@/routes/audit-logs';
 
 export type Entry = {
     title: string;
     href?: InertiaLinkProps['href'];
     icon?: LucideIcon;
     children?: Entry[];
+    ability?: string;
 };
+
+/**
+ * Filter navigation entries by the server-resolved abilities.
+ *
+ * The backend remains the security boundary; this only keeps a menu item a user
+ * cannot use out of their sidebar.
+ */
+export function visibleEntries(
+    entries: Entry[],
+    abilities: Record<string, boolean>,
+): Entry[] {
+    return entries
+        .filter((entry) => !entry.ability || abilities[entry.ability] === true)
+        .map((entry) =>
+            entry.children
+                ? {
+                      ...entry,
+                      children: visibleEntries(entry.children, abilities),
+                  }
+                : entry,
+        )
+        .filter((entry) => !entry.children || entry.children.length > 0);
+}
 
 export const CONTENT_ENTRIES: Entry[] = [
     {
@@ -112,5 +138,14 @@ export const ACCOUNT_ENTRIES: Entry[] = [
         title: 'Akun',
         href: editProfile(),
         icon: UserCog,
+    },
+];
+
+export const ADMINISTRATION_ENTRIES: Entry[] = [
+    {
+        title: 'Audit Log',
+        href: auditLogsIndex(),
+        icon: History,
+        ability: 'auditlogs.view',
     },
 ];

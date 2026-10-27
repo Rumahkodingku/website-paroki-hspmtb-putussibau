@@ -4,6 +4,7 @@ namespace App\Actions\MassSchedule;
 
 use App\Models\Location;
 use App\Models\MassSchedule;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -29,6 +30,8 @@ use Illuminate\Support\Facades\DB;
  */
 class DuplicateMassScheduleAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * The unique index on (location_id, day_of_week, start_time) is the layer
      * behind the validation: this action does not check, so a duplicate that
@@ -71,6 +74,19 @@ class DuplicateMassScheduleAction
             }
 
             $copy->save();
+
+            $this->audit->recordModel(
+                'mass_schedules',
+                'duplicated',
+                'success',
+                $copy,
+                [],
+                $this->audit->snapshot($copy, 'mass_schedules'),
+                [
+                    'source_id' => $source->getKey(),
+                    'destination_location_id' => $target->getKey(),
+                ],
+            );
 
             return $copy;
         });

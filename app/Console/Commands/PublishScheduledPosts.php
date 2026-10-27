@@ -4,7 +4,9 @@ namespace App\Console\Commands;
 
 use App\Enums\PostStatus;
 use App\Models\Post;
+use App\Services\AuditLogger;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Moves scheduled articles to published once their time arrives.
@@ -41,17 +43,50 @@ use Illuminate\Console\Command;
  */
 class PublishScheduledPosts extends Command
 {
+    public function __construct(private readonly AuditLogger $audit)
+    {
+        parent::__construct();
+    }
+
     protected $signature = 'posts:publish-scheduled';
 
     protected $description = 'Terbitkan artikel terjadwal yang waktunya sudah tiba';
 
     public function handle(): int
     {
-        $published = Post::query()
-            ->where('status', PostStatus::Scheduled->value)
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
-            ->update(['status' => PostStatus::Published->value]);
+        $published = DB::transaction(function (): int {
+            $ids = Post::query()
+                ->where('status', PostStatus::Scheduled->value)
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now())
+                ->lockForUpdate()
+                ->pluck('id')
+                ->all();
+
+            if ($ids === []) {
+                return 0;
+            }
+
+            Post::query()
+                ->whereKey($ids)
+                ->update(['status' => PostStatus::Published->value]);
+
+            $count = count($ids);
+
+            $this->audit->system(
+                'news',
+                'published',
+                'success',
+                "{$count} artikel terjadwal diterbitkan otomatis.",
+                [
+                    'count' => $count,
+                    'post_ids' => array_slice($ids, 0, 100),
+                ],
+                Post::class,
+            );
+
+            return $count;
+        });
 
         if ($published === 0) {
             $this->components->info('Tidak ada artikel terjadwal yang perlu diterbitkan.');

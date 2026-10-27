@@ -43,6 +43,8 @@ class PermissionSeeder extends Seeder
 
         'dashboard.view',
 
+        'auditlogs.view',
+
         'settings.view',
         'settings.update',
 

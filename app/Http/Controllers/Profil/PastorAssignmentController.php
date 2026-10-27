@@ -10,7 +10,9 @@ use App\Http\Requests\Profil\UpdatePastorAssignmentRequest;
 use App\Http\Resources\Profil\PastorAssignmentResource;
 use App\Models\Pastor;
 use App\Models\PastorAssignment;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +29,8 @@ use Inertia\Response;
 class PastorAssignmentController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
 
     public function create(Pastor $pastor): Response
     {
@@ -61,11 +65,17 @@ class PastorAssignmentController extends Controller
         // rows are never briefly current.
         $data['is_current'] = false;
 
-        $assignment = PastorAssignment::create($data);
+        $assignment = DB::transaction(function () use ($data, $wantsCurrent, $setCurrent): PastorAssignment {
+            $assignment = PastorAssignment::query()->create($data);
 
-        if ($wantsCurrent) {
-            $setCurrent->handle($assignment);
-        }
+            if ($wantsCurrent) {
+                $setCurrent->handle($assignment, false);
+            }
+
+            $this->audit->created('pastor_assignments', $assignment);
+
+            return $assignment;
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil ditambahkan.')]);
 
@@ -96,11 +106,22 @@ class PastorAssignmentController extends Controller
         $wantsCurrent = (bool) $data['is_current'];
         $data['is_current'] = false;
 
-        $assignment->update($data);
+        DB::transaction(function () use ($data, $wantsCurrent, $setCurrent, $assignment): void {
+            $before = $this->audit->snapshot($assignment, 'pastor_assignments');
 
-        if ($wantsCurrent) {
-            $setCurrent->handle($assignment);
-        }
+            $assignment->update($data);
+
+            if ($wantsCurrent) {
+                $setCurrent->handle($assignment, false);
+            }
+
+            $this->audit->updated(
+                'pastor_assignments',
+                $assignment,
+                $before,
+                $wantsCurrent ? 'activated' : 'updated',
+            );
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil diperbarui.')]);
 
@@ -129,7 +150,11 @@ class PastorAssignmentController extends Controller
         Gate::authorize('delete', $assignment);
         abort_unless($assignment->pastor_id === $pastor->getKey(), 404);
 
-        $assignment->delete();
+        DB::transaction(function () use ($assignment): void {
+            $before = $this->audit->snapshot($assignment, 'pastor_assignments');
+            $assignment->delete();
+            $this->audit->deleted('pastor_assignments', $assignment, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Riwayat penugasan berhasil dihapus.')]);
 

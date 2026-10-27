@@ -9,9 +9,11 @@ use App\Http\Requests\Profil\StorePastorRequest;
 use App\Http\Requests\Profil\UpdatePastorRequest;
 use App\Http\Resources\Profil\PastorResource;
 use App\Models\Pastor;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +29,9 @@ use Inertia\Response;
 class PastorController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -73,7 +78,12 @@ class PastorController extends Controller
 
     public function store(StorePastorRequest $request): RedirectResponse
     {
-        $pastor = Pastor::create($request->validated());
+        $pastor = DB::transaction(function () use ($request): Pastor {
+            $pastor = Pastor::query()->create($request->validated());
+            $this->audit->created('pastors', $pastor);
+
+            return $pastor;
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil ditambahkan. Tambahkan riwayat penugasannya.')]);
 
@@ -95,7 +105,11 @@ class PastorController extends Controller
 
     public function update(UpdatePastorRequest $request, Pastor $pastor): RedirectResponse
     {
-        $pastor->update($request->validated());
+        DB::transaction(function () use ($request, $pastor): void {
+            $before = $this->audit->snapshot($pastor, 'pastors');
+            $pastor->update($request->validated());
+            $this->audit->updated('pastors', $pastor, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil diperbarui.')]);
 
@@ -109,7 +123,11 @@ class PastorController extends Controller
         // Assignments cascade at the database level; deleting a pastor is a
         // deliberate act and the confirm dialog names the history that goes
         // with it.
-        $pastor->delete();
+        DB::transaction(function () use ($pastor): void {
+            $before = $this->audit->snapshot($pastor, 'pastors');
+            $pastor->delete();
+            $this->audit->deleted('pastors', $pastor, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil dihapus.')]);
 

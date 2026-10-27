@@ -3,6 +3,7 @@
 namespace App\Actions\Komunitas;
 
 use App\Models\Community;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,10 +20,14 @@ use Illuminate\Support\Facades\DB;
  */
 class DeleteCommunityAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     public function handle(Community $community): void
     {
         DB::transaction(function () use ($community): void {
+            $before = $this->audit->snapshot($community, 'communities');
             $community->delete();
+            $this->audit->deleted('communities', $community, $before);
         });
     }
 }

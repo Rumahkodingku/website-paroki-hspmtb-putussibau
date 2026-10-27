@@ -18,9 +18,11 @@ use App\Http\Resources\Pelayanan\ServiceStepResource;
 use App\Models\Document;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,6 +30,9 @@ use Inertia\Response;
 class ServiceController extends Controller
 {
     use ServiceFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -135,7 +140,11 @@ class ServiceController extends Controller
     {
         Gate::authorize('delete', $service);
 
-        $service->delete();
+        DB::transaction(function () use ($service): void {
+            $before = $this->audit->snapshot($service, 'services');
+            $service->delete();
+            $this->audit->deleted('services', $service, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.service_deleted')]);
 

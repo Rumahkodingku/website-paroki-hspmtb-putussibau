@@ -14,8 +14,9 @@ import {
 import { LayoutGrid } from 'lucide-react';
 import { dashboard } from '@/routes';
 import {
-    CONTENT_ENTRIES,
     ACCOUNT_ENTRIES,
+    ADMINISTRATION_ENTRIES,
+    CONTENT_ENTRIES,
 } from '@/layouts/app/app-sidebar-nav';
 import { SidebarGroup } from '@/layouts/app/components/app-sidebar-entry';
 
@@ -72,6 +73,11 @@ export function AppSidebar() {
                 />
 
                 <SidebarGroup label="Konten" entries={CONTENT_ENTRIES} />
+
+                <SidebarGroup
+                    label="Administrasi"
+                    entries={ADMINISTRATION_ENTRIES}
+                />
 
                 <SidebarGroup label="Akun" entries={ACCOUNT_ENTRIES} />
             </SidebarContent>

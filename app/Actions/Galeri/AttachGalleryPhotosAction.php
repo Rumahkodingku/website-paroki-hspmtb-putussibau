@@ -3,6 +3,7 @@
 namespace App\Actions\Galeri;
 
 use App\Models\GalleryAlbum;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\DB;
  */
 class AttachGalleryPhotosAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  list<int|string>  $mediaIds  media rows already validated as ready
      * @return int how many photos were actually attached
@@ -37,18 +40,20 @@ class AttachGalleryPhotosAction
             $max = $album->photos()->max('sort_order');
             $next = $max === null ? 0 : ((int) $max) + 1;
             $attached = 0;
+            $attachedIds = [];
 
             foreach (array_map('intval', $mediaIds) as $mediaId) {
                 if (in_array($mediaId, $existing, true)) {
                     continue;
                 }
 
-                $album->photos()->create([
+                $photo = $album->photos()->create([
                     'media_id' => $mediaId,
                     'sort_order' => $next,
                 ]);
 
                 $existing[] = $mediaId;
+                $attachedIds[] = $photo->getKey();
                 $next++;
                 $attached++;
             }
@@ -56,6 +61,21 @@ class AttachGalleryPhotosAction
             // The album's "terakhir diperbarui" moves even though only its
             // photos changed.
             $album->touch();
+
+            if ($attached > 0) {
+                $this->audit->recordModel(
+                    'galleries',
+                    'attached',
+                    'success',
+                    $album,
+                    [],
+                    [],
+                    [
+                        'photo_ids' => $attachedIds,
+                        'count' => $attached,
+                    ],
+                );
+            }
 
             return $attached;
         });

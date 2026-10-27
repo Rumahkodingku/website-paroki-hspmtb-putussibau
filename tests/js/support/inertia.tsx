@@ -121,6 +121,7 @@ export function publicPageProps(
         auth: { user: null },
         locale: 'id',
         displayTimezone: 'Asia/Pontianak',
+        abilities: { 'auditlogs.view': false },
         sidebarOpen: true,
         seo: { ...EMPTY_SEO },
         identity: { ...EMPTY_IDENTITY },

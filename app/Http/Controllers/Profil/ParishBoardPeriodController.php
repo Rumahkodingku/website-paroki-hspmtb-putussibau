@@ -9,8 +9,10 @@ use App\Http\Requests\Profil\StoreParishBoardPeriodRequest;
 use App\Http\Requests\Profil\UpdateParishBoardPeriodRequest;
 use App\Http\Resources\Profil\ParishBoardPeriodResource;
 use App\Models\ParishBoardPeriod;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +29,8 @@ use Inertia\Response;
 class ParishBoardPeriodController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
 
     public function index(Request $request): Response
     {
@@ -73,11 +77,17 @@ class ParishBoardPeriodController extends Controller
         $wantsActive = (bool) $data['is_active'];
         $data['is_active'] = false;
 
-        $period = ParishBoardPeriod::create($data);
+        $period = DB::transaction(function () use ($data, $wantsActive, $activate): ParishBoardPeriod {
+            $period = ParishBoardPeriod::query()->create($data);
 
-        if ($wantsActive) {
-            $activate->handle($period);
-        }
+            if ($wantsActive) {
+                $activate->handle($period, false);
+            }
+
+            $this->audit->created('parish_boards', $period);
+
+            return $period;
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Periode kepengurusan berhasil ditambahkan.')]);
 
@@ -105,11 +115,23 @@ class ParishBoardPeriodController extends Controller
         $wantsActive = (bool) $data['is_active'];
         $data['is_active'] = false;
 
-        $period->update($data);
+        DB::transaction(function () use ($data, $wantsActive, $activate, $period): void {
+            $before = $this->audit->snapshot($period, 'parish_boards');
+            $wasActive = $period->is_active;
 
-        if ($wantsActive) {
-            $activate->handle($period);
-        }
+            $period->update($data);
+
+            if ($wantsActive) {
+                $activate->handle($period, false);
+            }
+
+            $this->audit->updated(
+                'parish_boards',
+                $period,
+                $before,
+                $wantsActive && ! $wasActive ? 'activated' : 'updated',
+            );
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Periode kepengurusan berhasil diperbarui.')]);
 
@@ -137,7 +159,11 @@ class ParishBoardPeriodController extends Controller
 
         // CASCADE at the database, but the message is what tells an admin what
         // they are about to lose.
-        $period->delete();
+        DB::transaction(function () use ($period): void {
+            $before = $this->audit->snapshot($period, 'parish_boards');
+            $period->delete();
+            $this->audit->deleted('parish_boards', $period, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => $members === 0
             ? __('Periode kepengurusan berhasil dihapus.')

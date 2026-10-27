@@ -5,6 +5,7 @@ namespace App\Actions\Document;
 use App\Enums\DocumentStatus;
 use App\Models\Document;
 use App\Models\User;
+use App\Services\AuditLogger;
 use App\Services\DocumentStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,10 @@ use Throwable;
  */
 class SaveDocumentAction
 {
-    public function __construct(private readonly DocumentStorage $storage) {}
+    public function __construct(
+        private readonly DocumentStorage $storage,
+        private readonly AuditLogger $audit,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -37,6 +41,9 @@ class SaveDocumentAction
 
         try {
             $saved = DB::transaction(function () use ($document, $attributes, $newFile, $actor): Document {
+                $isNew = ! $document->exists;
+                $before = $isNew ? [] : $this->audit->snapshot($document, 'documents');
+
                 if ($newFile !== null) {
                     $attributes = array_merge($attributes, $newFile);
                 }
@@ -50,6 +57,19 @@ class SaveDocumentAction
 
                 $document->fill($attributes);
                 $document->save();
+
+                if ($isNew) {
+                    $this->audit->created('documents', $document);
+                } else {
+                    $this->audit->updated(
+                        'documents',
+                        $document,
+                        $before,
+                        null,
+                        null,
+                        ['file_replaced' => $newFile !== null],
+                    );
+                }
 
                 return $document;
             });

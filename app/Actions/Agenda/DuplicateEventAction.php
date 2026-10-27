@@ -4,6 +4,7 @@ namespace App\Actions\Agenda;
 
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -39,6 +40,8 @@ use Illuminate\Support\Str;
  */
 class DuplicateEventAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $overrides
      */
@@ -58,6 +61,16 @@ class DuplicateEventAction
             }
 
             $copy->save();
+
+            $this->audit->recordModel(
+                'agenda',
+                'created',
+                'success',
+                $copy,
+                [],
+                $this->audit->snapshot($copy, 'agenda'),
+                ['duplicated_from' => $source->getKey()],
+            );
 
             return $copy;
         });

@@ -3,6 +3,7 @@
 namespace App\Actions\Pelayanan;
 
 use App\Models\Service;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 class SaveServiceAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $attributes
      */
@@ -23,11 +26,20 @@ class SaveServiceAction
         unset($attributes['document_ids']);
 
         return DB::transaction(function () use ($service, $attributes, $documentIds): Service {
+            $isNew = ! $service->exists;
+            $before = $isNew ? [] : $this->audit->snapshot($service, 'services');
+
             $service->fill($attributes);
             $service->save();
 
             if (is_array($documentIds)) {
                 $service->documents()->sync($documentIds);
+            }
+
+            if ($isNew) {
+                $this->audit->created('services', $service);
+            } else {
+                $this->audit->updated('services', $service, $before);
             }
 
             return $service;
