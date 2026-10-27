@@ -55,7 +55,7 @@ export default function Index({
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
             communitiesIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -63,7 +63,7 @@ export default function Index({
     const sortBy = (sort: string, direction: 'asc' | 'desc') => {
         router.get(
             communitiesIndex().url,
-            { ...filters, sort, direction },
+            { ...filters, sort, direction, page: 1 },
             { preserveScroll: true, replace: true },
         );
     };

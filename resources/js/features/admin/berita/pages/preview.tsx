@@ -65,7 +65,7 @@ export default function Preview({ post, isPublished }: Props) {
                 <article className="mx-auto max-w-3xl space-y-6">
                     <header className="space-y-3">
                         {post.category ? (
-                            <Text as="p" variant="heading-md" color="brand">
+                            <Text as="p" variant="heading-md">
                                 {post.category.name}
                             </Text>
                         ) : null}

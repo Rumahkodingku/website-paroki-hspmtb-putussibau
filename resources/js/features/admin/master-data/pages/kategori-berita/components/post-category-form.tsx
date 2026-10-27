@@ -23,7 +23,6 @@ type Props = {
 export function PostCategoryForm({
     initial,
     labels,
-    hints,
     submitLabel,
     onSubmit,
     onCancel,
@@ -55,40 +54,6 @@ export function PostCategoryForm({
                     onChange={(value) => form.setData('name', value)}
                     placeholder="Contoh: Renungan"
                     required
-                />
-            </Field>
-
-            <Field
-                id="post-category-slug"
-                label={labels.slug ?? 'Slug'}
-                hint={hints.slug}
-                error={form.errors.slug}
-                required
-            >
-                <FormInput
-                    id="post-category-slug"
-                    value={form.data.slug}
-                    onChange={(value) => form.setData('slug', value)}
-                    placeholder="contoh: renungan"
-                    required
-                />
-            </Field>
-
-            <Field
-                id="post-category-order"
-                label={labels.sort_order ?? 'Urutan'}
-                hint={hints.sort_order}
-                error={form.errors.sort_order}
-            >
-                <FormInput
-                    id="post-category-order"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    value={String(form.data.sort_order)}
-                    onChange={(value) =>
-                        form.setData('sort_order', Number(value) || 0)
-                    }
                 />
             </Field>
 

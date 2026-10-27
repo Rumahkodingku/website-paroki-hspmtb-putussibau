@@ -49,7 +49,7 @@ class PastorController extends Controller
                 'sort_order' => 'pastors.sort_order',
             ],
             [['pastors.sort_order', 'asc'], ['pastors.name', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/profil/pastor/index', [
             'pastors' => PastorResource::collection($pastors),

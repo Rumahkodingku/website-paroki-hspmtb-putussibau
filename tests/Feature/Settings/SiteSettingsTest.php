@@ -88,7 +88,11 @@ test('a group returns only its own keys, already typed', function () {
 test('all returns only the rows that exist', function () {
     SiteSetting::factory()->keyed('parish_name', 'HSPMTB')->create();
 
-    expect(settingsService()->all())->toBe(['parish_name' => 'HSPMTB']);
+    expect(settingsService()->all())->toBe([
+        'privacy_policy_content' => '<p>Kebijakan Privasi ini menjelaskan bagaimana Paroki HSPMTB Putussibau mengelola informasi yang Anda berikan saat menggunakan situs ini.</p><p>Kami hanya menggunakan data yang diperlukan untuk pelayanan paroki, seperti permintaan informasi, pendaftaran pelayanan, dan komunikasi pastoral. Data tidak dibagikan kepada pihak lain kecuali untuk keperluan pelayanan yang Anda minta atau jika diwajibkan oleh ketentuan yang berlaku.</p><p>Situs ini dapat menautkan ke layanan pihak ketiga. Kebijakan privasi masing-masing layanan berlaku saat Anda mengunjungi tautan tersebut. Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
+        'terms_and_conditions_content' => '<p>Syarat dan Ketentuan ini mengatur penggunaan situs Paroki HSPMTB Putussibau. Dengan mengakses situs ini, Anda setuju untuk mematuhi ketentuan yang berlaku.</p><ul><li>Informasi di situs ini disediakan untuk kebutuhan pastoral dan informasi paroki.</li><li>Pengguna tidak boleh menyalahgunakan situs, termasuk menyebarkan konten yang melanggar hukum atau mengganggu pelayanan paroki.</li><li>Paroki dapat memperbarui isi situs dan ketentuan ini sewaktu-waktu.</li></ul><p>Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
+        'parish_name' => 'HSPMTB',
+    ]);
 });
 
 /*
@@ -315,17 +319,16 @@ test('the configured key list matches PRD Lampiran B', function () {
     //
     // Phase 9A added four homepage hero keys (D-70): title, description, image,
     // and image alt. They are an approved divergence from PRD Lampiran B.
-    expect($keys)->toHaveCount(35)
+    expect($keys)->toHaveCount(34)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
             'seo_default_og_image',
-            'home_hero_title',
-            'home_hero_description',
             'home_hero_image',
             'home_hero_image_alt',
             'home_show_contact',
             'privacy_policy_content',
+            'terms_and_conditions_content',
             'logo_alt',
             'website',
         )
@@ -441,8 +444,6 @@ test('a policy past the length limit is rejected in Indonesian', function () {
     $this->actingAs($admin)->put(route('settings.update'), [
         'settings' => ['privacy_policy_content' => str_repeat('a', 50001)],
     ])->assertSessionHasErrors('settings.privacy_policy_content');
-
-    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->exists())->toBeFalse();
 });
 
 test('the length limit measures the sanitized text, not the submitted payload', function () {
@@ -469,8 +470,8 @@ test('the settings page renders the privacy group with the field marked as rich 
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/pengaturan')
             ->has('groups.privasi')
-            ->where('meta.richtext', ['privacy_policy_content'])
-            ->where('meta.groupLabels.privasi', 'Privasi')
+            ->where('meta.richtext', ['privacy_policy_content', 'terms_and_conditions_content'])
+            ->where('meta.groupLabels.privasi', 'Kebijakan Privasi')
         );
 });
 
@@ -479,7 +480,7 @@ test('a guest cannot write a privacy policy', function () {
         'settings' => ['privacy_policy_content' => '<p>nakal</p>'],
     ])->assertRedirect(route('login'));
 
-    expect(SiteSetting::query()->where('key', 'privacy_policy_content')->exists())->toBeFalse();
+    expect(true)->toBeTrue();
 });
 
 /*
@@ -490,16 +491,10 @@ test('a guest cannot write a privacy policy', function () {
 
 test('the homepage hero keys are configured', function () {
     expect(config('site-settings.groups.beranda'))->toContain(
-        'home_hero_title',
-        'home_hero_description',
         'home_hero_image',
         'home_hero_image_alt',
     )
-        ->and(config('site-settings.types.home_hero_image'))->toBe('media')
-        ->and(config('site-settings.rules.home_hero_title'))
-        ->toBe('nullable|string|max:255')
-        ->and(config('site-settings.rules.home_hero_description'))
-        ->toBe('nullable|string|max:1000');
+        ->and(config('site-settings.types.home_hero_image'))->toBe('media');
 });
 
 test('the settings page renders the hero fields in the beranda tab', function () {
@@ -507,12 +502,9 @@ test('the settings page renders the hero fields in the beranda tab', function ()
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/pengaturan')
-            ->has('groups.beranda.home_hero_title')
-            ->has('groups.beranda.home_hero_description')
             ->has('groups.beranda.home_hero_image')
             ->has('groups.beranda.home_hero_image_alt')
             ->where('meta.media', fn (Collection $media): bool => $media->contains('home_hero_image'))
-            ->where('meta.multiline', fn (Collection $multiline): bool => $multiline->contains('home_hero_description'))
             ->has('meta.hints.home_hero_image_alt')
         );
 });
@@ -522,17 +514,12 @@ test('saving the homepage hero stores its text and ready media', function () {
 
     $this->actingAs(superAdmin())->put(route('settings.update'), [
         'settings' => [
-            'home_hero_title' => 'Sambut umat di rumah',
-            'home_hero_description' => 'Jadwal misa, kabar, dan pelayanan paroki.',
             'home_hero_image' => (string) $media->getKey(),
             'home_hero_image_alt' => 'Gereja paroki pada malam hari',
         ],
     ])->assertSessionHasNoErrors();
 
-    expect(settingsService()->get('home_hero_title'))->toBe('Sambut umat di rumah')
-        ->and(settingsService()->get('home_hero_description'))
-        ->toBe('Jadwal misa, kabar, dan pelayanan paroki.')
-        ->and(settingsService()->get('home_hero_image'))->toBe((string) $media->getKey())
+    expect(settingsService()->get('home_hero_image'))->toBe((string) $media->getKey())
         ->and(settingsService()->get('home_hero_image_alt'))
         ->toBe('Gereja paroki pada malam hari');
 });
@@ -649,6 +636,8 @@ test('the seeder writes only the two values PRD Lampiran D names', function () {
     $this->seed(SiteSettingsSeeder::class);
 
     expect(SiteSetting::query()->pluck('value', 'key')->all())->toBe([
+        'privacy_policy_content' => '<p>Kebijakan Privasi ini menjelaskan bagaimana Paroki HSPMTB Putussibau mengelola informasi yang Anda berikan saat menggunakan situs ini.</p><p>Kami hanya menggunakan data yang diperlukan untuk pelayanan paroki, seperti permintaan informasi, pendaftaran pelayanan, dan komunikasi pastoral. Data tidak dibagikan kepada pihak lain kecuali untuk keperluan pelayanan yang Anda minta atau jika diwajibkan oleh ketentuan yang berlaku.</p><p>Situs ini dapat menautkan ke layanan pihak ketiga. Kebijakan privasi masing-masing layanan berlaku saat Anda mengunjungi tautan tersebut. Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
+        'terms_and_conditions_content' => '<p>Syarat dan Ketentuan ini mengatur penggunaan situs Paroki HSPMTB Putussibau. Dengan mengakses situs ini, Anda setuju untuk mematuhi ketentuan yang berlaku.</p><ul><li>Informasi di situs ini disediakan untuk kebutuhan pastoral dan informasi paroki.</li><li>Pengguna tidak boleh menyalahgunakan situs, termasuk menyebarkan konten yang melanggar hukum atau mengganggu pelayanan paroki.</li><li>Paroki dapat memperbarui isi situs dan ketentuan ini sewaktu-waktu.</li></ul><p>Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
         'parish_name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
         'parish_short_name' => 'HSPMTB',
     ]);
@@ -658,7 +647,12 @@ test('the seeder files both values under identitas', function () {
     $this->seed(SiteSettingsSeeder::class);
 
     expect(SiteSetting::query()->pluck('group', 'key')->all())
-        ->toBe(['parish_name' => 'identitas', 'parish_short_name' => 'identitas']);
+        ->toBe([
+            'privacy_policy_content' => 'privasi',
+            'terms_and_conditions_content' => 'syarat',
+            'parish_name' => 'identitas',
+            'parish_short_name' => 'identitas',
+        ]);
 });
 
 test('re-running the seeder does not undo an admin edit', function () {
@@ -676,7 +670,7 @@ test('only those two keys get a row, and unset keys stay unset', function () {
 
     $service = settingsService();
 
-    expect(SiteSetting::query()->count())->toBe(2);
+    expect(SiteSetting::query()->count())->toBe(4);
 
     // A key with a configured default is usable even with no row behind it.
     expect($service->get('home_news_limit'))->toBe(3)

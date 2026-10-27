@@ -62,7 +62,7 @@ class DocumentController extends Controller
                 'updated_at' => 'documents.updated_at',
             ],
             [['documents.updated_at', 'desc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/dokumen', [
             'documents' => DocumentListResource::collection($documents),

@@ -71,7 +71,7 @@ class CommunityController extends Controller
                 'updated_at' => 'communities.updated_at',
             ],
             [['communities.name', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/komunitas', [
             'communities' => CommunityListResource::collection($communities),

@@ -68,7 +68,7 @@ class GalleryController extends Controller
                 'updated_at' => 'gallery_albums.updated_at',
             ],
             [['gallery_albums.updated_at', 'desc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/galeri', [
             'albums' => GalleryAlbumListResource::collection($albums),

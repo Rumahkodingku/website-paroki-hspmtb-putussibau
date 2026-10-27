@@ -129,7 +129,7 @@ it('creates a location', function () {
 it('rejects a missing name, slug or type', function () {
     $this->actingAs(superAdmin())
         ->post(route('locations.store'), [])
-        ->assertSessionHasErrors(['name', 'slug', 'type']);
+        ->assertSessionHasErrors(['name', 'type', 'is_active']);
 
     expect(Location::query()->count())->toBe(0);
 });

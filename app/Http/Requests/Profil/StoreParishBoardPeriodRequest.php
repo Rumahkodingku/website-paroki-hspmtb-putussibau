@@ -16,6 +16,12 @@ class StoreParishBoardPeriodRequest extends FormRequest
         return $this->user()?->can('create', ParishBoardPeriod::class) ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $sortOrder = $this->input('sort_order');
+        $this->merge(['sort_order' => ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder]);
+    }
+
     /**
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
      */

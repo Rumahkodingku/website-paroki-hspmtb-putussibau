@@ -51,7 +51,7 @@ class LocationController extends Controller
                 'is_active' => 'locations.is_active',
             ],
             [['locations.name', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/master-data/lokasi/index', [

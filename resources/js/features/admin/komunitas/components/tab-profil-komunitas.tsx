@@ -1,4 +1,4 @@
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Text } from '@/components/text';
 import type { CommunityFormInstance } from './community-form-instance';
@@ -34,9 +34,9 @@ export function TabProfilKomunitas({ form, labels }: Props) {
         >
             <div className="flex flex-col gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="community-vision">
+                    <FormLabel htmlFor="community-vision">
                         {labels.vision ?? 'Visi'}
-                    </Label>
+                    </FormLabel>
                     <RichTextEditor
                         id="community-vision"
                         value={form.data.vision}
@@ -51,9 +51,9 @@ export function TabProfilKomunitas({ form, labels }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="community-mission">
+                    <FormLabel htmlFor="community-mission">
                         {labels.mission ?? 'Misi'}
-                    </Label>
+                    </FormLabel>
                     <RichTextEditor
                         id="community-mission"
                         value={form.data.mission}

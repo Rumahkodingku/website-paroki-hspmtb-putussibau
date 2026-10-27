@@ -19,7 +19,7 @@ export function ArticleCard({
         <div className="group relative h-full min-w-0 overflow-hidden py-0">
             {/* Article image */}
             {article.image ? (
-                <div className="relative shrink-0 overflow-hidden bg-muted">
+                <div className="relative shrink-0 overflow-hidden rounded-xl bg-muted">
                     <img
                         src={article.image}
                         alt={article.image_alt ?? ''}

@@ -140,22 +140,6 @@ export function BoardMemberForm({
                         />
                     </Field>
                 </div>
-
-                <Field
-                    id="member-sort-order"
-                    label={labels.sort_order ?? 'Urutan'}
-                    hint={hints.sort_order}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="member-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                        placeholder="0"
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

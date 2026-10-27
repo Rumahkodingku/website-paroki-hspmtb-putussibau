@@ -78,7 +78,7 @@ class SpecialMassController extends Controller
                 'is_active' => 'special_masses.is_active',
             ],
             [['special_masses.start_at', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/jadwal-misa/misa-khusus/index', [

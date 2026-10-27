@@ -97,6 +97,7 @@ export function SpecialMassForm({
                         value={form.data.title}
                         onChange={(value) => form.setData('title', value)}
                         required
+                        placeholder="Contoh: Misa Khusus Paskah"
                     />
                 </Field>
 
@@ -139,6 +140,7 @@ export function SpecialMassForm({
                             onChange={(value) =>
                                 form.setData('description', value)
                             }
+                            placeholder="Contoh: Keterangan singkat kegiatan"
                         />
                     </Field>
                 </div>
@@ -154,6 +156,7 @@ export function SpecialMassForm({
                             rows={2}
                             value={form.data.notes}
                             onChange={(value) => form.setData('notes', value)}
+                            placeholder="Contoh: Catatan tambahan"
                         />
                     </Field>
                 </div>

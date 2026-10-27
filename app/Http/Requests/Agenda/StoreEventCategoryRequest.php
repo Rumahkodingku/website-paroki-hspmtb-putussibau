@@ -16,6 +16,11 @@ class StoreEventCategoryRequest extends FormRequest
 {
     use EventCategoryValidationRules;
 
+    protected function prepareForValidation(): void
+    {
+        $this->prepareEventCategoryInput();
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

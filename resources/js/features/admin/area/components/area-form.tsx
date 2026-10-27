@@ -94,6 +94,7 @@ export function AreaForm({
                                 form.setData('parent_id', '');
                             }
                         }}
+                        placeholder="Pilih tipe area"
                     />
                 </Field>
 
@@ -128,21 +129,7 @@ export function AreaForm({
                         value={form.data.name}
                         onChange={(value) => form.setData('name', value)}
                         required
-                    />
-                </Field>
-
-                <Field
-                    id="area-slug"
-                    label={labels.slug ?? 'Slug'}
-                    hint={hints.slug}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="area-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        required
+                        placeholder="Contoh: Wilayah Santo Yosef"
                     />
                 </Field>
 
@@ -155,6 +142,7 @@ export function AreaForm({
                         id="area-leader-name"
                         value={form.data.leader_name}
                         onChange={(value) => form.setData('leader_name', value)}
+                        placeholder="Contoh: Bapak Yohanes"
                     />
                 </Field>
 
@@ -170,21 +158,7 @@ export function AreaForm({
                             form.setData('contact_phone', value)
                         }
                         inputMode="numeric"
-                    />
-                </Field>
-
-                <Field
-                    id="area-sort-order"
-                    label={labels.sort_order ?? 'Urutan Tampilan'}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="area-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
+                        placeholder="Contoh: 08123456789"
                     />
                 </Field>
 
@@ -201,6 +175,7 @@ export function AreaForm({
                                 form.setData('description', value)
                             }
                             rows={2}
+                            placeholder="Contoh: Deskripsi wilayah/lingkungan"
                         />
                     </Field>
                 </div>

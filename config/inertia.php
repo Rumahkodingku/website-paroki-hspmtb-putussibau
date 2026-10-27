@@ -90,6 +90,7 @@ return [
             resource_path('js/features/public/jadwal-misa/pages'),
             resource_path('js/features/public/komunitas/pages'),
             resource_path('js/features/public/kontak/pages'),
+            resource_path('js/features/public/legal/pages'),
             resource_path('js/features/public/pelayanan/pages'),
             resource_path('js/features/public/profil/pages'),
         ],

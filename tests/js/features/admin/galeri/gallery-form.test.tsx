@@ -87,14 +87,12 @@ describe('GalleryForm', () => {
     it('reports the error count for several rejected fields at once', async () => {
         const { submit } = renderForm({
             title: 'Judul album wajib diisi.',
-            slug: 'Slug sudah dipakai album lain.',
+            description: 'Deskripsi album wajib diisi.',
         });
 
         await submit();
 
         expect(screen.getByText('Judul album wajib diisi.')).toBeVisible();
-        expect(
-            screen.getByText('Slug sudah dipakai album lain.'),
-        ).toBeVisible();
+        expect(screen.getByText('Deskripsi album wajib diisi.')).toBeVisible();
     });
 });

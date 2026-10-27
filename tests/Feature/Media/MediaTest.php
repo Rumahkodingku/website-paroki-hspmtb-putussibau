@@ -6,6 +6,7 @@ use App\Models\Media;
 use App\Models\MediaVariant;
 use App\Models\User;
 use App\Services\ImageProcessor;
+use App\Services\SiteSettingsService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -87,6 +88,31 @@ function jpegUploadWithExif(int $orientation = 6, string $name = 'exif.jpg'): Up
     file_put_contents($path, "\xFF\xD8".$segment.substr($base, 2));
 
     return new UploadedFile($path, $name, 'image/jpeg', null, true);
+}
+
+/**
+ * A fully transparent PNG of the given size.
+ */
+function pngUpload(int $width = 100, int $height = 100, string $name = 'logo.png'): UploadedFile
+{
+    $image = imagecreatetruecolor(max(1, $width), max(1, $height));
+
+    imagealphablending($image, false);
+    imagesavealpha($image, true);
+
+    $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+
+    if ($transparent === false) {
+        throw new RuntimeException('Gagal membuat warna transparan untuk fixture PNG.');
+    }
+
+    imagefilledrectangle($image, 0, 0, $width, $height, $transparent);
+
+    $path = tempnam(sys_get_temp_dir(), 'media').'.png';
+    imagepng($image, $path);
+    imagedestroy($image);
+
+    return new UploadedFile($path, $name, 'image/png', null, true);
 }
 
 /**
@@ -304,6 +330,45 @@ test('every variant exists on the public disk as a real webp', function () {
         // Not just an extension: the bytes have to be WebP.
         expect($disk->mimeType($variant->path))->toBe('image/webp');
     }
+});
+
+test('a transparent png keeps its transparency in the webp variants', function () {
+    $media = storeMedia(pngUpload());
+
+    (new GenerateImageVariants($media->getKey()))->handle(app(ImageProcessor::class));
+
+    $variant = $media->refresh()->variants()->firstOrFail();
+    $disk = Storage::disk((string) config('media.variant_disk'));
+    $image = imagecreatefromwebp($disk->path($variant->path));
+
+    if (! $image instanceof GdImage) {
+        throw new RuntimeException('Variant WebP tidak dapat dibaca.');
+    }
+
+    $color = imagecolorat($image, 0, 0);
+
+    if ($color === false) {
+        imagedestroy($image);
+
+        throw new RuntimeException('Piksel variant tidak dapat dibaca.');
+    }
+
+    $pixel = imagecolorsforindex($image, $color);
+
+    imagedestroy($image);
+
+    expect($pixel['alpha'])->toBe(127);
+});
+
+test('the regenerate command processes the configured logo', function () {
+    $media = storeMedia(jpegUpload());
+    app(SiteSettingsService::class)->set('logo', (string) $media->getKey());
+
+    $this->artisan('media:regenerate-variants', ['--logo' => true])
+        ->assertSuccessful();
+
+    expect($media->refresh()->variants()->count())
+        ->toBe(count((array) config('media.variants')));
 });
 
 test('a variant is never larger than the original width', function () {

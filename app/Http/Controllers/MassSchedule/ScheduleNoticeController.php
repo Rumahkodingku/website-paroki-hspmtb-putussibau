@@ -93,7 +93,7 @@ class ScheduleNoticeController extends Controller
             // a notice in one of four states from three booleans), so there is
             // nothing to sort it by and it is absent from the whitelist too.
             [['schedule_notices.starts_at', 'desc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/jadwal-misa/pemberitahuan/index', [

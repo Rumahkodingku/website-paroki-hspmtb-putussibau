@@ -41,7 +41,7 @@ class DocumentCategoryController extends Controller
                 'sort_order' => 'document_categories.sort_order',
             ],
             [['document_categories.sort_order', 'asc'], ['document_categories.name', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-dokumen/index', [
             'categories' => DocumentCategoryResource::collection($categories),

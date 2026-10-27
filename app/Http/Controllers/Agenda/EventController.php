@@ -90,7 +90,7 @@ class EventController extends Controller
                 'created_at' => 'events.created_at',
             ],
             [['events.start_at', 'desc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/agenda', [

@@ -5,7 +5,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { edit } from '@/routes/security';
 
 type Props = {
@@ -54,9 +54,12 @@ export default function Security(props: Props) {
                     {({ errors, processing }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="current_password">
+                                <FormLabel
+                                    htmlFor="current_password"
+                                    isRequired
+                                >
                                     Current password
-                                </Label>
+                                </FormLabel>
 
                                 <PasswordInput
                                     id="current_password"
@@ -71,7 +74,9 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
+                                <FormLabel htmlFor="password" isRequired>
+                                    New password
+                                </FormLabel>
 
                                 <PasswordInput
                                     id="password"
@@ -87,9 +92,12 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
+                                <FormLabel
+                                    htmlFor="password_confirmation"
+                                    isRequired
+                                >
                                     Confirm password
-                                </Label>
+                                </FormLabel>
 
                                 <PasswordInput
                                     id="password_confirmation"

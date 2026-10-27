@@ -22,21 +22,24 @@ import { renderWithInertia } from '../support/inertia';
 
 const EXPECTED_LINKS: Record<string, string> = {
     Beranda: '/',
-    Profil: '/profil',
+    'Profil Paroki': '/profil',
     'Jadwal Misa': '/jadwal-misa',
     'Berita & Artikel': '/berita',
     Agenda: '/agenda',
-    Pelayanan: '/pelayanan',
-    Komunitas: '/komunitas',
     Galeri: '/galeri',
-    Dokumen: '/dokumen',
-    'Halaman kontak': '/kontak',
-    Ringkasan: '/profil',
-    Sejarah: '/profil/sejarah',
-    'Wilayah Pelayanan': '/profil/wilayah',
-    Area: '/profil/area',
-    Pastor: '/profil/pastor',
+    'Sakramen Baptis': '/pelayanan',
+    'Komuni Pertama': '/pelayanan',
+    Krisma: '/pelayanan',
+    Pernikahan: '/pelayanan',
+    'Pengurapan Orang Sakit': '/pelayanan',
+    'Pelayanan Lainnya': '/pelayanan',
+    'Sejarah Paroki': '/profil/sejarah',
+    'Pastor Paroki': '/profil/pastor',
     'Struktur Kepengurusan': '/profil/struktur',
+    'Wilayah Pelayanan': '/profil/wilayah',
+    Komunitas: '/komunitas',
+    'Dokumen & Unduhan': '/dokumen',
+    'Halaman kontak': '/kontak',
 };
 
 const CONFIGURED_CONTACT: ContactDetails = {
@@ -65,7 +68,9 @@ describe('ParishFooter', () => {
 
         for (const [label, href] of Object.entries(EXPECTED_LINKS)) {
             expect(
-                screen.getByRole('link', { name: label }).getAttribute('href'),
+                screen
+                    .getAllByRole('link', { name: label })[0]
+                    .getAttribute('href'),
             ).toBe(href);
         }
     });
@@ -109,28 +114,30 @@ describe('ParishFooter', () => {
             props: { contact: CONFIGURED_CONTACT },
         });
 
-        expect(screen.getByText(/Jalan Contoh No\. 1/)).toBeInTheDocument();
+        expect(
+            screen.getAllByText(/Jalan Contoh No\. 1/)[0],
+        ).toBeInTheDocument();
 
         expect(
-            screen.getByRole('link', { name: /Telepon: 0812-3456-7890/ }),
+            screen.getAllByRole('link', { name: /Telepon: 0812-3456-7890/ })[0],
         ).toHaveAttribute('href', 'tel:+6281234567890');
 
         expect(
-            screen.getByRole('link', {
+            screen.getAllByRole('link', {
                 name: /Surel: sekretariat@example\.test/,
-            }),
+            })[0],
         ).toHaveAttribute('href', 'mailto:sekretariat@example.test');
 
-        const whatsapp = screen.getByRole('link', {
+        const whatsapp = screen.getAllByRole('link', {
             name: /WhatsApp: \+62 812 3456 7890/,
-        });
+        })[0];
 
         expect(whatsapp).toHaveAttribute('href', 'https://wa.me/6281234567890');
         expect(whatsapp).toHaveAttribute('target', '_blank');
         expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer');
 
         expect(
-            screen.getByRole('link', { name: 'Petunjuk arah' }),
+            screen.getAllByRole('link', { name: 'Petunjuk arah' })[0],
         ).toHaveAttribute(
             'href',
             'https://www.google.com/maps/place/Paroki/@-0.02,111.7,17z',
@@ -156,7 +163,7 @@ describe('ParishFooter', () => {
             props: { contact: CONFIGURED_CONTACT },
         });
 
-        const facebook = screen.getByRole('link', { name: 'Facebook' });
+        const facebook = screen.getAllByRole('link', { name: 'Facebook' })[0];
 
         expect(facebook).toHaveAttribute('href', 'https://facebook.com/paroki');
         expect(facebook).toHaveAttribute('target', '_blank');
@@ -194,14 +201,20 @@ describe('ParishFooter', () => {
      * the label stays as text; this asserts the gap is visible rather than
      * quietly deleted, and D-31 records it.
      */
-    it('shows the legal labels even though no route exists for them yet', () => {
+    it('shows the legal labels as links to their pages', () => {
         renderWithInertia(<ParishFooter />);
 
-        expect(screen.getByText('Kebijakan Privasi')).toBeInTheDocument();
+        expect(
+            screen.getAllByRole('link', { name: 'Kebijakan Privasi' })[0],
+        ).toHaveAttribute('href', '/kebijakan-privasi');
 
         expect(
-            screen.queryByRole('link', { name: 'Kebijakan Privasi' }),
-        ).toBeNull();
+            screen.getAllByRole('link', { name: 'Syarat & Ketentuan' })[0],
+        ).toHaveAttribute('href', '/syarat-ketentuan');
+
+        expect(
+            screen.getAllByRole('link', { name: 'Kontak Sekretariat' })[0],
+        ).toHaveAttribute('href', '/kontak');
     });
 
     it('exposes the information-architecture group headings', () => {
@@ -211,15 +224,18 @@ describe('ParishFooter', () => {
 
         for (const title of [
             'Menu Utama',
-            'Profil Paroki',
-            'Pelayanan & Komunitas',
+            'Pelayanan',
+            'Informasi Paroki',
             'Media Sosial',
-            'Kontak',
+            'Hubungi Kami',
         ]) {
             expect(
-                within(screen.getByRole('contentinfo')).getByRole('heading', {
-                    name: title,
-                }),
+                within(screen.getByRole('contentinfo')).getAllByRole(
+                    'heading',
+                    {
+                        name: title,
+                    },
+                )[0],
             ).toBeInTheDocument();
         }
     });
@@ -229,8 +245,8 @@ describe('ParishFooter', () => {
 
         for (const label of Object.keys(EXPECTED_LINKS)) {
             expect(
-                screen.getByRole('link', { name: label }).className,
-            ).toContain('min-h-11');
+                screen.getAllByRole('link', { name: label })[0].className,
+            ).toContain('min-h-8');
         }
     });
 });

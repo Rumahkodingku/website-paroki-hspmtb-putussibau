@@ -18,7 +18,7 @@ import {
     create as createPost,
     destroy as destroyPost,
     edit as editPost,
-    index as postsIndex,
+    list as postsIndex,
     preview as previewPost,
 } from '@/routes/posts';
 import type { Paginated } from '@/types';
@@ -52,7 +52,7 @@ export default function Index({
     const applyFilter = (next: Partial<PostFilters>) => {
         router.get(
             postsIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -238,7 +238,7 @@ export default function Index({
                     onSort={(sortKey, direction) =>
                         router.get(
                             postsIndex().url,
-                            { ...filters, sort: sortKey, direction },
+                            { ...filters, sort: sortKey, direction, page: 1 },
                             { preserveScroll: true, replace: true },
                         )
                     }

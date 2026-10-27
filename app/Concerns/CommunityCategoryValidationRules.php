@@ -4,7 +4,6 @@ namespace App\Concerns;
 
 use App\Models\CommunityCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
@@ -18,6 +17,8 @@ use Illuminate\Validation\Rule;
  */
 trait CommunityCategoryValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
      */
@@ -79,11 +80,21 @@ trait CommunityCategoryValidationRules
         }
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('name'));
+            $ignoreId = $this->routeKeyId('communityCategory', 'community_category');
+            $input['slug'] = $this->resolveUniqueSlug(
+                CommunityCategory::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         $input['is_active'] = (bool) filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN);
-        $input['sort_order'] = max(0, (int) $this->input('sort_order', 0));
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
 
         $this->merge($input);
     }

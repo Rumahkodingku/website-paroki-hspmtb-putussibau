@@ -20,7 +20,8 @@ return [
         'sosial' => 'Media Sosial',
         'seo' => 'SEO Dasar',
         'beranda' => 'Beranda',
-        'privasi' => 'Privasi',
+        'privasi' => 'Kebijakan Privasi',
+        'syarat' => 'Syarat & Ketentuan',
     ],
 
     'labels' => [
@@ -66,6 +67,7 @@ return [
         'home_show_contact' => 'Tampilkan kontak',
 
         'privacy_policy_content' => 'Kebijakan privasi',
+        'terms_and_conditions_content' => 'Syarat dan ketentuan',
     ],
 
     /*
@@ -96,6 +98,7 @@ return [
      */
     'hints' => [
         'privacy_policy_content' => 'Isi kebijakan privasi. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
+        'terms_and_conditions_content' => 'Isi syarat dan ketentuan. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
         'maps_link' => 'Tempel link dari Google Maps (buka lokasi, tekan Bagikan, lalu Salin link). Peta tertanam dibuat otomatis dari link ini.',
         'office_hours' => 'Atur hari dan jam operasional pelayanan sekretariat paroki.',
         'logo' => 'Logo dipakai pada header dan footer situs.',
