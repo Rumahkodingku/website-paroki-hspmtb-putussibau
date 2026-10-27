@@ -9,12 +9,16 @@ use App\Http\Requests\Pelayanan\StoreServiceRequirementRequest;
 use App\Http\Requests\Pelayanan\UpdateServiceRequirementRequest;
 use App\Models\Service;
 use App\Models\ServiceRequirement;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ServiceRequirementController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     public function store(StoreServiceRequirementRequest $request, Service $service): RedirectResponse
     {
         $data = $request->validated();
@@ -22,8 +26,11 @@ class ServiceRequirementController extends Controller
         $data['sort_order'] = $data['sort_order']
             ?? ((int) $service->requirements()->max('sort_order')) + 1;
 
-        ServiceRequirement::create($data);
-        $service->touch();
+        DB::transaction(function () use ($data, $service): void {
+            $item = ServiceRequirement::query()->create($data);
+            $service->touch();
+            $this->audit->created('service_requirements', $item);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_created')]);
 
@@ -37,8 +44,12 @@ class ServiceRequirementController extends Controller
     ): RedirectResponse {
         $this->ensureBelongsTo($service, $requirement);
 
-        $requirement->update($request->validated());
-        $service->touch();
+        DB::transaction(function () use ($request, $requirement, $service): void {
+            $before = $this->audit->snapshot($requirement, 'service_requirements');
+            $requirement->update($request->validated());
+            $service->touch();
+            $this->audit->updated('service_requirements', $requirement, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_updated')]);
 
@@ -50,8 +61,12 @@ class ServiceRequirementController extends Controller
         Gate::authorize('update', $service);
         $this->ensureBelongsTo($service, $requirement);
 
-        $requirement->delete();
-        $service->touch();
+        DB::transaction(function () use ($requirement, $service): void {
+            $before = $this->audit->snapshot($requirement, 'service_requirements');
+            $requirement->delete();
+            $service->touch();
+            $this->audit->deleted('service_requirements', $requirement, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.requirement_deleted')]);
 

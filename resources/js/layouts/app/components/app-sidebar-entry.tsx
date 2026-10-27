@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 import { Text } from '@/components/text';
 import {
@@ -13,7 +13,7 @@ import {
 import { ChevronRight } from 'lucide-react';
 
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import type { Entry } from '@/layouts/app/app-sidebar-nav';
+import { visibleEntries, type Entry } from '@/layouts/app/app-sidebar-nav';
 
 export function SidebarEntry({ entry }: { entry: Entry }) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
@@ -143,6 +143,13 @@ export function SidebarGroup({
     label: string;
     entries: Entry[];
 }) {
+    const { abilities } = usePage().props;
+    const visible = visibleEntries(entries, abilities);
+
+    if (visible.length === 0) {
+        return null;
+    }
+
     return (
         <div className="px-2 py-1">
             <Text
@@ -156,7 +163,7 @@ export function SidebarGroup({
             </Text>
 
             <SidebarMenu className="ml-2">
-                {entries.map((entry) => (
+                {visible.map((entry) => (
                     <SidebarEntry key={entry.title} entry={entry} />
                 ))}
             </SidebarMenu>

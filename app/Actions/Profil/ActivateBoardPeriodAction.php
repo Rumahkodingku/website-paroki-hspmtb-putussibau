@@ -3,6 +3,7 @@
 namespace App\Actions\Profil;
 
 use App\Models\ParishBoardPeriod;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -16,15 +17,35 @@ use Illuminate\Support\Facades\DB;
  */
 final class ActivateBoardPeriodAction
 {
-    public function handle(ParishBoardPeriod $period): ParishBoardPeriod
+    public function __construct(private readonly AuditLogger $audit) {}
+
+    public function handle(ParishBoardPeriod $period, bool $record = true): ParishBoardPeriod
     {
-        return DB::transaction(function () use ($period): ParishBoardPeriod {
+        return DB::transaction(function () use ($period, $record): ParishBoardPeriod {
+            $affected = ParishBoardPeriod::query()
+                ->where('is_active', true)
+                ->whereKeyNot($period->getKey())
+                ->pluck('id')
+                ->all();
+
             ParishBoardPeriod::query()
                 ->where('is_active', true)
                 ->whereKeyNot($period->getKey())
                 ->update(['is_active' => false]);
 
             $period->update(['is_active' => true]);
+
+            if ($record) {
+                $this->audit->recordModel(
+                    'parish_boards',
+                    'activated',
+                    'success',
+                    $period,
+                    [],
+                    $this->audit->snapshot($period, 'parish_boards'),
+                    ['affected_ids' => $affected],
+                );
+            }
 
             return $period;
         });

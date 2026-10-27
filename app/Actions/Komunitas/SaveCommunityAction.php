@@ -3,6 +3,7 @@
 namespace App\Actions\Komunitas;
 
 use App\Models\Community;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -25,16 +26,33 @@ use Illuminate\Support\Facades\DB;
  */
 class SaveCommunityAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $attributes  the validated payload
      */
     public function handle(Community $community, array $attributes): Community
     {
         return DB::transaction(function () use ($community, $attributes): Community {
+            $isNew = ! $community->exists;
+            $publishedBefore = $isNew ? false : (bool) $community->is_published;
+            $before = $isNew ? [] : $this->audit->snapshot($community, 'communities');
+
             $attributes['published_at'] = $this->resolvePublishedAt($community, $attributes);
 
             $community->fill($attributes);
             $community->save();
+
+            if ($isNew) {
+                $this->audit->created('communities', $community);
+            } else {
+                $publishedAfter = (bool) $community->is_published;
+                $action = $publishedBefore === $publishedAfter
+                    ? 'updated'
+                    : ($publishedAfter ? 'published' : 'unpublished');
+
+                $this->audit->updated('communities', $community, $before, $action);
+            }
 
             return $community;
         });

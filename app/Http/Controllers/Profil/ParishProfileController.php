@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Profil\UpdateParishProfileRequest;
 use App\Http\Resources\Profil\ParishProfileResource;
 use App\Models\ParishProfile;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +25,8 @@ use Inertia\Response;
 class ParishProfileController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
 
     public function edit(): Response
     {
@@ -40,11 +44,21 @@ class ParishProfileController extends Controller
 
     public function update(UpdateParishProfileRequest $request): RedirectResponse
     {
-        // fill()->save() rather than update(): update() is a no-op before the
-        // singleton exists.
-        ParishProfile::current()
-            ->fill($request->validated())
-            ->save();
+        DB::transaction(function () use ($request): void {
+            $profile = ParishProfile::current();
+            $isNew = ! $profile->exists;
+            $before = $isNew ? [] : $this->audit->snapshot($profile, 'parish_profile');
+
+            // fill()->save() rather than update(): update() is a no-op before the
+            // singleton exists.
+            $profile->fill($request->validated())->save();
+
+            if ($isNew) {
+                $this->audit->created('parish_profile', $profile);
+            } else {
+                $this->audit->updated('parish_profile', $profile, $before);
+            }
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Informasi profil berhasil disimpan.')]);
 

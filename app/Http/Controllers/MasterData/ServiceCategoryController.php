@@ -9,15 +9,19 @@ use App\Http\Requests\Pelayanan\StoreServiceCategoryRequest;
 use App\Http\Requests\Pelayanan\UpdateServiceCategoryRequest;
 use App\Http\Resources\Pelayanan\ServiceCategoryResource;
 use App\Models\ServiceCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ServiceCategoryController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use ServiceFormMeta;
     use SortsAdminList;
 
@@ -71,7 +75,10 @@ class ServiceCategoryController extends Controller
 
     public function store(StoreServiceCategoryRequest $request): RedirectResponse
     {
-        ServiceCategory::create($request->validated());
+        DB::transaction(function () use ($request): void {
+            $serviceCategory = ServiceCategory::query()->create($request->validated());
+            $this->audit->created('service_categories', $serviceCategory);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil ditambahkan.')]);
 
@@ -90,7 +97,18 @@ class ServiceCategoryController extends Controller
 
     public function update(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory): RedirectResponse
     {
-        $serviceCategory->update($request->validated());
+        DB::transaction(function () use ($request, $serviceCategory): void {
+            $before = $this->audit->snapshot($serviceCategory, 'service_categories');
+            $wasActive = $serviceCategory->is_active;
+
+            $serviceCategory->update($request->validated());
+
+            $action = $wasActive === $serviceCategory->is_active
+                ? 'updated'
+                : ($serviceCategory->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('service_categories', $serviceCategory, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil diperbarui.')]);
 
@@ -111,7 +129,11 @@ class ServiceCategoryController extends Controller
             ]);
         }
 
-        $serviceCategory->delete();
+        DB::transaction(function () use ($serviceCategory): void {
+            $before = $this->audit->snapshot($serviceCategory, 'service_categories');
+            $serviceCategory->delete();
+            $this->audit->deleted('service_categories', $serviceCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil dihapus.')]);
 

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UpdateSettingsRequest;
 use App\Models\Media;
+use App\Services\AuditLogger;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,7 +25,10 @@ use Inertia\Response;
  */
 class SettingsController extends Controller
 {
-    public function __construct(private readonly SiteSettingsService $settings) {}
+    public function __construct(
+        private readonly SiteSettingsService $settings,
+        private readonly AuditLogger $audit,
+    ) {}
 
     /**
      * Show the site settings page.
@@ -50,7 +55,39 @@ class SettingsController extends Controller
      */
     public function update(UpdateSettingsRequest $request): RedirectResponse
     {
-        $this->settings->setMany($request->settingsPayload());
+        $payload = $request->settingsPayload();
+        $keys = array_keys($payload);
+        $before = [];
+
+        foreach ($keys as $key) {
+            $before[$key] = $this->settings->get($key);
+        }
+
+        try {
+            DB::transaction(function () use ($payload, $keys, $before): void {
+                $this->settings->setMany($payload);
+
+                $after = [];
+
+                foreach ($keys as $key) {
+                    $after[$key] = $this->settings->get($key);
+                }
+
+                $changed = [];
+
+                foreach ($keys as $key) {
+                    if (($before[$key] ?? null) !== ($after[$key] ?? null)) {
+                        $changed[] = $key;
+                    }
+                }
+
+                if ($changed !== []) {
+                    $this->audit->settingsUpdated($before, $after, $changed);
+                }
+            });
+        } finally {
+            $this->settings->forget();
+        }
 
         Inertia::flash('toast', [
             'type' => 'success',

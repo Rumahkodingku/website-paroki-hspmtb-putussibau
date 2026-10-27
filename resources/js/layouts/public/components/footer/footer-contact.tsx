@@ -85,7 +85,7 @@ export function FooterContact({ contact }: FooterContactProps) {
                 <li>
                     <Link
                         href={kontak()}
-                        className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
                         Halaman kontak
                     </Link>
@@ -96,7 +96,7 @@ export function FooterContact({ contact }: FooterContactProps) {
                             href={contact.mapsLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                             Petunjuk arah
                         </a>

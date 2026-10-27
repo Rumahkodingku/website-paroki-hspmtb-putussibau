@@ -4,6 +4,7 @@ namespace App\Actions\Galeri;
 
 use App\Models\GalleryAlbum;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -29,12 +30,18 @@ use Illuminate\Support\Facades\DB;
  */
 class SaveGalleryAlbumAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $attributes  the validated payload
      */
     public function handle(GalleryAlbum $album, array $attributes, User $actor): GalleryAlbum
     {
         return DB::transaction(function () use ($album, $attributes, $actor): GalleryAlbum {
+            $isNew = ! $album->exists;
+            $publishedBefore = $isNew ? false : (bool) $album->is_published;
+            $before = $isNew ? [] : $this->audit->snapshot($album, 'galleries');
+
             $attributes['published_at'] = $this->resolvePublishedAt($album, $attributes);
 
             if (! $album->exists) {
@@ -45,6 +52,17 @@ class SaveGalleryAlbumAction
 
             $album->fill($attributes);
             $album->save();
+
+            if ($isNew) {
+                $this->audit->created('galleries', $album);
+            } else {
+                $publishedAfter = (bool) $album->is_published;
+                $action = $publishedBefore === $publishedAfter
+                    ? 'updated'
+                    : ($publishedAfter ? 'published' : 'unpublished');
+
+                $this->audit->updated('galleries', $album, $before, $action);
+            }
 
             return $album;
         });
