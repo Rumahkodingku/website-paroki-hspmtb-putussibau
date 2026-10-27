@@ -6,7 +6,7 @@ import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -236,11 +236,11 @@ export default function Settings({ groups, meta }: Props) {
                                             >
                                                 {kind === 'switch' ? (
                                                     <div className="flex items-center justify-between gap-4">
-                                                        <Label
+                                                        <FormLabel
                                                             htmlFor={inputId}
                                                         >
                                                             {label}
-                                                        </Label>
+                                                        </FormLabel>
                                                         <Switch
                                                             id={inputId}
                                                             checked={
@@ -338,11 +338,11 @@ export default function Settings({ groups, meta }: Props) {
                                                     )
                                                 ) : (
                                                     <>
-                                                        <Label
+                                                        <FormLabel
                                                             htmlFor={inputId}
                                                         >
                                                             {label}
-                                                        </Label>
+                                                        </FormLabel>
 
                                                         {kind === 'richtext' ? (
                                                             <Suspense
@@ -368,6 +368,9 @@ export default function Settings({ groups, meta }: Props) {
                                                           'multiline' ? (
                                                             <Textarea
                                                                 id={inputId}
+                                                                placeholder={
+                                                                    label
+                                                                }
                                                                 value={
                                                                     stringValue
                                                                 }
@@ -384,6 +387,9 @@ export default function Settings({ groups, meta }: Props) {
                                                         ) : (
                                                             <Input
                                                                 id={inputId}
+                                                                placeholder={
+                                                                    label
+                                                                }
                                                                 type={
                                                                     kind ===
                                                                     'number'

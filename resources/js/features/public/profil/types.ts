@@ -1,3 +1,11 @@
+export type PublicParishProfile = {
+    description: string | null;
+    established_year: number | null;
+    cover_url: string | null;
+    cover_alt: string | null;
+    video_embed_url: string | null;
+};
+
 export type PublicHistoryItem = {
     id: number;
     title: string;

@@ -13,6 +13,7 @@ import { DataTable } from '@/components/data-table';
 import { massScheduleColumns } from '../../components/columns';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -114,39 +115,27 @@ export default function MisaRutin({
                     searchPlaceholder="Cari nama misa atau lokasi"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter lokasi"
+                    <FilterSelect
+                        id="filter-lokasi"
+                        label="Filter lokasi"
                         value={filters.location_id}
-                        onChange={(event: any) =>
-                            applyFilter({ location_id: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua lokasi</option>
-                        {locations.map((location) => (
-                            <option
-                                key={location.id}
-                                value={String(location.id)}
-                            >
-                                {location.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(location_id) => applyFilter({ location_id })}
+                        options={[
+                            { value: '', label: 'Semua lokasi' },
+                            ...locations.map((location) => ({
+                                value: String(location.id),
+                                label: location.name,
+                            })),
+                        ]}
+                    />
 
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {STATUS_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={STATUS_OPTIONS}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters

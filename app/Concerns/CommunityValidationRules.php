@@ -10,7 +10,6 @@ use App\Services\HtmlSanitizer;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -42,6 +41,8 @@ use Illuminate\Validation\Validator;
  */
 trait CommunityValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @param  Community|null  $ignore  the record being updated, so it keeps its own slug
      * @return array<string, array<int, Closure|ValidationRule|string>>
@@ -197,7 +198,16 @@ trait CommunityValidationRules
         }
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('name'));
+            $ignoreId = $this->routeKeyId('community');
+            $input['slug'] = $this->resolveUniqueSlug(
+                Community::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         // An empty media picker posts nothing or an empty string; both mean "no

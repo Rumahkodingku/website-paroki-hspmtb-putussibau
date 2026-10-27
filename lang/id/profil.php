@@ -83,6 +83,10 @@ return [
 
     'hints' => [
         'short_description' => 'Satu atau dua kalimat yang muncul pada kartu dan berbagi tautan.',
+        'description' => 'Prosa profil paroki yang tampil pada halaman /profil. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
+        'cover_media_id' => 'Gambar utama halaman /profil. Rasio yang disarankan 16:9.',
+        'cover_alt' => 'Wajib diisi saat gambar sampul dipilih. Jelaskan gambar secara singkat untuk pembaca layar.',
+        'video_url' => 'Hanya tautan YouTube yang diterima; video akan ditanam di halaman /profil.',
         'history_description' => 'Narasi utama sejarah. Linimasa peristiwa dikelola pada daftar di bawahnya.',
         'established_year' => 'Isi hanya bila tahun berdiri memang diketahui.',
         'is_published' => 'Konten yang belum disetujui jangan diterbitkan.',

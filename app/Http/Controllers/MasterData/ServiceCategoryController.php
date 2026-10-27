@@ -46,7 +46,7 @@ class ServiceCategoryController extends Controller
                 'is_active' => 'service_categories.is_active',
             ],
             [['service_categories.sort_order', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-pelayanan/index', [
             'categories' => ServiceCategoryResource::collection($categories),
@@ -73,8 +73,9 @@ class ServiceCategoryController extends Controller
     {
         ServiceCategory::create($request->validated());
 
-        return to_route('service-categories.index')
-            ->with('success', __('Kategori pelayanan berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil ditambahkan.')]);
+
+        return to_route('service-categories.index');
     }
 
     public function edit(ServiceCategory $serviceCategory): Response
@@ -91,8 +92,9 @@ class ServiceCategoryController extends Controller
     {
         $serviceCategory->update($request->validated());
 
-        return to_route('service-categories.index')
-            ->with('success', __('Kategori pelayanan berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil diperbarui.')]);
+
+        return to_route('service-categories.index');
     }
 
     public function destroy(ServiceCategory $serviceCategory): RedirectResponse
@@ -111,7 +113,8 @@ class ServiceCategoryController extends Controller
 
         $serviceCategory->delete();
 
-        return to_route('service-categories.index')
-            ->with('success', __('Kategori pelayanan berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori pelayanan berhasil dihapus.')]);
+
+        return to_route('service-categories.index');
     }
 }

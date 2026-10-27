@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
     OfficeHoursEditor,
@@ -133,7 +133,7 @@ describe('OfficeHoursEditor', () => {
         expect(week.monday.close_time).toBe('15:00');
     });
 
-    it('reports a changed time for the right day', () => {
+    it('reports a changed time for the right day', async () => {
         const onChange = vi.fn();
 
         render(
@@ -144,9 +144,16 @@ describe('OfficeHoursEditor', () => {
             />,
         );
 
-        fireEvent.change(screen.getByLabelText('Jam buka Senin'), {
-            target: { value: '09:30' },
-        });
+        await userEvent.click(
+            screen.getByRole('button', { name: 'Jam buka Senin' }),
+        );
+
+        const comboboxes = screen.getAllByRole('combobox');
+        await userEvent.click(comboboxes[0]);
+        await userEvent.click(screen.getByRole('option', { name: '09' }));
+
+        await userEvent.click(comboboxes[1]);
+        await userEvent.click(screen.getByRole('option', { name: '30' }));
 
         const week = lastWeek(onChange);
 

@@ -6,6 +6,7 @@ use App\Models\MassSchedule;
 use App\Models\Media;
 use App\Models\ParishBoardPeriod;
 use App\Models\ParishHistoryNarrative;
+use App\Models\ParishProfile;
 use App\Models\PastorAssignment;
 use App\Models\Post;
 use App\Models\Service;
@@ -42,11 +43,14 @@ it('fills every module with published sample content', function () {
 
     $settings = app(SiteSettingsService::class);
 
+    $profile = ParishProfile::current();
+
     expect(ParishHistoryNarrative::query()->count())->toBe(1)
         ->and($settings->get('short_description'))->not->toBeNull()
-        ->and($settings->get('description'))->not->toBeNull()
         ->and($settings->get('logo'))->not->toBeNull()
-        ->and($settings->get('is_published'))->toBeTrue()
+        ->and($profile->description)->not->toBeNull()
+        ->and($profile->established_year)->toBe(1956)
+        ->and($profile->cover_media_id)->not->toBeNull()
         ->and(Post::query()->where('status', 'published')->count())->toBeGreaterThan(0)
         ->and(Event::query()->where('is_published', true)->count())->toBeGreaterThan(0)
         ->and(MassSchedule::query()->count())->toBeGreaterThan(0);
@@ -59,7 +63,7 @@ it('fills and activates the service module for preview', function () {
 
     // ServiceSeeder creates the six services inactive; the demo seeder activates
     // them so /pelayanan is populated. Production never reaches this branch.
-    expect($services)->toHaveCount(6);
+    expect($services)->toHaveCount(7);
 
     foreach ($services as $service) {
         expect($service->requirements()->count())->toBeGreaterThan(0)

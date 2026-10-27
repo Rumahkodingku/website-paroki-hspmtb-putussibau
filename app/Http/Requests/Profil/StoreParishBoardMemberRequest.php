@@ -14,6 +14,12 @@ class StoreParishBoardMemberRequest extends FormRequest
 {
     use ProfilValidationRules;
 
+    protected function prepareForValidation(): void
+    {
+        $sortOrder = $this->input('sort_order');
+        $this->merge(['sort_order' => ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder]);
+    }
+
     public function authorize(): bool
     {
         return $this->user()?->can('create', ParishBoardMember::class) ?? false;

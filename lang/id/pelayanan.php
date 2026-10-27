@@ -35,6 +35,12 @@ return [
         'unset' => 'Tidak Diatur',
     ],
 
+    'requirement_conditions' => [
+        'required' => 'Wajib',
+        'conditional' => 'Jika berlaku',
+        'upon_request' => 'Bila diminta',
+    ],
+
     'labels' => [
         // Informasi umum.
         'title' => 'Nama Layanan',
@@ -44,12 +50,16 @@ return [
         'thumbnail_alt' => 'Teks alternatif thumbnail',
         'summary' => 'Ringkasan Singkat',
         'introduction' => 'Pengantar Layanan',
+        'audience_info' => 'Sasaran Layanan',
+        'preparation_info' => 'Persiapan',
         'sort_order' => 'Urutan Tampilan',
         'is_active' => 'Aktifkan layanan ini',
 
         // Persyaratan.
         'requirement_text' => 'Persyaratan',
         'requirement_note' => 'Catatan tambahan',
+        'requirement_condition' => 'Kondisi Persyaratan',
+        'applies_to' => 'Berlaku untuk',
 
         // Prosedur.
         'step_title' => 'Judul langkah',
@@ -84,6 +94,8 @@ return [
         'thumbnail_media_id' => 'Gambar yang tampil pada kartu layanan di website. Opsional.',
         'thumbnail_alt' => 'Dibaca layar pembaca. Isi dengan singkat bila gambar diunggah.',
         'summary' => 'Muncul pada kartu daftar layanan di website.',
+        'audience_info' => 'Siapa yang dilayani oleh layanan ini. Kosongkan bila tidak perlu.',
+        'preparation_info' => 'Persiapan sebelum mengikuti proses. Kosongkan bila tidak ada.',
         'sort_order' => 'Angka kecil ditampilkan lebih dulu.',
         'is_active' => 'Hanya layanan aktif yang tampil di website. Pastikan isinya sudah diverifikasi pihak paroki.',
         'form_url' => 'Kosongkan link jika layanan ini tidak menggunakan Google Form.',
@@ -94,6 +106,7 @@ return [
         'contact_phone' => 'Dipakai untuk tombol telepon/WhatsApp di halaman publik.',
         'is_emergency' => 'Layanan darurat menggunakan kontak langsung dan tidak memakai Google Form.',
         'requirement_note' => 'Catatan opsional, misalnya keterangan tambahan untuk dokumen ini.',
+        'applies_to' => 'Contoh: Orang tua, Wali baptis, Calon baptis dewasa. Kosongkan bila berlaku umum.',
         'fee_info' => 'Biarkan kosong bila biaya belum dikonfirmasi paroki.',
     ],
 

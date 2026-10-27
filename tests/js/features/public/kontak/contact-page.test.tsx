@@ -68,7 +68,7 @@ describe('Kontak', () => {
         renderPage(CONFIGURED);
 
         expect(
-            screen.getByRole('heading', { name: 'Hubungi Kami' }),
+            screen.getByRole('heading', { name: 'Kami siap membantu Anda' }),
         ).toBeInTheDocument();
         expect(screen.getByText(/Jalan Contoh No\. 1/)).toBeInTheDocument();
         expect(screen.getByText('0812-3456-7890')).toBeInTheDocument();

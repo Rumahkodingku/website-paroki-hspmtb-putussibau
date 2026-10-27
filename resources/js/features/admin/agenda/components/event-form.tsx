@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import {
@@ -7,8 +8,8 @@ import {
     Field,
     FormActions,
     FormInput,
+    FormLabel,
 } from '@/components/form-fields';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Text } from '@/components/text';
 import { toDateTimeLocalValue } from '@/lib/datetime';
@@ -200,20 +201,6 @@ export function EventForm({
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <Field
-                        id="event-slug"
-                        label={labels.slug ?? 'Slug'}
-                        hint={hints.slug}
-                        error={form.errors.slug}
-                    >
-                        <FormInput
-                            id="event-slug"
-                            value={form.data.slug}
-                            onChange={(value) => form.setData('slug', value)}
-                            placeholder="dibuat otomatis dari judul"
-                        />
-                    </Field>
-
-                    <Field
                         id="event-category"
                         label={labels.event_category_id ?? 'Kategori'}
                         error={form.errors.event_category_id}
@@ -229,6 +216,7 @@ export function EventForm({
                                 )
                             }
                             options={categoryOptions}
+                            placeholder="Pilih kategori"
                         />
                     </Field>
                 </div>
@@ -260,20 +248,18 @@ export function EventForm({
                     error={form.errors.start_at}
                     required
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="event-start-at"
-                        type="datetime-local"
                         value={form.data.start_at}
                         onChange={(value) => form.setData('start_at', value)}
-                        required
                     />
                 </Field>
 
                 <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
-                        <Label htmlFor="event-all-day">
+                        <FormLabel htmlFor="event-all-day">
                             {labels.is_all_day ?? 'Sepanjang hari'}
-                        </Label>
+                        </FormLabel>
                         <Text as="p" variant="body-sm" color="muted">
                             {hints.is_all_day}
                         </Text>
@@ -299,9 +285,8 @@ export function EventForm({
                         hint={hints.end_at}
                         error={form.errors.end_at}
                     >
-                        <FormInput
+                        <DateTimePicker
                             id="event-end-at"
-                            type="datetime-local"
                             value={form.data.end_at}
                             onChange={(value) => form.setData('end_at', value)}
                         />
@@ -324,6 +309,7 @@ export function EventForm({
                             )
                         }
                         options={locationOptions}
+                        placeholder="Pilih lokasi"
                     />
                 </Field>
 
@@ -390,14 +376,15 @@ export function EventForm({
                             )
                         }
                         options={statusChoices}
+                        placeholder="Pilih status"
                     />
                 </Field>
 
                 <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
-                        <Label htmlFor="event-published">
+                        <FormLabel htmlFor="event-published">
                             {labels.is_published ?? 'Tampilkan di situs'}
-                        </Label>
+                        </FormLabel>
                         <Text as="p" variant="body-sm" color="muted">
                             Nonaktifkan untuk menyembunyikan kegiatan tanpa
                             menghapusnya.

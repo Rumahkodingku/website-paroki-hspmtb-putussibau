@@ -85,6 +85,7 @@ export function GalleryPhotoDialog({
                             id="photo-caption"
                             value={caption}
                             onChange={setCaption}
+                            placeholder="Contoh: Foto kegiatan paroki"
                         />
                     </Field>
 
@@ -98,6 +99,7 @@ export function GalleryPhotoDialog({
                             id="photo-alt"
                             value={altText}
                             onChange={setAltText}
+                            placeholder="Contoh: Deskripsi foto untuk aksesibilitas"
                         />
                     </Field>
 

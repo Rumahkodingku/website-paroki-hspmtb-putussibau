@@ -5499,3 +5499,47 @@ sejarah, wilayah, hero) **tidak** dihitung; ini gap yang dicatat, bukan kelalaia
 @see `docs/plan-implementation/plan-phase-9b-admin-dashboard.md` §9
 @see `app/Http/Controllers/Dashboard/DashboardController.php`
 @see `docs/DECISIONS.md` D-76
+
+---
+
+## D-78 — Konten profil kembali ke modul Profil Paroki, `/profil` dipulihkan
+
+**Status:** Accepted · branch `style/update-ui`
+
+D-69 memindahkan seluruh field editorial profil (`description`,
+`established_year`, `cover`, `cover_alt`, `video_url`, `is_published`) ke
+`site_settings` dan menghapus modul Informasi Profil. Audit lanjutan menunjukkan
+field tersebut menjadi **data mati**: tidak ada consumer publik, `is_published`
+kehilangan makna, dan `description`/`cover` tidak pernah dirender. Ini juga
+menyimpang dari rekomendasi revisi §3.3 (Alternatif B: konten profil tetap di
+modul Profil).
+
+**Keputusan yang mengikat.**
+
+1. **Field konten kembali ke tabel singleton `parish_profiles`.** Migration
+   `2026_10_24_000000_restore_parish_profile_contents` membuat ulang tabel
+   dengan kolom `description`, `established_year`, `cover_media_id`,
+   `cover_alt`, `video_url`. Identitas dan kontak global **tetap** di
+   `site_settings`; tidak ada duplikasi.
+2. **`is_published` dihapus.** Halaman publik profil memakai scope published
+   milik modulnya sendiri; status terbit tingkat profil tidak punya arti.
+   Nilainya dihapus bersama grup settings dan tidak dipulihkan pada rollback.
+3. **Backfill deterministik.** Nilai settings yang sudah diisi admin disalin ke
+   tabel baru, lalu baris settings grup `profil` dihapus. Rollback menulis balik
+   lima nilai konten (tanpa `is_published`).
+4. **Admin:** `/admin/profil/informasi` (`parish-profile.edit/update`) menjadi
+   akar modul; redirect `/admin/profil` mengarah ke sana. Permission tetap
+   `parishprofiles.view/update`.
+5. **Publik:** `/profil` (`profil.index`) dipulihkan sesuai PRD §7.2 sebagai
+   halaman ringkasan — cover, deskripsi, tahun berdiri, video YouTube, dan kartu
+   tautan ke empat sub-halaman. Tidak ada agregasi pastor/periode.
+6. **Video hanya YouTube.** `App\Rules\YoutubeUrl` menolak host lain dan
+   `App\Support\YoutubeEmbed` membentuk URL `youtube-nocookie.com/embed/{id}`.
+7. **UI tidak diubah.** Halaman baru disusun dari komponen yang sudah ada;
+   halaman lama tidak di-restyle. Test mengikuti UI, bukan sebaliknya.
+
+**Divergensi yang dicatat.** Tabel `parish_profiles` dibuat ulang dengan nama
+lama setelah D-69 menghapusnya; migration diberi komentar agar riwayatnya jelas.
+Nilai `is_published` lama tidak dapat dipulihkan.
+
+@see `docs/DECISIONS.md` D-52, D-69, D-70

@@ -3,7 +3,7 @@ import type { ComponentType } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/app/app-sidebar-layout';
 import AuthLayout from '@/layouts/auth';
 import PublicLayout from '@/layouts/public';
 import SettingsLayout from '@/layouts/settings/layout';

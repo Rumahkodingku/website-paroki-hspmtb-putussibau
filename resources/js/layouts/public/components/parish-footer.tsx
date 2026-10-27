@@ -1,170 +1,18 @@
-import type { InertiaLinkProps } from '@inertiajs/react';
 import { Link, usePage } from '@inertiajs/react';
-import {
-    type LucideIcon,
-    Church,
-    Mail,
-    MapPin,
-    MessageCircle,
-    Phone,
-} from 'lucide-react';
-import { PublicContainer } from '@/components/public-container';
 import { Text } from '@/components/text';
+import { PublicContainer } from '@/components/public-container';
 import type { ContactDetails, IdentityDetails, SeoDefaults } from '@/types';
-import { home } from '@/routes';
-import { index as agenda } from '@/routes/agenda';
-import { index as berita } from '@/routes/berita';
-import { index as kontak } from '@/routes/kontak';
-import { index as dokumen } from '@/routes/dokumen';
-import { index as galeri } from '@/routes/galeri';
-import { index as jadwalMisa } from '@/routes/jadwal-misa';
-import { index as komunitas } from '@/routes/komunitas';
-import { index as pelayanan } from '@/routes/pelayanan';
-import { index as areaIndex } from '@/routes/area';
-import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
 
-type FooterLink = {
-    label: string;
-    href: NonNullable<InertiaLinkProps['href']>;
-};
-
-type FooterGroup = {
-    title: string;
-    links: FooterLink[];
-};
-
-const MENU_UTAMA: FooterGroup = {
-    title: 'Menu Utama',
-    links: [
-        { label: 'Beranda', href: home() },
-        { label: 'Profil', href: sejarah() },
-        { label: 'Jadwal Misa', href: jadwalMisa() },
-        { label: 'Berita & Artikel', href: berita() },
-        { label: 'Agenda', href: agenda() },
-    ],
-};
-
-const PROFIL_PAROKI: FooterGroup = {
-    title: 'Profil Paroki',
-    links: [
-        { label: 'Sejarah', href: sejarah() },
-        { label: 'Wilayah Pelayanan', href: wilayah() },
-        { label: 'Area', href: areaIndex() },
-        { label: 'Pastor', href: pastor() },
-        { label: 'Struktur Kepengurusan', href: struktur() },
-    ],
-};
-
-const PELAYANAN: FooterGroup = {
-    title: 'Pelayanan & Komunitas',
-    links: [
-        { label: 'Pelayanan', href: pelayanan() },
-        { label: 'Komunitas', href: komunitas() },
-        { label: 'Galeri', href: galeri() },
-        { label: 'Dokumen', href: dokumen() },
-    ],
-};
-
-const MEDIA_SOCIAL: { key: keyof ContactDetails['social']; label: string }[] = [
-    { key: 'facebook', label: 'Facebook' },
-    { key: 'instagram', label: 'Instagram' },
-    { key: 'youtube', label: 'YouTube' },
-    { key: 'whatsappChannel', label: 'Kanal WhatsApp' },
-];
-
-const LEGAL = ['Kebijakan Privasi', 'Syarat & Ketentuan', 'Kontak Sekretariat'];
-
-/*
- * The class every footer link carries, in one place.
- *
- * It was written out twice before - once for the three navigation groups and
- * once for the single "Halaman kontak" link - and the two copies had already
- * begun to diverge in review. A constant is the smallest thing that stops a
- * third.
- */
-const FOOTER_LINK =
-    'inline-flex min-h-11 items-center transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
-
-function FooterLinks({ group }: { group: FooterGroup }) {
-    return (
-        <div>
-            <Text as="h2" variant="label" color="foreground">
-                {group.title}
-            </Text>
-
-            <ul className="mt-4 space-y-2">
-                {group.links.map((link: FooterLink) => (
-                    <li key={link.label}>
-                        {/*
-                            The anchor keeps the touch target and the focus
-                            ring; the Text keeps the type. Splitting them this
-                            way is what lets the size come from the design
-                            system without Text having to grow an `asChild` for
-                            a component that is not a text element.
-                        */}
-                        <Link href={link.href} className={FOOTER_LINK}>
-                            <Text
-                                as="span"
-                                variant="fine-print"
-                                className="text-muted-foreground hover:text-primary-on-surface"
-                            >
-                                {link.label}
-                            </Text>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-}
-
-type FooterContactItem = {
-    key: string;
-    icon: LucideIcon;
-    label: string;
-    value: string;
-    href?: string;
-    external?: boolean;
-};
-
-function ContactRow({ item }: { item: FooterContactItem }) {
-    const Icon = item.icon;
-
-    return (
-        <li className="flex items-start gap-2">
-            <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            {/*
-                The icon and the value are in a flex row, so the value keeps its
-                own line box: an icon with text wrapping around it at
-                items-start is the one place a phone-sized footer goes wrong.
-            */}
-            <Text
-                as="span"
-                variant="fine-print"
-                className="whitespace-pre-line text-muted-foreground"
-            >
-                <span className="sr-only">{item.label}: </span>
-                {item.href ? (
-                    <a
-                        href={item.href}
-                        aria-label={`${item.label}: ${item.value}`}
-                        {...(item.external
-                            ? {
-                                  target: '_blank',
-                                  rel: 'noopener noreferrer',
-                              }
-                            : {})}
-                        className="transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-                    >
-                        {item.value}
-                    </a>
-                ) : (
-                    item.value
-                )}
-            </Text>
-        </li>
-    );
-}
+import {
+    MENU_UTAMA,
+    PELAYANAN,
+    INFORMASI,
+    LINK_CLASS,
+} from './footer/footer-data';
+import { FooterBrand } from './footer/footer-brand';
+import { FooterLinks } from './footer/footer-links';
+import { FooterContact } from './footer/footer-contact';
+import { FooterLegal } from './footer/footer-legal';
 
 export function ParishFooter() {
     const { seo, contact, identity } = usePage<{
@@ -172,196 +20,93 @@ export function ParishFooter() {
         contact?: ContactDetails;
         identity?: IdentityDetails;
     }>().props;
-
-    const parishName = identity?.name ?? seo?.siteName ?? 'HSPMTB Putussibau';
-
-    const contactItems: FooterContactItem[] = [];
-
-    if (contact?.address) {
-        contactItems.push({
-            key: 'address',
-            icon: MapPin,
-            label: 'Alamat',
-            value: contact.address,
-        });
-    }
-
-    if (contact?.phone) {
-        contactItems.push({
-            key: 'phone',
-            icon: Phone,
-            label: 'Telepon',
-            value: contact.phone.display,
-            href: contact.phone.tel,
-        });
-    }
-
-    if (contact?.whatsapp) {
-        contactItems.push({
-            key: 'whatsapp',
-            icon: MessageCircle,
-            label: 'WhatsApp',
-            value: contact.whatsapp.display ?? 'WhatsApp',
-            href: contact.whatsapp.url,
-            external: true,
-        });
-    }
-
-    if (contact?.email) {
-        contactItems.push({
-            key: 'email',
-            icon: Mail,
-            label: 'Surel',
-            value: contact.email,
-            href: `mailto:${contact.email}`,
-        });
-    }
-
-    const socialItems = MEDIA_SOCIAL.flatMap((item) => {
-        const href = contact?.social[item.key] ?? null;
-
-        return href === null ? [] : [{ ...item, href }];
-    });
+    const parishName =
+        identity?.name ??
+        seo?.siteName ??
+        'Paroki Hati Santa Perawan Maria Tak Bernoda';
 
     return (
-        <footer className="border-t border-border-subtle bg-canvas-subtle">
-            <PublicContainer className="py-16">
-                <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
-                    <div className="lg:col-span-2">
-                        <div className="flex items-center gap-2">
-                            <Church
-                                className="size-5 text-primary-on-surface"
-                                aria-hidden="true"
-                            />
-                            <Text
-                                as="span"
-                                variant="heading-sm"
-                                color="foreground"
-                            >
-                                {parishName}
-                            </Text>
-                        </div>
+        <footer className="relative isolate overflow-hidden border border-border-subtle bg-background shadow-soft-card">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -z-10 bg-[url('/hero-section-2.webp')] bg-size-[auto_100%] bg-bottom-right bg-no-repeat opacity-[0.09] dark:opacity-[0.16]"
+            />
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-r from-background via-background/95 to-background/65 dark:from-background dark:via-background/90 dark:to-background/60"
+            />
 
-                        {identity?.shortDescription ? (
-                            <Text
-                                as="p"
-                                variant="fine-print"
-                                className="mt-4 max-w-sm text-muted-foreground"
-                            >
-                                {identity.shortDescription}
-                            </Text>
-                        ) : null}
+            <PublicContainer width="default" className="py-8 sm:py-10 lg:py-9">
+                <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-[minmax(230px,1.7fr)_minmax(120px,0.8fr)_minmax(150px,0.9fr)_minmax(150px,0.9fr)_minmax(210px,1.2fr)] lg:gap-x-7">
+                    <FooterBrand
+                        identity={identity}
+                        seo={seo}
+                        contact={contact}
+                    />
 
-                        {contactItems.length > 0 ? (
-                            <ul className="mt-6 space-y-3">
-                                {contactItems.map((item) => (
-                                    <ContactRow key={item.key} item={item} />
-                                ))}
-                            </ul>
-                        ) : null}
+                    <div className="hidden lg:block">
+                        <FooterLinks group={MENU_UTAMA} />
+                    </div>
+                    <div className="hidden lg:block">
+                        <FooterLinks group={PELAYANAN} />
+                    </div>
+                    <div className="hidden lg:block">
+                        <FooterLinks group={INFORMASI} />
+                    </div>
+                    <div className="hidden lg:block">
+                        <FooterContact contact={contact} />
                     </div>
 
-                    <FooterLinks group={MENU_UTAMA} />
-                    <FooterLinks group={PROFIL_PAROKI} />
-                    <FooterLinks group={PELAYANAN} />
+                    <div className="hidden grid-cols-2 gap-5 sm:col-span-2 sm:grid lg:hidden">
+                        <FooterLinks group={MENU_UTAMA} />
+                        <FooterLinks group={PELAYANAN} />
+                        <FooterLinks group={INFORMASI} />
+                        <FooterContact contact={contact} />
+                    </div>
 
-                    <div>
-                        {socialItems.length > 0 ? (
-                            <>
-                                <Text
-                                    as="h2"
-                                    variant="label"
-                                    color="foreground"
-                                >
-                                    Media Sosial
-                                </Text>
-
-                                <ul className="mt-4 space-y-2">
-                                    {socialItems.map((item) => (
-                                        <li key={item.key}>
-                                            <a
+                    <div className="space-y-0 sm:hidden">
+                        {[MENU_UTAMA, PELAYANAN, INFORMASI].map((group) => (
+                            <details
+                                key={group.title}
+                                className="group border-t border-border-subtle py-1.5"
+                            >
+                                <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 text-label font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+                                    {group.title}
+                                    <span
+                                        aria-hidden="true"
+                                        className="text-muted-foreground transition-transform group-open:rotate-180"
+                                    >
+                                        ⌄
+                                    </span>
+                                </summary>
+                                <ul className="grid grid-cols-2 gap-x-4 pb-3">
+                                    {group.links.map((item) => (
+                                        <li key={item.label}>
+                                            <Link
                                                 href={item.href}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className={FOOTER_LINK}
+                                                className={LINK_CLASS}
                                             >
-                                                <Text
-                                                    as="span"
-                                                    variant="fine-print"
-                                                    className="text-muted-foreground hover:text-primary-on-surface"
-                                                >
-                                                    {item.label}
-                                                </Text>
-                                            </a>
+                                                {item.label}
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>
-                            </>
-                        ) : null}
-
-                        <Text
-                            as="h2"
-                            variant="label"
-                            color="foreground"
-                            className={socialItems.length > 0 ? 'mt-8' : ''}
-                        >
-                            Kontak
-                        </Text>
-
-                        <ul className="mt-4 space-y-2">
-                            <li>
-                                <Link href={kontak()} className={FOOTER_LINK}>
-                                    <Text
-                                        as="span"
-                                        variant="fine-print"
-                                        className="text-muted-foreground hover:text-primary-on-surface"
-                                    >
-                                        Halaman kontak
-                                    </Text>
-                                </Link>
-                            </li>
-                            {contact?.mapsLink ? (
-                                <li>
-                                    <a
-                                        href={contact.mapsLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={FOOTER_LINK}
-                                    >
-                                        <Text
-                                            as="span"
-                                            variant="fine-print"
-                                            className="text-muted-foreground hover:text-primary-on-surface"
-                                        >
-                                            Petunjuk arah
-                                        </Text>
-                                    </a>
-                                </li>
-                            ) : null}
-                        </ul>
+                            </details>
+                        ))}
                     </div>
                 </div>
 
-                <div className="mt-12 flex flex-col gap-4 border-t border-border-subtle pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <Text as="p" variant="fine-print" color="subtle">
-                        &copy; {new Date().getFullYear()}{' '}
-                        <span title={parishName}>{parishName}</span>. Seluruh
+                <div className="mt-8 flex flex-col gap-3 border-t border-border-subtle pt-5 sm:flex-row sm:items-center sm:justify-between">
+                    <Text
+                        as="p"
+                        variant="fine-print"
+                        color="subtle"
+                        className="max-w-xl"
+                    >
+                        &copy; {new Date().getFullYear()} {parishName}. Seluruh
                         hak cipta dilindungi.
                     </Text>
-
-                    <ul className="flex flex-wrap gap-x-6 gap-y-2">
-                        {LEGAL.map((label) => (
-                            <li key={label}>
-                                <Text
-                                    as="span"
-                                    variant="fine-print"
-                                    color="subtle"
-                                >
-                                    {label}
-                                </Text>
-                            </li>
-                        ))}
-                    </ul>
+                    <FooterLegal />
                 </div>
             </PublicContainer>
         </footer>

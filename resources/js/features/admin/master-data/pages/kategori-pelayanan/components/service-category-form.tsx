@@ -34,7 +34,6 @@ type Props = {
 export function ServiceCategoryForm({
     initial,
     labels,
-    hints,
     submitLabel,
     onSubmit,
     onCancel,
@@ -66,21 +65,6 @@ export function ServiceCategoryForm({
                     />
                 </Field>
 
-                <Field
-                    id="category-slug"
-                    label={labels.category_slug ?? 'Slug'}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="category-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        placeholder="inisiasi"
-                        required
-                    />
-                </Field>
-
                 <div className="md:col-span-2">
                     <Field
                         id="category-description"
@@ -94,25 +78,10 @@ export function ServiceCategoryForm({
                                 form.setData('description', value)
                             }
                             rows={2}
+                            placeholder="Contoh: Deskripsi kategori"
                         />
                     </Field>
                 </div>
-
-                <Field
-                    id="category-sort-order"
-                    label={labels.sort_order ?? 'Urutan Tampilan'}
-                    hint={hints.sort_order}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="category-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

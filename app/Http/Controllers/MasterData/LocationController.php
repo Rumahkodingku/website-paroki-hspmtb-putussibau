@@ -51,7 +51,7 @@ class LocationController extends Controller
                 'is_active' => 'locations.is_active',
             ],
             [['locations.name', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/master-data/lokasi/index', [
@@ -77,8 +77,9 @@ class LocationController extends Controller
     {
         Location::create($request->locationPayload());
 
-        return to_route('locations.index')
-            ->with('success', __('Lokasi berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil ditambahkan.')]);
+
+        return to_route('locations.index');
     }
 
     public function edit(Location $location): Response
@@ -95,8 +96,9 @@ class LocationController extends Controller
     {
         $location->update($request->locationPayload());
 
-        return to_route('locations.index')
-            ->with('success', __('Lokasi berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil diperbarui.')]);
+
+        return to_route('locations.index');
     }
 
     public function destroy(Location $location): RedirectResponse
@@ -114,8 +116,9 @@ class LocationController extends Controller
 
         $location->delete();
 
-        return to_route('locations.index')
-            ->with('success', __('Lokasi berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil dihapus.')]);
+
+        return to_route('locations.index');
     }
 
     /**

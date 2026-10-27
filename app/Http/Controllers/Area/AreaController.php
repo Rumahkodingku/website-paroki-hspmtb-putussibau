@@ -112,8 +112,9 @@ class AreaController extends Controller
     {
         Area::create($request->validated());
 
-        return to_route('areas.index')
-            ->with('success', __('area.flash.area_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_created')]);
+
+        return to_route('areas.index');
     }
 
     public function edit(Area $area): Response
@@ -131,8 +132,9 @@ class AreaController extends Controller
     {
         $area->update($request->validated());
 
-        return to_route('areas.index')
-            ->with('success', __('area.flash.area_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_updated')]);
+
+        return to_route('areas.index');
     }
 
     public function destroy(Area $area): RedirectResponse
@@ -147,8 +149,9 @@ class AreaController extends Controller
 
         $area->delete();
 
-        return to_route('areas.index')
-            ->with('success', __('area.flash.area_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_deleted')]);
+
+        return to_route('areas.index');
     }
 
     /**

@@ -42,6 +42,29 @@ export type ParishHistoryItemFormData = {
 };
 
 /* -------------------------------------------------------------------------- */
+/* Informasi Profil                                                           */
+/* -------------------------------------------------------------------------- */
+
+export type ParishProfileRow = {
+    id: number | null;
+    description: string | null;
+    established_year: number | null;
+    cover_media_id: number | null;
+    cover_alt: string | null;
+    cover_url: string | null;
+    video_url: string | null;
+    can: { update: boolean };
+};
+
+export type ParishProfileFormData = {
+    description: string;
+    established_year: string;
+    cover_media_id: number | null;
+    cover_alt: string;
+    video_url: string;
+};
+
+/* -------------------------------------------------------------------------- */
 /* Wilayah                                                                    */
 /* -------------------------------------------------------------------------- */
 

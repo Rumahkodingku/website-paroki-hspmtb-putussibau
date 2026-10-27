@@ -4,14 +4,6 @@ import { Text } from '@/components/text';
 import { show as galleryShow } from '@/routes/galeri';
 import type { PublicGalleryCard as PublicGalleryCardData } from '../types';
 
-/**
- * One album in the public directory.
- *
- * The whole card is a single link via a stretched pseudo-element, so the heading
- * stays a heading and the card is one tab stop. The cover is the chosen one or,
- * when it was never set, the first photo (GAL-07) — the server already resolved
- * that, so a card here only decides how to draw it.
- */
 export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
     return (
         <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">

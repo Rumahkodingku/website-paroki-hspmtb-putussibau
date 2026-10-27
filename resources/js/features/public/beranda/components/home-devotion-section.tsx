@@ -4,7 +4,7 @@ import { PublicSection } from '@/components/public-section';
 import { Text } from '@/components/text';
 import { formatWibDate } from '@/lib/datetime';
 import { show as post } from '@/routes/berita';
-import type { ArticleCardData } from '@/components/article-card';
+import type { ArticleCardData } from '@/types/news-agenda';
 
 export function HomeDevotionSection({
     devotion,

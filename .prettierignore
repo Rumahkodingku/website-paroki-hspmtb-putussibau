@@ -4,9 +4,7 @@ docs/
 .codex/
 skills-lock.json
 composer.json
-public/
-resources/js/components/ui/*
-resources/views/mail/*
+/public/
 node_modules/
 vendor/
 bootstrap/ssr/

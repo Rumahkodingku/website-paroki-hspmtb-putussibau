@@ -7,7 +7,9 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as areaIndex } from '@/routes/area';
 import type { PublicServiceArea } from '../types';
-import { ProfileHero } from '../components/profile-hero';
+import PublicHeroBanner from '@/components/public-hero-banner';
+import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     area: PublicServiceArea | null;
@@ -23,15 +25,15 @@ export default function Wilayah({ area }: Props) {
 
             <Head title="Wilayah Pelayanan" />
 
-            <ProfileHero
-                ariaLabelledBy="wilayah-title"
+            <PublicHeroBanner
+                eyebrow="PROFIL PAROKI"
                 title="Wilayah Pelayanan"
-                description={
-                    <Text as="p" variant="body" className="mt-5 max-w-lg">
-                        Cakupan wilayah pelayanan Paroki Hati Santa Perawan
-                        Maria Tak Bernoda Putussibau.
-                    </Text>
-                }
+                description="Cakupan wilayah pelayanan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Profil', href: profilIndex() },
+                    { title: 'Wilayah Pelayanan' },
+                ]}
             />
 
             <PublicSection>

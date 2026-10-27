@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -53,7 +54,7 @@ export default function Index({
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
             areasIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -61,7 +62,7 @@ export default function Index({
     const sortBy = (sortKey: string, direction: 'asc' | 'desc') => {
         router.get(
             areasIndex().url,
-            { ...filters, sort: sortKey, direction },
+            { ...filters, sort: sortKey, direction, page: 1 },
             { preserveScroll: true, replace: true },
         );
     };
@@ -103,36 +104,27 @@ export default function Index({
                     searchPlaceholder="Cari nama stasi/lingkungan"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter tipe"
+                    <FilterSelect
+                        id="filter-tipe"
+                        label="Filter tipe"
                         value={filters.type}
-                        onChange={(event: any) =>
-                            applyFilter({ type: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        <option value="">Semua tipe</option>
-                        {areaTypes.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(type) => applyFilter({ type })}
+                        options={[
+                            { value: '', label: 'Semua tipe' },
+                            ...areaTypes.map((option) => ({
+                                value: option.value,
+                                label: option.label,
+                            })),
+                        ]}
+                    />
 
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {STATUS_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={STATUS_OPTIONS}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters onReset={reset} />

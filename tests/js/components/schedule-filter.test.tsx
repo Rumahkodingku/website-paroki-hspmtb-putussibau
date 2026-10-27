@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ScheduleFilter } from '@/features/public/jadwal-misa/components/schedule-filter';
-import { DAY_LABELS } from '@/features/public/jadwal-misa/components/mass-schedule-card';
+import { DAY_LABELS } from '@/features/public/jadwal-misa/components/regular-mass-schedule-card';
 
 /*
  * The location and day filter.
@@ -44,12 +44,14 @@ function renderFilter(
 }
 
 describe('ScheduleFilter', () => {
-    it('offers every location plus an all-locations option', () => {
+    it('offers every location plus an all-locations option', async () => {
+        const user = userEvent.setup();
         renderFilter();
 
-        const select = screen.getByLabelText('Lokasi');
+        const select = screen.getByLabelText('Lokasi misa');
 
-        expect(select).toHaveValue('');
+        await user.click(select);
+
         expect(
             screen.getByRole('option', { name: 'Semua lokasi' }),
         ).toBeInTheDocument();
@@ -58,8 +60,11 @@ describe('ScheduleFilter', () => {
         ).toBeInTheDocument();
     });
 
-    it('offers every day, Sunday first', () => {
+    it('offers every day, Sunday first', async () => {
+        const user = userEvent.setup();
         renderFilter();
+
+        await user.click(screen.getByLabelText('Hari misa'));
 
         expect(
             screen.getByRole('option', { name: 'Minggu' }),
@@ -80,7 +85,10 @@ describe('ScheduleFilter', () => {
 
         renderFilter({ day: 3 }, (next) => seen.push(next));
 
-        await user.selectOptions(screen.getByLabelText('Lokasi'), '2');
+        await user.click(screen.getByLabelText('Lokasi misa'));
+        await user.click(
+            screen.getByRole('option', { name: 'Stasi Tanah Empang' }),
+        );
 
         expect(seen).toEqual([{ location_id: 2, day: 3 }]);
     });
@@ -91,7 +99,8 @@ describe('ScheduleFilter', () => {
 
         renderFilter({ locationId: 2 }, (next) => seen.push(next));
 
-        await user.selectOptions(screen.getByLabelText('Hari'), '0');
+        await user.click(screen.getByLabelText('Hari misa'));
+        await user.click(screen.getByRole('option', { name: 'Minggu' }));
 
         expect(seen).toEqual([{ location_id: 2, day: 0 }]);
     });
@@ -102,7 +111,8 @@ describe('ScheduleFilter', () => {
 
         renderFilter({ locationId: 1, day: 0 }, (next) => seen.push(next));
 
-        await user.selectOptions(screen.getByLabelText('Lokasi'), '');
+        await user.click(screen.getByLabelText('Lokasi misa'));
+        await user.click(screen.getByRole('option', { name: 'Semua lokasi' }));
 
         // Day stays: clearing one filter is not a request to clear both.
         expect(seen).toEqual([{ location_id: null, day: 0 }]);

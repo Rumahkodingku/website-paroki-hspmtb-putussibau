@@ -7,7 +7,6 @@ use App\Models\Area;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -28,6 +27,8 @@ use Illuminate\Validation\Validator;
  */
 trait AreaValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @return array<string, array<int, Closure|ValidationRule|string>>
      */
@@ -130,7 +131,16 @@ trait AreaValidationRules
         }
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('name'));
+            $ignoreId = $this->routeKeyId('area');
+            $input['slug'] = $this->resolveUniqueSlug(
+                Area::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         $parentId = $this->input('parent_id');
@@ -150,7 +160,8 @@ trait AreaValidationRules
 
         $input['show_contact'] = (bool) filter_var($this->input('show_contact'), FILTER_VALIDATE_BOOLEAN);
         $input['is_active'] = (bool) filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN);
-        $input['sort_order'] = max(0, (int) $this->input('sort_order', 0));
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
 
         $this->merge($input);
     }

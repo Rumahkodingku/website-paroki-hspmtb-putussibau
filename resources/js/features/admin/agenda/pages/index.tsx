@@ -6,6 +6,8 @@ import { DeleteDialog } from '@/components/delete-dialog';
 import { RowActions } from '@/components/row-actions';
 import { ListPagination } from '@/components/list-pagination';
 import {
+    FilterMonth,
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -18,7 +20,7 @@ import {
     destroy as destroyEvent,
     duplicate as duplicateEvent,
     edit as editEvent,
-    index as eventsIndex,
+    list as eventsIndex,
 } from '@/routes/events';
 import type { Paginated } from '@/types';
 import type { Option } from '@/types/news-agenda';
@@ -63,7 +65,7 @@ export default function Index({
     const applyFilter = (next: Partial<EventFilters>) => {
         router.get(
             eventsIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -222,69 +224,46 @@ export default function Index({
                     searchPlaceholder="Cari judul kegiatan"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        aria-label="Filter kategori"
-                        value={filters.kategori}
-                        onChange={(event: any) =>
-                            applyFilter({ kategori: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {categoryOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-
-                    {/*
-                     * type="month" rather than a select of preset months. The
-                     * parish's data is not limited to months anybody has thought
-                     * of yet, and a select cannot offer next March in December.
-                     */}
-                    <input
-                        type="month"
-                        aria-label="Filter bulan"
-                        value={filters.bulan}
-                        onChange={(event: any) =>
-                            applyFilter({ bulan: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
+                        onChange={(status) => applyFilter({ status })}
+                        options={statusOptions}
                     />
 
-                    <select
-                        aria-label="Filter pengumuman"
+                    <FilterSelect
+                        id="filter-kategori"
+                        label="Filter kategori"
+                        value={filters.kategori}
+                        onChange={(kategori) => applyFilter({ kategori })}
+                        options={categoryOptions}
+                    />
+
+                    <FilterMonth
+                        id="filter-bulan"
+                        label="Filter bulan"
+                        value={filters.bulan}
+                        onChange={(bulan) => applyFilter({ bulan })}
+                    />
+
+                    {/*
+                     * yes/no, not 1/0. EventController whitelists exactly
+                     * ['yes', 'no'] and anything else is ignored silently, so
+                     * sending 1/0 produced a filter that looked applied and
+                     * filtered nothing.
+                     */}
+                    <FilterSelect
+                        id="filter-publikasi"
+                        label="Filter pengumuman"
                         value={filters.publikasi}
-                        onChange={(event: any) =>
-                            applyFilter({ publikasi: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {/*
-                         * yes/no, not 1/0. EventController whitelists exactly
-                         * ['yes', 'no'] and anything else is ignored silently,
-                         * so sending 1/0 produced a filter that looked applied
-                         * and filtered nothing.
-                         */}
-                        <option value="">Semua pengumuman</option>
-                        <option value="yes">Diumumkan</option>
-                        <option value="no">Belum diumumkan</option>
-                    </select>
+                        onChange={(publikasi) => applyFilter({ publikasi })}
+                        options={[
+                            { value: '', label: 'Semua pengumuman' },
+                            { value: 'yes', label: 'Diumumkan' },
+                            { value: 'no', label: 'Belum diumumkan' },
+                        ]}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters
@@ -311,7 +290,7 @@ export default function Index({
                     onSort={(sortKey, direction) =>
                         router.get(
                             eventsIndex().url,
-                            { ...filters, sort: sortKey, direction },
+                            { ...filters, sort: sortKey, direction, page: 1 },
                             { preserveScroll: true, replace: true },
                         )
                     }

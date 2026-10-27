@@ -6,21 +6,6 @@ import {
 } from '@/components/masonry-grid';
 import { ParishImage } from '@/components/parish-image';
 
-/*
- * The album's photos as a masonry grid of buttons.
- *
- * Each tile is a button rather than an anchor: it opens the lightbox in place,
- * and a link would promise a navigation that does not happen. The thumbnail
- * variant is what loads here (roadmap 8A section 8.1), so the grid never pulls
- * a full-resolution original for a picture nobody has enlarged.
- *
- * Tiles keep their own aspect ratio rather than the 1:1 square this grid used
- * before. A masonry column that crops every photo to a square is not a masonry
- * grid - it is the old grid with the seams hidden - and a fixed square is also
- * the crop DESIGN-v2 §7 warns against, since it decides which part of a
- * portrait or a wide group shot survives. `contain` letterboxes the remainder
- * against the surface instead of cutting through the subject.
- */
 export function PhotoGrid({
     photos,
     onOpen,

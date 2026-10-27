@@ -1,14 +1,16 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
 import type { Paginated } from '@/types';
 import type { PublicCategory, PublicPost, PublicPostFilters } from '../types';
-import { ArticleCard } from '@/components/article-card';
+import { ArticleCard } from '@/features/public/berita/components/article-card';
 import { NewsFilters } from '../components/news-filters';
 import { PinnedStrip } from '../components/pinned-strip';
+import { home } from '@/routes';
+import { index as beritaIndex } from '@/routes/berita';
 
 type Props = {
     pinned: PublicPost[];
@@ -17,19 +19,6 @@ type Props = {
     filters: PublicPostFilters;
 };
 
-/*
- * The list page.
- *
- * PRD 7.4 wants a heading, a summary, search, a category filter, a featured
- * area, a grid, and pagination. DESIGN.md wants whitespace to do work and
- * warns against turning every section into a rounded container — so the
- * featured strip is the only part with a surface, and the grid below it is
- * cards on the page background.
- *
- * One eyebrow, not one per section. DESIGN.md permits a small uppercase label
- * above a headline, and a page that repeats it above every heading turns into
- * a template.
- */
 export default function Index({ pinned, posts, categories, filters }: Props) {
     const { displayTimezone } = usePage().props;
     const isFiltered = filters.q !== '' || filters.kategori !== '';
@@ -43,27 +32,22 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
 
             <Head title="Berita & Artikel" />
 
+            <PublicHeroBanner
+                eyebrow="Berita & Artikel"
+                title="Berita & Artikel"
+                description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Berita & Artikel' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-12">
-                    <SectionHeading
-                        eyebrow="Berita & Artikel"
-                        title="Berita & Artikel"
-                        description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi paroki."
+                    <PinnedStrip
+                        articles={pinned}
+                        displayTimezone={displayTimezone}
                     />
-
-                    {/*
-                     * The strip is hidden while a filter is on. A pinned article
-                     * is an editorial choice about the front page; under a
-                     * filter the visitor asked for something else, and leaving
-                     * two articles they did not ask for above the results reads
-                     * as a bug.
-                     */}
-                    {!isFiltered ? (
-                        <PinnedStrip
-                            articles={pinned}
-                            displayTimezone={displayTimezone}
-                        />
-                    ) : null}
 
                     <section
                         aria-labelledby="berita-semua"
@@ -106,6 +90,15 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
                                         ? 'Coba kata lain atau reset filter.'
                                         : 'Berita paroki akan muncul di sini setelah diterbitkan.'}
                                 </Text>
+
+                                {isFiltered ? (
+                                    <Link
+                                        href={beritaIndex()}
+                                        className="mt-4 inline-flex text-sm font-medium text-primary-on-surface underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                    >
+                                        Reset filter
+                                    </Link>
+                                ) : null}
                             </div>
                         )}
                     </section>

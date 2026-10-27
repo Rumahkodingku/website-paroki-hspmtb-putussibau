@@ -78,7 +78,7 @@ class SpecialMassController extends Controller
                 'is_active' => 'special_masses.is_active',
             ],
             [['special_masses.start_at', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/jadwal-misa/misa-khusus/index', [
@@ -112,8 +112,9 @@ class SpecialMassController extends Controller
     {
         SpecialMass::create($request->specialMassPayload());
 
-        return to_route('special-masses.index')
-            ->with('success', __('Misa khusus berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil ditambahkan.')]);
+
+        return to_route('special-masses.index');
     }
 
     public function edit(SpecialMass $specialMass): Response
@@ -133,8 +134,9 @@ class SpecialMassController extends Controller
     {
         $specialMass->update($request->specialMassPayload());
 
-        return to_route('special-masses.index')
-            ->with('success', __('Misa khusus berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil diperbarui.')]);
+
+        return to_route('special-masses.index');
     }
 
     /**
@@ -152,8 +154,9 @@ class SpecialMassController extends Controller
 
         $specialMass->delete();
 
-        return to_route('special-masses.index')
-            ->with('success', __('Misa khusus berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil dihapus.')]);
+
+        return to_route('special-masses.index');
     }
 
     /**

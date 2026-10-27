@@ -62,7 +62,7 @@ class DocumentController extends Controller
                 'updated_at' => 'documents.updated_at',
             ],
             [['documents.updated_at', 'desc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/dokumen', [
             'documents' => DocumentListResource::collection($documents),
@@ -97,8 +97,9 @@ class DocumentController extends Controller
             $request->user(),
         );
 
-        return to_route('documents.edit', $document)
-            ->with('success', __('documents.flash.created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.created')]);
+
+        return to_route('documents.edit', $document);
     }
 
     public function edit(Document $document): Response
@@ -123,8 +124,9 @@ class DocumentController extends Controller
             $request->user(),
         );
 
-        return to_route('documents.edit', $document)
-            ->with('success', __('documents.flash.updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.updated')]);
+
+        return to_route('documents.edit', $document);
     }
 
     public function destroy(Document $document, DeleteDocumentAction $action): RedirectResponse
@@ -133,8 +135,9 @@ class DocumentController extends Controller
 
         $action->handle($document);
 
-        return to_route('documents.index')
-            ->with('success', __('documents.flash.deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.deleted')]);
+
+        return to_route('documents.index');
     }
 
     public function preview(Document $document, DocumentStorage $storage): StreamedResponse

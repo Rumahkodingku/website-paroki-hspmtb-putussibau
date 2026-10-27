@@ -6,11 +6,7 @@ use App\Models\ServiceCategory;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeds the three service categories the six MVP services belong to.
- *
- * Roadmap 6B 3.1/6.1 names them: Sakramen Inisiasi, Sakramen Perkawinan,
- * Pelayanan Orang Sakit. Category is a master table rather than the PRD's ENUM
- * so an admin can rename and reorder it — see D-54.
+ * Seeds the three sacrament categories the seven MVP services belong to.
  *
  * firstOrCreate keyed on slug, not updateOrCreate: roadmap 6B-104 requires the
  * seeder to be idempotent without overwriting an admin's edits. Re-running it
@@ -23,14 +19,29 @@ use Illuminate\Database\Seeder;
 class ServiceCategorySeeder extends Seeder
 {
     /**
-     * The three categories from roadmap 6B 6.1.
+     * The three categories from the parish's sacrament grouping.
      *
-     * @var list<array{name: string, slug: string, sort_order: int}>
+     * @var list<array{name: string, slug: string, description: string, sort_order: int}>
      */
     private const CATEGORIES = [
-        ['name' => 'Sakramen Inisiasi', 'slug' => 'inisiasi', 'sort_order' => 1],
-        ['name' => 'Sakramen Perkawinan', 'slug' => 'perkawinan', 'sort_order' => 2],
-        ['name' => 'Pelayanan Orang Sakit', 'slug' => 'orang-sakit', 'sort_order' => 3],
+        [
+            'name' => 'Sakramen Inisiasi Kristiani',
+            'slug' => 'inisiasi-kristiani',
+            'description' => 'Sakramen-sakramen yang memulai dan memperkuat kehidupan Kristiani: Baptis, Krisma (Penguatan), dan Ekaristi. Ketiganya merupakan satu kesatuan inisiasi yang mempersatukan umat dengan Kristus dan Gereja-Nya.',
+            'sort_order' => 1,
+        ],
+        [
+            'name' => 'Sakramen Penyembuhan',
+            'slug' => 'penyembuhan',
+            'description' => 'Sakramen penyembuhan bagi umat yang membutuhkan rekonsiliasi dengan Tuhan dan Gereja serta penghiburan dalam sakit: Tobat dan Rekonsiliasi serta Pengurapan Orang Sakit.',
+            'sort_order' => 2,
+        ],
+        [
+            'name' => 'Sakramen Pelayanan Persekutuan',
+            'slug' => 'pelayanan-persekutuan',
+            'description' => 'Sakramen yang mengabdi pada persekutuan dan misi Gereja: Tahbisan Suci bagi mereka yang dipanggil melayani, dan Perkawinan bagi pasangan yang membangun keluarga Kristiani.',
+            'sort_order' => 3,
+        ],
     ];
 
     public function run(): void
@@ -40,6 +51,7 @@ class ServiceCategorySeeder extends Seeder
                 ['slug' => $category['slug']],
                 [
                     'name' => $category['name'],
+                    'description' => $category['description'],
                     'sort_order' => $category['sort_order'],
                     'is_active' => true,
                 ],

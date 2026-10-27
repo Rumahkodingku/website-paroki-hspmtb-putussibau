@@ -18,16 +18,6 @@ type Props = {
     album: PublicGalleryDetail;
 };
 
-/**
- * One album.
- *
- * The open photo is the only piece of state, and it lives here rather than in
- * the lightbox so a single source of truth decides which photo is shown. The
- * lightbox owns nothing but the document keyboard listener.
- *
- * Only published albums reach this page: the route binds {gallery:slug} through
- * GalleryAlbum::published(), so a draft 404s before this component runs.
- */
 export default function GaleriShow({ album }: Props) {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -53,9 +43,9 @@ export default function GaleriShow({ album }: Props) {
                 />
 
                 <SectionHeading
-                    eyebrow="Album"
                     title={album.title}
                     description={album.description ?? undefined}
+                    className="mt-8"
                 />
 
                 {album.event_date || album.location ? (

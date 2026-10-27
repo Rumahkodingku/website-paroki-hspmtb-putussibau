@@ -112,8 +112,8 @@ class PublicHomeController extends Controller
         }
 
         return [
-            'title' => $this->stringSetting('home_hero_title'),
-            'description' => $this->stringSetting('home_hero_description'),
+            'title' => $this->stringSetting('parish_name'),
+            'description' => $this->stringSetting('short_description'),
             'image' => $mediaUrl ?? (string) config('homepage.fallback_hero_image'),
             'imageAlt' => $this->stringSetting('home_hero_image_alt')
                 ?? (string) config('homepage.fallback_hero_image_alt'),

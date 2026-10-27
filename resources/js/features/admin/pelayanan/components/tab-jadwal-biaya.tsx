@@ -36,6 +36,7 @@ export function TabJadwalBiaya({ form, labels, hints, onSubmit }: Props) {
                             form.setData('schedule_info', value)
                         }
                         rows={4}
+                        placeholder="Contoh: Jadwal pelayanan"
                     />
                 </Field>
 
@@ -50,6 +51,7 @@ export function TabJadwalBiaya({ form, labels, hints, onSubmit }: Props) {
                         value={form.data.fee_info}
                         onChange={(value) => form.setData('fee_info', value)}
                         rows={3}
+                        placeholder="Contoh: Biaya pelayanan"
                     />
                 </Field>
             </div>

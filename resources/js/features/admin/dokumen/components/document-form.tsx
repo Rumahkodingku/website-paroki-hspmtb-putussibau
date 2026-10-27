@@ -7,6 +7,7 @@ import {
     FormInput,
     FormTextarea,
 } from '@/components/form-fields';
+import { DatePicker } from '@/components/date-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
 import type {
@@ -73,6 +74,7 @@ export function DocumentForm({
                         value={form.data.title}
                         onChange={(value) => form.setData('title', value)}
                         required
+                        placeholder="Contoh: Tata tertib paroki"
                     />
                 </Field>
 
@@ -111,6 +113,7 @@ export function DocumentForm({
                                 form.setData('description', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Deskripsi dokumen"
                         />
                     </Field>
                 </div>
@@ -158,6 +161,7 @@ export function DocumentForm({
                             form.setData('status', value as DocumentStatus)
                         }
                         options={statusOptions}
+                        placeholder="Pilih status"
                     />
                 </Field>
 
@@ -167,9 +171,8 @@ export function DocumentForm({
                     hint={meta.hints.document_date}
                     error={form.errors.document_date}
                 >
-                    <FormInput
+                    <DatePicker
                         id="document-date"
-                        type="date"
                         value={form.data.document_date}
                         onChange={(value) =>
                             form.setData('document_date', value)
@@ -183,9 +186,8 @@ export function DocumentForm({
                     hint={meta.hints.expires_at}
                     error={form.errors.expires_at}
                 >
-                    <FormInput
+                    <DatePicker
                         id="document-expires"
-                        type="date"
                         value={form.data.expires_at}
                         onChange={(value) => form.setData('expires_at', value)}
                     />

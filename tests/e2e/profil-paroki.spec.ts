@@ -8,10 +8,11 @@ import { resetLoginRateLimit, signIn } from './support/session';
  * href AND then click it, and check the URL plus something only the target page
  * renders. Asserting an href proves nothing about whether the link works.
  *
- * Informasi Profil was removed in D-69; the group root redirects to Sejarah.
+ * Informasi Profil is the module root again (D-78).
  */
 
 const PROFIL_PAROKI_SUB_MENU = [
+    ['Informasi Profil', '/admin/profil/informasi'],
     ['Sejarah Paroki', '/admin/profil/sejarah'],
     ['Wilayah Pelayanan', '/admin/profil/wilayah'],
     ['Pastor Paroki', '/admin/profil/pastor'],
@@ -96,6 +97,7 @@ test.describe('alur narasi sejarah', () => {
 
 test.describe('halaman publik Profil Paroki', () => {
     const PUBLIC_PAGES: Array<[string, string]> = [
+        ['/profil', 'Profil Paroki'],
         ['/profil/sejarah', 'Sejarah'],
         ['/profil/wilayah', 'Wilayah Pelayanan'],
         ['/profil/pastor', 'Pastor'],
@@ -107,7 +109,7 @@ test.describe('halaman publik Profil Paroki', () => {
             await page.goto(url);
 
             await expect(
-                page.getByRole('heading', { name: activeLabel, level: 2 }),
+                page.getByRole('heading', { name: activeLabel, level: 1 }),
             ).toBeVisible();
         }
     });

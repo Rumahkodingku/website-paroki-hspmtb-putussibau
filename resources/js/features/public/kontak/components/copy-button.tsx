@@ -2,14 +2,6 @@ import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-/**
- * Copy a value to the clipboard, with a short confirmation.
- *
- * The clipboard API is not available everywhere (and can be denied), so a
- * missing or rejected call leaves the button in its idle state rather than
- * throwing into the console. The accessible name never changes; only the
- * visible label does, so a screen reader hears the same control throughout.
- */
 export function CopyButton({
     value,
     label,

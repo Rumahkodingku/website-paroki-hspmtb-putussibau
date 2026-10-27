@@ -1,9 +1,13 @@
 import type { ChangeEvent } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { Field, FormInput, FormTextarea } from '@/components/form-fields';
+import {
+    Field,
+    FormInput,
+    FormLabel,
+    FormTextarea,
+} from '@/components/form-fields';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { ServiceFormInstance } from './service-form-instance';
 
@@ -133,13 +137,14 @@ export function TabKontakPendaftaran({
                             onChange={(value) =>
                                 form.setData('form_button_label', value)
                             }
+                            placeholder="Contoh: Daftar sekarang"
                         />
                     </Field>
 
                     <div className="flex items-center justify-between gap-4">
-                        <Label htmlFor="service-form-open">
+                        <FormLabel htmlFor="service-form-open">
                             {labels.is_form_open}
-                        </Label>
+                        </FormLabel>
                         <Switch
                             id="service-form-open"
                             checked={form.data.is_form_open}
@@ -167,6 +172,7 @@ export function TabKontakPendaftaran({
                                     form.setData('form_closed_message', value)
                                 }
                                 rows={2}
+                                placeholder="Contoh: Pesan saat pendaftaran ditutup"
                             />
                         </Field>
                     ) : null}
@@ -195,6 +201,7 @@ export function TabKontakPendaftaran({
                                 onChange={(value) =>
                                     form.setData('contact_name', value)
                                 }
+                                placeholder="Contoh: Sekretariat paroki"
                             />
                         </Field>
 
@@ -218,9 +225,9 @@ export function TabKontakPendaftaran({
 
                     <section className="space-y-4 rounded-lg border border-border bg-muted p-5">
                         <div className="flex items-center justify-between gap-4">
-                            <Label htmlFor="service-emergency">
+                            <FormLabel htmlFor="service-emergency">
                                 {labels.is_emergency}
-                            </Label>
+                            </FormLabel>
                             <Switch
                                 id="service-emergency"
                                 checked={form.data.is_emergency}

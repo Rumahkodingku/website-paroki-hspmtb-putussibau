@@ -37,7 +37,6 @@ test.describe('pengaturan situs', () => {
         for (const group of [
             'Identitas Paroki',
             'Kontak',
-            'Profil Paroki',
             'Media Sosial',
             'SEO Dasar',
             'Beranda',
@@ -58,13 +57,8 @@ test.describe('pengaturan situs', () => {
         await expect(page.locator('input#setting-favicon')).toHaveCount(0);
     });
 
-    test('field situs web berada di tab Media Sosial, bukan Profil Paroki', async ({
-        page,
-    }) => {
+    test('field situs web berada di tab Media Sosial', async ({ page }) => {
         await page.goto('/admin/pengaturan');
-
-        await page.getByRole('tab', { name: 'Profil Paroki' }).click();
-        await expect(page.getByText('Situs web paroki')).toHaveCount(0);
 
         await page.getByRole('tab', { name: 'Media Sosial' }).click();
         await expect(page.getByText('Situs web paroki')).toBeVisible();

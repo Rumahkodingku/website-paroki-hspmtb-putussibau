@@ -24,7 +24,7 @@ test.describe('kontak publik', () => {
         await page.goto('/kontak');
 
         await expect(
-            page.getByRole('heading', { name: 'Hubungi Kami' }),
+            page.getByRole('heading', { name: 'Kami siap membantu Anda' }),
         ).toBeVisible();
     });
 
@@ -119,7 +119,7 @@ test.describe('kontak publik', () => {
 
         await expect(page).toHaveURL(/\/kontak$/);
         await expect(
-            page.getByRole('heading', { name: 'Hubungi Kami' }),
+            page.getByRole('heading', { name: 'Kami siap membantu Anda' }),
         ).toBeVisible();
     });
 
@@ -134,7 +134,7 @@ test.describe('kontak publik', () => {
 
         await page.goto('/kontak');
         await expect(
-            page.getByRole('heading', { name: 'Hubungi Kami' }),
+            page.getByRole('heading', { name: 'Kami siap membantu Anda' }),
         ).toBeVisible();
     });
 

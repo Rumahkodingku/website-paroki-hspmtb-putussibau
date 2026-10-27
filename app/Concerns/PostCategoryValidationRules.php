@@ -23,6 +23,8 @@ use Illuminate\Validation\Rule;
  */
 trait PostCategoryValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @param  PostCategory|null  $ignore  the record being updated, so it keeps its own slug
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
@@ -39,14 +41,14 @@ trait PostCategoryValidationRules
             // Two rules that both do something beats one that looks like it
             // does.
             'slug' => [
-                'required',
+                'nullable',
                 'string',
                 'alpha_dash:ascii',
                 'lowercase',
                 'max:180',
                 Rule::unique('post_categories', 'slug')->ignore($ignore?->getKey()),
             ],
-            'sort_order' => ['required', 'integer', 'min:0'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
@@ -74,5 +76,31 @@ trait PostCategoryValidationRules
     protected function postCategoryAttributes(array $validated): array
     {
         return $validated;
+    }
+
+    protected function preparePostCategoryInput(): void
+    {
+        $input = [];
+
+        foreach (['name', 'slug'] as $field) {
+            $value = $this->input($field);
+            $input[$field] = is_string($value) ? trim($value) : $value;
+        }
+
+        if (($input['slug'] ?? null) === null || $input['slug'] === '') {
+            $ignoreId = $this->routeKeyId('postCategory', 'post_category');
+            $input['slug'] = $this->resolveUniqueSlug(
+                PostCategory::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        }
+
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
+
+        $this->merge($input);
     }
 }

@@ -88,7 +88,6 @@ class SettingsController extends Controller
             // setting would want its own control, not this one.
             'officeHours' => ['office_hours'],
             'numericRanges' => [
-                'established_year' => [1000, (int) date('Y')],
                 'home_news_limit' => [3, 6],
                 'home_events_limit' => [3, 5],
                 'home_gallery_limit' => [1, 12],

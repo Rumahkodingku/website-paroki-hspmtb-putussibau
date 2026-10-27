@@ -1,3 +1,4 @@
+import { DateTimePicker } from '@/components/date-time-picker';
 import { useForm } from '@inertiajs/react';
 import type { NoticeTargets } from '../../../types';
 import {
@@ -134,6 +135,7 @@ export function ScheduleNoticeForm({
                             value={form.data.title}
                             onChange={(value) => form.setData('title', value)}
                             required
+                            placeholder="Contoh: Pemberitahuan perubahan jadwal"
                         />
                     </Field>
                 </div>
@@ -149,6 +151,7 @@ export function ScheduleNoticeForm({
                             rows={3}
                             value={form.data.message}
                             onChange={(value) => form.setData('message', value)}
+                            placeholder="Contoh: Isi pemberitahuan"
                         />
                     </Field>
                 </div>
@@ -190,6 +193,7 @@ export function ScheduleNoticeForm({
                                 { value: '', label: generalLabel },
                                 ...targetOptions(targets),
                             ]}
+                            placeholder="Pilih target"
                         />
                     </Field>
                 </div>
@@ -200,12 +204,10 @@ export function ScheduleNoticeForm({
                     hint={hints.starts_at}
                     error={form.errors.starts_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="notice-starts-at"
-                        type="datetime-local"
                         value={form.data.starts_at}
                         onChange={(value) => form.setData('starts_at', value)}
-                        required
                     />
                 </Field>
 
@@ -215,9 +217,8 @@ export function ScheduleNoticeForm({
                     hint={hints.ends_at}
                     error={form.errors.ends_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="notice-ends-at"
-                        type="datetime-local"
                         value={form.data.ends_at}
                         onChange={(value) => form.setData('ends_at', value)}
                     />

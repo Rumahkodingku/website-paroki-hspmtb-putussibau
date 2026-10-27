@@ -285,6 +285,7 @@ function StepDialog({
                                 form.setData('description', value)
                             }
                             rows={2}
+                            placeholder="Contoh: Deskripsi langkah"
                         />
                     </Field>
 

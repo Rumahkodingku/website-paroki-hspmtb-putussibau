@@ -80,3 +80,29 @@ export type MediaState = {
         url: string | null;
     }>;
 };
+
+/**
+ * Card data shared by the Berita list and the home devotion strip.
+ *
+ * Lives in types/ because two features (Berita and Beranda) read it; keeping it
+ * in a feature would make the other feature import across the feature boundary.
+ */
+export type ArticleCardData = {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    image: string | null;
+    image_alt: string | null;
+    /** Fallback illustration, not a photograph of the parish (D-71). */
+    image_is_illustration?: boolean;
+    /** Sent only for locally committed illustrations. */
+    image_srcset?: string;
+    image_sizes?: string;
+    category: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
+    published_at: string | null;
+};

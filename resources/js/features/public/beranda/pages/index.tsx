@@ -12,19 +12,6 @@ import { HomeQuickLinks } from '../components/home-quick-links';
 import { HomeServicesSection } from '../components/home-services-section';
 import type { HomepageProps } from '../types';
 
-/**
- * The public homepage.
- *
- * The page is deliberately a composition, not a data owner. The controller
- * decides what each block may see; this file decides how the blocks sit next to
- * each other. Every section that has no data returns null on its own, so the
- * page never leaves a heading above an empty region.
- *
- * The layout alternates surfaces and shapes so the page does not read as one
- * card grid repeated: full-bleed photograph, divided quick links, a soft mass
- * band, editorial news cards, a two-column agenda, a navy reflection, a list of
- * services, a photographic strip, then the contact block.
- */
 export default function Beranda({
     nextMass,
     news,

@@ -1,9 +1,9 @@
+import { TimePicker } from '@/components/time-picker';
 import InputError from '@/components/input-error';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { Switch } from '@/components/ui/switch';
 import type {
     OfficeHoursDay,
@@ -144,19 +144,15 @@ export function OfficeHoursEditor({
                         </Text>
 
                         <div className="grid gap-1">
-                            <Label htmlFor={openId}>Jam Buka</Label>
-                            <Input
+                            <FormLabel htmlFor={openId}>Jam Buka</FormLabel>
+                            <TimePicker
                                 id={openId}
-                                type="time"
+                                ariaLabel={`Jam buka ${label}`}
                                 value={day.open_time ?? ''}
                                 disabled={!day.is_open}
-                                aria-label={`Jam buka ${label}`}
-                                onChange={(event: any) =>
+                                onChange={(value) =>
                                     update(key, {
-                                        open_time:
-                                            event.target.value === ''
-                                                ? null
-                                                : event.target.value,
+                                        open_time: value === '' ? null : value,
                                     })
                                 }
                             />
@@ -164,19 +160,15 @@ export function OfficeHoursEditor({
                         </div>
 
                         <div className="grid gap-1">
-                            <Label htmlFor={closeId}>Jam Tutup</Label>
-                            <Input
+                            <FormLabel htmlFor={closeId}>Jam Tutup</FormLabel>
+                            <TimePicker
                                 id={closeId}
-                                type="time"
+                                ariaLabel={`Jam tutup ${label}`}
                                 value={day.close_time ?? ''}
                                 disabled={!day.is_open}
-                                aria-label={`Jam tutup ${label}`}
-                                onChange={(event: any) =>
+                                onChange={(value) =>
                                     update(key, {
-                                        close_time:
-                                            event.target.value === ''
-                                                ? null
-                                                : event.target.value,
+                                        close_time: value === '' ? null : value,
                                     })
                                 }
                             />

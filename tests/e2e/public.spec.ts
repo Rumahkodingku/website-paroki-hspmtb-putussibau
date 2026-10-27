@@ -42,7 +42,7 @@ test.describe('situs publik', () => {
             page.getByRole('link', { name: 'Lihat Jadwal Misa' }),
         ).toHaveAttribute('href', '/jadwal-misa');
         await expect(
-            page.getByRole('link', { name: 'Sejarah Paroki' }),
+            page.getByRole('link', { name: 'Kenali Paroki' }),
         ).toHaveAttribute('href', '/profil/sejarah');
 
         const shortcuts = page.getByRole('navigation', {
@@ -173,9 +173,10 @@ test.describe('situs publik', () => {
         const drawer = page.getByRole('dialog');
         await expect(drawer).toBeVisible();
 
-        await drawer.getByRole('link', { name: 'Profil' }).click();
+        await drawer.getByRole('button', { name: 'Profil' }).click();
+        await drawer.getByRole('link', { name: 'Ringkasan' }).click();
 
-        await expect(page).toHaveURL(/\/profil\/sejarah$/);
+        await expect(page).toHaveURL(/\/profil$/);
 
         // The drawer closed rather than covering the page it just navigated to.
         await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -233,13 +234,18 @@ test.describe('situs publik', () => {
         await page.goto('/');
 
         const menu = [
-            'Profil',
+            'Beranda',
+            'Ringkasan',
+            'Sejarah',
+            'Wilayah Pelayanan',
+            'Area',
+            'Pastor',
+            'Struktur Kepengurusan',
             'Jadwal Misa',
             'Berita & Artikel',
             'Agenda',
             'Pelayanan',
             'Komunitas',
-            'Area',
             'Galeri',
             'Dokumen',
             'Kontak',
@@ -253,6 +259,11 @@ test.describe('situs publik', () => {
 
         const drawer = page.getByRole('dialog');
         await expect(drawer).toBeVisible();
+
+        // Profil and Pelayanan are disclosure groups in the drawer, so their
+        // children only exist once the group is opened.
+        await drawer.getByRole('button', { name: 'Profil' }).click();
+        await drawer.getByRole('button', { name: 'Pelayanan' }).click();
 
         for (const label of menu) {
             const link = drawer.getByRole('link', { name: label, exact: true });

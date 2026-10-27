@@ -12,7 +12,6 @@ use App\Services\HtmlSanitizer;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -40,6 +39,8 @@ use Illuminate\Validation\Validator;
  */
 trait ServiceValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * The closure on contact_phone is a rule too: Laravel accepts a closure as a
      * validation rule, and the array types below list it so PHPStan reads the
@@ -69,6 +70,8 @@ trait ServiceValidationRules
             'thumbnail_alt' => ['nullable', 'string', 'max:255'],
             'summary' => ['nullable', 'string', 'max:2000'],
             'introduction' => ['nullable', 'string', 'max:500000'],
+            'audience_info' => ['nullable', 'string', 'max:5000'],
+            'preparation_info' => ['nullable', 'string', 'max:5000'],
             'schedule_info' => ['nullable', 'string', 'max:5000'],
             'fee_info' => ['nullable', 'string', 'max:5000'],
             'contact_name' => ['nullable', 'string', 'max:255'],
@@ -113,6 +116,8 @@ trait ServiceValidationRules
             'thumbnail_media_id.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'thumbnail_alt.max' => 'Teks alternatif gambar maksimal :max karakter.',
             'summary.max' => 'Ringkasan maksimal :max karakter.',
+            'audience_info.max' => 'Sasaran layanan maksimal :max karakter.',
+            'preparation_info.max' => 'Persiapan maksimal :max karakter.',
             'form_url.max' => 'Tautan Google Form terlalu panjang.',
             'form_button_label.required' => 'Label tombol pendaftaran wajib diisi.',
             'form_closed_message.max' => 'Pesan penutupan maksimal :max karakter.',
@@ -135,6 +140,8 @@ trait ServiceValidationRules
             'thumbnail_alt' => 'teks alternatif thumbnail',
             'summary' => 'ringkasan',
             'introduction' => 'pengantar',
+            'audience_info' => 'sasaran layanan',
+            'preparation_info' => 'persiapan',
             'schedule_info' => 'jadwal',
             'fee_info' => 'biaya',
             'contact_name' => 'nama penanggung jawab',
@@ -158,7 +165,7 @@ trait ServiceValidationRules
     {
         $input = [];
 
-        foreach (['title', 'slug', 'summary', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
+        foreach (['title', 'slug', 'summary', 'audience_info', 'preparation_info', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
             $value = $this->input($field);
 
             if (is_string($value)) {
@@ -169,7 +176,7 @@ trait ServiceValidationRules
         }
 
         // An untouched optional text input is absent, not an empty string.
-        foreach (['summary', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
+        foreach (['summary', 'audience_info', 'preparation_info', 'schedule_info', 'fee_info', 'contact_name', 'contact_phone', 'form_url', 'form_closed_message', 'thumbnail_alt'] as $field) {
             if (($input[$field] ?? null) === '') {
                 $input[$field] = null;
             }
@@ -181,7 +188,16 @@ trait ServiceValidationRules
         $input['thumbnail_media_id'] = ($thumbnailId === null || $thumbnailId === '') ? null : (int) $thumbnailId;
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('title'));
+            $ignoreId = $this->routeKeyId('service');
+            $input['slug'] = $this->resolveUniqueSlug(
+                Service::class,
+                null,
+                (string) $this->input('title'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         $emergency = (bool) filter_var($this->input('is_emergency'), FILTER_VALIDATE_BOOLEAN);
@@ -203,7 +219,8 @@ trait ServiceValidationRules
         $label = trim((string) $this->input('form_button_label', ''));
         $input['form_button_label'] = $label === '' ? 'Daftar Sekarang' : $label;
 
-        $input['sort_order'] = max(0, (int) $this->input('sort_order', 0));
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
 
         $this->merge($input);
     }

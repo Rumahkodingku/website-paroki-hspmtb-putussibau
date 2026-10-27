@@ -143,7 +143,7 @@ export function HomeAgendaSection({
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
                             <Link href={agenda()}>
                                 Semua Agenda

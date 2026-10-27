@@ -1,21 +1,11 @@
 import { Link } from '@inertiajs/react';
+import { ArrowRight } from 'lucide-react';
 import { Text } from '@/components/text';
 import { show as post } from '@/routes/berita';
 import { formatWibDate } from '@/lib/datetime';
 import type { PublicPost } from '../types';
+import { Badge } from '@/components/ui/badge';
 
-/**
- * The featured strip: at most two articles, above the list.
- *
- * POST-07 caps it at two and the query enforces that, so this component does
- * not have to. Two rather than three is the PRD's number and it is also the
- * right number editorially: three cards of the same weight reads as "this is
- * the list" and the list below becomes redundant.
- *
- * Visually distinct from the cards — wider, no border, image beside the text —
- * because "this is the editor's choice" and "this is everything" are different
- * things and identical treatment would hide the distinction.
- */
 export function PinnedStrip({
     articles,
     displayTimezone,
@@ -27,59 +17,173 @@ export function PinnedStrip({
         return null;
     }
 
+    const [leadArticle, secondaryArticle] = articles;
+
     return (
         <section aria-labelledby="berita-semat" className="space-y-4">
-            <Text as="h2" variant="h3" id="berita-semat">
-                Pilihan Redaksi
-            </Text>
+            <div className="flex items-end justify-between gap-4">
+                <Text as="h2" variant="h3" id="berita-semat">
+                    Sorotan Pilihan Redaksi
+                </Text>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                {articles.map((article) => (
-                    <article
-                        key={article.id}
-                        className="group relative grid gap-4 overflow-hidden rounded-lg bg-navy-soft p-6 sm:grid-cols-2 sm:items-center"
-                    >
-                        {article.image ? (
-                            <img
-                                src={article.image}
-                                alt={article.image_alt ?? ''}
-                                loading="lazy"
-                                className="aspect-4/3 w-full rounded-md object-cover sm:aspect-square"
-                            />
-                        ) : null}
+                <Text
+                    as="p"
+                    variant="body-sm"
+                    color="muted"
+                    className="hidden shrink-0 sm:block"
+                >
+                    Kabar pilihan dari paroki
+                </Text>
+            </div>
 
-                        <div className="space-y-2">
-                            {article.category ? (
-                                <Text as="p" variant="label" color="brand">
-                                    {article.category.name}
-                                </Text>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(17rem,0.8fr)]">
+                {/* Lead story */}
+                <article className="group relative isolate flex min-h-88 overflow-hidden rounded-xl bg-navy md:min-h-100">
+                    {leadArticle.image ? (
+                        <img
+                            src={leadArticle.image}
+                            alt={leadArticle.image_alt ?? ''}
+                            loading="eager"
+                            fetchPriority="high"
+                            className="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                    ) : null}
+
+                    <div
+                        aria-hidden="true"
+                        className="absolute inset-0 -z-10 bg-linear-to-t from-black/85 via-black/35 to-black/5"
+                    />
+
+                    <div className="mt-auto w-full space-y-3 p-5 sm:p-7 lg:p-8">
+                        <div className="flex flex-wrap items-center gap-2 text-white">
+                            {leadArticle.category ? (
+                                <Badge variant="secondary" className="text-xs">
+                                    {leadArticle.category.name}
+                                </Badge>
                             ) : null}
 
-                            <Text as="h3" variant="h4">
-                                {article.title}
-                            </Text>
-
-                            {article.published_at ? (
-                                <Text as="p" variant="body-sm" color="muted">
+                            {leadArticle.published_at ? (
+                                <Text
+                                    as="p"
+                                    variant="body-sm"
+                                    className="text-white/85"
+                                >
                                     {formatWibDate(
-                                        article.published_at,
+                                        leadArticle.published_at,
                                         displayTimezone,
                                     )}
                                 </Text>
                             ) : null}
                         </div>
 
-                        <Link
-                            href={post(article.slug)}
-                            prefetch
-                            className="absolute inset-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        <Text
+                            as="h3"
+                            variant="h2"
+                            className="max-w-2xl text-balance text-white"
                         >
-                            <span className="sr-only">
-                                Baca artikel: {article.title}
+                            {leadArticle.title}
+                        </Text>
+
+                        {leadArticle.excerpt ? (
+                            <Text
+                                as="p"
+                                variant="body"
+                                className="line-clamp-2 max-w-xl text-white/85"
+                            >
+                                {leadArticle.excerpt}
+                            </Text>
+                        ) : null}
+
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                            Baca selengkapnya
+                            <ArrowRight
+                                aria-hidden="true"
+                                className="size-4 transition-transform group-hover:translate-x-1"
+                            />
+                        </span>
+                    </div>
+
+                    <Link
+                        href={post(leadArticle.slug)}
+                        prefetch
+                        aria-label={`Baca artikel: ${leadArticle.title}`}
+                        className="absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                    />
+                </article>
+
+                {/* Secondary story */}
+                {secondaryArticle ? (
+                    <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border transition-shadow">
+                        {secondaryArticle.image ? (
+                            <div className="overflow-hidden">
+                                <img
+                                    src={secondaryArticle.image}
+                                    alt={secondaryArticle.image_alt ?? ''}
+                                    loading="lazy"
+                                    className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                />
+                            </div>
+                        ) : (
+                            <div
+                                aria-hidden="true"
+                                className="aspect-video w-full bg-muted"
+                            />
+                        )}
+
+                        <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+                            <div className="flex flex-wrap items-center gap-2">
+                                {secondaryArticle.category ? (
+                                    <Badge variant="secondary">
+                                        {secondaryArticle.category.name}
+                                    </Badge>
+                                ) : null}
+
+                                {secondaryArticle.published_at ? (
+                                    <Text
+                                        as="p"
+                                        variant="body-sm"
+                                        color="muted"
+                                    >
+                                        {formatWibDate(
+                                            secondaryArticle.published_at,
+                                            displayTimezone,
+                                        )}
+                                    </Text>
+                                ) : null}
+                            </div>
+
+                            <Text as="h3" variant="h4" className="text-balance">
+                                {secondaryArticle.title}
+                            </Text>
+
+                            {secondaryArticle.excerpt ? (
+                                <Text
+                                    as="p"
+                                    variant="body-sm"
+                                    color="muted"
+                                    className="line-clamp-3"
+                                >
+                                    {secondaryArticle.excerpt}
+                                </Text>
+                            ) : null}
+
+                            <span className="mt-auto inline-flex items-center gap-2 pt-1 text-sm font-medium">
+                                Baca selengkapnya
+                                <ArrowRight
+                                    aria-hidden="true"
+                                    className="size-4 transition-transform group-hover:translate-x-1"
+                                />
                             </span>
-                        </Link>
+                        </div>
+
+                        <Link
+                            href={post(secondaryArticle.slug)}
+                            prefetch
+                            aria-label={`Baca artikel: ${secondaryArticle.title}`}
+                            className="absolute inset-0 z-10 rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+                        />
                     </article>
-                ))}
+                ) : null}
             </div>
         </section>
     );

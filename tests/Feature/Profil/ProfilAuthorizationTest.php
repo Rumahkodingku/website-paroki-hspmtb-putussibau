@@ -12,13 +12,14 @@ use Inertia\Testing\AssertableInertia as Assert;
 | superAdmin() supaya 403 yang muncul memang dari Policy, bukan dari gate
 | admin.access.
 |
-| The Informasi Profil page was removed in D-69, so the module root now
-| redirects to the Sejarah page and the profile edit route no longer exists.
+| Informasi Profil is the module root again (D-78), so the module root redirect
+| lands there instead of on Sejarah.
 */
 
 it('sends a guest to the login page', function (string $route) {
     $this->get($route)->assertRedirect(route('login'));
 })->with([
+    'profile' => fn () => route('parish-profile.edit'),
     'history list' => fn () => route('parish-histories.index'),
     'service area' => fn () => route('parish-service-area.edit'),
     'pastors' => fn () => route('pastors.index'),
@@ -40,25 +41,24 @@ it('lets a super admin through', function () {
         ->assertInertia(fn (Assert $page) => $page->component('admin/profil/sejarah/index'));
 });
 
-it('redirects the module root to the first section rather than rendering a page', function () {
-    // There is no overview page (D-52); the root is a named redirect.
+it('redirects the module root to the profile page', function () {
+    // The root is a named redirect; Informasi Profil is the first section.
     $this->actingAs(superAdmin())
         ->get(route('parish-profile.index'))
-        ->assertRedirect(route('parish-histories.index'));
+        ->assertRedirect(route('parish-profile.edit'));
 });
 
-it('never declares a public profil route twice', function () {
+it('declares the summary and never brings Visi & Misi back', function () {
+    $this->get(route('profil.index', absolute: false))->assertOk();
     $this->get(route('profil.sejarah', absolute: false))->assertOk();
 
-    // The Informasi Profil summary page and Visi & Misi are both gone and must
-    // not come back.
+    expect(collect(app('router')->getRoutes()->getRoutes())
+        ->pluck('action.as')
+        ->filter()
+        ->contains('profil.index'))->toBeTrue();
+
     expect(collect(app('router')->getRoutes()->getRoutes())
         ->pluck('action.as')
         ->filter()
         ->contains('profil.visiMisi'))->toBeFalse();
-
-    expect(collect(app('router')->getRoutes()->getRoutes())
-        ->pluck('action.as')
-        ->filter()
-        ->contains('profil.index'))->toBeFalse();
 });

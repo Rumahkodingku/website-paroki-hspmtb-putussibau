@@ -45,6 +45,7 @@ const MASTER_DATA_SUB_MENU = [
  * Profil was removed in D-69; the group root now redirects to Sejarah.
  */
 const PROFIL_PAROKI_SUB_MENU = [
+    ['Informasi Profil', '/admin/profil/informasi'],
     ['Sejarah Paroki', '/admin/profil/sejarah'],
     ['Wilayah Pelayanan', '/admin/profil/wilayah'],
     ['Pastor Paroki', '/admin/profil/pastor'],
@@ -62,7 +63,7 @@ const PROFIL_PAROKI_SUB_MENU = [
 function renderSidebar(url = '/admin') {
     return renderWithInertia(
         <TooltipProvider delayDuration={0}>
-            <AppShell variant="sidebar">
+            <AppShell>
                 <AppSidebar />
             </AppShell>
         </TooltipProvider>,
@@ -272,8 +273,8 @@ describe('AppSidebar — Profil Paroki', () => {
     });
 
     it('is a disclosure and not a link', () => {
-        // There is no overview page; the module root redirects, and a group
-        // pointing at a redirect is exactly the failure this file guards.
+        // The module root is a redirect, and a group pointing at a redirect is
+        // exactly the failure this file guards.
         renderSidebar('/admin');
 
         expect(

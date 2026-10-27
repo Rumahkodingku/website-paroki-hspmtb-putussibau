@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { dashboard } from '@/routes';
-import { edit as editPastor } from '@/routes/pastors';
+import { create as createAssignment } from '@/routes/pastor-assignments';
 import { update as updateAssignment } from '@/routes/pastor-assignments';
 import {
     PastorAssignmentForm,
@@ -52,7 +52,7 @@ export default function EditAssignment({
                         )
                     }
                     onCancel={() =>
-                        router.visit(editPastor({ pastor: pastor.id }))
+                        router.visit(createAssignment({ pastor: pastor.id }))
                     }
                 />
             </div>
