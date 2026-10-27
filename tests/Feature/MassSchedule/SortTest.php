@@ -334,8 +334,8 @@ it('paginates without repeating or dropping a row', function () {
     // this is the case where a missing tie-breaker shows: MySQL is free to
     // return the same row on both pages.
     expect($first->intersect($second))->toBeEmpty()
-        ->and($first->count())->toBe(15)
-        ->and($second->count())->toBe(6);
+        ->and($first->count())->toBe(10)
+        ->and($second->count())->toBe(10);
 });
 
 /*

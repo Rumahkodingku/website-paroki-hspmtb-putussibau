@@ -57,7 +57,7 @@ class EventCategoryController extends Controller
             // No sort_order column: roadmap 5.3 does not ask for one, and the
             // agenda list is ordered by date. Name is the only stable order.
             [['event_categories.name', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-agenda/index', [

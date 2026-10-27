@@ -6,7 +6,7 @@ import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -48,7 +48,9 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <FormLabel htmlFor="name" isRequired>
+                                    Name
+                                </FormLabel>
 
                                 <Input
                                     id="name"
@@ -67,7 +69,9 @@ export default function Profile({ mustVerifyEmail, status }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <FormLabel htmlFor="email" isRequired>
+                                    Email address
+                                </FormLabel>
 
                                 <Input
                                     id="email"

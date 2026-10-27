@@ -51,7 +51,7 @@ class CommunityCategoryController extends Controller
                 'is_active' => 'community_categories.is_active',
             ],
             [['community_categories.sort_order', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-komunitas/index', [
             'categories' => CommunityCategoryResource::collection($categories),

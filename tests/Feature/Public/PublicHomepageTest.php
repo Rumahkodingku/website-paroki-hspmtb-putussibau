@@ -382,8 +382,8 @@ it('sends the configured hero text and media, with a fallback image', function (
     ]);
 
     app(SiteSettingsService::class)->setMany([
-        'home_hero_title' => 'Sambut umat di rumah',
-        'home_hero_description' => 'Jadwal misa, kabar, dan pelayanan paroki.',
+        'parish_name' => 'Sambut umat di rumah',
+        'short_description' => 'Jadwal misa, kabar, dan pelayanan paroki.',
         'home_hero_image' => (string) $media->getKey(),
         'home_hero_image_alt' => 'Gereja paroki pada malam hari',
         'motto_verse' => 'Sebab di mana dua atau tiga orang berkumpul dalam nama-Ku, di situ Aku ada.',

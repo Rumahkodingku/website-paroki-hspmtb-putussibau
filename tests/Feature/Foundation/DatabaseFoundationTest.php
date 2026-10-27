@@ -145,5 +145,5 @@ test('the seeder creates no fabricated parish or admin data', function () {
     // Lampiran D settles it: exactly two keys may exist, both quoted from the
     // document. Anything beyond that pair would be fabricated parish data.
     expect(DB::table('site_settings')->pluck('key')->sort()->values()->all())
-        ->toBe(['parish_name', 'parish_short_name']);
+        ->toBe(['parish_name', 'parish_short_name', 'privacy_policy_content', 'terms_and_conditions_content']);
 });

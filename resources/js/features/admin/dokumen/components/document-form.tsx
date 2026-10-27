@@ -74,6 +74,7 @@ export function DocumentForm({
                         value={form.data.title}
                         onChange={(value) => form.setData('title', value)}
                         required
+                        placeholder="Contoh: Tata tertib paroki"
                     />
                 </Field>
 
@@ -112,6 +113,7 @@ export function DocumentForm({
                                 form.setData('description', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Deskripsi dokumen"
                         />
                     </Field>
                 </div>
@@ -159,6 +161,7 @@ export function DocumentForm({
                             form.setData('status', value as DocumentStatus)
                         }
                         options={statusOptions}
+                        placeholder="Pilih status"
                     />
                 </Field>
 

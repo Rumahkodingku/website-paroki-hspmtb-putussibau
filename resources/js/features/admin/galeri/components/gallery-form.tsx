@@ -64,21 +64,7 @@ export function GalleryForm({
                         value={form.data.title}
                         onChange={(value) => form.setData('title', value)}
                         required
-                    />
-                </Field>
-
-                <Field
-                    id="gallery-slug"
-                    label={labels.slug ?? 'Slug'}
-                    hint={hints.slug}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="gallery-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        required
+                        placeholder="Contoh: Album Paskah 2026"
                     />
                 </Field>
 
@@ -96,6 +82,7 @@ export function GalleryForm({
                                 form.setData('description', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Deskripsi album"
                         />
                     </Field>
                 </div>
@@ -123,6 +110,7 @@ export function GalleryForm({
                         id="gallery-location"
                         value={form.data.location}
                         onChange={(value) => form.setData('location', value)}
+                        placeholder="Contoh: Gereja paroki"
                     />
                 </Field>
             </div>

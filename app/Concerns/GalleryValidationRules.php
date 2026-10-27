@@ -4,7 +4,6 @@ namespace App\Concerns;
 
 use App\Models\GalleryAlbum;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
@@ -29,6 +28,8 @@ use Illuminate\Validation\Rule;
  */
 trait GalleryValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @param  GalleryAlbum|null  $ignore  the record being updated, so it keeps its own slug
      * @return array<string, array<int, ValidationRule|string>>
@@ -105,7 +106,16 @@ trait GalleryValidationRules
         }
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('title'));
+            $ignoreId = $this->routeKeyId('gallery', 'album');
+            $input['slug'] = $this->resolveUniqueSlug(
+                GalleryAlbum::class,
+                null,
+                (string) $this->input('title'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         $input['is_published'] = (bool) filter_var($this->input('is_published'), FILTER_VALIDATE_BOOLEAN);

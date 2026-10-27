@@ -22,6 +22,8 @@ class UpdatePastorRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->sanitizeHtmlFields(['bio']);
+        $sortOrder = $this->input('sort_order');
+        $this->merge(['sort_order' => ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder]);
     }
 
     /**

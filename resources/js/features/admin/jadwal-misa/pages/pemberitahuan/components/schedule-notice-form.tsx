@@ -135,6 +135,7 @@ export function ScheduleNoticeForm({
                             value={form.data.title}
                             onChange={(value) => form.setData('title', value)}
                             required
+                            placeholder="Contoh: Pemberitahuan perubahan jadwal"
                         />
                     </Field>
                 </div>
@@ -150,6 +151,7 @@ export function ScheduleNoticeForm({
                             rows={3}
                             value={form.data.message}
                             onChange={(value) => form.setData('message', value)}
+                            placeholder="Contoh: Isi pemberitahuan"
                         />
                     </Field>
                 </div>
@@ -191,6 +193,7 @@ export function ScheduleNoticeForm({
                                 { value: '', label: generalLabel },
                                 ...targetOptions(targets),
                             ]}
+                            placeholder="Pilih target"
                         />
                     </Field>
                 </div>

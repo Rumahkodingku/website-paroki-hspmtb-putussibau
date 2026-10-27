@@ -72,12 +72,24 @@ it('counts each article once in the same session', function () {
         ->and($second->fresh()->view_count)->toBe(1);
 });
 
-it('counts a view made by a guest in a separate session', function () {
+it('does not count a repeat view from the same IP within 24 hours', function () {
     $post = Post::factory()->published()->create();
 
     $this->get(route('berita.show', $post))->assertOk();
     $this->flushSession();
     $this->get(route('berita.show', $post))->assertOk();
+
+    expect($post->fresh()->view_count)->toBe(1);
+});
+
+it('counts a view from a different IP within 24 hours', function () {
+    $post = Post::factory()->published()->create();
+
+    $this->get(route('berita.show', $post))->assertOk();
+    $this->flushSession();
+    $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])
+        ->get(route('berita.show', $post))
+        ->assertOk();
 
     expect($post->fresh()->view_count)->toBe(2);
 });

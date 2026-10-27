@@ -55,7 +55,7 @@ class ParishHistoryItemController extends Controller
                 ['parish_history_items.sort_order', 'asc'],
                 ['parish_history_items.year', 'asc'],
             ],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         $narrative = ParishHistoryNarrative::current();
 

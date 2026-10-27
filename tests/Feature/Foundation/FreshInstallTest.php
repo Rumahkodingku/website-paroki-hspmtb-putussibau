@@ -148,7 +148,7 @@ test('the full chain writes only the two seeded site settings', function () {
     // PRD Lampiran D. Anything beyond this pair would be invented parish data,
     // which AGENTS.md forbids.
     expect(SiteSetting::query()->pluck('key')->sort()->values()->all())
-        ->toBe(['parish_name', 'parish_short_name']);
+        ->toBe(['parish_name', 'parish_short_name', 'privacy_policy_content', 'terms_and_conditions_content']);
 });
 
 test('seeding the full chain twice does not duplicate anything', function () {
@@ -166,7 +166,7 @@ test('seeding the full chain twice does not duplicate anything', function () {
         // this. The names themselves are pinned in RbacFoundationTest.
         ->and(Permission::query()->count())
         ->toBe(app(PermissionSeeder::class)->expectedCount())
-        ->and(SiteSetting::query()->count())->toBe(2);
+        ->and(SiteSetting::query()->count())->toBe(4);
 });
 
 /*
@@ -192,7 +192,7 @@ test('the full chain succeeds with no admin credentials configured', function ()
         // this. The names themselves are pinned in RbacFoundationTest.
         ->and(Permission::query()->count())
         ->toBe(app(PermissionSeeder::class)->expectedCount())
-        ->and(SiteSetting::query()->count())->toBe(2);
+        ->and(SiteSetting::query()->count())->toBe(4);
 });
 
 test('a blank admin credential counts as absent', function () {

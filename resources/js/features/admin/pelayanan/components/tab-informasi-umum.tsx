@@ -5,12 +5,12 @@ import {
     Field,
     FormInput,
     FormTextarea,
+    FormLabel,
 } from '@/components/form-fields';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Text } from '@/components/text';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { ServiceFormInstance } from './service-form-instance';
 
@@ -67,22 +67,6 @@ export function TabInformasiUmum({
                             value={form.data.title}
                             onChange={(value) => form.setData('title', value)}
                             placeholder={copy.placeholder_name}
-                            required
-                        />
-                    </Field>
-
-                    <Field
-                        id="service-slug"
-                        label={labels.slug}
-                        hint={hints.slug}
-                        error={form.errors.slug}
-                        required
-                    >
-                        <FormInput
-                            id="service-slug"
-                            value={form.data.slug}
-                            onChange={(value) => form.setData('slug', value)}
-                            placeholder={copy.placeholder_slug}
                             required
                         />
                     </Field>
@@ -155,6 +139,7 @@ export function TabInformasiUmum({
                                 form.setData('audience_info', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Informasi untuk peserta"
                         />
                     </Field>
 
@@ -171,13 +156,14 @@ export function TabInformasiUmum({
                                 form.setData('preparation_info', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Persiapan yang perlu dibawa"
                         />
                     </Field>
 
                     <div className="space-y-2">
-                        <Label htmlFor="service-introduction">
+                        <FormLabel htmlFor="service-introduction">
                             {labels.introduction}
-                        </Label>
+                        </FormLabel>
                         <RichTextEditor
                             id="service-introduction"
                             value={form.data.introduction}
@@ -195,28 +181,14 @@ export function TabInformasiUmum({
                 </div>
 
                 <aside className="space-y-5 rounded-lg border border-border p-5">
-                    <Field
-                        id="service-sort-order"
-                        label={labels.sort_order}
-                        hint={hints.sort_order}
-                        error={form.errors.sort_order}
-                    >
-                        <FormInput
-                            id="service-sort-order"
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            value={form.data.sort_order}
-                            onChange={(value) =>
-                                form.setData('sort_order', value)
-                            }
-                        />
-                    </Field>
+                    <p className="text-sm font-medium text-foreground">
+                        {labels.status ?? 'Status'}
+                    </p>
 
                     <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
-                        <Label htmlFor="service-active">
+                        <FormLabel htmlFor="service-active">
                             {labels.is_active}
-                        </Label>
+                        </FormLabel>
                         <Switch
                             id="service-active"
                             checked={form.data.is_active}

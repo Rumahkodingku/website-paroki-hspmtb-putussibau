@@ -52,7 +52,6 @@ type Props = {
 export function BoardPeriodForm({
     initial,
     labels,
-    hints,
     onSubmit,
     onCancel,
 }: Props) {
@@ -132,22 +131,6 @@ export function BoardPeriodForm({
                         />
                     </Field>
                 </div>
-
-                <Field
-                    id="period-sort-order"
-                    label={labels.sort_order ?? 'Urutan'}
-                    hint={hints.sort_order}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="period-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                        placeholder="0"
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

@@ -81,7 +81,7 @@ trait PostValidationRules
             'status' => ['required', Rule::enum(PostStatus::class)],
             // after or equal, not after: an admin scheduling an article for this
             // exact minute should not be told to wait one minute more.
-            'published_at' => ['nullable', 'date', 'after_or_equal:now'],
+            'published_at' => ['nullable', 'date'],
             'is_pinned' => ['required', 'boolean'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:500'],
@@ -114,7 +114,6 @@ trait PostValidationRules
             'content.max' => 'Isi artikel terlalu panjang untuk disimpan.',
             'status.required' => 'Status artikel wajib dipilih.',
             'status.enum' => 'Status artikel tidak valid.',
-            'published_at.after_or_equal' => 'Waktu terbit tidak boleh di masa lalu.',
             'is_pinned.required' => 'Pilih apakah artikel ini disematkan.',
             'meta_description.max' => 'Meta description maksimal :max karakter.',
             'media_id.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',

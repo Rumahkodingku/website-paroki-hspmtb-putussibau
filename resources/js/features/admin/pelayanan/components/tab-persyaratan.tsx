@@ -347,6 +347,7 @@ function RequirementDialog({
                             value={form.data.note}
                             onChange={(value) => form.setData('note', value)}
                             rows={2}
+                            placeholder="Contoh: Catatan persyaratan"
                         />
                     </Field>
 
@@ -382,6 +383,7 @@ function RequirementDialog({
                                 form.setData('applies_to', value)
                             }
                             list="requirement-applies-to-suggestions"
+                            placeholder="Contoh: Semua umat"
                         />
                         <datalist id="requirement-applies-to-suggestions">
                             {[

@@ -54,7 +54,7 @@ export default function Index({
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
             areasIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -62,7 +62,7 @@ export default function Index({
     const sortBy = (sortKey: string, direction: 'asc' | 'desc') => {
         router.get(
             areasIndex().url,
-            { ...filters, sort: sortKey, direction },
+            { ...filters, sort: sortKey, direction, page: 1 },
             { preserveScroll: true, replace: true },
         );
     };

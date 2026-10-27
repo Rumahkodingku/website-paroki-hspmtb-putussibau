@@ -12,7 +12,6 @@ use App\Services\HtmlSanitizer;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -40,6 +39,8 @@ use Illuminate\Validation\Validator;
  */
 trait ServiceValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * The closure on contact_phone is a rule too: Laravel accepts a closure as a
      * validation rule, and the array types below list it so PHPStan reads the
@@ -187,7 +188,16 @@ trait ServiceValidationRules
         $input['thumbnail_media_id'] = ($thumbnailId === null || $thumbnailId === '') ? null : (int) $thumbnailId;
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('title'));
+            $ignoreId = $this->routeKeyId('service');
+            $input['slug'] = $this->resolveUniqueSlug(
+                Service::class,
+                null,
+                (string) $this->input('title'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
         $emergency = (bool) filter_var($this->input('is_emergency'), FILTER_VALIDATE_BOOLEAN);
@@ -209,7 +219,8 @@ trait ServiceValidationRules
         $label = trim((string) $this->input('form_button_label', ''));
         $input['form_button_label'] = $label === '' ? 'Daftar Sekarang' : $label;
 
-        $input['sort_order'] = max(0, (int) $this->input('sort_order', 0));
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
 
         $this->merge($input);
     }

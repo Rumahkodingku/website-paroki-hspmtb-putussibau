@@ -106,7 +106,7 @@ class MassScheduleController extends Controller
                 ['mass_schedules.day_of_week', 'asc'],
                 ['mass_schedules.start_time', 'asc'],
             ],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/jadwal-misa/misa-rutin/index', [

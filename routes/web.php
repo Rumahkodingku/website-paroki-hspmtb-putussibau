@@ -41,6 +41,7 @@ use App\Http\Controllers\Profil\ParishServiceAreaController;
 use App\Http\Controllers\Profil\PastorAssignmentController;
 use App\Http\Controllers\Profil\PastorController;
 use App\Http\Controllers\Profil\PublicParishProfileController;
+use App\Http\Controllers\Public\PublicLegalController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\SettingsController;
@@ -106,6 +107,9 @@ Route::get('/dokumen/{document}/unduh', [PublicDocumentController::class, 'downl
     ->name('dokumen.unduh');
 
 Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
+
+Route::get('/kebijakan-privasi', [PublicLegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/syarat-ketentuan', [PublicLegalController::class, 'terms'])->name('legal.terms');
 
 Route::inertia('/design-system', 'public/design-system')->name('design-system.index');
 

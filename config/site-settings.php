@@ -88,8 +88,6 @@ return [
             'seo_default_og_image',
         ],
         'beranda' => [
-            'home_hero_title',
-            'home_hero_description',
             'home_hero_image',
             'home_hero_image_alt',
             'home_news_limit',
@@ -102,6 +100,9 @@ return [
         ],
         'privasi' => [
             'privacy_policy_content',
+        ],
+        'syarat' => [
+            'terms_and_conditions_content',
         ],
     ],
 
@@ -126,6 +127,7 @@ return [
 
     'types' => [
         'privacy_policy_content' => 'html',
+        'terms_and_conditions_content' => 'html',
         'office_hours' => 'json',
         'logo' => 'media',
         'favicon' => 'media',
@@ -184,9 +186,8 @@ return [
 
     'rules' => [
         'privacy_policy_content' => 'nullable|string|max:50000',
+        'terms_and_conditions_content' => 'nullable|string|max:50000',
         'website' => 'nullable|url|max:255',
-        'home_hero_title' => 'nullable|string|max:255',
-        'home_hero_description' => 'nullable|string|max:1000',
         'home_hero_image_alt' => 'nullable|string|max:255|required_with:settings.home_hero_image',
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',

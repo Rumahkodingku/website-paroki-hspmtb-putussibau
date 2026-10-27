@@ -28,7 +28,7 @@ class UpdateLocationRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge($this->normaliseCoordinateInput($this->all()));
+        $this->prepareLocationInput();
     }
 
     public function withValidator(Validator $validator): void

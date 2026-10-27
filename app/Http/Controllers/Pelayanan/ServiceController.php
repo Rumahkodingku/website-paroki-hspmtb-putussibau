@@ -62,7 +62,7 @@ class ServiceController extends Controller
                 'updated_at' => 'services.updated_at',
             ],
             [['services.sort_order', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/pelayanan', [
             'services' => ServiceListResource::collection($services),

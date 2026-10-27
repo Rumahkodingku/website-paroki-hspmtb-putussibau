@@ -78,7 +78,7 @@ class PostController extends Controller
                 'is_pinned' => 'posts.is_pinned',
             ],
             [['posts.created_at', 'desc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/berita', [

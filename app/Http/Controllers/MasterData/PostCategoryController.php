@@ -54,7 +54,7 @@ class PostCategoryController extends Controller
                 'sort_order' => 'post_categories.sort_order',
             ],
             [['post_categories.sort_order', 'asc'], ['post_categories.name', 'asc']],
-        )->paginate(15)
+        )->paginate($this->perPage($request))
             ->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-berita/index', [

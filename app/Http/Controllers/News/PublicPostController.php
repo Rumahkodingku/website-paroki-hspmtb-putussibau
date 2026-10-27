@@ -116,7 +116,7 @@ class PublicPostController extends Controller
 
         $request->session()->put($key, true);
 
-        $recordView->handle($post, $request->userAgent() ?? '');
+        $recordView->handle($post, $request->userAgent() ?? '', $request->ip());
     }
 
     /**

@@ -3,7 +3,7 @@ import InputError from '@/components/input-error';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import { Switch } from '@/components/ui/switch';
 import type {
     OfficeHoursDay,
@@ -144,7 +144,7 @@ export function OfficeHoursEditor({
                         </Text>
 
                         <div className="grid gap-1">
-                            <Label htmlFor={openId}>Jam Buka</Label>
+                            <FormLabel htmlFor={openId}>Jam Buka</FormLabel>
                             <TimePicker
                                 id={openId}
                                 ariaLabel={`Jam buka ${label}`}
@@ -160,7 +160,7 @@ export function OfficeHoursEditor({
                         </div>
 
                         <div className="grid gap-1">
-                            <Label htmlFor={closeId}>Jam Tutup</Label>
+                            <FormLabel htmlFor={closeId}>Jam Tutup</FormLabel>
                             <TimePicker
                                 id={closeId}
                                 ariaLabel={`Jam tutup ${label}`}

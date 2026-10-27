@@ -53,7 +53,7 @@ export default function Index({ albums, years, filters, empty }: Props) {
     const applyFilter = (next: Partial<typeof filters>) => {
         router.get(
             galleriesIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -61,7 +61,7 @@ export default function Index({ albums, years, filters, empty }: Props) {
     const sortBy = (sort: string, direction: 'asc' | 'desc') => {
         router.get(
             galleriesIndex().url,
-            { ...filters, sort, direction },
+            { ...filters, sort, direction, page: 1 },
             { preserveScroll: true, replace: true },
         );
     };

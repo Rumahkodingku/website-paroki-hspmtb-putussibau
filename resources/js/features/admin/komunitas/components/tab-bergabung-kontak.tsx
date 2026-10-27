@@ -31,6 +31,7 @@ export function TabBergabungKontak({ form, labels, hints }: Props) {
                         value={form.data.eligibility}
                         onChange={(value) => form.setData('eligibility', value)}
                         rows={2}
+                        placeholder="Contoh: Syarat bergabung"
                     />
                 </Field>
 
@@ -46,6 +47,7 @@ export function TabBergabungKontak({ form, labels, hints }: Props) {
                             form.setData('joining_info', value)
                         }
                         rows={2}
+                        placeholder="Contoh: Cara bergabung"
                     />
                 </Field>
 
@@ -61,6 +63,7 @@ export function TabBergabungKontak({ form, labels, hints }: Props) {
                             onChange={(value) =>
                                 form.setData('contact_name', value)
                             }
+                            placeholder="Contoh: Koordinator komunitas"
                         />
                     </Field>
 
@@ -76,6 +79,7 @@ export function TabBergabungKontak({ form, labels, hints }: Props) {
                                 form.setData('contact_phone', value)
                             }
                             inputMode="numeric"
+                            placeholder="Contoh: 08123456789"
                         />
                     </Field>
                 </div>
