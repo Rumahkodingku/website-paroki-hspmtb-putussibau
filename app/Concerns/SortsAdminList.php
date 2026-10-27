@@ -84,4 +84,11 @@ trait SortsAdminList
         // of page 1, and the table drops rows while looking complete.
         return $query->orderBy($query->getModel()->getKeyName());
     }
+
+    protected function perPage(Request $request): int
+    {
+        $perPage = (int) $request->input('per_page', 10);
+
+        return in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 10;
+    }
 }

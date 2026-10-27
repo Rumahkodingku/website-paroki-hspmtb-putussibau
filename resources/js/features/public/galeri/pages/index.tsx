@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
@@ -8,6 +8,7 @@ import { index as galeriIndex } from '@/routes/galeri';
 import { AlbumCard } from '../components/album-card';
 import type { PublicGalleryCard, PublicGalleryFilters } from '../types';
 import type { Paginated } from '@/types';
+import { home } from '@/routes';
 
 type Props = {
     albums: Paginated<PublicGalleryCard>;
@@ -43,14 +44,18 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
 
             <Head title="Galeri" />
 
+            <PublicHeroBanner
+                eyebrow="Galeri"
+                title="Galeri Kegiatan"
+                description="Dokumentasi foto kegiatan paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Galeri Kegiatan' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Galeri"
-                        title="Galeri Kegiatan"
-                        description="Dokumentasi foto kegiatan paroki."
-                    />
-
                     {years.length > 0 ? (
                         <div className="flex flex-wrap items-center gap-3">
                             <label

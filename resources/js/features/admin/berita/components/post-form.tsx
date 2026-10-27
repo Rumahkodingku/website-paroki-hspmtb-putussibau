@@ -8,10 +8,11 @@ import {
     FormActions,
     FormInput,
     FormTextarea,
+    FormLabel,
 } from '@/components/form-fields';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Text } from '@/components/text';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { toDateTimeLocalValue } from '@/lib/datetime';
 import type { Option } from '@/types/news-agenda';
 import type { PostFormData, PostFormMeta } from '../types';
@@ -172,20 +173,6 @@ export function PostForm({
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <Field
-                        id="post-slug"
-                        label={labels.slug ?? 'Slug'}
-                        hint={hints.slug}
-                        error={form.errors.slug}
-                    >
-                        <FormInput
-                            id="post-slug"
-                            value={form.data.slug}
-                            onChange={(value) => form.setData('slug', value)}
-                            placeholder="dibuat otomatis dari judul"
-                        />
-                    </Field>
-
-                    <Field
                         id="post-category"
                         label={labels.post_category_id ?? 'Kategori'}
                         error={form.errors.post_category_id}
@@ -201,6 +188,7 @@ export function PostForm({
                                 )
                             }
                             options={categoryOptions}
+                            placeholder="Pilih kategori"
                         />
                     </Field>
                 </div>
@@ -230,6 +218,7 @@ export function PostForm({
                         rows={3}
                         value={form.data.excerpt}
                         onChange={(value) => form.setData('excerpt', value)}
+                        placeholder="Contoh: Ringkasan artikel"
                     />
                 </Field>
             </fieldset>
@@ -292,6 +281,7 @@ export function PostForm({
                             )
                         }
                         options={statusChoices}
+                        placeholder="Pilih status"
                     />
                 </Field>
 
@@ -306,9 +296,8 @@ export function PostForm({
                             form.errors.published_at !== undefined
                         }
                     >
-                        <FormInput
+                        <DateTimePicker
                             id="post-published-at"
-                            type="datetime-local"
                             value={form.data.published_at}
                             onChange={(value) =>
                                 form.setData('published_at', value)
@@ -319,9 +308,9 @@ export function PostForm({
 
                 <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                     <div className="space-y-1">
-                        <Label htmlFor="post-pinned">
+                        <FormLabel htmlFor="post-pinned">
                             {labels.is_pinned ?? 'Sematkan di halaman berita'}
-                        </Label>
+                        </FormLabel>
                         <Text as="p" variant="body-sm" color="muted">
                             Maksimal dua artikel aktif dapat disematkan. Artikel
                             sematan tampil di bagian atas halaman berita.
@@ -355,6 +344,7 @@ export function PostForm({
                         id="post-meta-title"
                         value={form.data.meta_title}
                         onChange={(value) => form.setData('meta_title', value)}
+                        placeholder="Contoh: Judul SEO artikel"
                     />
                 </Field>
 
@@ -371,6 +361,7 @@ export function PostForm({
                         onChange={(value) =>
                             form.setData('meta_description', value)
                         }
+                        placeholder="Contoh: Deskripsi SEO artikel"
                     />
                 </Field>
             </fieldset>

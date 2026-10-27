@@ -4,11 +4,12 @@ namespace App\Concerns;
 
 use App\Models\DocumentCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 trait DocumentCategoryValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @return array<string, array<int, ValidationRule|string>>
      */
@@ -73,10 +74,20 @@ trait DocumentCategoryValidationRules
         }
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
-            $input['slug'] = Str::slug((string) $this->input('name'));
+            $ignoreId = $this->routeKeyId('documentCategory', 'document_category');
+            $input['slug'] = $this->resolveUniqueSlug(
+                DocumentCategory::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        } else {
+            $input['slug'] = trim((string) $input['slug']);
         }
 
-        $input['sort_order'] = max(0, (int) $this->input('sort_order', 0));
+        $sortOrder = $this->input('sort_order');
+        $input['sort_order'] = ($sortOrder === null || $sortOrder === '') ? 0 : (int) $sortOrder;
         $input['is_active'] = (bool) filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN);
 
         $this->merge($input);

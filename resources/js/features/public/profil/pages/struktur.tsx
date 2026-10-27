@@ -1,12 +1,14 @@
-import { Head } from "@inertiajs/react";
-import { SectionHeading } from "@/components/section-heading";
-import { Text } from "@/components/text";
-import { Seo } from "@/components/seo";
-import { PublicSection } from "@/components/public-section";
-import { PublicBoardPeriod } from "../types";
-import { OrganizationChart } from "../components/organization-chart";
-import { BoardPeriodArchive } from "../components/board-period-archive";
-import { ProfileHero } from "../components/profile-hero";
+import { Head } from '@inertiajs/react';
+import { SectionHeading } from '@/components/section-heading';
+import { Text } from '@/components/text';
+import { Seo } from '@/components/seo';
+import { PublicSection } from '@/components/public-section';
+import { PublicBoardPeriod } from '../types';
+import { OrganizationChart } from '../components/organization-chart';
+import { BoardPeriodArchive } from '../components/board-period-archive';
+import PublicHeroBanner from '@/components/public-hero-banner';
+import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     periods: PublicBoardPeriod[];
@@ -29,16 +31,15 @@ export default function Struktur({ periods }: Props) {
 
             <Head title="Struktur Kepengurusan" />
 
-            <ProfileHero
-                ariaLabel="Struktur Kepengurusan Paroki"
+            <PublicHeroBanner
+                eyebrow="PROFIL PAROKI"
                 title="Struktur Kepengurusan"
-                description={
-                    <Text as="p" variant="body" className="mt-5 max-w-lg">
-                        Susunan pengurus Dewan Pastoral Paroki Hati Santa
-                        Perawan Maria Tak Bernoda Putussibau dalam setiap
-                        periode pelayanan.
-                    </Text>
-                }
+                description="Susunan pengurus Dewan Pastoral Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau dalam setiap periode pelayanan."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Profil', href: profilIndex() },
+                    { title: 'Struktur Kepengurusan' },
+                ]}
             />
 
             <PublicSection>

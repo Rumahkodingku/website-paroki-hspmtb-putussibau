@@ -101,3 +101,52 @@ it('touches the service when a requirement changes', function () {
 
     expect($service->fresh()->updated_at->greaterThan($before))->toBeTrue();
 });
+
+it('stores requirement condition and applies_to', function () {
+    $service = Service::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('service-requirements.store', $service), [
+            'text' => 'Fotokopi KK',
+            'requirement_condition' => 'conditional',
+            'applies_to' => 'Wali baptis',
+        ])
+        ->assertRedirect();
+
+    $requirement = $service->requirements()->sole();
+
+    expect($requirement->requirement_condition)->toBe('conditional')
+        ->and($requirement->applies_to)->toBe('Wali baptis');
+});
+
+it('rejects an unknown requirement condition', function () {
+    $service = Service::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('service-requirements.store', $service), [
+            'text' => 'Fotokopi KK',
+            'requirement_condition' => 'maybe',
+        ])
+        ->assertSessionHasErrors('requirement_condition');
+});
+
+it('defaults requirement condition to required when omitted', function () {
+    $service = Service::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('service-requirements.store', $service), ['text' => 'Fotokopi KK'])
+        ->assertRedirect();
+
+    expect($service->requirements()->sole()->requirement_condition)->toBe('required');
+});
+
+it('rejects applies_to longer than 100 characters', function () {
+    $service = Service::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('service-requirements.store', $service), [
+            'text' => 'Fotokopi KK',
+            'applies_to' => str_repeat('a', 101),
+        ])
+        ->assertSessionHasErrors('applies_to');
+});

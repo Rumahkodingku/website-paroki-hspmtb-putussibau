@@ -1,14 +1,5 @@
 import type { PublicDocumentCard } from '@/types/document';
 
-/*
- * Types for the public Pelayanan pages.
- *
- * They mirror App\Http\Resources\Public\Pelayanan one for one. Router props on
- * the server change them in the same commit (ARCHITECTURE.md Part C section 1).
- *
- * @see docs/DECISIONS.md D-54
- */
-
 /** App\Http\Resources\Public\Pelayanan\PublicServiceCardResource */
 export type PublicServiceCard = {
     id: number;
@@ -24,16 +15,14 @@ export type PublicServiceCard = {
 export type PublicServiceGroup = {
     id: number;
     name: string;
+    description: string;
     slug: string;
     services: PublicServiceCard[];
 };
 
 /** The four CTA states of PRD 7.6, decided on the server. */
 export type PublicServiceCtaState =
-    | 'form_open'
-    | 'form_closed'
-    | 'contact'
-    | 'emergency';
+    'form_open' | 'form_closed' | 'contact' | 'emergency';
 
 export type PublicServiceCta = {
     state: PublicServiceCtaState;
@@ -50,10 +39,14 @@ export type PublicServiceContact = {
     source: 'service' | 'secretariat' | null;
 };
 
+export type RequirementCondition = 'required' | 'conditional' | 'upon_request';
+
 export type PublicServiceRequirement = {
     id: number;
     text: string;
     note: string | null;
+    requirement_condition: RequirementCondition;
+    applies_to: string | null;
 };
 
 export type PublicServiceStep = {
@@ -77,6 +70,8 @@ export type PublicServiceDetail = {
     thumbnail_alt: string | null;
     summary: string | null;
     introduction: string | null;
+    audience_info: string | null;
+    preparation_info: string | null;
     schedule_info: string | null;
     fee_info: string | null;
     is_emergency: boolean;

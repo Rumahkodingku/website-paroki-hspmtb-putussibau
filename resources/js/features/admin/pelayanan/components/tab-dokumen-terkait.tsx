@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { FormLabel } from '@/components/form-fields';
 import type { ServiceDocumentOption, ServiceFormMeta } from '../types';
 import type { ServiceFormInstance } from './service-form-instance';
 
@@ -67,7 +67,9 @@ export function TabDokumenTerkait({ form, documents, copy, onSubmit }: Props) {
                                     }
                                 />
                                 <div className="space-y-1">
-                                    <Label htmlFor={id}>{document.title}</Label>
+                                    <FormLabel htmlFor={id}>
+                                        {document.title}
+                                    </FormLabel>
                                     {document.status !== 'published' ? (
                                         <Badge variant="outline">
                                             {document.status_label}

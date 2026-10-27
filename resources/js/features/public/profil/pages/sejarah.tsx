@@ -3,7 +3,9 @@ import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { HistoryTimeline } from '../components/history-timeline';
 import type { PublicHistoryItem } from '../types';
-import { ProfileHero } from '../components/profile-hero';
+import PublicHeroBanner from '@/components/public-hero-banner';
+import { home } from '@/routes';
+import { index as profilIndex } from '@/routes/profil';
 
 type Props = {
     narrative: string | null;
@@ -21,15 +23,15 @@ export default function Sejarah({ items }: Props) {
             <Head title="Sejarah Paroki" />
 
             <main>
-                <ProfileHero
-                    ariaLabelledBy="history-title"
+                <PublicHeroBanner
+                    eyebrow="PROFIL PAROKI"
                     title="Sejarah Paroki"
-                    description={
-                        <Text as="p" variant="body" className="mt-5 max-w-lg">
-                            Mengenal perjalanan iman umat dan perkembangan
-                            pelayanan paroki dari masa ke masa.
-                        </Text>
-                    }
+                    description="Mengenal perjalanan iman umat dan perkembangan pelayanan Paroki HSPMTB Putussibau dari masa ke masa."
+                    breadcrumbs={[
+                        { title: 'Beranda', href: home() },
+                        { title: 'Profil', href: profilIndex() },
+                        { title: 'Sejarah Paroki' },
+                    ]}
                 />
 
                 {/* Timeline */}

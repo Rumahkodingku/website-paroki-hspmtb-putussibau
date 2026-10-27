@@ -250,7 +250,7 @@ class UpdateSettingsRequest extends FormRequest
         ];
 
         /*
-         * logo and cover are media references. The stored value is the media
+         * logo, favicon, and the home hero image are media references. The stored value is the media
          * id as a string (value is a LONGTEXT column), so the generic string
          * rule would accept anything; these replace it with a real existence
          * check against a row that finished processing.
@@ -265,18 +265,12 @@ class UpdateSettingsRequest extends FormRequest
             'string',
             Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
         ];
-        $rules['settings.cover'] = [
-            'nullable',
-            'string',
-            Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
-        ];
         $rules['settings.home_hero_image'] = [
             'nullable',
             'string',
             Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
         ];
         $rules['settings.logo_alt'] = ['nullable', 'string', 'max:255'];
-        $rules['settings.cover_alt'] = ['nullable', 'string', 'max:255'];
 
         return $rules;
     }
@@ -296,7 +290,6 @@ class UpdateSettingsRequest extends FormRequest
             'settings.office_hours.*.close_time.date_format' => ':attribute harus dalam format jam HH:mm.',
             'settings.logo.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'settings.favicon.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
-            'settings.cover.exists' => 'Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
             'settings.home_hero_image.exists' => 'Gambar hero yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.',
         ];
     }

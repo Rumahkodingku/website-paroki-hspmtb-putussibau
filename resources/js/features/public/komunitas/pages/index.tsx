@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
@@ -12,6 +12,7 @@ import type {
     PublicCommunityFilters,
 } from '../types';
 import type { Paginated } from '@/types';
+import { home } from '@/routes';
 
 type Props = {
     communities: Paginated<PublicCommunityCardData>;
@@ -19,13 +20,6 @@ type Props = {
     filters: PublicCommunityFilters;
 };
 
-/**
- * The directory.
- *
- * DESIGN.md asks whitespace to do the work, so the grid is cards on the page
- * background with one heading and one filter row above it, not a stack of
- * rounded containers.
- */
 export default function KomunitasIndex({
     communities,
     categories,
@@ -42,14 +36,18 @@ export default function KomunitasIndex({
 
             <Head title="Komunitas" />
 
+            <PublicHeroBanner
+                eyebrow="Komunitas"
+                title="Komunitas Paroki"
+                description="Temukan kelompok dan kategorial di paroki."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Komunitas Paroki' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Komunitas"
-                        title="Komunitas Paroki"
-                        description="Temukan kelompok dan kategorial di paroki."
-                    />
-
                     <CommunityFilters
                         filters={filters}
                         categories={categories}

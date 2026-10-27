@@ -5,6 +5,7 @@ import {
     FormActions,
     FormInput,
 } from '@/components/form-fields';
+import { DatePicker } from '@/components/date-picker';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type {
@@ -112,9 +113,8 @@ export function HistoryItemForm({
                     hint={hints.date}
                     error={form.errors.date}
                 >
-                    <FormInput
+                    <DatePicker
                         id="history-date"
-                        type="date"
                         value={form.data.date}
                         onChange={(value) => form.setData('date', value)}
                     />
@@ -150,22 +150,6 @@ export function HistoryItemForm({
                         removable
                     />
                 </div>
-
-                <Field
-                    id="history-sort-order"
-                    label={labels.sort_order ?? 'Urutan'}
-                    hint={hints.sort_order}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="history-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                        placeholder="0"
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

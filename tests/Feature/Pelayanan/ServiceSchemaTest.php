@@ -113,6 +113,13 @@ it('keeps a soft-deleted service slug in the table', function () {
         ->and(Service::withTrashed()->where('slug', 'baptis-bayi')->exists())->toBeTrue();
 });
 
+it('adds public detail fields to services and requirements', function () {
+    expect(Schema::hasColumn('services', 'audience_info'))->toBeTrue()
+        ->and(Schema::hasColumn('services', 'preparation_info'))->toBeTrue()
+        ->and(Schema::hasColumn('service_requirements', 'requirement_condition'))->toBeTrue()
+        ->and(Schema::hasColumn('service_requirements', 'applies_to'))->toBeTrue();
+});
+
 /*
 |--------------------------------------------------------------------------
 | Scope

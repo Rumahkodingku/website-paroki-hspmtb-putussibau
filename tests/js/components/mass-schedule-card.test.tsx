@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import {
-    MassScheduleCard,
+    RegularMassScheduleCard as MassScheduleCard,
     DAY_LABELS,
-} from '@/features/public/jadwal-misa/components/mass-schedule-card';
+} from '@/features/public/jadwal-misa/components/regular-mass-schedule-card';
 import type { PublicMassSchedule } from '@/features/public/jadwal-misa/types';
 
 /*
@@ -40,7 +40,7 @@ function mass(overrides: Partial<PublicMassSchedule> = {}): PublicMassSchedule {
 function renderCard(overrides: Partial<PublicMassSchedule> = {}): HTMLElement {
     render(
         <ul>
-            <MassScheduleCard mass={mass(overrides)} dayLabels={DAY_LABELS} />
+            <MassScheduleCard mass={mass(overrides)} />
         </ul>,
     );
 

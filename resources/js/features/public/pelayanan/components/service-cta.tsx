@@ -13,14 +13,6 @@ type Labels = {
     whatsapp: string;
 };
 
-/**
- * The registration call to action, one branch per state PRD 7.6 defines.
- *
- * The branch is chosen on the server (PublicServiceDetailResource) and mirrored
- * here, so the page cannot invent a fifth state or show a form button for a
- * service that has none. Buttons are `print:hidden`: a printed sheet cannot open
- * a Google Form, and the address is more useful on paper than an inert button.
- */
 export function ServiceCta({
     cta,
     contact,
@@ -35,7 +27,7 @@ export function ServiceCta({
     if (cta.state === 'form_open' && cta.url) {
         return (
             <div className={className}>
-                <Button asChild size="lg" className="print:hidden">
+                <Button asChild size="lg" className="text-sm print:hidden">
                     <a href={cta.url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="size-4" aria-hidden="true" />
                         {cta.label || labels.register_now}
@@ -52,16 +44,10 @@ export function ServiceCta({
                     type="button"
                     size="lg"
                     disabled
-                    className="print:hidden"
+                    className="text-sm print:hidden"
                 >
                     {labels.registration_closed}
                 </Button>
-
-                {cta.message ? (
-                    <Text as="p" variant="body" color="muted" className="mt-3">
-                        {cta.message}
-                    </Text>
-                ) : null}
             </div>
         );
     }
@@ -69,10 +55,6 @@ export function ServiceCta({
     if (cta.state === 'emergency') {
         return (
             <div className={className}>
-                <Text as="p" variant="heading-sm" className="mb-3">
-                    {labels.contact_now}
-                </Text>
-
                 {contact.tel || contact.whatsapp ? (
                     <ContactActions
                         contact={contact}

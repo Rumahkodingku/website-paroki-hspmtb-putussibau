@@ -264,6 +264,7 @@ function FaqDialog({
                                 form.setData('question', value)
                             }
                             required
+                            placeholder="Contoh: Bagaimana cara mendaftar?"
                         />
                     </Field>
 
@@ -278,6 +279,7 @@ function FaqDialog({
                             value={form.data.answer}
                             onChange={(value) => form.setData('answer', value)}
                             rows={3}
+                            placeholder="Contoh: Jawaban pertanyaan"
                         />
                     </Field>
 

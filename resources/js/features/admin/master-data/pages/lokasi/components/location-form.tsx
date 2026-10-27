@@ -88,22 +88,6 @@ export function LocationForm({
                 </div>
 
                 <Field
-                    id="location-slug"
-                    label={labels.slug ?? 'Slug'}
-                    hint={hints.slug}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="location-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        placeholder="Masukkan slug disini"
-                        required
-                    />
-                </Field>
-
-                <Field
                     id="location-type"
                     label={labels.type ?? 'Jenis lokasi'}
                     hint={hints.type}
@@ -117,6 +101,7 @@ export function LocationForm({
                             form.setData('type', value as LocationType)
                         }
                         options={types}
+                        placeholder="Pilih jenis lokasi"
                     />
                 </Field>
 

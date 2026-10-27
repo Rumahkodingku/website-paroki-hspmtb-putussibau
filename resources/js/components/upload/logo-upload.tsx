@@ -121,7 +121,7 @@ function LogoUpload<TResult = unknown>({
                     removeLabel={removeLabel}
                     emptyLabel={emptyLabel}
                 />
-                <CardFooter className="border-t text-xs text-muted-foreground">
+                <CardFooter className="border-t pt-4 text-xs text-muted-foreground">
                     {footer ?? (
                         <>
                             Square SVG or PNG, at least 256 × 256 px. Max{' '}

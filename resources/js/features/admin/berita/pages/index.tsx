@@ -6,6 +6,7 @@ import { DeleteDialog } from '@/components/delete-dialog';
 import { RowActions } from '@/components/row-actions';
 import { ListPagination } from '@/components/list-pagination';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -17,7 +18,7 @@ import {
     create as createPost,
     destroy as destroyPost,
     edit as editPost,
-    index as postsIndex,
+    list as postsIndex,
     preview as previewPost,
 } from '@/routes/posts';
 import type { Paginated } from '@/types';
@@ -51,7 +52,7 @@ export default function Index({
     const applyFilter = (next: Partial<PostFilters>) => {
         router.get(
             postsIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -198,35 +199,21 @@ export default function Index({
                     searchPlaceholder="Cari judul artikel"
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label="Filter status"
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={statusOptions}
+                    />
 
-                    <select
-                        aria-label="Filter kategori"
+                    <FilterSelect
+                        id="filter-kategori"
+                        label="Filter kategori"
                         value={filters.kategori}
-                        onChange={(event: any) =>
-                            applyFilter({ kategori: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {categoryOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(kategori) => applyFilter({ kategori })}
+                        options={categoryOptions}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters
@@ -251,7 +238,7 @@ export default function Index({
                     onSort={(sortKey, direction) =>
                         router.get(
                             postsIndex().url,
-                            { ...filters, sort: sortKey, direction },
+                            { ...filters, sort: sortKey, direction, page: 1 },
                             { preserveScroll: true, replace: true },
                         )
                     }

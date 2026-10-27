@@ -22,6 +22,8 @@ class ServiceRequirementFactory extends Factory
             'service_id' => Service::factory(),
             'text' => fake()->sentence(5),
             'note' => null,
+            'requirement_condition' => 'required',
+            'applies_to' => null,
             'sort_order' => 0,
         ];
     }

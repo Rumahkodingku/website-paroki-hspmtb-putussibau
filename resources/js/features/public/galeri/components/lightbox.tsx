@@ -4,21 +4,6 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import type { PublicGalleryPhoto } from '../types';
 
-/*
- * The album lightbox.
- *
- * Hand-rolled rather than built on the shadcn Dialog for one concrete reason:
- * the Dialog ships its own close control whose accessible name is the English
- * "Close", and this is an Indonesian interface. Building it here keeps every
- * label ours and lets the arrow-key navigation live with the thing it navigates.
- *
- * It is still accessible on purpose: role="dialog" with aria-modal, focus moves
- * to the close button on open and returns to whatever had focus when it closes,
- * Escape closes it, and the arrow keys move between photos. The caller owns the
- * open photo's index so the lightbox holds no state of its own beyond the
- * document listener.
- */
-
 type Props = {
     photos: PublicGalleryPhoto[];
     index: number | null;

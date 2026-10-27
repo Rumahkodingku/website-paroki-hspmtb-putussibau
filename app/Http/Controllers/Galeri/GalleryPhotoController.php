@@ -13,6 +13,7 @@ use App\Models\GalleryAlbum;
 use App\Models\GalleryPhoto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 /**
  * The photo endpoints for an album.
@@ -37,7 +38,9 @@ class GalleryPhotoController extends Controller
     ): RedirectResponse {
         $action->handle($gallery, $request->validated('media_ids'));
 
-        return back()->with('success', __('galeri.flash.photos_added'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photos_added')]);
+
+        return back();
     }
 
     public function update(
@@ -47,7 +50,9 @@ class GalleryPhotoController extends Controller
     ): RedirectResponse {
         $photo->update($request->validated());
 
-        return back()->with('success', __('galeri.flash.photo_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photo_updated')]);
+
+        return back();
     }
 
     public function reorder(
@@ -57,14 +62,18 @@ class GalleryPhotoController extends Controller
     ): RedirectResponse {
         $action->handle($gallery, $request->validated('ids'));
 
-        return back()->with('success', __('galeri.flash.photos_reordered'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photos_reordered')]);
+
+        return back();
     }
 
     public function cover(SetGalleryCoverRequest $request, GalleryAlbum $gallery): RedirectResponse
     {
         $gallery->update(['cover_photo_id' => $request->validated('photo_id')]);
 
-        return back()->with('success', __('galeri.flash.cover_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.cover_updated')]);
+
+        return back();
     }
 
     public function destroy(GalleryAlbum $gallery, GalleryPhoto $photo): RedirectResponse
@@ -78,6 +87,8 @@ class GalleryPhotoController extends Controller
 
         $photo->delete();
 
-        return back()->with('success', __('galeri.flash.photo_removed'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photo_removed')]);
+
+        return back();
     }
 }

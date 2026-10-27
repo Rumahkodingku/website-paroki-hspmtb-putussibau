@@ -53,11 +53,11 @@ describe('Dashboard', () => {
         // would match a loose query, so a dropped card has to be caught here
         // rather than by a substring that also finds its neighbours.
         for (const label of [
-            'Berita',
-            'Agenda mendatang',
+            'Total Berita',
+            'Agenda Mendatang',
             'Dokumen',
-            'Misa rutin aktif',
-            'Pelayanan aktif',
+            'Jadwal Misa',
+            'Pelayanan',
         ]) {
             expect(
                 screen.getByText(label, { exact: true }),
@@ -69,14 +69,11 @@ describe('Dashboard', () => {
         renderWithInertia(<Dashboard {...EMPTY_PROPS} />);
 
         expect(
-            screen.getByRole('link', { name: /Tulis Berita Artikel/ }),
+            screen.getAllByRole('link', { name: /Tulis Berita/ })[0],
         ).toHaveAttribute('href', '/admin/berita/tambah');
         expect(
-            screen.getByRole('link', { name: /Tambah Agenda Kegiatan/ }),
+            screen.getAllByRole('link', { name: /Tambah Agenda/ })[0],
         ).toHaveAttribute('href', '/admin/agenda/tambah');
-        expect(
-            screen.getByRole('link', { name: /Pengaturan Situs/ }),
-        ).toHaveAttribute('href', '/admin/pengaturan');
     });
 
     it('renders a recent article and an upcoming activity', () => {

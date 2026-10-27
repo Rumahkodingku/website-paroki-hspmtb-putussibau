@@ -24,6 +24,42 @@ function fromSelectValue(value: string): string {
     return value === EMPTY_VALUE ? '' : value;
 }
 
+export function FormLabel({
+    htmlFor,
+    isRequired = false,
+    hint,
+    error,
+    disabled = false,
+    children,
+}: {
+    htmlFor: string;
+    isRequired?: boolean;
+    hint?: string;
+    error?: string;
+    disabled?: boolean;
+    children: ReactNode;
+}) {
+    return (
+        <div className="space-y-1">
+            <Label
+                htmlFor={htmlFor}
+                className={`${disabled ? 'opacity-50' : undefined} font-semibold`}
+            >
+                {children}{' '}
+                {isRequired ? <span className="text-red-600">*</span> : null}
+            </Label>
+
+            {hint ? (
+                <Text as="p" variant="body-sm" color="muted">
+                    {hint}
+                </Text>
+            ) : null}
+
+            <InputError message={error} />
+        </div>
+    );
+}
+
 export function Field({
     id,
     label,
@@ -31,6 +67,7 @@ export function Field({
     error,
     children,
     required,
+    isRequired,
 }: {
     id: string;
     label: string;
@@ -38,24 +75,22 @@ export function Field({
     error?: string;
     children: ReactNode;
     required?: boolean;
+    isRequired?: boolean;
 }) {
     return (
         <div className="space-y-2">
-            <Label htmlFor={id}>
-                {label}{' '}
-                {required && <span className="text-destructive">*</span>}
-            </Label>
+            <FormLabel
+                htmlFor={id}
+                isRequired={isRequired ?? required}
+                hint={hint}
+                error={error}
+            >
+                {label}
+            </FormLabel>
             <div className="mt-2"> {children}</div>
-            {hint ? (
-                <Text as="p" variant="body-sm" color="muted">
-                    {hint}
-                </Text>
-            ) : null}
-            <InputError message={error} />
         </div>
     );
 }
-
 export function ChoiceSelect({
     id,
     value,
@@ -159,6 +194,7 @@ export function FormInput({
     min,
     max,
     placeholder,
+    list,
 }: {
     id: string;
     value: string;
@@ -169,6 +205,7 @@ export function FormInput({
     min?: string | number;
     max?: string | number;
     placeholder?: string;
+    list?: string;
 }) {
     return (
         <Input
@@ -179,6 +216,7 @@ export function FormInput({
             required={required}
             min={min}
             max={max}
+            list={list}
             onChange={(event: any) => onChange(event.target.value)}
             className="border-border focus-visible:border-primary"
             placeholder={placeholder}

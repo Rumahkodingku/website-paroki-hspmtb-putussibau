@@ -3,6 +3,7 @@
 namespace App\Actions\News;
 
 use App\Models\Post;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Counts one view of an article, at most once per session, ignoring bots.
@@ -49,14 +50,36 @@ class RecordPostViewAction
 
     /**
      * @param  string  $userAgent  the visitor's User-Agent header, empty when absent
+     * @param  string|null  $ip  the visitor's IP address, used for 24-hour dedup
      */
-    public function handle(Post $post, string $userAgent): void
+    public function handle(Post $post, string $userAgent, ?string $ip = null): void
     {
         if ($this->looksLikeABot($userAgent)) {
             return;
         }
 
+        if ($this->alreadyCountedToday($post, $ip, $userAgent)) {
+            return;
+        }
+
         $post->increment('view_count');
+    }
+
+    private function alreadyCountedToday(Post $post, ?string $ip, string $userAgent): bool
+    {
+        if ($ip === null || trim($ip) === '') {
+            return false;
+        }
+
+        $key = 'post-view:'.$post->getKey().':'.hash('sha256', $ip.'|'.trim($userAgent));
+
+        if (Cache::has($key)) {
+            return true;
+        }
+
+        Cache::put($key, true, now()->addDay());
+
+        return false;
     }
 
     private function looksLikeABot(string $userAgent): bool

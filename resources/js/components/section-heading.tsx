@@ -51,13 +51,13 @@ export function SectionHeading({
                     >
                         <span
                             aria-hidden="true"
-                            className="h-0.5 w-8 shrink-0 bg-primary"
+                            className="h-0.5 w-7 shrink-0 bg-primary"
                         />
 
                         <Text
                             as="p"
                             variant="label"
-                            className="text-xs font-semibold tracking-[0.12em] text-primary uppercase"
+                            className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase"
                         >
                             {eyebrow}
                         </Text>

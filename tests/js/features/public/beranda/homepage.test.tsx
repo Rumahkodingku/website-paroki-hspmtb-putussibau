@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import type { ArticleCardData } from '@/components/article-card';
+import type { ArticleCardData } from '@/features/public/berita/components/article-card';
 import type { EventCardData } from '@/components/event-card';
 import type { NextMassCardData } from '@/components/next-mass-card';
 import Beranda from '@/features/public/beranda/pages/index';

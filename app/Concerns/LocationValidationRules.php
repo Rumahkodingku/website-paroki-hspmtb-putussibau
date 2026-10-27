@@ -27,6 +27,7 @@ use Illuminate\Validation\Validator;
  */
 trait LocationValidationRules
 {
+    use GeneratesUniqueSlug;
     use ValidatesActiveLocationReference;
 
     /**
@@ -159,5 +160,26 @@ trait LocationValidationRules
         }
 
         return $validated;
+    }
+
+    protected function prepareLocationInput(): void
+    {
+        $input = $this->normaliseCoordinateInput($this->all());
+
+        $slug = $input['slug'] ?? null;
+        if (! is_string($slug) || trim($slug) === '') {
+            $ignoreId = $this->routeKeyId('location');
+            $input['slug'] = $this->resolveUniqueSlug(
+                Location::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                false,
+            );
+        } else {
+            $input['slug'] = trim($slug);
+        }
+
+        $this->merge($input);
     }
 }

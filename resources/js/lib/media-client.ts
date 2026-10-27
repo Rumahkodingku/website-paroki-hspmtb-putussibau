@@ -224,7 +224,10 @@ async function readMedia(
     if (!response.ok) {
         throw new MediaUploadError(
             'Status gambar tidak dapat dibaca. Coba muat ulang halaman.',
-            { retryable: true, status: response.status },
+            {
+                retryable: true,
+                status: response.status,
+            },
         );
     }
 

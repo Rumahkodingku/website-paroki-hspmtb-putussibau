@@ -6,14 +6,6 @@ import { Button } from '@/components/ui/button';
 import type { ContactDetails as ContactDetailsData } from '@/types';
 import { CopyButton } from './copy-button';
 
-/**
- * The contact cards the parish has actually configured.
- *
- * Every item is conditional. A missing phone produces no card and no `tel:`
- * link, which is the only honest rendering: an empty anchor looks like a
- * working button to a screen reader and goes nowhere when tapped (KON-10).
- */
-
 type ContactItem = {
     key: string;
     label: string;

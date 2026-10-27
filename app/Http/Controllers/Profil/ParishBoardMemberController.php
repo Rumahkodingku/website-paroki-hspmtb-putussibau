@@ -40,8 +40,9 @@ class ParishBoardMemberController extends Controller
 
         ParishBoardMember::create($data);
 
-        return to_route('board-periods.index', ['periode' => $period->getKey()])
-            ->with('success', __('Anggota kepengurusan berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil ditambahkan.')]);
+
+        return to_route('board-periods.index', ['periode' => $period->getKey()]);
     }
 
     public function edit(ParishBoardPeriod $period, ParishBoardMember $member): Response
@@ -67,8 +68,9 @@ class ParishBoardMemberController extends Controller
 
         $member->update($request->validated());
 
-        return to_route('board-periods.index', ['periode' => $period->getKey()])
-            ->with('success', __('Anggota kepengurusan berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil diperbarui.')]);
+
+        return to_route('board-periods.index', ['periode' => $period->getKey()]);
     }
 
     public function destroy(ParishBoardPeriod $period, ParishBoardMember $member): RedirectResponse
@@ -78,7 +80,8 @@ class ParishBoardMemberController extends Controller
 
         $member->delete();
 
-        return to_route('board-periods.index', ['periode' => $period->getKey()])
-            ->with('success', __('Anggota kepengurusan berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil dihapus.')]);
+
+        return to_route('board-periods.index', ['periode' => $period->getKey()]);
     }
 }

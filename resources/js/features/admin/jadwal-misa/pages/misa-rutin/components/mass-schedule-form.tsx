@@ -1,3 +1,4 @@
+import { TimePicker } from '@/components/time-picker';
 import { useForm } from '@inertiajs/react';
 import type { DayOfWeek, LocationOption } from '../../../types';
 import {
@@ -100,6 +101,7 @@ export function MassScheduleForm({
                             value: String(day.value),
                             label: day.label,
                         }))}
+                        placeholder="Pilih hari"
                     />
                 </Field>
 
@@ -109,12 +111,10 @@ export function MassScheduleForm({
                     hint={hints.start_time}
                     error={form.errors.start_time}
                 >
-                    <FormInput
+                    <TimePicker
                         id="schedule-time"
-                        type="time"
                         value={form.data.start_time}
                         onChange={(value) => form.setData('start_time', value)}
-                        required
                     />
                 </Field>
 
@@ -128,6 +128,7 @@ export function MassScheduleForm({
                         value={form.data.name}
                         onChange={(value) => form.setData('name', value)}
                         required
+                        placeholder="Contoh: Misa Minggu Pagi"
                     />
                 </Field>
 
@@ -142,6 +143,7 @@ export function MassScheduleForm({
                             rows={2}
                             value={form.data.notes}
                             onChange={(value) => form.setData('notes', value)}
+                            placeholder="Contoh: Catatan jadwal misa"
                         />
                     </Field>
                 </div>

@@ -26,6 +26,7 @@ export function TabJadwalLokasi({ form, labels }: Props) {
                             form.setData('meeting_schedule', value)
                         }
                         rows={2}
+                        placeholder="Contoh: Jadwal pertemuan"
                     />
                 </Field>
 
@@ -40,6 +41,7 @@ export function TabJadwalLokasi({ form, labels }: Props) {
                         onChange={(value) =>
                             form.setData('meeting_location', value)
                         }
+                        placeholder="Contoh: Aula paroki"
                     />
                 </Field>
             </div>

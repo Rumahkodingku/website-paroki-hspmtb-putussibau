@@ -81,22 +81,6 @@ export function EventCategoryForm({
             </Field>
 
             <Field
-                id="event-category-slug"
-                label={labels.slug ?? 'Slug'}
-                hint={hints.slug}
-                error={form.errors.slug}
-                required
-            >
-                <FormInput
-                    id="event-category-slug"
-                    value={form.data.slug}
-                    onChange={(value) => form.setData('slug', value)}
-                    placeholder="contoh: liturgi"
-                    required
-                />
-            </Field>
-
-            <Field
                 id="event-category-color"
                 label={labels.color ?? 'Warna penanda'}
                 hint={hints.color}

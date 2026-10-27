@@ -3,7 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { ListPagination } from '@/components/list-pagination';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import type {
     PublicDocumentFilters,
 } from '../types';
 import type { Paginated } from '@/types';
+import { home } from '@/routes';
 
 type Props = {
     documents: Paginated<PublicDocumentCard>;
@@ -54,14 +55,18 @@ export default function DokumenIndex({
 
             <Head title="Dokumen" />
 
+            <PublicHeroBanner
+                eyebrow="Dokumen"
+                title="Dokumen Paroki"
+                description="Formulir, pedoman, pengumuman resmi, dan dokumen pelayanan yang dapat diunduh."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Dokumen Paroki' },
+                ]}
+            />
+
             <PublicSection>
                 <div className="space-y-10">
-                    <SectionHeading
-                        eyebrow="Dokumen"
-                        title="Dokumen Paroki"
-                        description="Formulir, pedoman, pengumuman resmi, dan dokumen pelayanan yang dapat diunduh."
-                    />
-
                     <div className="flex flex-wrap items-end gap-3">
                         <form
                             onSubmit={submitSearch}

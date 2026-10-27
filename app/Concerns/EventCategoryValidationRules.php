@@ -26,6 +26,8 @@ use Illuminate\Validation\Rule;
  */
 trait EventCategoryValidationRules
 {
+    use GeneratesUniqueSlug;
+
     /**
      * @param  EventCategory|null  $ignore  the record being updated, so it keeps its own slug
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
@@ -72,5 +74,28 @@ trait EventCategoryValidationRules
     protected function eventCategoryAttributes(array $validated): array
     {
         return $validated;
+    }
+
+    protected function prepareEventCategoryInput(): void
+    {
+        $input = [];
+
+        foreach (['name', 'slug', 'color'] as $field) {
+            $value = $this->input($field);
+            $input[$field] = is_string($value) ? trim($value) : $value;
+        }
+
+        if (($input['slug'] ?? null) === null || $input['slug'] === '') {
+            $ignoreId = $this->routeKeyId('eventCategory', 'event_category');
+            $input['slug'] = $this->resolveUniqueSlug(
+                EventCategory::class,
+                null,
+                (string) $this->input('name'),
+                is_numeric($ignoreId) ? (int) $ignoreId : null,
+                true,
+            );
+        }
+
+        $this->merge($input);
     }
 }

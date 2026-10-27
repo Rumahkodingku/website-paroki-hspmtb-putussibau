@@ -28,6 +28,7 @@ class PublicCommunityCardResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'thumbnail_url' => $this->whenLoaded('thumbnailMedia', fn (): ?string => $this->thumbnailMedia->url('medium')),
+            'logo_url' => $this->whenLoaded('logoMedia', fn (): ?string => $this->logoMedia->url('thumb')),
             'category' => $this->whenLoaded('communityCategory', fn (): array => [
                 'id' => $this->communityCategory->getKey(),
                 'name' => $this->communityCategory->name,

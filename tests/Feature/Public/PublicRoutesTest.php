@@ -35,6 +35,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  */
 dataset('public pages', fn (): array => [
     '/' => ['/', 'public/beranda'],
+    '/profil' => ['/profil', 'public/profil'],
     '/profil/sejarah' => ['/profil/sejarah', 'public/profil/sejarah'],
     '/profil/wilayah' => ['/profil/wilayah', 'public/profil/wilayah'],
     '/profil/pastor' => ['/profil/pastor', 'public/profil/pastor'],

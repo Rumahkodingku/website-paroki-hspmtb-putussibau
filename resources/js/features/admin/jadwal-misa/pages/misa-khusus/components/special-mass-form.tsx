@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { toDateTimeLocalValue } from '@/lib/datetime';
 import type { LocationOption } from '../../../types';
 import {
@@ -96,6 +97,7 @@ export function SpecialMassForm({
                         value={form.data.title}
                         onChange={(value) => form.setData('title', value)}
                         required
+                        placeholder="Contoh: Misa Khusus Paskah"
                     />
                 </Field>
 
@@ -105,12 +107,10 @@ export function SpecialMassForm({
                     hint={hints.start_at}
                     error={form.errors.start_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="special-start-at"
-                        type="datetime-local"
                         value={form.data.start_at}
                         onChange={(value) => form.setData('start_at', value)}
-                        required
                     />
                 </Field>
 
@@ -120,9 +120,8 @@ export function SpecialMassForm({
                     hint={hints.end_at}
                     error={form.errors.end_at}
                 >
-                    <FormInput
+                    <DateTimePicker
                         id="special-end-at"
-                        type="datetime-local"
                         value={form.data.end_at}
                         onChange={(value) => form.setData('end_at', value)}
                     />
@@ -141,6 +140,7 @@ export function SpecialMassForm({
                             onChange={(value) =>
                                 form.setData('description', value)
                             }
+                            placeholder="Contoh: Keterangan singkat kegiatan"
                         />
                     </Field>
                 </div>
@@ -156,6 +156,7 @@ export function SpecialMassForm({
                             rows={2}
                             value={form.data.notes}
                             onChange={(value) => form.setData('notes', value)}
+                            placeholder="Contoh: Catatan tambahan"
                         />
                     </Field>
                 </div>

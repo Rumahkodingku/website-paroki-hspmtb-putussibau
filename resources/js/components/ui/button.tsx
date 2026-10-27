@@ -1,7 +1,7 @@
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 /*
  * Restyled onto docs/DESIGN-v2.md §9.
@@ -25,33 +25,32 @@ import { cn } from "@/lib/utils";
  * @see docs/DECISIONS.md D-32, D-72
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-  {
-    variants: {
-      variant: {
-        default:
-          "rounded-pill bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active",
-        destructive:
-          "rounded-pill bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        secondary:
-          "rounded-pill border border-input bg-background text-foreground hover:bg-muted",
-        outline:
-          "rounded-pill border border-primary-on-surface bg-background text-primary-on-surface hover:bg-primary hover:text-primary-foreground",
-        gold: "rounded-pill bg-gold text-navy-deep hover:bg-gold/90",
-        ghost:
-          "rounded-pill text-foreground hover:bg-muted hover:text-foreground",
-        link: "text-primary-on-surface underline-offset-4 hover:underline",
-      },
+    "inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform] duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+    {
+        variants: {
+            variant: {
+                default:
+                    'rounded-pill bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active',
+                destructive:
+                    'rounded-pill bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                secondary:
+                    'rounded-pill border border-input bg-background text-foreground hover:bg-muted',
+                outline:
+                    'rounded-pill border border-primary-on-surface bg-background text-primary-on-surface hover:bg-primary hover:text-primary-foreground',
+                gold: 'rounded-pill bg-gold text-navy-deep hover:bg-gold/90',
+                ghost: 'rounded-pill text-foreground hover:bg-muted hover:text-foreground',
+                link: 'text-primary-on-surface underline-offset-4 hover:underline',
+            },
             size: {
-                default: "h-11 px-[22px] text-body",
-                sm: "h-9 px-4 text-label",
-                lg: "h-12 px-8 text-body-lg",
-                icon: "size-11 rounded-full",
+                default: 'h-11 px-[22px] text-body',
+                sm: 'h-9 px-4 text-label',
+                lg: 'h-12 px-8 text-body-lg',
+                icon: 'size-11 rounded-full',
             },
         },
         defaultVariants: {
-            variant: "default",
-            size: "default",
+            variant: 'default',
+            size: 'default',
         },
     },
 );
@@ -62,11 +61,11 @@ function Button({
     size,
     asChild = false,
     ...props
-}: React.ComponentProps<"button"> &
+}: React.ComponentProps<'button'> &
     VariantProps<typeof buttonVariants> & {
         asChild?: boolean;
     }) {
-    const Comp = asChild ? Slot : "button";
+    const Comp = asChild ? Slot : 'button';
 
     return (
         <Comp

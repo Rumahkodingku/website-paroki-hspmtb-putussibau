@@ -206,9 +206,12 @@ class ImageProcessor
     }
 
     /**
-     * Resize with a white background, because every output is WebP and WebP does
-     * not support transparency here. A PNG logo would otherwise come out with a
-     * black box where its transparency used to be.
+     * Resize onto a transparent canvas so PNG/WebP transparency survives.
+     *
+     * WebP supports an alpha channel, so a logo with no background must not be
+     * flattened onto white here. JPEG sources have no alpha, so the transparent
+     * canvas is fully covered by the resampled image and nothing changes for
+     * them.
      */
     private function resize(\GdImage $source, int $width, int $height): \GdImage
     {
@@ -217,15 +220,20 @@ class ImageProcessor
 
         $canvas = imagecreatetruecolor($width, $height);
 
-        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
 
-        if ($white === false) {
+        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+
+        if ($transparent === false) {
             imagedestroy($canvas);
 
             throw UnprocessableImage::resizeFailed($width, $height);
         }
 
-        imagefilledrectangle($canvas, 0, 0, $width, $height, $white);
+        imagefilledrectangle($canvas, 0, 0, $width, $height, $transparent);
+
+        imagealphablending($canvas, true);
 
         // Resampling on a truecolour source.
         if (! imagecopyresampled($canvas, $source, 0, 0, 0, 0, $width, $height, imagesx($source), imagesy($source))) {
@@ -233,6 +241,8 @@ class ImageProcessor
 
             throw UnprocessableImage::resizeFailed($width, $height);
         }
+
+        imagesavealpha($canvas, true);
 
         return $canvas;
     }
@@ -243,6 +253,8 @@ class ImageProcessor
      */
     private function encodeWebp(\GdImage $image): string
     {
+        imagesavealpha($image, true);
+
         ob_start();
         $ok = imagewebp($image, null, (int) config('media.webp_quality'));
         $bytes = (string) ob_get_clean();

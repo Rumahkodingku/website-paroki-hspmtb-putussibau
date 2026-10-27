@@ -68,6 +68,8 @@ function emptyData(): ServiceFormData {
         thumbnail_alt: '',
         summary: '',
         introduction: '',
+        audience_info: '',
+        preparation_info: '',
         schedule_info: '',
         fee_info: '',
         contact_name: '',
@@ -92,6 +94,8 @@ function toFormData(service: ServiceDetail): ServiceFormData {
         thumbnail_alt: service.thumbnail_alt ?? '',
         summary: service.summary ?? '',
         introduction: service.introduction ?? '',
+        audience_info: service.audience_info ?? '',
+        preparation_info: service.preparation_info ?? '',
         schedule_info: service.schedule_info ?? '',
         fee_info: service.fee_info ?? '',
         contact_name: service.contact_name ?? '',
@@ -117,6 +121,7 @@ export function ServiceForm({
     documents = [],
     labels,
     hints,
+    conditions,
     copy,
     empty,
 }: Props) {
@@ -281,6 +286,7 @@ export function ServiceForm({
                                     items={requirements}
                                     labels={labels}
                                     hints={hints}
+                                    conditions={conditions}
                                     copy={copy}
                                     empty={empty}
                                 />

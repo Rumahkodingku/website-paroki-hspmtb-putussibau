@@ -62,7 +62,7 @@ class ServiceController extends Controller
                 'updated_at' => 'services.updated_at',
             ],
             [['services.sort_order', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/pelayanan', [
             'services' => ServiceListResource::collection($services),
@@ -93,8 +93,9 @@ class ServiceController extends Controller
     {
         $service = $action->handle(new Service, $request->validated());
 
-        return to_route('services.edit', $service)
-            ->with('success', __('pelayanan.flash.service_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.service_created')]);
+
+        return to_route('services.edit', $service);
     }
 
     public function edit(Service $service): Response
@@ -125,8 +126,9 @@ class ServiceController extends Controller
     {
         $action->handle($service, $request->validated());
 
-        return to_route('services.edit', $service)
-            ->with('success', __('pelayanan.flash.service_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.service_updated')]);
+
+        return to_route('services.edit', $service);
     }
 
     public function destroy(Service $service): RedirectResponse
@@ -135,8 +137,9 @@ class ServiceController extends Controller
 
         $service->delete();
 
-        return to_route('services.index')
-            ->with('success', __('pelayanan.flash.service_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.service_deleted')]);
+
+        return to_route('services.index');
     }
 
     /**

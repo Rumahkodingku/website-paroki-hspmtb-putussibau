@@ -19,7 +19,6 @@ type Props = {
 export function TabInformasiDasar({
     form,
     labels,
-    hints,
     statuses,
     categories,
 }: Props) {
@@ -40,21 +39,7 @@ export function TabInformasiDasar({
                         value={form.data.name}
                         onChange={(value) => form.setData('name', value)}
                         required
-                    />
-                </Field>
-
-                <Field
-                    id="community-slug"
-                    label={labels.slug ?? 'Slug'}
-                    hint={hints.slug}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="community-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        required
+                        placeholder="Contoh: Komunitas muda-mudi"
                     />
                 </Field>
 
@@ -97,6 +82,7 @@ export function TabInformasiDasar({
                                 value as CommunityFormData['status'],
                             )
                         }
+                        placeholder="Pilih status"
                     />
                 </Field>
 
@@ -113,6 +99,7 @@ export function TabInformasiDasar({
                                 form.setData('description', value)
                             }
                             rows={3}
+                            placeholder="Contoh: Deskripsi komunitas"
                         />
                     </Field>
                 </div>

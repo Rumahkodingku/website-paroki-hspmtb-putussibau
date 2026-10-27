@@ -55,7 +55,7 @@ class ParishHistoryItemController extends Controller
                 ['parish_history_items.sort_order', 'asc'],
                 ['parish_history_items.year', 'asc'],
             ],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         $narrative = ParishHistoryNarrative::current();
 
@@ -82,8 +82,9 @@ class ParishHistoryItemController extends Controller
             ->fill(['narrative' => $request->validated('narrative')])
             ->save();
 
-        return to_route('parish-histories.index')
-            ->with('success', __('Narasi sejarah berhasil disimpan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Narasi sejarah berhasil disimpan.')]);
+
+        return to_route('parish-histories.index');
     }
 
     public function create(): Response
@@ -99,8 +100,9 @@ class ParishHistoryItemController extends Controller
     {
         ParishHistoryItem::create($request->validated());
 
-        return to_route('parish-histories.index')
-            ->with('success', __('Peristiwa sejarah berhasil ditambahkan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil ditambahkan.')]);
+
+        return to_route('parish-histories.index');
     }
 
     public function edit(ParishHistoryItem $historyItem): Response
@@ -119,8 +121,9 @@ class ParishHistoryItemController extends Controller
     {
         $historyItem->update($request->validated());
 
-        return to_route('parish-histories.index')
-            ->with('success', __('Peristiwa sejarah berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil diperbarui.')]);
+
+        return to_route('parish-histories.index');
     }
 
     public function destroy(ParishHistoryItem $historyItem): RedirectResponse
@@ -129,7 +132,8 @@ class ParishHistoryItemController extends Controller
 
         $historyItem->delete();
 
-        return to_route('parish-histories.index')
-            ->with('success', __('Peristiwa sejarah berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil dihapus.')]);
+
+        return to_route('parish-histories.index');
     }
 }

@@ -34,7 +34,6 @@ type Props = {
 export function CommunityCategoryForm({
     initial,
     labels,
-    hints,
     submitLabel,
     onSubmit,
     onCancel,
@@ -66,22 +65,6 @@ export function CommunityCategoryForm({
                     />
                 </Field>
 
-                <Field
-                    id="community-category-slug"
-                    label={labels.slug ?? 'Slug'}
-                    hint={hints.slug}
-                    error={form.errors.slug}
-                    required
-                >
-                    <FormInput
-                        id="community-category-slug"
-                        value={form.data.slug}
-                        onChange={(value) => form.setData('slug', value)}
-                        placeholder="organisasi-kategorial"
-                        required
-                    />
-                </Field>
-
                 <div className="md:col-span-2">
                     <Field
                         id="community-category-description"
@@ -95,24 +78,10 @@ export function CommunityCategoryForm({
                                 form.setData('description', value)
                             }
                             rows={2}
+                            placeholder="Contoh: Deskripsi kategori"
                         />
                     </Field>
                 </div>
-
-                <Field
-                    id="community-category-sort-order"
-                    label={labels.sort_order ?? 'Urutan Tampilan'}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="community-category-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

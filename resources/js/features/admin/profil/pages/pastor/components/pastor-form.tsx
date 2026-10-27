@@ -48,7 +48,6 @@ export function PastorForm({
     initial,
     currentPhotoUrl,
     labels,
-    hints,
     onSubmit,
     onCancel,
 }: Props) {
@@ -121,22 +120,6 @@ export function PastorForm({
                         removable
                     />
                 </div>
-
-                <Field
-                    id="pastor-sort-order"
-                    label={labels.sort_order ?? 'Urutan'}
-                    hint={hints.sort_order}
-                    error={form.errors.sort_order}
-                >
-                    <FormInput
-                        id="pastor-sort-order"
-                        type="number"
-                        inputMode="numeric"
-                        value={form.data.sort_order}
-                        onChange={(value) => form.setData('sort_order', value)}
-                        placeholder="0"
-                    />
-                </Field>
             </div>
 
             <ActiveSwitch

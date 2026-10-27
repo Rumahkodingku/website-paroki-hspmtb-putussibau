@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { DataTable } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -55,7 +56,7 @@ export default function Index({
     const applyFilter = (next: Partial<ServiceFilters>) => {
         router.get(
             servicesIndex().url,
-            { ...filters, ...next },
+            { ...filters, ...next, page: 1 },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
@@ -63,7 +64,7 @@ export default function Index({
     const sortBy = (sort: string, direction: 'asc' | 'desc') => {
         router.get(
             servicesIndex().url,
-            { ...filters, sort, direction },
+            { ...filters, sort, direction, page: 1 },
             { preserveScroll: true, replace: true },
         );
     };
@@ -139,35 +140,21 @@ export default function Index({
                     searchPlaceholder={copy.search_placeholder}
                     onSearch={(search) => applyFilter({ search })}
                 >
-                    <select
-                        aria-label={copy.filter_all_categories}
+                    <FilterSelect
+                        id="filter-kategori"
+                        label={copy.filter_all_categories}
                         value={filters.category}
-                        onChange={(event: any) =>
-                            applyFilter({ category: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {categoryOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(category) => applyFilter({ category })}
+                        options={categoryOptions}
+                    />
 
-                    <select
-                        aria-label={copy.filter_all_status}
+                    <FilterSelect
+                        id="filter-status"
+                        label={copy.filter_all_status}
                         value={filters.status}
-                        onChange={(event: any) =>
-                            applyFilter({ status: event.target.value })
-                        }
-                        className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                    >
-                        {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(status) => applyFilter({ status })}
+                        options={statusOptions}
+                    />
 
                     {hasFilter || filters.sort !== '' ? (
                         <ResetFilters

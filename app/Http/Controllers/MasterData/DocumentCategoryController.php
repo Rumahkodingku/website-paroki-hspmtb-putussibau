@@ -41,7 +41,7 @@ class DocumentCategoryController extends Controller
                 'sort_order' => 'document_categories.sort_order',
             ],
             [['document_categories.sort_order', 'asc'], ['document_categories.name', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/master-data/kategori-dokumen/index', [
             'categories' => DocumentCategoryResource::collection($categories),
@@ -67,8 +67,9 @@ class DocumentCategoryController extends Controller
     {
         DocumentCategory::query()->create($request->validated());
 
-        return to_route('document-categories.index')
-            ->with('success', __('documents.flash.category_created'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_created')]);
+
+        return to_route('document-categories.index');
     }
 
     public function edit(DocumentCategory $documentCategory): Response
@@ -85,8 +86,9 @@ class DocumentCategoryController extends Controller
     {
         $documentCategory->update($request->validated());
 
-        return to_route('document-categories.index')
-            ->with('success', __('documents.flash.category_updated'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_updated')]);
+
+        return to_route('document-categories.index');
     }
 
     public function destroy(DocumentCategory $documentCategory): RedirectResponse
@@ -103,7 +105,8 @@ class DocumentCategoryController extends Controller
 
         $documentCategory->delete();
 
-        return to_route('document-categories.index')
-            ->with('success', __('documents.flash.category_deleted'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_deleted')]);
+
+        return to_route('document-categories.index');
     }
 }

@@ -17,11 +17,11 @@ return [
     'groups' => [
         'identitas' => 'Identitas Paroki',
         'kontak' => 'Kontak',
-        'profil' => 'Profil Paroki',
         'sosial' => 'Media Sosial',
         'seo' => 'SEO Dasar',
         'beranda' => 'Beranda',
-        'privasi' => 'Privasi',
+        'privasi' => 'Kebijakan Privasi',
+        'syarat' => 'Syarat & Ketentuan',
     ],
 
     'labels' => [
@@ -42,13 +42,7 @@ return [
         'office_hours' => 'Jam Pelayanan Sekretariat',
         'maps_link' => 'Tautan Google Maps',
 
-        'description' => 'Deskripsi lengkap',
-        'established_year' => 'Tahun berdiri',
-        'cover' => 'Gambar sampul',
-        'cover_alt' => 'Teks alternatif sampul',
-        'video_url' => 'Tautan video',
         'website' => 'Situs web paroki',
-        'is_published' => 'Tandai profil terbit',
 
         'social_facebook' => 'Facebook',
         'social_instagram' => 'Instagram',
@@ -73,6 +67,7 @@ return [
         'home_show_contact' => 'Tampilkan kontak',
 
         'privacy_policy_content' => 'Kebijakan privasi',
+        'terms_and_conditions_content' => 'Syarat dan ketentuan',
     ],
 
     /*
@@ -103,6 +98,7 @@ return [
      */
     'hints' => [
         'privacy_policy_content' => 'Isi kebijakan privasi. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
+        'terms_and_conditions_content' => 'Isi syarat dan ketentuan. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
         'maps_link' => 'Tempel link dari Google Maps (buka lokasi, tekan Bagikan, lalu Salin link). Peta tertanam dibuat otomatis dari link ini.',
         'office_hours' => 'Atur hari dan jam operasional pelayanan sekretariat paroki.',
         'logo' => 'Logo dipakai pada header dan footer situs.',
@@ -111,16 +107,13 @@ return [
         'home_hero_description' => 'Kosongkan untuk memakai deskripsi singkat paroki.',
         'home_hero_image' => 'Gambar utama beranda. Bila kosong, situs memakai foto gereja bawaan. Rasio yang disarankan 16:9.',
         'home_hero_image_alt' => 'Wajib diisi saat gambar hero dipilih. Jelaskan gambar secara singkat untuk pembaca layar.',
-        'description' => 'Prosa profil paroki. HTML yang tidak diizinkan akan dibuang otomatis saat disimpan.',
-        'established_year' => 'Isi hanya bila tahun berdiri memang diketahui.',
-        'is_published' => 'Menandai profil paroki sebagai terbit.',
         'website' => 'Situs resmi paroki, bila ada. Bukan situs komunitas.',
     ],
 
     /*
      | Fields that are paths or URLs rather than prose. seo_default_og_image
-     | remains a text input; logo, favicon and cover use the media picker and
-     | are declared by type instead.
+     | remains a text input; logo, favicon and the home hero image use the media
+     | picker and are declared by type instead.
      */
     'urls' => [
         'maps_link',
@@ -130,7 +123,6 @@ return [
         'social_whatsapp_channel',
         'seo_default_og_image',
         'website',
-        'video_url',
     ],
 
 ];

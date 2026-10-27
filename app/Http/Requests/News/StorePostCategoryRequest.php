@@ -20,6 +20,11 @@ class StorePostCategoryRequest extends FormRequest
 {
     use PostCategoryValidationRules;
 
+    protected function prepareForValidation(): void
+    {
+        $this->preparePostCategoryInput();
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

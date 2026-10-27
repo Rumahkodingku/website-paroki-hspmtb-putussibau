@@ -1,18 +1,17 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { PublicSection } from '@/components/public-section';
-import { SectionHeading } from '@/components/section-heading';
+import PublicHeroBanner from '@/components/public-hero-banner';
 import { EmptyState } from '@/components/empty-state';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatWibDateTime } from '@/lib/datetime';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
-import { DAY_LABELS, MassScheduleCard } from '../components/mass-schedule-card';
-import { NextMassCard } from '@/components/next-mass-card';
+import { DAY_LABELS } from '../components/regular-mass-schedule-card';
+import { RegularMassScheduleCard } from '../components/regular-mass-schedule-card';
+import { NextMassSection } from '../components/next-mass-section';
 import { ScheduleFilter } from '../components/schedule-filter';
 import { ScheduleNoticeBanner } from '../components/schedule-notice-banner';
-import { LocationInfo, ShareActions } from '../components/share-actions';
 import type {
     NextMass as NextMassData,
     PublicLocation,
@@ -21,32 +20,14 @@ import type {
     PublicSpecialMass,
     ScheduleFilters,
 } from '../types';
-
-/*
- * /jadwal-misa — the page PRD 7.3 calls the most-visited page on the site.
- *
- * Three things arrive already decided and are used as given:
- *
- *   nextMass        NextMassResolver's answer, already in the display timezone.
- *                   Nothing here recomputes it — roadmap 7.2 forbids a second
- *                   schedule calculation in React, and a page that disagreed
- *                   with the resolver would disagree with its own tests.
- *
- *   regularMasses   Already filtered to active schedules at active locations.
- *                   Filtering again here would hide nothing and would break if
- *                   MASS-07's rule were ever relaxed server-side.
- *
- *   specialMasses   Already filtered to what has not happened yet (MASS-02), so
- *                   a past mass cannot appear on the tab even for one frame.
- *
- * The filters are in the URL. That makes a filtered view shareable, printable and
- * reload-safe for free, and it is the mechanism roadmap 7.2 asks for.
- *
- * Which tab is open is component state rather than a query parameter. It is a
- * view preference, not a filter: two links to the same filtered schedule with
- * different tabs open are the same page, and putting it in the URL would make the
- * back button step through tab changes as though they were pages.
- */
+import { CalendarDays, ChevronDown } from 'lucide-react';
+import { SpecialMassScheduleCard } from '../components/special-mass-schedule-card';
+import { home } from '@/routes';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 type Props = {
     nextMass: NextMassData | null;
@@ -65,13 +46,8 @@ export default function JadwalMisa({
     locations,
     filters,
 }: Props) {
-    const { displayTimezone, seo } = usePage().props;
+    const { displayTimezone } = usePage().props;
     const [tab, setTab] = useState<'rutin' | 'khusus'>('rutin');
-
-    // Read from window rather than from a prop: the shareable URL is the one in
-    // the address bar, which is the only version that carries the filter.
-    const shareUrl =
-        typeof window === 'undefined' ? seo.appUrl : window.location.href;
 
     const applyFilter = (next: {
         location_id: number | null;
@@ -87,33 +63,40 @@ export default function JadwalMisa({
         );
     };
 
+    const regularMassGroups = Object.entries(DAY_LABELS)
+        .map(([day, label]) => ({
+            day: Number(day),
+            label,
+            masses: regularMasses.filter(
+                (mass) => mass.day_of_week === Number(day),
+            ),
+        }))
+        .filter((group) => group.masses.length > 0);
+
     return (
         <>
-            {/*
-              Seo rather than Inertia's Head, because it is the component that
-              keeps the page's meta tags in step with the ones app.blade.php
-              renders. SSR is off (D-26), so the blade output is what a crawler
-              and a WhatsApp unfurl actually read; Head alone would leave the
-              description coming only from site_settings.
-            */}
             <Seo
                 title="Jadwal Misa"
                 description="Jadwal misa rutin, misa khusus, dan pemberitahuan perubahan jadwal di Paroki HSPMTB Putussibau."
             />
 
+            <PublicHeroBanner
+                eyebrow="Ibadah"
+                title="Jadwal Misa"
+                description="Jadwal misa rutin setiap minggu, misa khusus pada tanggal tertentu, dan pemberitahuan perubahan jadwal."
+                breadcrumbs={[
+                    { title: 'Beranda', href: home() },
+                    { title: 'Jadwal Misa' },
+                ]}
+            />
+
+            <NextMassSection
+                nextMass={nextMass}
+                displayTimezone={displayTimezone}
+            />
+
             <PublicSection>
-                <SectionHeading
-                    eyebrow="Ibadah"
-                    title="Jadwal Misa"
-                    description="Jadwal misa rutin setiap minggu, misa khusus pada tanggal tertentu, dan pemberitahuan perubahan jadwal."
-                />
-
                 <div className="space-y-10">
-                    <NextMassCard
-                        nextMass={nextMass}
-                        displayTimezone={displayTimezone}
-                    />
-
                     <ScheduleNoticeBanner notices={notices} />
 
                     <ScheduleFilter
@@ -130,7 +113,7 @@ export default function JadwalMisa({
                             setTab(value as 'rutin' | 'khusus')
                         }
                     >
-                        <TabsList>
+                        <TabsList variant="line">
                             <TabsTrigger value="rutin">Misa Rutin</TabsTrigger>
                             <TabsTrigger value="khusus">
                                 Misa Khusus
@@ -154,15 +137,139 @@ export default function JadwalMisa({
                                     }
                                 />
                             ) : (
-                                <ul>
-                                    {regularMasses.map((mass) => (
-                                        <MassScheduleCard
-                                            key={mass.id}
-                                            mass={mass}
-                                            dayLabels={DAY_LABELS}
-                                        />
+                                <div className="space-y-3">
+                                    <div className="mb-10 space-y-1">
+                                        <Text as="h2" variant="heading-sm">
+                                            Jadwal Misa Rutin
+                                        </Text>
+
+                                        <Text
+                                            as="p"
+                                            variant="body-sm"
+                                            color="muted"
+                                        >
+                                            Daftar misa rutin yang ada di paroki
+                                        </Text>
+                                    </div>
+
+                                    {regularMassGroups.map((group) => (
+                                        <div
+                                            key={group.day}
+                                            className="mb-4 overflow-hidden border-b border-border/70 pb-4"
+                                        >
+                                            {/* Mobile: collapsible */}
+                                            <div className="sm:hidden">
+                                                <Collapsible
+                                                    defaultOpen={
+                                                        group.day === 0
+                                                    }
+                                                >
+                                                    <CollapsibleTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            className="flex w-full items-center gap-3 rounded-xl p-4 text-left transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                        >
+                                                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
+                                                                <CalendarDays
+                                                                    className="size-5"
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </div>
+
+                                                            <div className="min-w-0 flex-1">
+                                                                <Text
+                                                                    as="h3"
+                                                                    variant="heading-sm"
+                                                                >
+                                                                    {
+                                                                        group.label
+                                                                    }
+                                                                </Text>
+                                                                <Text
+                                                                    as="p"
+                                                                    variant="body-sm"
+                                                                    color="muted"
+                                                                >
+                                                                    {
+                                                                        group
+                                                                            .masses
+                                                                            .length
+                                                                    }{' '}
+                                                                    misa
+                                                                </Text>
+                                                            </div>
+
+                                                            <ChevronDown
+                                                                className="size-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                                                                aria-hidden="true"
+                                                            />
+                                                        </button>
+                                                    </CollapsibleTrigger>
+
+                                                    <CollapsibleContent>
+                                                        <ul className="divide-y divide-border/70 px-4 py-3">
+                                                            {group.masses.map(
+                                                                (mass) => (
+                                                                    <RegularMassScheduleCard
+                                                                        key={
+                                                                            mass.id
+                                                                        }
+                                                                        mass={
+                                                                            mass
+                                                                        }
+                                                                    />
+                                                                ),
+                                                            )}
+                                                        </ul>
+                                                    </CollapsibleContent>
+                                                </Collapsible>
+                                            </div>
+
+                                            {/* Desktop: always visible, without collapsible */}
+                                            <div className="hidden sm:grid sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-10">
+                                                <div className="flex items-center gap-3 p-4 sm:px-5">
+                                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
+                                                        <CalendarDays
+                                                            className="size-5"
+                                                            aria-hidden="true"
+                                                        />
+                                                    </div>
+
+                                                    <div className="min-w-0">
+                                                        <Text
+                                                            as="h3"
+                                                            variant="heading-sm"
+                                                        >
+                                                            {group.label}
+                                                        </Text>
+                                                        <Text
+                                                            as="p"
+                                                            variant="body-sm"
+                                                            color="muted"
+                                                        >
+                                                            {
+                                                                group.masses
+                                                                    .length
+                                                            }{' '}
+                                                            misa
+                                                        </Text>
+                                                    </div>
+                                                </div>
+
+                                                <ul className="min-w-0 divide-y divide-border/70 px-4 py-3 sm:px-5">
+                                                    {group.masses.map(
+                                                        (mass) => (
+                                                            <RegularMassScheduleCard
+                                                                key={mass.id}
+                                                                mass={mass}
+                                                            />
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             )}
                         </TabsContent>
 
@@ -173,79 +280,38 @@ export default function JadwalMisa({
                                     description="Misa khusus akan tampil di sini setelah dipublikasikan."
                                 />
                             ) : (
-                                <ul className="space-y-6">
-                                    {specialMasses.map((mass) => (
-                                        <li
-                                            key={mass.id}
-                                            className="space-y-2 border-t border-border pt-5"
-                                            data-test="special-mass-card"
+                                <div className="space-y-5">
+                                    <div className="space-y-1">
+                                        <Text as="h2" variant="heading-sm">
+                                            Jadwal Misa Khusus
+                                        </Text>
+
+                                        <Text
+                                            as="p"
+                                            variant="body-sm"
+                                            color="muted"
                                         >
-                                            <Text as="p" variant="heading-sm">
-                                                {mass.title}
-                                            </Text>
+                                            Daftar misa khusus dan perayaan
+                                            tertentu di paroki, stasi, dan
+                                            kapel.
+                                        </Text>
+                                    </div>
 
-                                            <Text
-                                                as="p"
-                                                variant="body-sm"
-                                                color="muted"
-                                            >
-                                                {formatWibDateTime(
-                                                    mass.start_at,
-                                                    displayTimezone,
-                                                )}
-                                                {mass.end_at
-                                                    ? ` – ${
-                                                          formatWibDateTime(
-                                                              mass.end_at,
-                                                              displayTimezone,
-                                                          ).split(' · ')[1]
-                                                      }`
-                                                    : ''}
-                                            </Text>
-
-                                            <Text
-                                                as="p"
-                                                variant="body-sm"
-                                                color="muted"
-                                            >
-                                                {mass.location.name}
-                                            </Text>
-
-                                            {mass.description ? (
-                                                <Text as="p" variant="body">
-                                                    {mass.description}
-                                                </Text>
-                                            ) : null}
-                                        </li>
-                                    ))}
-                                </ul>
+                                    <ul className="space-y-3">
+                                        {specialMasses.map((mass) => (
+                                            <SpecialMassScheduleCard
+                                                key={mass.id}
+                                                mass={mass}
+                                                displayTimezone={
+                                                    displayTimezone
+                                                }
+                                            />
+                                        ))}
+                                    </ul>
+                                </div>
                             )}
                         </TabsContent>
                     </Tabs>
-
-                    {locations.length > 0 ? (
-                        <section aria-label="Lokasi misa" className="space-y-4">
-                            <Text as="h2" variant="h3">
-                                Lokasi
-                            </Text>
-
-                            <div className="grid gap-6 sm:grid-cols-2">
-                                {locations.map((location) => (
-                                    <div
-                                        key={location.id}
-                                        className="rounded-lg border border-border p-5"
-                                    >
-                                        <LocationInfo location={location} />
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    ) : null}
-
-                    <ShareActions
-                        url={shareUrl}
-                        title="Jadwal Misa Paroki HSPMTB Putussibau"
-                    />
                 </div>
             </PublicSection>
         </>

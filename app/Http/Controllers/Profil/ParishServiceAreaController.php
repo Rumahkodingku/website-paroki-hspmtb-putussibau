@@ -45,7 +45,8 @@ class ParishServiceAreaController extends Controller
         // no-op before the singleton exists.
         $area->fill($request->validated())->save();
 
-        return to_route('parish-service-area.edit')
-            ->with('success', __('Narasi wilayah pelayanan berhasil disimpan.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Narasi wilayah pelayanan berhasil disimpan.')]);
+
+        return to_route('parish-service-area.edit');
     }
 }

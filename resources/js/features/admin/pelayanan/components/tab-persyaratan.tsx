@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, Pencil, Trash } from 'lucide-react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { Field, FormInput, FormTextarea } from '@/components/form-fields';
+import {
+    ChoiceSelect,
+    Field,
+    FormInput,
+    FormTextarea,
+} from '@/components/form-fields';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,17 +31,24 @@ type Props = {
     items: ServiceRequirementRow[];
     labels: Record<string, string>;
     hints: Record<string, string>;
+    conditions: Record<string, string>;
     copy: Record<string, string>;
     empty: Record<string, string>;
 };
 
-type FormData = { text: string; note: string };
+type FormData = {
+    text: string;
+    note: string;
+    requirement_condition: string;
+    applies_to: string;
+};
 
 export function TabPersyaratan({
     serviceId,
     items,
     labels,
     hints,
+    conditions,
     copy,
     empty,
 }: Props) {
@@ -108,6 +120,24 @@ export function TabPersyaratan({
                                 <Text as="p" variant="heading-sm">
                                     {item.text}
                                 </Text>
+                                {item.applies_to ? (
+                                    <Text
+                                        as="p"
+                                        variant="body-sm"
+                                        color="muted"
+                                    >
+                                        Untuk {item.applies_to}
+                                    </Text>
+                                ) : null}
+                                {item.requirement_condition !== 'required' ? (
+                                    <Text
+                                        as="p"
+                                        variant="body-sm"
+                                        color="muted"
+                                    >
+                                        {conditions[item.requirement_condition]}
+                                    </Text>
+                                ) : null}
                                 {item.note ? (
                                     <Text
                                         as="p"
@@ -191,6 +221,7 @@ export function TabPersyaratan({
                     item={editing}
                     labels={labels}
                     hints={hints}
+                    conditions={conditions}
                     copy={copy}
                     onClose={() => {
                         setCreating(false);
@@ -238,6 +269,7 @@ function RequirementDialog({
     item,
     labels,
     hints,
+    conditions,
     copy,
     onClose,
 }: {
@@ -245,12 +277,15 @@ function RequirementDialog({
     item: ServiceRequirementRow | null;
     labels: Record<string, string>;
     hints: Record<string, string>;
+    conditions: Record<string, string>;
     copy: Record<string, string>;
     onClose: () => void;
 }) {
     const form = useForm<FormData>({
         text: item?.text ?? '',
         note: item?.note ?? '',
+        requirement_condition: item?.requirement_condition ?? 'required',
+        applies_to: item?.applies_to ?? '',
     });
 
     const submit = () => {
@@ -312,7 +347,56 @@ function RequirementDialog({
                             value={form.data.note}
                             onChange={(value) => form.setData('note', value)}
                             rows={2}
+                            placeholder="Contoh: Catatan persyaratan"
                         />
+                    </Field>
+
+                    <Field
+                        id="requirement-condition"
+                        label={labels.requirement_condition}
+                        error={form.errors.requirement_condition}
+                        required
+                    >
+                        <ChoiceSelect
+                            id="requirement-condition"
+                            value={form.data.requirement_condition}
+                            onChange={(value) =>
+                                form.setData('requirement_condition', value)
+                            }
+                            options={Object.entries(conditions).map(
+                                ([value, label]) => ({ value, label }),
+                            )}
+                            placeholder={undefined}
+                        />
+                    </Field>
+
+                    <Field
+                        id="requirement-applies-to"
+                        label={labels.applies_to}
+                        hint={hints.applies_to}
+                        error={form.errors.applies_to}
+                    >
+                        <FormInput
+                            id="requirement-applies-to"
+                            value={form.data.applies_to}
+                            onChange={(value) =>
+                                form.setData('applies_to', value)
+                            }
+                            list="requirement-applies-to-suggestions"
+                            placeholder="Contoh: Semua umat"
+                        />
+                        <datalist id="requirement-applies-to-suggestions">
+                            {[
+                                'Orang tua',
+                                'Wali baptis',
+                                'Calon baptis dewasa',
+                                'Calon penerima sakramen',
+                                'Keluarga',
+                                'Umum',
+                            ].map((suggestion) => (
+                                <option key={suggestion} value={suggestion} />
+                            ))}
+                        </datalist>
                     </Field>
 
                     <DialogFooter>

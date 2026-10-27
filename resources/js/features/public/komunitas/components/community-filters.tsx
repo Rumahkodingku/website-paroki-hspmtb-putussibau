@@ -1,15 +1,11 @@
 import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { Check, House, LayoutGrid, Search, Users, X } from 'lucide-react';
 import { Text } from '@/components/text';
 import { index as komunitasIndex } from '@/routes/komunitas';
 import type { PublicCommunityCategory, PublicCommunityFilters } from '../types';
+import { SEARCH_DEBOUNCE_MS } from '@/lib/search-debouce';
 
-/**
- * Search and category filter, both living in the URL.
- *
- * A filtered directory is a place somebody can be sent a link to, so the filters
- * are query parameters rather than component state. `replace` rather than
- * `push`, because typing in a search box should not fill the back button.
- */
 export function CommunityFilters({
     filters,
     categories,
@@ -19,72 +15,203 @@ export function CommunityFilters({
     categories: PublicCommunityCategory[];
     resultCount: number;
 }) {
-    const apply = (next: Partial<PublicCommunityFilters>) => {
+    const [search, setSearch] = useState(filters.q);
+    const [activeCategory, setActiveCategory] = useState(filters.kategori);
+
+    useEffect(() => {
+        setSearch(filters.q);
+    }, [filters.q]);
+
+    useEffect(() => {
+        setActiveCategory(filters.kategori);
+    }, [filters.kategori]);
+
+    useEffect(() => {
+        const normalizedSearch = search.trim();
+
+        if (normalizedSearch === filters.q.trim()) {
+            return;
+        }
+
+        const timeout = window.setTimeout(() => {
+            router.get(
+                komunitasIndex().url,
+                {
+                    ...filters,
+                    q: normalizedSearch,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                },
+            );
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => window.clearTimeout(timeout);
+    }, [search, filters]);
+
+    const hasFilter = search.trim() !== '' || activeCategory !== '';
+
+    const applyCategory = (kategori: string) => {
+        setActiveCategory(kategori);
+
         router.get(
             komunitasIndex().url,
-            { ...filters, ...next },
-            { preserveState: true, preserveScroll: true, replace: true },
+            {
+                ...filters,
+                q: search.trim(),
+                kategori,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
         );
     };
 
-    const hasFilter = filters.q !== '' || filters.kategori !== '';
+    const resetFilters = () => {
+        setSearch('');
+        setActiveCategory('');
+
+        router.get(
+            komunitasIndex().url,
+            {
+                ...filters,
+                q: '',
+                kategori: '',
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
 
     return (
-        <div className="flex flex-wrap items-center gap-3">
-            <div className="min-w-56 flex-1">
+        <section
+            aria-label="Pencarian dan filter komunitas"
+            className="space-y-5"
+        >
+            {/* Search */}
+            <div className="relative">
                 <label htmlFor="komunitas-search" className="sr-only">
                     Cari komunitas
                 </label>
+
+                <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground"
+                />
+
                 <input
                     id="komunitas-search"
                     type="search"
-                    value={filters.q}
-                    placeholder="Cari nama komunitas"
-                    onChange={(event: any) => apply({ q: event.target.value })}
-                    className="h-11 w-full rounded-pill border border-border bg-background px-4 text-sm focus-visible:border-primary focus-visible:outline-none"
+                    value={search}
+                    onChange={(event: any) => setSearch(event.target.value)}
+                    placeholder="Cari nama komunitas..."
+                    autoComplete="off"
+                    className="h-14 w-full rounded-lg border border-border bg-background pr-12 pl-12 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-primary-on-surface focus-visible:ring-2 focus-visible:ring-primary-on-surface/15 focus-visible:outline-none"
                 />
+
+                {search ? (
+                    <button
+                        type="button"
+                        onClick={() => setSearch('')}
+                        aria-label="Hapus pencarian"
+                        className="absolute top-1/2 right-3 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    >
+                        <X className="size-4" aria-hidden="true" />
+                    </button>
+                ) : null}
             </div>
 
-            <div>
-                <label htmlFor="komunitas-kategori" className="sr-only">
-                    Filter kategori
-                </label>
-                <select
-                    id="komunitas-kategori"
-                    value={filters.kategori}
-                    onChange={(event: any) =>
-                        apply({ kategori: event.target.value })
-                    }
-                    className="h-11 rounded-md border border-border bg-background px-3 text-sm focus-visible:border-primary"
-                >
-                    <option value="">Semua kategori</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.slug}>
-                            {category.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {hasFilter ? (
+            {/* Category chips */}
+            <div
+                className="-mx-1 scrollbar-thin flex scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
+                aria-label="Kategori komunitas"
+            >
                 <button
                     type="button"
-                    onClick={() => apply({ q: '', kategori: '' })}
-                    className="h-11 rounded-md px-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    aria-pressed={activeCategory === ''}
+                    onClick={() => applyCategory('')}
+                    className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
+                        activeCategory === ''
+                            ? 'border-primary-on-surface bg-primary-on-surface text-white'
+                            : 'border-border bg-background text-foreground hover:bg-muted'
+                    }`}
                 >
-                    Reset filter
+                    {activeCategory === '' ? (
+                        <Check className="size-4" aria-hidden="true" />
+                    ) : (
+                        <LayoutGrid className="size-4" aria-hidden="true" />
+                    )}
+                    Semua
                 </button>
-            ) : null}
 
-            <Text
-                as="p"
-                variant="body-sm"
-                color="muted"
-                role="status"
-                aria-live="polite"
-            >
-                {resultCount} komunitas
-            </Text>
-        </div>
+                {categories.map((category) => {
+                    const isActive = activeCategory === category.slug;
+
+                    return (
+                        <button
+                            key={category.id}
+                            type="button"
+                            aria-pressed={isActive}
+                            onClick={() => applyCategory(category.slug)}
+                            className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
+                                isActive
+                                    ? 'border-primary-on-surface bg-primary-on-surface text-white'
+                                    : 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground'
+                            }`}
+                        >
+                            {category.name === 'Organisasi/Kategorial' ? (
+                                <Users className="size-4" aria-hidden="true" />
+                            ) : category.name === 'Wilayah dan Lingkungan' ? (
+                                <House className="size-4" aria-hidden="true" />
+                            ) : (
+                                <Users className="size-4" aria-hidden="true" />
+                            )}
+
+                            {category.name}
+
+                            {isActive ? (
+                                <Check
+                                    className="size-3.5"
+                                    aria-hidden="true"
+                                />
+                            ) : null}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Results summary */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-4">
+                <div className="flex items-baseline gap-2">
+                    <Text as="p" variant="h3">
+                        {resultCount} komunitas
+                    </Text>
+
+                    {hasFilter ? (
+                        <span className="text-sm text-muted-foreground">
+                            hasil pencarian
+                        </span>
+                    ) : null}
+                </div>
+
+                {hasFilter ? (
+                    <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    >
+                        <X className="size-4" aria-hidden="true" />
+                        Reset filter
+                    </button>
+                ) : null}
+            </div>
+        </section>
     );
 }

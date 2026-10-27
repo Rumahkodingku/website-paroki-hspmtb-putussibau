@@ -36,10 +36,12 @@ use App\Http\Controllers\Pelayanan\ServiceStepController;
 use App\Http\Controllers\Profil\ParishBoardMemberController;
 use App\Http\Controllers\Profil\ParishBoardPeriodController;
 use App\Http\Controllers\Profil\ParishHistoryItemController;
+use App\Http\Controllers\Profil\ParishProfileController;
 use App\Http\Controllers\Profil\ParishServiceAreaController;
 use App\Http\Controllers\Profil\PastorAssignmentController;
 use App\Http\Controllers\Profil\PastorController;
 use App\Http\Controllers\Profil\PublicParishProfileController;
+use App\Http\Controllers\Public\PublicLegalController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\SettingsController;
@@ -56,6 +58,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', PublicHomeController::class)->name('home');
 
+Route::get('/profil', [PublicParishProfileController::class, 'index'])->name('profil.index');
 Route::get('/profil/sejarah', [PublicParishProfileController::class, 'sejarah'])->name('profil.sejarah');
 Route::get('/profil/wilayah', [PublicParishProfileController::class, 'wilayah'])->name('profil.wilayah');
 Route::get('/profil/pastor', [PublicParishProfileController::class, 'pastor'])->name('profil.pastor');
@@ -104,6 +107,9 @@ Route::get('/dokumen/{document}/unduh', [PublicDocumentController::class, 'downl
     ->name('dokumen.unduh');
 
 Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
+
+Route::get('/kebijakan-privasi', [PublicLegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/syarat-ketentuan', [PublicLegalController::class, 'terms'])->name('legal.terms');
 
 Route::inertia('/design-system', 'public/design-system')->name('design-system.index');
 
@@ -364,7 +370,11 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
          | page (D-52). Every redirect must be named or Wayfinder fails to build.
          |
          */
-        Route::get('/profil', fn () => to_route('parish-histories.index'))->name('parish-profile.index');
+        Route::get('/profil', fn () => to_route('parish-profile.edit'))->name('parish-profile.index');
+
+        // Informasi Profil
+        Route::get('/profil/informasi', [ParishProfileController::class, 'edit'])->name('parish-profile.edit');
+        Route::put('/profil/informasi', [ParishProfileController::class, 'update'])->name('parish-profile.update');
 
         // Sejarah Paroki
         Route::get('/profil/sejarah', [ParishHistoryItemController::class, 'index'])->name('parish-histories.index');
@@ -387,6 +397,7 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::patch('/profil/pastor/{pastor}', [PastorController::class, 'update'])->name('pastors.update');
         Route::delete('/profil/pastor/{pastor}', [PastorController::class, 'destroy'])->name('pastors.destroy');
 
+        Route::get('/profil/pastor/{pastor}/penugasan/tambah', [PastorAssignmentController::class, 'create'])->name('pastor-assignments.create');
         Route::post('/profil/pastor/{pastor}/penugasan', [PastorAssignmentController::class, 'store'])->name('pastor-assignments.store');
         Route::get('/profil/pastor/{pastor}/penugasan/{assignment}/ubah', [PastorAssignmentController::class, 'edit'])->name('pastor-assignments.edit');
         Route::patch('/profil/pastor/{pastor}/penugasan/{assignment}', [PastorAssignmentController::class, 'update'])->name('pastor-assignments.update');

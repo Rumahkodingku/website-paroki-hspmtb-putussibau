@@ -49,7 +49,7 @@ class PastorController extends Controller
                 'sort_order' => 'pastors.sort_order',
             ],
             [['pastors.sort_order', 'asc'], ['pastors.name', 'asc']],
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return Inertia::render('admin/profil/pastor/index', [
             'pastors' => PastorResource::collection($pastors),
@@ -75,8 +75,9 @@ class PastorController extends Controller
     {
         $pastor = Pastor::create($request->validated());
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __('Data pastor berhasil ditambahkan. Tambahkan riwayat penugasannya.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil ditambahkan. Tambahkan riwayat penugasannya.')]);
+
+        return to_route('pastors.edit', $pastor);
     }
 
     public function edit(Pastor $pastor): Response
@@ -96,8 +97,9 @@ class PastorController extends Controller
     {
         $pastor->update($request->validated());
 
-        return to_route('pastors.edit', $pastor)
-            ->with('success', __('Data pastor berhasil diperbarui.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil diperbarui.')]);
+
+        return to_route('pastors.edit', $pastor);
     }
 
     public function destroy(Pastor $pastor): RedirectResponse
@@ -109,7 +111,8 @@ class PastorController extends Controller
         // with it.
         $pastor->delete();
 
-        return to_route('pastors.index')
-            ->with('success', __('Data pastor berhasil dihapus.'));
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Data pastor berhasil dihapus.')]);
+
+        return to_route('pastors.index');
     }
 }
