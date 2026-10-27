@@ -94,6 +94,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale' => fn () => app()->getLocale(),
             'displayTimezone' => fn () => config('app.display_timezone'),
+            'abilities' => fn (): array => [
+                'auditlogs.view' => (bool) $request->user()?->can('auditlogs.view'),
+            ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),
             'identity' => fn (): array => $this->identityDetails(),

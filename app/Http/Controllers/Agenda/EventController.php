@@ -16,11 +16,13 @@ use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\Location;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -43,6 +45,9 @@ use Inertia\Response;
 class EventController extends Controller
 {
     use EventFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -180,7 +185,11 @@ class EventController extends Controller
     {
         Gate::authorize('delete', $event);
 
-        $event->delete();
+        DB::transaction(function () use ($event): void {
+            $before = $this->audit->snapshot($event, 'agenda');
+            $event->delete();
+            $this->audit->deleted('agenda', $event, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Agenda berhasil dihapus.')]);
 

@@ -134,7 +134,7 @@ it('sends no page-specific props from a placeholder', function (string $url) {
     // D-62. `contact` is shared for the same reason: the footer renders it on
     // every public page (D-67). `identity` is shared because the navbar and
     // footer render the parish identity on every public page (D-69).
-    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'sidebarOpen', 'seo', 'identity', 'media', 'documentUploads', 'contact', 'errors'];
+    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'abilities', 'sidebarOpen', 'seo', 'identity', 'media', 'documentUploads', 'contact', 'errors'];
 
     expect(array_diff(array_keys($props), $shared))->toBe([]);
 })->with('placeholder pages');

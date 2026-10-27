@@ -5,6 +5,7 @@ use App\Http\Controllers\Agenda\EventIcsController;
 use App\Http\Controllers\Agenda\PublicEventController;
 use App\Http\Controllers\Area\AreaController;
 use App\Http\Controllers\Area\PublicAreaController;
+use App\Http\Controllers\Audit\AuditLogController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\PublicDocumentController;
@@ -133,6 +134,18 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
          * ------------------------------------------------------------------
          */
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        /*
+         * ------------------------------------------------------------------
+         * Audit Log
+         * ------------------------------------------------------------------
+         */
+
+        Route::get('/audit-log', [AuditLogController::class, 'index'])
+            ->name('audit-logs.index');
+
+        Route::get('/audit-log/{auditEvent}', [AuditLogController::class, 'show'])
+            ->name('audit-logs.show');
 
         /*
          * ------------------------------------------------------------------

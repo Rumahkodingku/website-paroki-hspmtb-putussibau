@@ -10,9 +10,11 @@ use App\Http\Requests\Area\UpdateAreaRequest;
 use App\Http\Resources\Area\AreaOptionResource;
 use App\Http\Resources\Area\AreaResource;
 use App\Models\Area;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,6 +33,8 @@ use Inertia\Response;
  */
 class AreaController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use AreaFormMeta;
     use SortsAdminList;
 
@@ -110,7 +114,10 @@ class AreaController extends Controller
 
     public function store(StoreAreaRequest $request): RedirectResponse
     {
-        Area::create($request->validated());
+        DB::transaction(function () use ($request): void {
+            $area = Area::query()->create($request->validated());
+            $this->audit->created('areas', $area);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_created')]);
 
@@ -130,7 +137,18 @@ class AreaController extends Controller
 
     public function update(UpdateAreaRequest $request, Area $area): RedirectResponse
     {
-        $area->update($request->validated());
+        DB::transaction(function () use ($request, $area): void {
+            $before = $this->audit->snapshot($area, 'areas');
+            $wasActive = $area->is_active;
+
+            $area->update($request->validated());
+
+            $action = $wasActive === $area->is_active
+                ? 'updated'
+                : ($area->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('areas', $area, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_updated')]);
 
@@ -147,7 +165,11 @@ class AreaController extends Controller
             ]);
         }
 
-        $area->delete();
+        DB::transaction(function () use ($area): void {
+            $before = $this->audit->snapshot($area, 'areas');
+            $area->delete();
+            $this->audit->deleted('areas', $area, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('area.flash.area_deleted')]);
 

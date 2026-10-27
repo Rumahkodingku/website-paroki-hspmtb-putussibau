@@ -11,7 +11,7 @@ cites. This file is about the mechanism.
 
 ## 1. What exists
 
-One role and ninety-three permissions. That is not an oversight: the PRD puts
+One role and ninety-four permissions. That is not an oversight: the PRD puts
 role management out of MVP scope, and a permission for a module with no code to
 guard would be a name nothing reads.
 
@@ -46,6 +46,7 @@ are absent on purpose:
 | --- | --- |
 | Entry | `admin.access` |
 | Dashboard | `dashboard.view` |
+| Audit Log | `auditlogs.view` |
 | Settings | `settings.view`, `settings.update` |
 | Media | `media.view`, `media.create`, `media.delete` |
 | Users | `users.view`, `users.create`, `users.update`, `users.disable` |
@@ -75,7 +76,7 @@ The role:
 
 | Role | How it gets its permissions |
 | --- | --- |
-| `super_admin` | **Not attached.** Granted by `Gate::before`. |
+| `super_admin` | **Not attached.** Granted by `Gate::before`. Menu visibility uses the `abilities` shared prop computed with `can()`, not the attached permission list. |
 
 The list lives in one constant, `PermissionSeeder::PERMISSIONS`. The role name
 is `AppServiceProvider::SUPER_ADMIN`, referenced rather than typed out, because a

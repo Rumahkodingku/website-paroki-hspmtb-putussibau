@@ -7,13 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\StoreMediaRequest;
 use App\Jobs\GenerateImageVariants;
 use App\Models\Media;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use RuntimeException;
+use Throwable;
 
 /**
  * The media upload endpoint.
@@ -28,6 +32,8 @@ use Inertia\Inertia;
  */
 class MediaController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * Detected MIME type to stored extension.
      *
@@ -59,18 +65,46 @@ class MediaController extends Controller
             (string) config('media.original_disk'),
         );
 
-        $media = Media::query()->create([
-            'disk' => (string) config('media.original_disk'),
-            'path' => $path,
-            'original_name' => $upload->getClientOriginalName(),
-            // The provisional value is replaced by inspect() in the job, which
-            // reads the type from the file itself rather than from the browser.
-            'mime_type' => $upload->getMimeType() ?? 'application/octet-stream',
-            'file_size' => $upload->getSize(),
-            'alt_text' => $request->input('alt_text'),
-            'status' => MediaStatus::Pending,
-            'uploader_id' => $request->user()->id,
-        ]);
+        if ($path === false) {
+            throw new RuntimeException('Gagal menyimpan berkas unggahan.');
+        }
+
+        try {
+            $media = DB::transaction(function () use ($request, $upload, $path): Media {
+                $media = Media::query()->create([
+                    'disk' => (string) config('media.original_disk'),
+                    'path' => $path,
+                    'original_name' => $upload->getClientOriginalName(),
+                    // The provisional value is replaced by inspect() in the job, which
+                    // reads the type from the file itself rather than from the browser.
+                    'mime_type' => $upload->getMimeType() ?? 'application/octet-stream',
+                    'file_size' => $upload->getSize(),
+                    'alt_text' => $request->input('alt_text'),
+                    'status' => MediaStatus::Pending,
+                    'uploader_id' => $request->user()->id,
+                ]);
+
+                $this->audit->recordModel(
+                    'media',
+                    'upload_accepted',
+                    'success',
+                    $media,
+                    [],
+                    $this->audit->snapshot($media, 'media'),
+                    [
+                        'original_name' => $media->original_name,
+                        'mime_type' => $media->mime_type,
+                        'file_size' => $media->file_size,
+                    ],
+                );
+
+                return $media;
+            });
+        } catch (Throwable $exception) {
+            Storage::disk((string) config('media.original_disk'))->delete($path);
+
+            throw $exception;
+        }
 
         // Dispatched after the row exists, and outside any transaction, so a
         // worker can never pick the job up before the commit it depends on.
@@ -163,15 +197,40 @@ class MediaController extends Controller
             403,
         );
 
+        $variants = $media->variants()->get(['path']);
         $variantDisk = Storage::disk((string) config('media.variant_disk'));
+        $originalDisk = $media->disk;
+        $originalPath = $media->path;
 
-        foreach ($media->variants as $variant) {
-            $variantDisk->delete($variant->path);
+        DB::transaction(function () use ($media): void {
+            $before = $this->audit->snapshot($media, 'media');
+            $media->delete();
+            $this->audit->deleted('media', $media, $before);
+        });
+
+        try {
+            foreach ($variants as $variant) {
+                $variantDisk->delete($variant->path);
+            }
+
+            Storage::disk($originalDisk)->delete($originalPath);
+        } catch (Throwable $exception) {
+            $this->audit->system(
+                'media',
+                'storage_delete_failed',
+                'failure',
+                __('audit.descriptions.storage_delete_failed'),
+                [
+                    'media_id' => $media->getKey(),
+                    'reason_code' => $exception::class,
+                ],
+                Media::class,
+                (string) $media->getKey(),
+                $media->original_name,
+            );
+
+            throw $exception;
         }
-
-        Storage::disk($media->disk)->delete($media->path);
-
-        $media->delete();
 
         Inertia::flash('toast', [
             'type' => 'success',

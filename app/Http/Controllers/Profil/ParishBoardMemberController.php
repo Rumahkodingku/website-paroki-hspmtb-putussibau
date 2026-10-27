@@ -9,7 +9,9 @@ use App\Http\Requests\Profil\UpdateParishBoardMemberRequest;
 use App\Http\Resources\Profil\ParishBoardMemberResource;
 use App\Models\ParishBoardMember;
 use App\Models\ParishBoardPeriod;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,6 +24,8 @@ use Inertia\Response;
 class ParishBoardMemberController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
 
     public function create(ParishBoardPeriod $period): Response
     {
@@ -38,7 +42,10 @@ class ParishBoardMemberController extends Controller
         $data = $request->validated();
         $data['parish_board_period_id'] = $period->getKey();
 
-        ParishBoardMember::create($data);
+        DB::transaction(function () use ($data): void {
+            $member = ParishBoardMember::query()->create($data);
+            $this->audit->created('parish_board_members', $member);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil ditambahkan.')]);
 
@@ -66,7 +73,11 @@ class ParishBoardMemberController extends Controller
     ): RedirectResponse {
         abort_unless($member->parish_board_period_id === $period->getKey(), 404);
 
-        $member->update($request->validated());
+        DB::transaction(function () use ($request, $member): void {
+            $before = $this->audit->snapshot($member, 'parish_board_members');
+            $member->update($request->validated());
+            $this->audit->updated('parish_board_members', $member, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil diperbarui.')]);
 
@@ -78,7 +89,11 @@ class ParishBoardMemberController extends Controller
         Gate::authorize('delete', $member);
         abort_unless($member->parish_board_period_id === $period->getKey(), 404);
 
-        $member->delete();
+        DB::transaction(function () use ($member): void {
+            $before = $this->audit->snapshot($member, 'parish_board_members');
+            $member->delete();
+            $this->audit->deleted('parish_board_members', $member, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Anggota kepengurusan berhasil dihapus.')]);
 

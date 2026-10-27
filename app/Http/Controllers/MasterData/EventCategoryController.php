@@ -9,9 +9,11 @@ use App\Http\Requests\Agenda\StoreEventCategoryRequest;
 use App\Http\Requests\Agenda\UpdateEventCategoryRequest;
 use App\Http\Resources\Agenda\EventCategoryResource;
 use App\Models\EventCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,6 +34,8 @@ use Inertia\Response;
  */
 class EventCategoryController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use EventFormMeta;
     use SortsAdminList;
 
@@ -80,7 +84,10 @@ class EventCategoryController extends Controller
 
     public function store(StoreEventCategoryRequest $request): RedirectResponse
     {
-        EventCategory::create($request->eventCategoryPayload());
+        DB::transaction(function () use ($request): void {
+            $eventCategory = EventCategory::query()->create($request->eventCategoryPayload());
+            $this->audit->created('event_categories', $eventCategory);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil ditambahkan.')]);
 
@@ -99,7 +106,11 @@ class EventCategoryController extends Controller
 
     public function update(UpdateEventCategoryRequest $request, EventCategory $eventCategory): RedirectResponse
     {
-        $eventCategory->update($request->eventCategoryPayload());
+        DB::transaction(function () use ($request, $eventCategory): void {
+            $before = $this->audit->snapshot($eventCategory, 'event_categories');
+            $eventCategory->update($request->eventCategoryPayload());
+            $this->audit->updated('event_categories', $eventCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil diperbarui.')]);
 
@@ -125,7 +136,11 @@ class EventCategoryController extends Controller
             ]);
         }
 
-        $eventCategory->delete();
+        DB::transaction(function () use ($eventCategory): void {
+            $before = $this->audit->snapshot($eventCategory, 'event_categories');
+            $eventCategory->delete();
+            $this->audit->deleted('event_categories', $eventCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori agenda berhasil dihapus.')]);
 

@@ -11,9 +11,11 @@ use App\Http\Requests\Galeri\UpdateGalleryAlbumRequest;
 use App\Http\Resources\Galeri\GalleryAlbumListResource;
 use App\Http\Resources\Galeri\GalleryAlbumResource;
 use App\Models\GalleryAlbum;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,6 +36,9 @@ use Inertia\Response;
 class GalleryController extends Controller
 {
     use GalleryFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -132,7 +137,11 @@ class GalleryController extends Controller
     {
         Gate::authorize('delete', $gallery);
 
-        $gallery->delete();
+        DB::transaction(function () use ($gallery): void {
+            $before = $this->audit->snapshot($gallery, 'galleries');
+            $gallery->delete();
+            $this->audit->deleted('galleries', $gallery, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.album_deleted')]);
 

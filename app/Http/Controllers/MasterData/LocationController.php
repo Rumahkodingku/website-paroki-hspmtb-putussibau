@@ -9,15 +9,19 @@ use App\Http\Requests\MassSchedule\StoreLocationRequest;
 use App\Http\Requests\MassSchedule\UpdateLocationRequest;
 use App\Http\Resources\MassSchedule\LocationResource;
 use App\Models\Location;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LocationController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use MassScheduleFormMeta;
     use SortsAdminList;
 
@@ -75,7 +79,10 @@ class LocationController extends Controller
 
     public function store(StoreLocationRequest $request): RedirectResponse
     {
-        Location::create($request->locationPayload());
+        DB::transaction(function () use ($request): void {
+            $location = Location::query()->create($request->locationPayload());
+            $this->audit->created('locations', $location);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil ditambahkan.')]);
 
@@ -94,7 +101,18 @@ class LocationController extends Controller
 
     public function update(UpdateLocationRequest $request, Location $location): RedirectResponse
     {
-        $location->update($request->locationPayload());
+        DB::transaction(function () use ($request, $location): void {
+            $before = $this->audit->snapshot($location, 'locations');
+            $wasActive = $location->is_active;
+
+            $location->update($request->locationPayload());
+
+            $action = $wasActive === $location->is_active
+                ? 'updated'
+                : ($location->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('locations', $location, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil diperbarui.')]);
 
@@ -114,7 +132,11 @@ class LocationController extends Controller
             ]);
         }
 
-        $location->delete();
+        DB::transaction(function () use ($location): void {
+            $before = $this->audit->snapshot($location, 'locations');
+            $location->delete();
+            $this->audit->deleted('locations', $location, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Lokasi berhasil dihapus.')]);
 

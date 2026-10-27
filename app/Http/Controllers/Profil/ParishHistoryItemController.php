@@ -11,9 +11,11 @@ use App\Http\Requests\Profil\UpdateParishHistoryNarrativeRequest;
 use App\Http\Resources\Profil\ParishHistoryItemResource;
 use App\Models\ParishHistoryItem;
 use App\Models\ParishHistoryNarrative;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,6 +32,9 @@ use Inertia\Response;
 class ParishHistoryItemController extends Controller
 {
     use ProfilFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -78,9 +83,19 @@ class ParishHistoryItemController extends Controller
      */
     public function updateNarrative(UpdateParishHistoryNarrativeRequest $request): RedirectResponse
     {
-        ParishHistoryNarrative::current()
-            ->fill(['narrative' => $request->validated('narrative')])
-            ->save();
+        DB::transaction(function () use ($request): void {
+            $narrative = ParishHistoryNarrative::current();
+            $isNew = ! $narrative->exists;
+            $before = $isNew ? [] : $this->audit->snapshot($narrative, 'parish_histories');
+
+            $narrative->fill(['narrative' => $request->validated('narrative')])->save();
+
+            if ($isNew) {
+                $this->audit->created('parish_histories', $narrative, 'Narasi Sejarah');
+            } else {
+                $this->audit->updated('parish_histories', $narrative, $before, null, 'Narasi Sejarah');
+            }
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Narasi sejarah berhasil disimpan.')]);
 
@@ -98,7 +113,10 @@ class ParishHistoryItemController extends Controller
 
     public function store(StoreParishHistoryItemRequest $request): RedirectResponse
     {
-        ParishHistoryItem::create($request->validated());
+        DB::transaction(function () use ($request): void {
+            $item = ParishHistoryItem::query()->create($request->validated());
+            $this->audit->created('parish_histories', $item);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil ditambahkan.')]);
 
@@ -119,7 +137,11 @@ class ParishHistoryItemController extends Controller
 
     public function update(UpdateParishHistoryItemRequest $request, ParishHistoryItem $historyItem): RedirectResponse
     {
-        $historyItem->update($request->validated());
+        DB::transaction(function () use ($request, $historyItem): void {
+            $before = $this->audit->snapshot($historyItem, 'parish_histories');
+            $historyItem->update($request->validated());
+            $this->audit->updated('parish_histories', $historyItem, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil diperbarui.')]);
 
@@ -130,7 +152,11 @@ class ParishHistoryItemController extends Controller
     {
         Gate::authorize('delete', $historyItem);
 
-        $historyItem->delete();
+        DB::transaction(function () use ($historyItem): void {
+            $before = $this->audit->snapshot($historyItem, 'parish_histories');
+            $historyItem->delete();
+            $this->audit->deleted('parish_histories', $historyItem, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Peristiwa sejarah berhasil dihapus.')]);
 

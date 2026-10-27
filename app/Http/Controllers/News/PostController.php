@@ -13,10 +13,12 @@ use App\Http\Resources\News\PostCategoryOptionResource;
 use App\Http\Resources\News\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,6 +40,9 @@ use Inertia\Response;
 class PostController extends Controller
 {
     use PostFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -152,7 +157,11 @@ class PostController extends Controller
     {
         Gate::authorize('delete', $post);
 
-        $post->delete();
+        DB::transaction(function () use ($post): void {
+            $before = $this->audit->snapshot($post, 'news');
+            $post->delete();
+            $this->audit->deleted('news', $post, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Artikel berhasil dihapus.')]);
 

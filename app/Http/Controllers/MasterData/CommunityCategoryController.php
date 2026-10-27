@@ -9,9 +9,11 @@ use App\Http\Requests\Komunitas\StoreCommunityCategoryRequest;
 use App\Http\Requests\Komunitas\UpdateCommunityCategoryRequest;
 use App\Http\Resources\Komunitas\CommunityCategoryResource;
 use App\Models\CommunityCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +25,8 @@ use Inertia\Response;
  */
 class CommunityCategoryController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use CommunityFormMeta;
     use SortsAdminList;
 
@@ -76,7 +80,10 @@ class CommunityCategoryController extends Controller
 
     public function store(StoreCommunityCategoryRequest $request): RedirectResponse
     {
-        CommunityCategory::create($request->validated());
+        DB::transaction(function () use ($request): void {
+            $communityCategory = CommunityCategory::query()->create($request->validated());
+            $this->audit->created('community_categories', $communityCategory);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_created')]);
 
@@ -95,7 +102,18 @@ class CommunityCategoryController extends Controller
 
     public function update(UpdateCommunityCategoryRequest $request, CommunityCategory $communityCategory): RedirectResponse
     {
-        $communityCategory->update($request->validated());
+        DB::transaction(function () use ($request, $communityCategory): void {
+            $before = $this->audit->snapshot($communityCategory, 'community_categories');
+            $wasActive = $communityCategory->is_active;
+
+            $communityCategory->update($request->validated());
+
+            $action = $wasActive === $communityCategory->is_active
+                ? 'updated'
+                : ($communityCategory->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('community_categories', $communityCategory, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_updated')]);
 
@@ -118,7 +136,11 @@ class CommunityCategoryController extends Controller
             ]);
         }
 
-        $communityCategory->delete();
+        DB::transaction(function () use ($communityCategory): void {
+            $before = $this->audit->snapshot($communityCategory, 'community_categories');
+            $communityCategory->delete();
+            $this->audit->deleted('community_categories', $communityCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('komunitas.flash.category_deleted')]);
 

@@ -15,10 +15,12 @@ use App\Models\Location;
 use App\Models\MassSchedule;
 use App\Models\ScheduleNotice;
 use App\Models\SpecialMass;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,6 +39,9 @@ use Inertia\Response;
 class ScheduleNoticeController extends Controller
 {
     use MassScheduleFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -121,7 +126,10 @@ class ScheduleNoticeController extends Controller
 
     public function store(StoreScheduleNoticeRequest $request): RedirectResponse
     {
-        ScheduleNotice::create($request->scheduleNoticePayload());
+        DB::transaction(function () use ($request): void {
+            $notice = ScheduleNotice::query()->create($request->scheduleNoticePayload());
+            $this->audit->created('schedule_notices', $notice);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil ditambahkan.')]);
 
@@ -143,7 +151,18 @@ class ScheduleNoticeController extends Controller
 
     public function update(UpdateScheduleNoticeRequest $request, ScheduleNotice $scheduleNotice): RedirectResponse
     {
-        $scheduleNotice->update($request->scheduleNoticePayload());
+        DB::transaction(function () use ($request, $scheduleNotice): void {
+            $before = $this->audit->snapshot($scheduleNotice, 'schedule_notices');
+            $wasActive = $scheduleNotice->is_active;
+
+            $scheduleNotice->update($request->scheduleNoticePayload());
+
+            $action = $wasActive === $scheduleNotice->is_active
+                ? 'updated'
+                : ($scheduleNotice->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('schedule_notices', $scheduleNotice, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil diperbarui.')]);
 
@@ -182,7 +201,11 @@ class ScheduleNoticeController extends Controller
     {
         Gate::authorize('delete', $scheduleNotice);
 
-        $scheduleNotice->delete();
+        DB::transaction(function () use ($scheduleNotice): void {
+            $before = $this->audit->snapshot($scheduleNotice, 'schedule_notices');
+            $scheduleNotice->delete();
+            $this->audit->deleted('schedule_notices', $scheduleNotice, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Pemberitahuan berhasil dihapus.')]);
 
