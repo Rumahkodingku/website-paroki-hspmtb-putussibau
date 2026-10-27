@@ -135,6 +135,8 @@ export type SharedProps = {
     locale: string;
     /** Storage stays UTC; only this is used to render dates. */
     displayTimezone: string;
+    /** Ability checks resolved server-side with can(). */
+    abilities: Record<string, boolean>;
     sidebarOpen: boolean;
     seo: SeoDefaults;
     identity: IdentityDetails;

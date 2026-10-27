@@ -2,9 +2,11 @@
 
 namespace App\Actions\Agenda;
 
+use App\Enums\EventStatus;
 use App\Enums\MediaStatus;
 use App\Models\Event;
 use App\Models\Media;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -20,12 +22,19 @@ use Illuminate\Support\Str;
  */
 class SaveEventAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $attributes  the validated payload
      */
     public function handle(Event $event, array $attributes): Event
     {
         return DB::transaction(function () use ($event, $attributes): Event {
+            $isNew = ! $event->exists;
+            $statusBefore = $isNew ? null : $event->status;
+            $publishedBefore = $isNew ? false : $event->is_published;
+            $before = $isNew ? [] : $this->audit->snapshot($event, 'agenda');
+
             $event->fill([
                 ...$attributes,
                 'slug' => $this->resolveSlug($event, $attributes),
@@ -34,8 +43,40 @@ class SaveEventAction
 
             $event->save();
 
+            if ($isNew) {
+                $this->audit->created('agenda', $event);
+            } else {
+                $this->audit->updated(
+                    'agenda',
+                    $event,
+                    $before,
+                    $this->auditAction($statusBefore, $event->status, $publishedBefore, $event->is_published),
+                );
+            }
+
             return $event;
         });
+    }
+
+    private function auditAction(
+        ?EventStatus $statusBefore,
+        EventStatus $statusAfter,
+        bool $publishedBefore,
+        bool $publishedAfter,
+    ): string {
+        if ($statusBefore !== $statusAfter) {
+            return match ($statusAfter) {
+                EventStatus::Cancelled => 'cancelled',
+                EventStatus::Postponed => 'postponed',
+                EventStatus::Scheduled => 'updated',
+            };
+        }
+
+        if ($publishedBefore !== $publishedAfter) {
+            return $publishedAfter ? 'published' : 'unpublished';
+        }
+
+        return 'updated';
     }
 
     /**

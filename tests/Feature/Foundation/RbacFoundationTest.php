@@ -64,6 +64,7 @@ test('the foundation permissions are seeded with resource.action names', functio
         'admin.access',
 
         'dashboard.view',
+        'auditlogs.view',
         'settings.view',
         'settings.update',
         'media.view',

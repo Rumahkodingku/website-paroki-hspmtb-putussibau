@@ -4,9 +4,11 @@ namespace App\Jobs;
 
 use App\Enums\MediaStatus;
 use App\Models\Media;
+use App\Services\AuditLogger;
 use App\Services\ImageProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -55,8 +57,10 @@ class GenerateImageVariants implements ShouldQueue
     /**
      * Run the pipeline.
      */
-    public function handle(ImageProcessor $processor): void
+    public function handle(ImageProcessor $processor, ?AuditLogger $audit = null): void
     {
+        $audit ??= app(AuditLogger::class);
+
         $media = Media::query()->find($this->mediaId);
 
         if ($media === null) {
@@ -73,15 +77,32 @@ class GenerateImageVariants implements ShouldQueue
 
         $processor->inspect($media);
         $variants = $processor->variants($media);
+        $variantNames = array_map(fn ($variant): string => $variant->name, $variants);
 
-        $media->forceFill([
-            'status' => MediaStatus::Ready,
-            'error_message' => null,
-        ])->save();
+        DB::transaction(function () use ($media, $audit, $variantNames): void {
+            $media->forceFill([
+                'status' => MediaStatus::Ready,
+                'error_message' => null,
+            ])->save();
+
+            $audit->system(
+                'media',
+                'media_processing_completed',
+                'success',
+                __('audit.descriptions.media_processing_completed'),
+                [
+                    'media_id' => $media->getKey(),
+                    'variants' => $variantNames,
+                ],
+                Media::class,
+                (string) $media->getKey(),
+                $media->original_name,
+            );
+        });
 
         Log::info('Media processing finished.', [
             'media_id' => $media->getKey(),
-            'variants' => array_map(fn ($variant): string => $variant->name, $variants),
+            'variants' => $variantNames,
         ]);
     }
 
@@ -96,10 +117,32 @@ class GenerateImageVariants implements ShouldQueue
     {
         $media = Media::query()->find($this->mediaId);
 
-        $media?->forceFill([
-            'status' => MediaStatus::Failed,
-            'error_message' => $exception?->getMessage(),
-        ])->save();
+        if ($media !== null) {
+            $audit = app(AuditLogger::class);
+
+            DB::transaction(function () use ($media, $audit, $exception): void {
+                $media->forceFill([
+                    'status' => MediaStatus::Failed,
+                    'error_message' => $exception?->getMessage(),
+                ])->save();
+
+                $audit->system(
+                    'media',
+                    'media_processing_failed',
+                    'failure',
+                    __('audit.descriptions.media_processing_failed'),
+                    [
+                        'media_id' => $media->getKey(),
+                        'job_name' => self::class,
+                        'error_class' => $exception === null ? 'unknown' : $exception::class,
+                        'reason_code' => 'job_failed',
+                    ],
+                    Media::class,
+                    (string) $media->getKey(),
+                    $media->original_name,
+                );
+            });
+        }
 
         Log::error('Media processing failed.', [
             'media_id' => $this->mediaId,

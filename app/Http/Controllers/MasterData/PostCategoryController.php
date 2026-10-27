@@ -9,9 +9,11 @@ use App\Http\Requests\News\StorePostCategoryRequest;
 use App\Http\Requests\News\UpdatePostCategoryRequest;
 use App\Http\Resources\News\PostCategoryResource;
 use App\Models\PostCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,6 +31,8 @@ use Inertia\Response;
  */
 class PostCategoryController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use PostFormMeta;
     use SortsAdminList;
 
@@ -77,7 +81,10 @@ class PostCategoryController extends Controller
 
     public function store(StorePostCategoryRequest $request): RedirectResponse
     {
-        PostCategory::create($request->postCategoryPayload());
+        DB::transaction(function () use ($request): void {
+            $postCategory = PostCategory::query()->create($request->postCategoryPayload());
+            $this->audit->created('post_categories', $postCategory);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil ditambahkan.')]);
 
@@ -96,7 +103,11 @@ class PostCategoryController extends Controller
 
     public function update(UpdatePostCategoryRequest $request, PostCategory $postCategory): RedirectResponse
     {
-        $postCategory->update($request->postCategoryPayload());
+        DB::transaction(function () use ($request, $postCategory): void {
+            $before = $this->audit->snapshot($postCategory, 'post_categories');
+            $postCategory->update($request->postCategoryPayload());
+            $this->audit->updated('post_categories', $postCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil diperbarui.')]);
 
@@ -125,7 +136,11 @@ class PostCategoryController extends Controller
             ]);
         }
 
-        $postCategory->delete();
+        DB::transaction(function () use ($postCategory): void {
+            $before = $this->audit->snapshot($postCategory, 'post_categories');
+            $postCategory->delete();
+            $this->audit->deleted('post_categories', $postCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Kategori berita berhasil dihapus.')]);
 

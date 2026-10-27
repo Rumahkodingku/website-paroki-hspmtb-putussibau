@@ -7,6 +7,7 @@ use App\Enums\PostStatus;
 use App\Models\Media;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -35,12 +36,18 @@ use Illuminate\Support\Str;
  */
 class SavePostAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  array<string, mixed>  $attributes  the validated payload
      */
     public function handle(Post $post, array $attributes, User $author): Post
     {
         return DB::transaction(function () use ($post, $attributes, $author): Post {
+            $isNew = ! $post->exists;
+            $statusBefore = $isNew ? null : $post->status;
+            $before = $isNew ? [] : $this->audit->snapshot($post, 'news');
+
             $post->fill([
                 ...$attributes,
                 'author_id' => $author->getKey(),
@@ -52,8 +59,33 @@ class SavePostAction
 
             $post->save();
 
+            if ($isNew) {
+                $this->audit->created('news', $post);
+            } else {
+                $this->audit->updated(
+                    'news',
+                    $post,
+                    $before,
+                    $this->statusAction($statusBefore, $post->status),
+                );
+            }
+
             return $post;
         });
+    }
+
+    private function statusAction(?PostStatus $before, PostStatus $after): string
+    {
+        if ($before === $after) {
+            return 'updated';
+        }
+
+        return match ($after) {
+            PostStatus::Published => 'published',
+            PostStatus::Scheduled => 'scheduled',
+            PostStatus::Archived => 'archived',
+            PostStatus::Draft => 'unpublished',
+        };
     }
 
     /**

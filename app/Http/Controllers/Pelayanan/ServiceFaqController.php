@@ -9,12 +9,16 @@ use App\Http\Requests\Pelayanan\StoreServiceFaqRequest;
 use App\Http\Requests\Pelayanan\UpdateServiceFaqRequest;
 use App\Models\Service;
 use App\Models\ServiceFaq;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ServiceFaqController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     public function store(StoreServiceFaqRequest $request, Service $service): RedirectResponse
     {
         $data = $request->validated();
@@ -22,8 +26,11 @@ class ServiceFaqController extends Controller
         $data['sort_order'] = $data['sort_order']
             ?? ((int) $service->faqs()->max('sort_order')) + 1;
 
-        ServiceFaq::create($data);
-        $service->touch();
+        DB::transaction(function () use ($data, $service): void {
+            $item = ServiceFaq::query()->create($data);
+            $service->touch();
+            $this->audit->created('service_faqs', $item);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_created')]);
 
@@ -37,8 +44,12 @@ class ServiceFaqController extends Controller
     ): RedirectResponse {
         $this->ensureBelongsTo($service, $faq);
 
-        $faq->update($request->validated());
-        $service->touch();
+        DB::transaction(function () use ($request, $faq, $service): void {
+            $before = $this->audit->snapshot($faq, 'service_faqs');
+            $faq->update($request->validated());
+            $service->touch();
+            $this->audit->updated('service_faqs', $faq, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_updated')]);
 
@@ -50,8 +61,12 @@ class ServiceFaqController extends Controller
         Gate::authorize('update', $service);
         $this->ensureBelongsTo($service, $faq);
 
-        $faq->delete();
-        $service->touch();
+        DB::transaction(function () use ($faq, $service): void {
+            $before = $this->audit->snapshot($faq, 'service_faqs');
+            $faq->delete();
+            $service->touch();
+            $this->audit->deleted('service_faqs', $faq, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.faq_deleted')]);
 

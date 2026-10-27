@@ -11,10 +11,12 @@ use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Http\Resources\MassSchedule\SpecialMassResource;
 use App\Models\Location;
 use App\Models\SpecialMass;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,6 +35,9 @@ use Inertia\Response;
 class SpecialMassController extends Controller
 {
     use MassScheduleFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     /**
@@ -110,7 +115,10 @@ class SpecialMassController extends Controller
 
     public function store(StoreSpecialMassRequest $request): RedirectResponse
     {
-        SpecialMass::create($request->specialMassPayload());
+        DB::transaction(function () use ($request): void {
+            $specialMass = SpecialMass::query()->create($request->specialMassPayload());
+            $this->audit->created('special_masses', $specialMass);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil ditambahkan.')]);
 
@@ -132,7 +140,18 @@ class SpecialMassController extends Controller
 
     public function update(UpdateSpecialMassRequest $request, SpecialMass $specialMass): RedirectResponse
     {
-        $specialMass->update($request->specialMassPayload());
+        DB::transaction(function () use ($request, $specialMass): void {
+            $before = $this->audit->snapshot($specialMass, 'special_masses');
+            $wasActive = $specialMass->is_active;
+
+            $specialMass->update($request->specialMassPayload());
+
+            $action = $wasActive === $specialMass->is_active
+                ? 'updated'
+                : ($specialMass->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('special_masses', $specialMass, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil diperbarui.')]);
 
@@ -152,7 +171,11 @@ class SpecialMassController extends Controller
     {
         Gate::authorize('delete', $specialMass);
 
-        $specialMass->delete();
+        DB::transaction(function () use ($specialMass): void {
+            $before = $this->audit->snapshot($specialMass, 'special_masses');
+            $specialMass->delete();
+            $this->audit->deleted('special_masses', $specialMass, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Misa khusus berhasil dihapus.')]);
 

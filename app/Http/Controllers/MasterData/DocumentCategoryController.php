@@ -8,16 +8,20 @@ use App\Http\Requests\Document\StoreDocumentCategoryRequest;
 use App\Http\Requests\Document\UpdateDocumentCategoryRequest;
 use App\Http\Resources\Document\DocumentCategoryResource;
 use App\Models\DocumentCategory;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DocumentCategoryController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     public function index(Request $request): Response
@@ -65,7 +69,10 @@ class DocumentCategoryController extends Controller
 
     public function store(StoreDocumentCategoryRequest $request): RedirectResponse
     {
-        DocumentCategory::query()->create($request->validated());
+        DB::transaction(function () use ($request): void {
+            $documentCategory = DocumentCategory::query()->create($request->validated());
+            $this->audit->created('document_categories', $documentCategory);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_created')]);
 
@@ -84,7 +91,18 @@ class DocumentCategoryController extends Controller
 
     public function update(UpdateDocumentCategoryRequest $request, DocumentCategory $documentCategory): RedirectResponse
     {
-        $documentCategory->update($request->validated());
+        DB::transaction(function () use ($request, $documentCategory): void {
+            $before = $this->audit->snapshot($documentCategory, 'document_categories');
+            $wasActive = $documentCategory->is_active;
+
+            $documentCategory->update($request->validated());
+
+            $action = $wasActive === $documentCategory->is_active
+                ? 'updated'
+                : ($documentCategory->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('document_categories', $documentCategory, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_updated')]);
 
@@ -103,7 +121,11 @@ class DocumentCategoryController extends Controller
             ]);
         }
 
-        $documentCategory->delete();
+        DB::transaction(function () use ($documentCategory): void {
+            $before = $this->audit->snapshot($documentCategory, 'document_categories');
+            $documentCategory->delete();
+            $this->audit->deleted('document_categories', $documentCategory, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('documents.flash.category_deleted')]);
 

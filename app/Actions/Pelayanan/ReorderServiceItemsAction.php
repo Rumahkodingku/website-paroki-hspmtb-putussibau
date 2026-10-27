@@ -3,6 +3,10 @@
 namespace App\Actions\Pelayanan;
 
 use App\Models\Service;
+use App\Models\ServiceFaq;
+use App\Models\ServiceRequirement;
+use App\Models\ServiceStep;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +28,8 @@ use Illuminate\Validation\ValidationException;
  */
 final class ReorderServiceItemsAction
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     /**
      * @param  class-string<Model>  $modelClass
      * @param  list<int|string>  $ids  the new order, first item first
@@ -52,6 +58,26 @@ final class ReorderServiceItemsAction
             // SVC-03: a reorder changes only sort_order, so the parent's
             // updated_at would not move without this.
             $service->touch();
+
+            $module = match ($modelClass) {
+                ServiceRequirement::class => 'service_requirements',
+                ServiceStep::class => 'service_steps',
+                ServiceFaq::class => 'service_faqs',
+                default => 'services',
+            };
+
+            $this->audit->recordModel(
+                $module,
+                'reordered',
+                'success',
+                $service,
+                [],
+                [],
+                [
+                    'count' => count($ordered),
+                    'ids' => array_slice($ordered, 0, 100),
+                ],
+            );
         });
     }
 }

@@ -13,11 +13,13 @@ use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Http\Resources\MassSchedule\MassScheduleResource;
 use App\Models\Location;
 use App\Models\MassSchedule;
+use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -41,6 +43,9 @@ use Inertia\Response;
 class MassScheduleController extends Controller
 {
     use MassScheduleFormMeta;
+
+    public function __construct(private readonly AuditLogger $audit) {}
+
     use SortsAdminList;
 
     /**
@@ -145,7 +150,10 @@ class MassScheduleController extends Controller
      */
     public function store(StoreMassScheduleRequest $request): RedirectResponse
     {
-        MassSchedule::create($request->massSchedulePayload());
+        DB::transaction(function () use ($request): void {
+            $massSchedule = MassSchedule::query()->create($request->massSchedulePayload());
+            $this->audit->created('mass_schedules', $massSchedule);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil ditambahkan.')]);
 
@@ -177,7 +185,18 @@ class MassScheduleController extends Controller
      */
     public function update(UpdateMassScheduleRequest $request, MassSchedule $massSchedule): RedirectResponse
     {
-        $massSchedule->update($request->massSchedulePayload());
+        DB::transaction(function () use ($request, $massSchedule): void {
+            $before = $this->audit->snapshot($massSchedule, 'mass_schedules');
+            $wasActive = $massSchedule->is_active;
+
+            $massSchedule->update($request->massSchedulePayload());
+
+            $action = $wasActive === $massSchedule->is_active
+                ? 'updated'
+                : ($massSchedule->is_active ? 'activated' : 'deactivated');
+
+            $this->audit->updated('mass_schedules', $massSchedule, $before, $action);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil diperbarui.')]);
 
@@ -233,7 +252,11 @@ class MassScheduleController extends Controller
     {
         Gate::authorize('delete', $massSchedule);
 
-        $massSchedule->delete();
+        DB::transaction(function () use ($massSchedule): void {
+            $before = $this->audit->snapshot($massSchedule, 'mass_schedules');
+            $massSchedule->delete();
+            $this->audit->deleted('mass_schedules', $massSchedule, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Jadwal misa rutin berhasil dihapus.')]);
 

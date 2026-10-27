@@ -5543,3 +5543,44 @@ lama setelah D-69 menghapusnya; migration diberi komentar agar riwayatnya jelas.
 Nilai `is_published` lama tidak dapat dipulihkan.
 
 @see `docs/DECISIONS.md` D-52, D-69, D-70
+
+
+---
+
+## D-79 — Audit Log MVP: allowlist, transaksi, dan batas append-only
+
+**Status:** Accepted · branch `feat/audit-log`
+
+Audit Log P0 dicatat di tabel `audit_events` melalui `AuditLogger` dan
+`RecordAuditEventAction`. Tabel dan UI tidak menyediakan operasi update/delete.
+
+**Keputusan yang mengikat.**
+
+1. **Allowlist, bukan snapshot model.** Field yang boleh masuk `before`/`after`
+   didefinisikan per modul di `config/audit.php`; metadata juga allowlisted.
+2. **Redaksi dan ringkasan.** Key sensitif dibuang; rich text panjang disimpan
+   sebagai penanda ringkas + panjang, bukan HTML penuh.
+3. **Konsistensi transaksi.** Mutasi database dan event sukses ditulis dalam
+   transaksi yang sama. Rollback membatalkan event.
+4. **Aktor dan konteks.** Aktor manusia disimpan sebagai snapshot; event sistem
+   memakai `actor_type=system`; login gagal memakai `anonymous` + email yang
+   dicoba. IP dan user-agent disimpan dan hanya tampil di detail.
+5. **Auth.** Login berhasil, login gagal, logout, perubahan profil/email, dan
+   perubahan/reset password dicatat. Role/permission dan status akun belum
+   dicatat karena belum ada jalur UI.
+6. **Media.** Upload diterima dan status job (`completed`/`failed`) dicatat
+   terpisah; upload diterima tidak berarti pemrosesan selesai.
+7. **Operasi massal.** Reorder, aktivasi periode/pastor, dan publish terjadwal
+   dicatat sebagai satu event agregat dengan metadata jumlah/ID terbatas.
+8. **Retensi.** 12 bulan, dokumentasi saja; belum ada auto-purge.
+9. **Append-only aplikasi.** Tidak ada route mutasi; model menolak update/delete
+   instance. Administrator database/server tetap dapat memanipulasi data.
+10. **Akses.** Permission `auditlogs.view`; route daftar/detail di group admin;
+    menu memakai shared prop `abilities` yang dihitung dengan `can()`.
+
+**Batas yang dicatat.** Ekspor, hash chain, external immutable log, auto-purge,
+UI manajemen role/permission, dan restore objek berada di luar MVP.
+
+@see `docs/specifications/spec-audit-log.md`
+@see `docs/plan-implementation/plan-audit-log.md`
+@see `docs/audit-log.md`

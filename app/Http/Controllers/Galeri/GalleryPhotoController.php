@@ -11,7 +11,9 @@ use App\Http\Requests\Galeri\SetGalleryCoverRequest;
 use App\Http\Requests\Galeri\UpdateGalleryPhotoRequest;
 use App\Models\GalleryAlbum;
 use App\Models\GalleryPhoto;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
@@ -31,6 +33,8 @@ use Inertia\Inertia;
  */
 class GalleryPhotoController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     public function store(
         AttachGalleryPhotosRequest $request,
         GalleryAlbum $gallery,
@@ -48,7 +52,11 @@ class GalleryPhotoController extends Controller
         GalleryAlbum $gallery,
         GalleryPhoto $photo,
     ): RedirectResponse {
-        $photo->update($request->validated());
+        DB::transaction(function () use ($request, $photo): void {
+            $before = $this->audit->snapshot($photo, 'gallery_photos');
+            $photo->update($request->validated());
+            $this->audit->updated('gallery_photos', $photo, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photo_updated')]);
 
@@ -69,7 +77,11 @@ class GalleryPhotoController extends Controller
 
     public function cover(SetGalleryCoverRequest $request, GalleryAlbum $gallery): RedirectResponse
     {
-        $gallery->update(['cover_photo_id' => $request->validated('photo_id')]);
+        DB::transaction(function () use ($request, $gallery): void {
+            $before = $this->audit->snapshot($gallery, 'galleries');
+            $gallery->update(['cover_photo_id' => $request->validated('photo_id')]);
+            $this->audit->updated('galleries', $gallery, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.cover_updated')]);
 
@@ -85,7 +97,11 @@ class GalleryPhotoController extends Controller
         // "in this album" that the caller is allowed to act on.
         abort_unless($photo->gallery_album_id === $gallery->getKey(), 404);
 
-        $photo->delete();
+        DB::transaction(function () use ($photo): void {
+            $before = $this->audit->snapshot($photo, 'gallery_photos');
+            $photo->delete();
+            $this->audit->deleted('gallery_photos', $photo, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('galeri.flash.photo_removed')]);
 

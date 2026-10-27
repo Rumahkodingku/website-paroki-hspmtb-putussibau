@@ -9,12 +9,16 @@ use App\Http\Requests\Pelayanan\StoreServiceStepRequest;
 use App\Http\Requests\Pelayanan\UpdateServiceStepRequest;
 use App\Models\Service;
 use App\Models\ServiceStep;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ServiceStepController extends Controller
 {
+    public function __construct(private readonly AuditLogger $audit) {}
+
     public function store(StoreServiceStepRequest $request, Service $service): RedirectResponse
     {
         $data = $request->validated();
@@ -22,8 +26,11 @@ class ServiceStepController extends Controller
         $data['sort_order'] = $data['sort_order']
             ?? ((int) $service->steps()->max('sort_order')) + 1;
 
-        ServiceStep::create($data);
-        $service->touch();
+        DB::transaction(function () use ($data, $service): void {
+            $item = ServiceStep::query()->create($data);
+            $service->touch();
+            $this->audit->created('service_steps', $item);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_created')]);
 
@@ -37,8 +44,12 @@ class ServiceStepController extends Controller
     ): RedirectResponse {
         $this->ensureBelongsTo($service, $step);
 
-        $step->update($request->validated());
-        $service->touch();
+        DB::transaction(function () use ($request, $step, $service): void {
+            $before = $this->audit->snapshot($step, 'service_steps');
+            $step->update($request->validated());
+            $service->touch();
+            $this->audit->updated('service_steps', $step, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_updated')]);
 
@@ -50,8 +61,12 @@ class ServiceStepController extends Controller
         Gate::authorize('update', $service);
         $this->ensureBelongsTo($service, $step);
 
-        $step->delete();
-        $service->touch();
+        DB::transaction(function () use ($step, $service): void {
+            $before = $this->audit->snapshot($step, 'service_steps');
+            $step->delete();
+            $service->touch();
+            $this->audit->deleted('service_steps', $step, $before);
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('pelayanan.flash.step_deleted')]);
 
