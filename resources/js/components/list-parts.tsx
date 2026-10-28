@@ -199,7 +199,7 @@ export function FilterSelect({
             <SelectTrigger
                 id={id}
                 aria-label={label}
-                className="h-11 min-w-36 cursor-pointer rounded-md border-border bg-background py-6 shadow-none focus-visible:border-primary"
+                className="h-11 w-auto cursor-pointer rounded-md border-border bg-background py-6 shadow-none focus-visible:border-primary"
             >
                 <SelectValue />
             </SelectTrigger>
