@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import { usePage } from '@inertiajs/react';
-import type { UploadItem } from '@uploadcn/core';
+import { formatBytes, type UploadItem } from '@uploadcn/core';
 import { useUploadContext, useUploadSelector } from '@uploadcn/react';
 import { ConstructionIcon } from 'lucide-react';
 import { Field } from '@/components/form-fields';
@@ -102,6 +102,20 @@ type DocumentProps = {
     onFileChange: (file: File | null) => void;
 };
 
+type BackupProps = {
+    id: string;
+    label: string;
+    hint?: string;
+    error?: string;
+    required?: boolean;
+    /** File types the archive picker offers. */
+    accept: string[];
+    /** Maximum archive size in bytes. Zero skips the client-side check. */
+    maxSize: number;
+    /** The selected archive, or null when it is cleared. */
+    onFileChange: (file: File | null) => void;
+};
+
 export type MediaUploadFieldProps =
     | (CommonProps & {
           variant?: 'image';
@@ -134,6 +148,7 @@ export type MediaUploadFieldProps =
           onMediaChangeMany?: (mediaIds: number[]) => void;
       })
     | (DocumentProps & { variant: 'document' })
+    | (BackupProps & { variant: 'backup' })
     | (PlaceholderProps & { variant: 'file' });
 
 export function MediaUploadField(props: MediaUploadFieldProps) {
@@ -143,6 +158,8 @@ export function MediaUploadField(props: MediaUploadFieldProps) {
             return <UnavailableUpload {...props} />;
         case 'document':
             return <DocumentVariant {...props} />;
+        case 'backup':
+            return <BackupVariant {...props} />;
         case 'avatar':
             return <AvatarVariant {...props} />;
         case 'logo':
@@ -438,6 +455,61 @@ function formatDocumentLimits(limits: DocumentUploadLimits): string {
     );
 
     return `${formats.join(', ')}. Maksimal ${limits.maxUploadKilobytes / 1024} MB.`;
+}
+
+/**
+ * The archive picker for backup uploads.
+ *
+ * Like the document variant, this is submitted with the rest of the form in one
+ * multipart request, so it is a controlled native input rather than an
+ * uploadcn queue. Its accept list and size limit belong to backup settings, not
+ * to the document limits.
+ */
+function BackupVariant({
+    id,
+    label,
+    hint,
+    error,
+    required = false,
+    accept,
+    maxSize,
+    onFileChange,
+}: BackupProps) {
+    const [localError, setLocalError] = useState<string | null>(null);
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.currentTarget.files?.[0] ?? null;
+
+        if (file !== null && maxSize > 0 && file.size > maxSize) {
+            setLocalError(`Ukuran arsip maksimal ${formatBytes(maxSize)}.`);
+            event.currentTarget.value = '';
+            onFileChange(null);
+
+            return;
+        }
+
+        setLocalError(null);
+        onFileChange(file);
+    };
+
+    return (
+        <Field
+            id={id}
+            label={label}
+            hint={hint}
+            error={localError ?? error}
+            required={required}
+        >
+            <input
+                id={id}
+                type="file"
+                accept={accept.join(',')}
+                required={required}
+                onChange={handleChange}
+                className="block w-full cursor-pointer rounded-md border border-border bg-background px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-secondary/80 focus-visible:border-primary focus-visible:outline-none"
+            />
+        </Field>
+    );
 }
 
 /**

@@ -2,6 +2,7 @@ import type { InertiaLinkProps } from '@inertiajs/react';
 import {
     CalendarClock,
     CalendarDays,
+    DatabaseBackup,
     FileText,
     Globe,
     HandHeart,
@@ -43,6 +44,7 @@ import { edit as editServiceArea } from '@/routes/parish-service-area';
 import { index as pastorsIndex } from '@/routes/pastors';
 import { index as boardPeriodsIndex } from '@/routes/board-periods';
 import { index as auditLogsIndex } from '@/routes/audit-logs';
+import { index as backupsIndex } from '@/routes/backups';
 
 export type Entry = {
     title: string;
@@ -147,5 +149,11 @@ export const ADMINISTRATION_ENTRIES: Entry[] = [
         href: auditLogsIndex(),
         icon: History,
         ability: 'auditlogs.view',
+    },
+    {
+        title: 'Backup & Pemulihan',
+        href: backupsIndex(),
+        icon: DatabaseBackup,
+        ability: 'backups.view',
     },
 ];

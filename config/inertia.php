@@ -71,6 +71,7 @@ return [
         'paths' => [
             resource_path('js/features/admin/akun/pages'),
             resource_path('js/features/admin/agenda/pages'),
+            resource_path('js/features/admin/backup/pages'),
             resource_path('js/features/admin/berita/pages'),
             resource_path('js/features/admin/dashboard/pages'),
             resource_path('js/features/admin/dokumen/pages'),

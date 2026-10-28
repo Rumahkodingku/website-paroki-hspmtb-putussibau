@@ -166,6 +166,29 @@ Frontend only, without the PHP processes: `npm run dev`.
 
 ---
 
+## 4.1 Backup worker and scheduler
+
+Backup and restore jobs use the dedicated `backups` queue connection so a long
+dump is not retried after the default 90-second window. Local development gets
+one worker from `composer dev`, but it listens to the default queue. To exercise
+backup jobs while developing, run a second worker:
+
+```bash
+php artisan queue:work --queue=backups,default --tries=1 --timeout=7200
+```
+
+E2E runs the job inline with `BACKUPS_QUEUE_CONNECTION=sync`; no separate worker
+is needed for the Playwright suite. The settings page and the backup list show
+scheduler/worker heartbeats, so "not detected" is visible rather than assumed.
+
+Production also needs the cron line from `docs/backup-recovery.md`:
+
+```cron
+* * * * * cd /path/ke/aplikasi && php artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
 ## 5. The gate
 
 ```bash

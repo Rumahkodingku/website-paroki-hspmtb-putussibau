@@ -6,6 +6,11 @@ use App\Http\Controllers\Agenda\PublicEventController;
 use App\Http\Controllers\Area\AreaController;
 use App\Http\Controllers\Area\PublicAreaController;
 use App\Http\Controllers\Audit\AuditLogController;
+use App\Http\Controllers\Backup\BackupController;
+use App\Http\Controllers\Backup\BackupDownloadController;
+use App\Http\Controllers\Backup\BackupRestoreController;
+use App\Http\Controllers\Backup\BackupSettingsController;
+use App\Http\Controllers\Backup\BackupUploadController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\PublicDocumentController;
@@ -146,6 +151,41 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
 
         Route::get('/audit-log/{auditEvent}', [AuditLogController::class, 'show'])
             ->name('audit-logs.show');
+
+        /*
+         * ------------------------------------------------------------------
+         * Backup & Pemulihan
+         * ------------------------------------------------------------------
+         |
+         | Static paths come before {backup}, and the ID is restricted to digits
+         | so /backup/pengaturan never matches the detail route.
+         |
+         */
+        Route::get('/backup', [BackupController::class, 'index'])->name('backups.index');
+        Route::get('/backup/pengaturan', [BackupSettingsController::class, 'edit'])->name('backups.settings.edit');
+        Route::put('/backup/pengaturan', [BackupSettingsController::class, 'update'])->name('backups.settings.update');
+        Route::post('/backup', [BackupController::class, 'store'])->name('backups.store');
+        Route::post('/backup/unggah', [BackupUploadController::class, 'store'])->name('backups.upload');
+
+        Route::get('/backup/{backup}', [BackupController::class, 'show'])
+            ->whereNumber('backup')
+            ->name('backups.show');
+
+        Route::get('/backup/{backup}/unduh', [BackupDownloadController::class, 'download'])
+            ->whereNumber('backup')
+            ->name('backups.download');
+
+        Route::post('/backup/{backup}/pemulihan/persiapan', [BackupRestoreController::class, 'prepare'])
+            ->whereNumber('backup')
+            ->name('backups.restore.prepare');
+
+        Route::post('/backup/{backup}/pemulihan', [BackupRestoreController::class, 'store'])
+            ->whereNumber('backup')
+            ->name('backups.restore');
+
+        Route::delete('/backup/{backup}', [BackupController::class, 'destroy'])
+            ->whereNumber('backup')
+            ->name('backups.destroy');
 
         /*
          * ------------------------------------------------------------------
