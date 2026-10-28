@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\BlockWritesDuringRestore;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Jobs\BackupWorkerHeartbeatJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             AssignRequestId::class,
+            BlockWritesDuringRestore::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
@@ -58,6 +61,28 @@ return Application::configure(basePath: dirname(__DIR__))
          * therefore still private. ScheduledPublishingTest pins that.
          */
         $schedule->command('posts:publish-scheduled')->everyMinute()->withoutOverlapping();
+
+        $schedule->command('backups:heartbeat')
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->command('backups:run-scheduled')
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->job(
+            new BackupWorkerHeartbeatJob,
+            config('backups.queue'),
+            config('backups.queue_connection'),
+        )->everyFiveMinutes();
+
+        $schedule->command('backups:verify')
+            ->dailyAt('03:00')
+            ->timezone(config('app.display_timezone'));
+
+        $schedule->command('backups:prune')
+            ->dailyAt('03:30')
+            ->timezone(config('app.display_timezone'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

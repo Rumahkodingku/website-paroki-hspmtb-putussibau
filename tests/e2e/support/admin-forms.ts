@@ -40,14 +40,56 @@ export async function pilih(
 export async function buatLokasi(
     page: Page,
     nama: string,
-    slug: string,
 ): Promise<void> {
     await page.goto('/admin/master-data/lokasi/tambah');
 
     await page.getByLabel('Nama lokasi').fill(nama);
-    await page.getByLabel('Slug').fill(slug);
     await page.getByLabel('Alamat').fill('Alamat pengujian');
     await page.getByRole('button', { name: 'Simpan lokasi' }).click();
 
     await expect(page).toHaveURL(/\/admin\/master-data\/lokasi$/);
+}
+
+/**
+ * Set a TimePicker (a popover with two Radix selects) by its label.
+ *
+ * TimePicker is a button, not an input, so fill() cannot touch it. The hour and
+ * minute selects live inside the popover that the button opens.
+ */
+export async function pilihWaktu(
+    page: Page,
+    label: string,
+    value: string,
+): Promise<void> {
+    const [hour, minute] = value.split(':');
+
+    await page.getByLabel(label, { exact: true }).click();
+
+    const popover = page.locator('[data-slot="popover-content"]').last();
+    const selects = popover.getByRole('combobox');
+
+    await selects.nth(0).click();
+    await page.getByRole('option', { name: hour, exact: true }).click();
+
+    await selects.nth(1).click();
+    await page.getByRole('option', { name: minute, exact: true }).click();
+
+    await page.keyboard.press('Escape');
+}
+
+/**
+ * Pick a date from a DatePicker popover.
+ *
+ * The calendar renders every visible day with a `data-day` attribute. The
+ * selected day is deliberately not fixed to a known month: these forms only
+ * require a valid date, and pinning one would make the test break in a future
+ * month.
+ */
+export async function pilihTanggal(page: Page, label: string): Promise<void> {
+    await page.getByLabel(label, { exact: true }).click();
+
+    const day = page.locator('[data-slot="popover-content"] [data-day]').nth(15);
+    await day.click();
+
+    await page.keyboard.press('Escape');
 }

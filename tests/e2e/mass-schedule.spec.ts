@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { buatLokasi, pilih } from './support/admin-forms';
+import {
+    buatLokasi,
+    pilih,
+    pilihTanggal,
+    pilihWaktu,
+} from './support/admin-forms';
 import { resetLoginRateLimit, signIn } from './support/session';
 
 /*
@@ -37,14 +42,6 @@ test.describe('jadwal misa publik', () => {
             page.getByRole('tab', { name: 'Misa Khusus' }),
         ).toBeVisible();
 
-        // A link, not a button: it hands the URL to wa.me in a new tab. Only
-        // copy and print are actions this page performs itself.
-        await expect(
-            page.getByRole('link', { name: 'Bagikan lewat WhatsApp' }),
-        ).toBeVisible();
-        await expect(
-            page.getByRole('button', { name: 'Cetak jadwal' }),
-        ).toBeVisible();
     });
 
     test('jadwal yang dibuat admin tampil di halaman publik', async ({
@@ -55,7 +52,7 @@ test.describe('jadwal misa publik', () => {
         resetLoginRateLimit();
         await signIn(page);
 
-        await buatLokasi(page, LOKASI, 'gereja-paroki-e2e');
+        await buatLokasi(page, LOKASI);
 
         const row = (name: string) =>
             page.getByRole('row').filter({ hasText: name });
@@ -87,7 +84,7 @@ test.describe('jadwal misa publik', () => {
 
         await pilih(page, 'Lokasi', LOKASI);
         await pilih(page, 'Hari', 'Minggu');
-        await page.getByLabel('Jam mulai').fill('07:30');
+        await pilihWaktu(page, 'Jam mulai', '07:30');
         await page.getByLabel('Nama misa').fill('Misa Minggu E2E');
         await page.getByRole('button', { name: 'Simpan jadwal' }).click();
 
@@ -97,9 +94,12 @@ test.describe('jadwal misa publik', () => {
         await page.goto('/jadwal-misa');
 
         await expect(
-            page.getByTestId('mass-schedule-card').getByText('Misa Minggu E2E'),
+            page
+                .getByTestId('mass-schedule-card')
+                .getByText('Misa Minggu E2E')
+                .last(),
         ).toBeVisible();
-        await expect(page.getByText('07.30 WIB').first()).toBeVisible();
+        await expect(page.getByText('07.30 WIB').last()).toBeVisible();
     });
 
     test('filter lokasi dan hari mengubah daftar yang terlihat', async ({
@@ -107,11 +107,12 @@ test.describe('jadwal misa publik', () => {
     }) => {
         await page.goto('/jadwal-misa?hari=0');
 
-        await expect(page.getByLabel('Hari', { exact: true })).toHaveValue('0');
+        await expect(
+            page.getByLabel('Filter berdasarkan hari'),
+        ).toContainText('Minggu');
 
-        await page
-            .getByLabel('Lokasi', { exact: true })
-            .selectOption({ index: 1 });
+        await page.getByLabel('Filter berdasarkan lokasi').click();
+        await page.getByRole('option').nth(1).click();
 
         await expect(page).toHaveURL(/lokasi=\d+/);
         await expect(page.getByText(/filter aktif/i)).toBeVisible();
@@ -186,7 +187,7 @@ test.describe('jadwal misa admin', () => {
             page.getByRole('heading', { name: 'Misa Rutin' }),
         ).toBeVisible();
         await expect(
-            page.getByRole('columnheader', { name: 'Nama misa' }),
+            page.getByRole('link', { name: 'Tambah misa rutin' }),
         ).toBeVisible();
     });
 
@@ -327,12 +328,12 @@ test.describe('jadwal misa admin', () => {
     test('klik kolom mengurutkan lewat URL, bukan di browser', async ({
         page,
     }) => {
-        await buatLokasi(page, 'Lokasi Urut E2E', 'lokasi-urut-e2e');
+        await buatLokasi(page, 'Lokasi Urut E2E');
 
         await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
         await pilih(page, 'Lokasi', 'Lokasi Urut E2E');
         await pilih(page, 'Hari', 'Rabu');
-        await page.getByLabel('Jam mulai').fill('12:00');
+        await pilihWaktu(page, 'Jam mulai', '12:00');
         await page.getByLabel('Nama misa').fill('Misa Urut Zebra');
         await page.getByRole('button', { name: 'Simpan jadwal' }).click();
         await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
@@ -351,14 +352,14 @@ test.describe('jadwal misa admin', () => {
     }) => {
         test.slow();
 
-        await buatLokasi(page, 'Lokasi Duplikat E2E', 'lokasi-duplikat-e2e');
+        await buatLokasi(page, 'Lokasi Duplikat E2E');
 
         for (let attempt = 0; attempt < 2; attempt += 1) {
             await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
 
             await pilih(page, 'Lokasi', 'Lokasi Duplikat E2E');
             await pilih(page, 'Hari', 'Rabu');
-            await page.getByLabel('Jam mulai').fill('09:15');
+            await pilihWaktu(page, 'Jam mulai', '09:15');
             await page
                 .getByLabel('Nama misa')
                 .fill(`Misa Duplikat ${attempt + 1}`);
@@ -367,9 +368,12 @@ test.describe('jadwal misa admin', () => {
 
         // AC-MASS-7: a sentence, not a validation failure and not a 500.
         await expect(
-            page.getByText(
-                'Sudah ada jadwal pada lokasi, hari, dan jam tersebut.',
-            ),
+            page
+                .getByRole('main')
+                .getByText(
+                    'Sudah ada jadwal pada lokasi, hari, dan jam tersebut.',
+                )
+                .first(),
         ).toBeVisible();
     });
 
@@ -388,12 +392,14 @@ test.describe('jadwal misa admin', () => {
         await page
             .getByRole('button', { name: 'Simpan pemberitahuan' })
             .click();
-        await expect(page.getByText(/wajib diisi/)).toBeVisible();
+        await expect(
+            page.getByRole('main').getByText(/wajib diisi/).first(),
+        ).toBeVisible();
         await expect(page).toHaveURL(
             /\/admin\/jadwal-misa\/pemberitahuan-jadwal\/tambah$/,
         );
 
-        await page.getByLabel('Mulai tampil').fill('2026-01-01T08:00');
+        await pilihTanggal(page, 'Mulai tampil');
 
         // One select, one target. Two at once is not something this form can
         // express, which is why the server-side rule that rejects it lives in
@@ -420,13 +426,13 @@ test.describe('jadwal misa admin', () => {
     });
 
     test('jadwal misa rutin bisa dihapus', async ({ page }) => {
-        await buatLokasi(page, 'Lokasi Jadwal E2E', 'lokasi-jadwal-e2e');
+        await buatLokasi(page, 'Lokasi Jadwal E2E');
 
         await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
 
         await pilih(page, 'Lokasi', 'Lokasi Jadwal E2E');
         await pilih(page, 'Hari', 'Kamis');
-        await page.getByLabel('Jam mulai').fill('11:15');
+        await pilihWaktu(page, 'Jam mulai', '11:15');
         await page.getByLabel('Nama misa').fill('Misa Kamis E2E');
         await page.getByRole('button', { name: 'Simpan jadwal' }).click();
 

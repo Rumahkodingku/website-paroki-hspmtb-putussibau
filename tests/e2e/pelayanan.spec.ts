@@ -12,14 +12,9 @@ import { resetLoginRateLimit, signIn } from './support/session';
  * category is created first — a service cannot exist without one.
  */
 
-async function buatKategori(
-    page: Page,
-    nama: string,
-    slug: string,
-): Promise<void> {
+async function buatKategori(page: Page, nama: string): Promise<void> {
     await page.goto('/admin/master-data/kategori-pelayanan/tambah');
     await page.getByLabel('Nama Kategori').fill(nama);
-    await page.getByLabel('Slug').fill(slug);
     await page.getByRole('button', { name: 'Simpan kategori' }).click();
 
     await expect(page).toHaveURL(/\/admin\/master-data\/kategori-pelayanan$/);
@@ -28,12 +23,10 @@ async function buatKategori(
 async function buatLayanan(
     page: Page,
     nama: string,
-    slug: string,
     kategori: string,
 ): Promise<void> {
     await page.goto('/admin/pelayanan/tambah');
     await page.getByLabel('Nama Layanan').fill(nama);
-    await page.getByLabel('Slug').fill(slug);
 
     // The category is a Radix ChoiceSelect. Addressed by role rather than by
     // label because a required field's accessible name carries the asterisk
@@ -96,11 +89,10 @@ test.describe('layanan admin', () => {
     test('membuat kategori, layanan, persyaratan, dan FAQ', async ({
         page,
     }) => {
-        await buatKategori(page, 'Sakramen Inisiasi E2E', 'inisiasi-e2e');
+        await buatKategori(page, 'Sakramen Inisiasi E2E');
         await buatLayanan(
             page,
             'Baptis Bayi E2E',
-            'baptis-bayi-e2e',
             'Sakramen Inisiasi E2E',
         );
 
@@ -110,7 +102,7 @@ test.describe('layanan admin', () => {
 
         const requirementDialog = page.getByRole('dialog');
         await requirementDialog
-            .getByLabel('Persyaratan')
+            .getByRole('textbox', { name: 'Persyaratan *' })
             .fill('Fotokopi Kartu Keluarga');
         await requirementDialog
             .getByRole('button', { name: 'Tambah', exact: true })
@@ -135,11 +127,10 @@ test.describe('layanan admin', () => {
     });
 
     test('menyimpan layanan tanpa URL Google Form', async ({ page }) => {
-        await buatKategori(page, 'Kategori Tanpa Form', 'tanpa-form-e2e');
+        await buatKategori(page, 'Kategori Tanpa Form');
         await buatLayanan(
             page,
             'Layanan Tanpa Form',
-            'tanpa-form-e2e',
             'Kategori Tanpa Form',
         );
 
@@ -157,8 +148,8 @@ test.describe('layanan admin', () => {
     test('menerima URL Google Form valid dan menampilkan tombol uji', async ({
         page,
     }) => {
-        await buatKategori(page, 'Kategori Form', 'form-e2e');
-        await buatLayanan(page, 'Layanan Form', 'form-e2e', 'Kategori Form');
+        await buatKategori(page, 'Kategori Form');
+        await buatLayanan(page, 'Layanan Form', 'Kategori Form');
 
         await page.getByRole('tab', { name: 'Kontak & Pendaftaran' }).click();
         await page
@@ -171,11 +162,10 @@ test.describe('layanan admin', () => {
     });
 
     test('menolak URL yang bukan Google Form', async ({ page }) => {
-        await buatKategori(page, 'Kategori URL Salah', 'url-salah-e2e');
+        await buatKategori(page, 'Kategori URL Salah');
         await buatLayanan(
             page,
             'Layanan URL Salah',
-            'url-salah-e2e',
             'Kategori URL Salah',
         );
 
@@ -186,7 +176,10 @@ test.describe('layanan admin', () => {
         await page.getByRole('button', { name: 'Simpan Perubahan' }).click();
 
         await expect(
-            page.getByText('Tautan Google Form harus berupa alamat https'),
+            page
+                .getByRole('main')
+                .getByText('Tautan Google Form harus berupa alamat https')
+                .first(),
         ).toBeVisible();
     });
 });
@@ -195,11 +188,10 @@ test.describe('halaman publik Pelayanan', () => {
     test('pengunjung hanya melihat layanan yang aktif', async ({ page }) => {
         resetLoginRateLimit();
         await signIn(page);
-        await buatKategori(page, 'Kategori Publik', 'publik-e2e');
+        await buatKategori(page, 'Kategori Publik');
         await buatLayanan(
             page,
             'Layanan Publik E2E',
-            'layanan-publik-e2e',
             'Kategori Publik',
         );
 

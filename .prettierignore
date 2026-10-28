@@ -1,6 +1,7 @@
 .github/
 *.md
 docs/
+.agents/
 .codex/
 skills-lock.json
 composer.json

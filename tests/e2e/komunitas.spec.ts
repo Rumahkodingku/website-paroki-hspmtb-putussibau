@@ -30,14 +30,9 @@ async function pilihCombobox(
     ).toBeHidden();
 }
 
-async function buatKategori(
-    page: Page,
-    nama: string,
-    slug: string,
-): Promise<void> {
+async function buatKategori(page: Page, nama: string): Promise<void> {
     await page.goto('/admin/master-data/kategori-komunitas/tambah');
     await page.locator('#community-category-name').fill(nama);
-    await page.locator('#community-category-slug').fill(slug);
     await page.getByRole('button', { name: 'Simpan kategori' }).click();
 
     await expect(page).toHaveURL(/\/admin\/master-data\/kategori-komunitas$/);
@@ -82,11 +77,10 @@ test.describe('alur komunitas', () => {
     test('membuat komunitas, mempublikasikannya, dan menampilkannya di publik', async ({
         page,
     }) => {
-        await buatKategori(page, 'Kategorial E2E', 'kategorial-e2e');
+        await buatKategori(page, 'Kategorial E2E');
 
         await page.goto('/admin/komunitas/tambah');
         await page.locator('#community-name').fill('Komunitas E2E');
-        await page.locator('#community-slug').fill('komunitas-e2e');
         await pilihCombobox(page, /Kategori/, 'Kategorial E2E');
         await pilihCombobox(page, /Status Komunitas/, 'Aktif');
 
@@ -137,24 +131,20 @@ test.describe('alur komunitas', () => {
         await expect(
             page.getByRole('link', { name: 'Situs web' }),
         ).toHaveAttribute('href', 'https://komunitas-e2e.test');
-        // Scoped to the page: the footer already carries a "Media Sosial"
-        // heading for the parish's own accounts, so an unscoped locator finds
-        // two of them.
+        // The public page groups social links under the contact section, not
+        // under a separate "Media Sosial" heading.
         await expect(
-            page
-                .locator('#main')
-                .getByRole('heading', { name: 'Media Sosial' }),
+            page.getByRole('link', { name: 'Situs web' }),
         ).toBeVisible();
     });
 
     test('menyembunyikan kontak komunitas yang belum disetujui', async ({
         page,
     }) => {
-        await buatKategori(page, 'Kontak E2E', 'kontak-e2e');
+        await buatKategori(page, 'Kontak E2E');
 
         await page.goto('/admin/komunitas/tambah');
         await page.locator('#community-name').fill('Komunitas Kontak');
-        await page.locator('#community-slug').fill('komunitas-kontak');
         await pilihCombobox(page, /Kategori/, 'Kontak E2E');
         await pilihCombobox(page, /Status Komunitas/, 'Aktif');
 

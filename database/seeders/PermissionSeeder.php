@@ -257,6 +257,22 @@ class PermissionSeeder extends Seeder
         'documentcategories.create',
         'documentcategories.update',
         'documentcategories.delete',
+
+        /*
+         * Backup & Recovery.
+         *
+         * `backups.settings` rather than the specification's
+         * `backups.manage-settings`: the foundation test requires one word
+         * after the dot, and relaxing that rule for one feature would hide the
+         * next naming mistake instead of catching it.
+         */
+        'backups.view',
+        'backups.create',
+        'backups.download',
+        'backups.upload',
+        'backups.restore',
+        'backups.delete',
+        'backups.settings',
     ];
 
     /**

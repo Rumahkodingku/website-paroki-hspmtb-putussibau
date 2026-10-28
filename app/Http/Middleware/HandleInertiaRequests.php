@@ -96,6 +96,13 @@ class HandleInertiaRequests extends Middleware
             'displayTimezone' => fn () => config('app.display_timezone'),
             'abilities' => fn (): array => [
                 'auditlogs.view' => (bool) $request->user()?->can('auditlogs.view'),
+                'backups.view' => (bool) $request->user()?->can('backups.view'),
+                'backups.create' => (bool) $request->user()?->can('backups.create'),
+                'backups.upload' => (bool) $request->user()?->can('backups.upload'),
+                'backups.download' => (bool) $request->user()?->can('backups.download'),
+                'backups.restore' => (bool) $request->user()?->can('backups.restore'),
+                'backups.delete' => (bool) $request->user()?->can('backups.delete'),
+                'backups.settings' => (bool) $request->user()?->can('backups.settings'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),
