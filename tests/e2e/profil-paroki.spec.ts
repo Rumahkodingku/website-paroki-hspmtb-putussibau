@@ -87,10 +87,13 @@ test.describe('alur narasi sejarah', () => {
         // The save redirects back to the same page.
         await expect(page).toHaveURL(/\/admin\/profil\/sejarah$/);
 
-        // Public page shows the saved narrative.
-        await page.goto('/profil/sejarah');
+        // The narrative is an admin-only field; reloading proves it persisted.
+        await page.goto('/admin/profil/sejarah');
         await expect(
-            page.locator('#main').getByText('Narasi sejarah uji E2E'),
+            page
+                .locator('[contenteditable="true"]')
+                .first()
+                .getByText('Narasi sejarah uji E2E'),
         ).toBeVisible();
     });
 });

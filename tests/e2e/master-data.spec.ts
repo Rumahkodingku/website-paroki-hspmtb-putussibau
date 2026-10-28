@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { buatLokasi, pilih } from './support/admin-forms';
+import { buatLokasi, pilih, pilihWaktu } from './support/admin-forms';
 import { resetLoginRateLimit, signIn } from './support/session';
 
 /*
@@ -207,8 +207,9 @@ test.describe('lokasi admin', () => {
         // The sentence comes from lang/id/validation.php: the message is
         // ":attribute wajib diisi." and attributes.name is "Nama". The form
         // label "Nama lokasi" is not what a visitor is told.
-        await expect(page.getByText('Nama wajib diisi.')).toBeVisible();
-        await expect(page.getByText('Slug wajib diisi.')).toBeVisible();
+        await expect(
+            page.getByRole('main').getByText('Nama wajib diisi.'),
+        ).toBeVisible();
     });
 
     test('koordinat setengah terisi ditolak', async ({ page }) => {
@@ -216,7 +217,6 @@ test.describe('lokasi admin', () => {
         await page.goto('/admin/master-data/lokasi/tambah');
 
         await page.getByLabel('Nama lokasi').fill('Koordinat Setengah');
-        await page.getByLabel('Slug').fill('koordinat-setengah');
         await page.getByLabel('Lintang').fill('-0.0293');
         await page.getByRole('button', { name: 'Simpan lokasi' }).click();
 
@@ -232,7 +232,7 @@ test.describe('lokasi admin', () => {
     test('lokasi kosong bisa dihapus lewat dialog konfirmasi', async ({
         page,
     }) => {
-        await buatLokasi(page, 'Lokasi Untuk Dihapus', 'lokasi-dihapus-e2e');
+        await buatLokasi(page, 'Lokasi Untuk Dihapus');
 
         const row = page.getByRole('row').filter({
             hasText: 'Lokasi Untuk Dihapus',
@@ -261,13 +261,13 @@ test.describe('lokasi admin', () => {
     }) => {
         // Roadmap 4.5: the button is not offered for something the server will
         // refuse, and the refusal is asserted by DeleteTest on the backend.
-        await buatLokasi(page, 'Lokasi Sibuk E2E', 'lokasi-sibuk-e2e');
+        await buatLokasi(page, 'Lokasi Sibuk E2E');
 
         await page.goto('/admin/jadwal-misa/misa-rutin/tambah');
 
         await pilih(page, 'Lokasi', 'Lokasi Sibuk E2E');
         await pilih(page, 'Hari', 'Selasa');
-        await page.getByLabel('Jam mulai').fill('10:00');
+        await pilihWaktu(page, 'Jam mulai', '10:00');
         await page.getByLabel('Nama misa').fill('Misa Sibuk E2E');
         await page.getByRole('button', { name: 'Simpan jadwal' }).click();
 

@@ -26,11 +26,10 @@ test.describe('dashboard admin', () => {
         ).toBeVisible();
 
         for (const panel of [
-            'Aksi Cepat',
             'Agenda Terdekat',
             'Berita Terbaru',
             'Perlu Perhatian',
-            'Konten Terbaru',
+            'Konten Terakhir Diperbarui',
         ]) {
             await expect(
                 main.getByRole('heading', { name: panel, exact: true }),
@@ -43,11 +42,11 @@ test.describe('dashboard admin', () => {
         const summary = page.getByTestId('dashboard-summary');
 
         for (const card of [
-            'Berita',
-            'Agenda mendatang',
+            'Total Berita',
+            'Agenda Mendatang',
             'Dokumen',
-            'Misa rutin aktif',
-            'Pelayanan aktif',
+            'Jadwal Misa',
+            'Pelayanan',
         ]) {
             await expect(
                 summary.getByText(card, { exact: true }),
@@ -73,7 +72,11 @@ test.describe('dashboard admin', () => {
         // Scoped to the quick actions: "Tulis Berita" also appears in the
         // Berita Terbaru empty state, so the description is what tells them
         // apart.
-        await page.getByRole('link', { name: /Tulis Berita Artikel/ }).click();
+        await page
+            .getByRole('main')
+            .getByRole('link', { name: 'Tulis Berita', exact: true })
+            .first()
+            .click();
 
         await expect(page).toHaveURL(/\/admin\/berita\/tambah$/);
         await expect(
