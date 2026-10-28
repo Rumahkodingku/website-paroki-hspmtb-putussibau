@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { pilihWaktu } from './support/admin-forms';
 import { resetLoginRateLimit, signIn } from './support/session';
 
 /**
@@ -100,8 +101,8 @@ test.describe('pengaturan situs', () => {
         await page
             .getByRole('switch', { name: 'Aktifkan pelayanan Senin' })
             .click();
-        await page.getByLabel('Jam buka Senin').fill('08:00');
-        await page.getByLabel('Jam tutup Senin').fill('15:00');
+        await pilihWaktu(page, 'Jam buka Senin', '08:00');
+        await pilihWaktu(page, 'Jam tutup Senin', '15:00');
 
         await Promise.all([
             page.waitForResponse(
@@ -118,8 +119,8 @@ test.describe('pengaturan situs', () => {
         await expect(
             page.getByRole('switch', { name: 'Aktifkan pelayanan Senin' }),
         ).toHaveAttribute('aria-checked', 'true');
-        await expect(page.getByLabel('Jam buka Senin')).toHaveValue('08:00');
-        await expect(page.getByLabel('Jam tutup Senin')).toHaveValue('15:00');
+        await expect(page.getByLabel('Jam buka Senin')).toContainText('08:00');
+        await expect(page.getByLabel('Jam tutup Senin')).toContainText('15:00');
     });
 
     test('halaman pengaturan menolak tamu', async ({ page, context }) => {

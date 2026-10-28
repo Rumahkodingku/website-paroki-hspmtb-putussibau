@@ -129,7 +129,9 @@ test.describe('kontak publik', () => {
 
         await page.goto('/');
         await expect(
-            page.getByRole('heading', { name: 'Hubungi Kami' }),
+            page
+                .getByRole('main')
+                .getByRole('heading', { name: 'Hubungi Kami' }),
         ).toHaveCount(0);
 
         await page.goto('/kontak');

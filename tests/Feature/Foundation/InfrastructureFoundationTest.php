@@ -49,7 +49,10 @@ function scheduleListing(): string
 {
     Artisan::call('schedule:list');
 
-    return Artisan::output();
+    // schedule:list pads cron columns to the widest expression, so the number
+    // of spaces between fields changes whenever a new task is added. The
+    // assertions below are about which expressions exist, not about padding.
+    return (string) preg_replace('/\s+/', ' ', Artisan::output());
 }
 
 test('the schedule has at least one task', function () {

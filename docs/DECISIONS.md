@@ -5584,3 +5584,86 @@ UI manajemen role/permission, dan restore objek berada di luar MVP.
 @see `docs/specifications/spec-audit-log.md`
 @see `docs/plan-implementation/plan-audit-log.md`
 @see `docs/audit-log.md`
+
+---
+
+## D-80 — Metadata backup dan tabel yang dikecualikan dari dump
+
+**Status:** Accepted · branch `feat/backup-recovery`
+
+Tiga tabel: `backups`, `backup_restores`, `backup_settings`. Metadata backup
+tidak memakai FK ke `users` karena tabel `users` ikut di-restore, sedangkan
+tabel backup dikecualikan dari dump. `backup_restores.backup_id` memakai
+`cascadeOnDelete`; `safety_backup_id` memakai `nullOnDelete`.
+
+Dump database mengecualikan `sessions`, `cache`, `cache_locks`, `jobs`,
+`job_batches`, `failed_jobs`, `password_reset_tokens`, `backups`,
+`backup_restores`, dan `backup_settings`. `audit_events` tetap disertakan;
+restore karena itu mengembalikan Audit Log ke waktu backup. Batas ini
+didokumentasikan, bukan diklaim immutable.
+
+## D-81 — Disk privat `backups` dan temporary workspace
+
+Arsip final berada di disk privat `backups` (`storage/app/private/backups`),
+terpisah dari temporary workspace `storage/app/private/backup-temp`. Tidak ada
+public URL. Upload karantina dan staging restore juga privat.
+
+## D-82 — Format manifest backup
+
+Backup database `.sql.gz` membawa manifest sebagai komentar
+`-- HSPMTB-MANIFEST:<base64 JSON>` di awal dump. Backup lengkap `.zip` membawa
+`manifest.json` di root. Format version yang tidak didukung ditolak.
+
+## D-83 — Queue khusus `backups` dan heartbeat kesiapan
+
+Backup/restore memakai koneksi antrean `backups` dengan `retry_after` 7300
+detik, di atas timeout job 7200 detik. Worker produksi harus menjalankan
+`--queue=backups,default`. Scheduler dan worker menulis heartbeat; UI
+menyatakan “belum terdeteksi” bila heartbeat basi.
+
+## D-84 — Restore dua tahap dengan safety backup
+
+Restore tidak langsung destruktif. Tahap persiapan membuat dan memvalidasi
+safety backup, lalu operasi menjadi `ready`. Konfirmasi final memakai frasa
+`PULIHKAN DATA` dan baru setelah itu restore dijalankan. Lock eksklusif
+mencegah operasi bersamaan. Maintenance memakai flag cache + middleware
+write-block, bukan `artisan down`, karena `down` menghentikan worker restore.
+
+## D-85 — Kebijakan file full restore
+
+File yang ada di arsip diganti. File yang tidak ada di arsip dipertahankan;
+tidak ada penghapusan file arbitrary. Hasil bukan cermin penuh dan UI
+menyatakannya. File yang gagal disalin menghasilkan status `partial`.
+
+## D-86 — Penamaan permission `backups.settings`
+
+Spec menyebut `backups.manage-settings`, tetapi test fondasi mewajibkan
+`^[a-z]+\.[a-z]+$`. Permission yang dipakai adalah `backups.settings`. Regex
+tidak dilonggarkan.
+
+## D-87 — Default jadwal dan retensi
+
+Database harian 02:00, full mingguan Minggu 02:30, timezone `Asia/Pontianak`.
+Retensi database 14 hari, lengkap 4 minggu, manual tidak dihapus otomatis,
+unggahan gagal 7 hari, safety backup 30 hari. Nilai ini memenuhi PRD
+NFR-AVAIL (≥14 hari) sambil tetap menyediakan full backup mingguan.
+
+## D-88 — Restore produksi dan batas audit
+
+Restore produksi diizinkan dari UI bagi pemegang `backups.restore` dengan
+konfirmasi kuat. Safety backup wajib berhasil. Karena Audit Log berada di
+database yang sama, event sebelum restore dapat hilang; aplikasi menulis log
+file aman sebelum/sesudah restore. Audit eksternal yang tahan rollback berada
+di luar scope.
+
+## D-89 — Uji restore nyata dengan database terpisah
+
+`tests/Integration/Backup/RestoreIntegrationTest.php` memakai
+`website_paroki_hspmtb_restore_test`. Test membuat database, menjalankan
+migration, melakukan dump/restore nyata, lalu menghapus database. Jika
+privilege tidak tersedia, test di-skip dengan alasan jelas; hasil skip tidak
+diklaim lulus.
+
+@see `docs/specifications/spec-backup-recovery.md`
+@see `docs/plan-implementation/plan-backup-recovery.md`
+@see `docs/backup-recovery.md`
