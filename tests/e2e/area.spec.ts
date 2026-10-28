@@ -52,7 +52,6 @@ async function buatArea(
     }
 
     await page.locator('#area-name').fill(nama);
-    await page.locator('#area-slug').fill(slug);
 
     if (beforeSave) {
         await beforeSave(page);

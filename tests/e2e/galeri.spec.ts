@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { pilihTanggal } from './support/admin-forms';
 import { seedGalleryAlbum } from './support/gallery';
 import { resetLoginRateLimit, signIn } from './support/session';
 
@@ -54,8 +55,7 @@ test.describe('alur album', () => {
     }) => {
         await page.goto('/admin/galeri/tambah');
         await page.locator('#gallery-title').fill('Album Draf E2E');
-        await page.locator('#gallery-slug').fill('album-draf-e2e');
-        await page.locator('#gallery-event-date').fill('2025-03-01');
+        await pilihTanggal(page, 'Tanggal Kegiatan');
         await page.getByRole('button', { name: 'Simpan album' }).click();
 
         // A new album lands on its photo manager, ready for photos.
