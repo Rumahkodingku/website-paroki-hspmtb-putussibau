@@ -55,6 +55,7 @@ return [
         'locations',
         'galleries',
         'gallery_photos',
+        'backups',
     ],
 
     /*
@@ -90,6 +91,27 @@ return [
         'profile_updated',
         'email_changed',
         'password_changed',
+        'backup_started',
+        'backup_completed',
+        'backup_failed',
+        'backup_validated',
+        'backup_validation_failed',
+        'backup_uploaded',
+        'backup_upload_rejected',
+        'backup_downloaded',
+        'backup_deleted',
+        'backup_delete_failed',
+        'backup_retention_deleted',
+        'backup_settings_updated',
+        'restore_requested',
+        'restore_safety_created',
+        'restore_ready',
+        'restore_rejected',
+        'restore_started',
+        'restore_completed',
+        'restore_partial',
+        'restore_failed',
+        'restore_expired',
     ],
 
     /*
@@ -225,6 +247,16 @@ return [
         'gallery_photos' => [
             'gallery_album_id', 'media_id', 'caption', 'alt_text', 'sort_order',
         ],
+        'backups' => [
+            'type', 'source', 'status', 'validation_status', 'file_size',
+            'checksum', 'format_version', 'note', 'failure_code', 'scheduled_slot',
+            'schedule_enabled', 'database_enabled', 'full_enabled',
+            'database_time', 'full_day', 'full_time', 'timezone',
+            'retention_daily_days', 'retention_weekly_weeks',
+            'retention_invalid_upload_days', 'retention_safety_days',
+            'max_upload_megabytes', 'max_expanded_megabytes', 'max_files',
+            'max_compression_ratio', 'low_disk_threshold_megabytes',
+        ],
     ],
 
     /*
@@ -252,6 +284,11 @@ return [
         'service_faqs' => ['count', 'ids'],
         'pastor_assignments' => ['affected_ids'],
         'parish_boards' => ['affected_ids'],
+        'backups' => [
+            'backup_id', 'operation_id', 'type', 'source', 'status',
+            'file_size', 'duration_ms', 'error_code', 'safety_backup_id',
+            'count', 'ids', 'requested_by', 'setting_keys_changed',
+        ],
     ],
 
     /*
@@ -293,6 +330,7 @@ return [
         'areas' => ['description'],
         'galleries' => ['description'],
         'documents' => ['description'],
+        'backups' => ['note'],
     ],
 
     /*

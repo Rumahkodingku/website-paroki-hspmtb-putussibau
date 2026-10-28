@@ -92,6 +92,10 @@ export default defineConfig({
         env: {
             DB_DATABASE: environment.database,
 
+            // Backup jobs run inline in E2E: there is no separate worker in
+            // the Playwright web server.
+            BACKUPS_QUEUE_CONNECTION: 'sync',
+
             /**
              * Force debug off even though a development machine has it on.
              *
