@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app/app-sidebar-layout';
 import AuthLayout from '@/layouts/auth';
+import InstallationLayout from '@/layouts/installation';
 import PublicLayout from '@/layouts/public';
 import SettingsLayout from '@/layouts/settings/layout';
 import { pageName } from '@/lib/page-name';
@@ -64,6 +65,8 @@ void createInertiaApp({
         switch (true) {
             case name === 'public/error':
                 return PublicLayout;
+            case name.startsWith('installation/'):
+                return InstallationLayout;
             case name.startsWith('public/auth/'):
                 return AuthLayout;
             case name.startsWith('public/'):

@@ -3916,11 +3916,12 @@ yang mengikat:
    berubah false→true dan masih null, tidak diubah saat unpublish/republish
    (pola `SavePostAction`, D-9 plan). Field ini tidak ada di rules request.
 
-10. **Seeder hanya demo.** Tidak ada seeder produksi komunitas/kategori/area
-    (roadmap §3.2/§17, prinsip D-34). `DemoContentSeeder` mengisi kategori, area
-    (wilayah/lingkungan/stasi), dan komunitas contoh — tanpa kontak atau nama
+10. **Seeder kategori produksi, konten demo.** `CommunityCategorySeeder`
+    (master data) men-seed tiga kategori default di setiap `migrate:fresh --seed`,
+    termasuk instalasi bare (D-34). `DemoContentSeeder` mengisi area
+    (wilayah/lingkungan/stasi) dan komunitas contoh — tanpa kontak atau nama
     nyata — dijaga `config('demo.enabled')` (D-53). E2E dan `composer setup`
-    tetap bersih.
+    tetap bersih (kategori default tetap ada; area & komunitas tidak).
 
 11. **Permission: `communities.*` + `communitycategories.*` + `areas.*`** (4 verb
     masing-masing, total 12; 69 → 81). Semua satu kata (`/^[a-z]+\.[a-z]+$/`).
@@ -5667,3 +5668,98 @@ diklaim lulus.
 @see `docs/specifications/spec-backup-recovery.md`
 @see `docs/plan-implementation/plan-backup-recovery.md`
 @see `docs/backup-recovery.md`
+
+## D-90 — Installation Wizard: konfigurasi environment dikelola deployment
+
+Wizard tidak menulis `.env`. Operator menyiapkan `DB_*`, `APP_KEY`, `APP_URL`,
+dan `INSTALLER_ENABLED` sebelum membuka `/install`; Step 3 hanya menampilkan
+nilai koneksi (tanpa password), menguji koneksi, dan memeriksa kelayakan
+database. Ini menghindari masalah permission, escaping, dan config cache basi
+yang muncul bila aplikasi web menulis file environment. Konsekuensi: Step 3
+bukan form input, dan Step 5 tidak mengubah URL/timezone/nama aplikasi.
+
+`INSTALLER_ENABLED=false` adalah default. Flag ini hanya untuk deployment yang
+memang sedang memasang instalasi baru.
+
+## D-91 — Installation Wizard: status di file, bukan tabel
+
+Status instalasi disimpan di `storage/app/private/installation/status.json`
+dengan status `pending`, `installing`, `failed`, atau `completed`, plus langkah
+terakhir dan kode error yang aman. Tabel tidak bisa menjadi sumber kebenaran
+sebelum migrasi pertama, dan file ini juga yang dibaca operator saat instalasi
+gagal. Penulisan bersifat atomik; file yang tidak terbaca dianggap `failed`
+(`STATUS_UNREADABLE`), bukan instalasi baru.
+
+File tidak menyimpan password, email admin, connection string, atau secret.
+`completed` dan `failed` bersifat terminal untuk HTTP. Pemulihan dilakukan
+operator melalui SSH setelah verifikasi manual; tidak ada endpoint reset.
+
+## D-92 — Installation Wizard: proses sinkron dengan progress dari backend
+
+`POST /install/run` menjalankan seluruh urutan dalam satu request
+(`set_time_limit(300)`) dan mencatat langkah ke file status. Browser memanggil
+`GET /install/progress` selama menunggu; progress tidak pernah dikarang dari
+sisi klien. Lock `Cache::lock('installation.run', 3600)` mencegah dua proses
+berjalan bersamaan. Queue tidak dipakai karena tabel queue baru ada setelah
+migrasi dan worker belum tentu tersedia di hosting target.
+
+Kegagalan dicatat sebagai kode aman; stack trace hanya masuk log server.
+
+## D-93 — Installation Wizard: hanya database kosong
+
+Instalasi hanya diizinkan bila schema target memiliki **nol tabel**. Jumlah
+tabel dibaca dari schema yang dikonfigurasi, bukan dari seluruh server MySQL
+(`getTableListing(null)` akan melihat database lain di instance yang sama).
+Database yang berisi tabel ditolak dan harus diperiksa operator; wizard tidak
+menyediakan `migrate:fresh`, `db:wipe`, `DROP TABLE`, atau rollback otomatis.
+
+Status `failed` tidak membuka resume otomatis. Operator memverifikasi database,
+memulihkan backup bila perlu, lalu menghapus file status untuk mengulang.
+
+## D-94 — Installation Wizard: runtime pra-migrasi
+
+Tiga hal membuat `/install*` dapat hidup sebelum tabel ada:
+
+1. `UseInstallerRuntime` (global prepend) memaksa session/cache `file` dan
+   queue `sync` untuk path installer. Driver `array` dipertahankan karena sudah
+   bekerja tanpa database dan dipakai test suite.
+2. `HandleInertiaRequests::share()` tidak mengevaluasi `seo`, `identity`,
+   `contact`, atau `abilities` pada path installer.
+3. `resources/views/app.blade.php` melewati query `site_settings` (favicon dan
+   SEO) untuk komponen `installation/*`.
+4. `AppServiceProvider::boot()` berjalan sebelum `FortifyServiceProvider::boot()`
+   dan menetapkan `cache.limiter` ke `file` untuk request installer. Fortify
+   meresolusi singleton `RateLimiter` saat boot; tanpa ini throttle pada POST
+   installer memakai tabel `cache` yang belum ada.
+
+`config/inertia.php` mendapat direktori
+`resources/js/features/installation/wizard/pages`; tanpa itu
+`assertInertia()->component()` dan ArchitectureTest tidak menemukan halaman.
+Installer memakai layout sendiri di `resources/js/layouts/installation/`.
+
+## D-95 — Installation Wizard: seeder produksi dan kategori komunitas
+
+Wizard hanya menjalankan `PermissionSeeder` dan lima seeder kategori melalui
+allow-list `config/installer.php`; `DatabaseSeeder`, `ServiceSeeder`,
+`SiteSettingsSeeder`, `SuperAdminSeeder` berbasis env, dan seluruh seeder demo
+tidak dipanggil.
+
+`CommunityCategorySeeder` menjadi master data produksi: `firstOrCreate` per slug
+(tidak menimpa rename admin, `withTrashed()` menjaga slot unik) dan tanpa
+deskripsi "Contoh kategori komunitas untuk pratinjau." yang sebelumnya masuk ke
+instalasi produksi.
+
+@see `docs/specifications/spec-installation-wizard.md`
+@see `docs/plan-implementation/plan-installation-wizard.md`
+
+## D-96 — Auto-redirect ke `/install` sebelum instalasi
+
+Sebelum status `completed`, request ke path non-asset (selain `/install*`, `/up`,
+`/build/*`, `/storage/*`, `/favicon*`, `/robots.txt`, `/sitemap*`) dialihkan
+dengan 302 ke `/install`. Sumber kebenaran adalah file status installer; tidak
+ada query database di middleware. Redirect hanya aktif saat `INSTALLER_ENABLED=true`. Jika nonaktif dan
+status file ada tetapi belum `completed`, respons adalah 503 (fail closed).
+Tanpa file status, request diteruskan normal. Setelah `completed`, situs
+berjalan normal dan tidak ada redirect.
+
+@see `docs/plan-implementation/plan-installation-redirect.md`
