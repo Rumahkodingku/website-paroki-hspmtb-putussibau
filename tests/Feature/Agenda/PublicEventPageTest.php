@@ -230,7 +230,7 @@ it('treats an unknown mode as the list', function () {
 });
 
 it('sends both readings at once, so switching mode needs no round trip', function () {
-    Event::factory()->create(['start_at' => Carbon::now()->addDays(3)]);
+    Event::factory()->create(['start_at' => Carbon::now()->addHours(1)]);
 
     $this->get('/agenda')
         ->assertInertia(fn (Assert $page) => $page

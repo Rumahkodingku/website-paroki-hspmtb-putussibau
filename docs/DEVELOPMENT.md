@@ -405,3 +405,74 @@ disagrees with it, `php artisan config:clear` is already the first thing
 | How are roles and permissions arranged? | `RBAC.md` |
 | What are the design tokens? | `docs/DESIGN.md` |
 | What does the product require? | `docs/PRD.md` |
+
+---
+
+## 11. Installation Wizard (instalasi baru)
+
+Wizard adalah alat deployment satu kali, bukan fitur yang selalu aktif. Ia
+berjalan di `/install`, memeriksa server, memverifikasi database, membuat akun
+Super Admin, dan menyimpan identitas paroki. Tidak ada konten demo yang
+dimasukkan.
+
+### 11.1 Prasyarat
+
+- MySQL 8 dan database target **kosong** (nol tabel).
+- Dependensi PHP dan frontend sudah terpasang.
+- `.env` sudah berisi `DB_*`, `APP_KEY`, dan `APP_URL` yang benar.
+- `INSTALLER_ENABLED=true` hanya selama instalasi.
+
+Jangan memakai `composer setup` untuk instalasi baru: perintah itu menjalankan
+`php artisan migrate`, sehingga database tidak lagi kosong dan wizard akan
+menolaknya.
+
+Membuka `/` sebelum instalasi otomatis diarahkan ke `/install`; tidak perlu
+mengetik `/install` secara manual.
+
+### 11.2 Urutan deployment
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+# edit DB_*, APP_URL, dan set INSTALLER_ENABLED=true
+php artisan storage:link
+npm ci
+npm run build
+```
+
+Jika konfigurasi pernah di-cache, jalankan `php artisan config:clear` setelah
+mengubah `.env`.
+
+Buka `/install` di browser, selesaikan tujuh langkah, lalu **kembalikan**
+`INSTALLER_ENABLED=false` dan jalankan `php artisan config:clear` bila perlu.
+Installer juga terkunci oleh status `completed`, tetapi flag adalah lapisan
+pertahanan pertama.
+
+### 11.3 Apa yang dijalankan wizard
+
+1. Requirements read-only.
+2. Uji koneksi + pemeriksaan database kosong.
+3. Migrasi normal (`migrate`, bukan `migrate:fresh`).
+4. `PermissionSeeder` lalu lima seeder kategori.
+5. Akun Super Admin dari input Step 4.
+6. Lima identitas paroki melalui `SiteSettingsService`.
+7. Verifikasi dan penguncian.
+
+`DatabaseSeeder`, `ServiceSeeder`, `SiteSettingsSeeder`, `SuperAdminSeeder`
+berbasis environment, dan seluruh seeder demo tidak dipanggil.
+
+### 11.4 Status dan pemulihan
+
+Status: `storage/app/private/installation/status.json`. File ini tidak berisi
+secret. Jika instalasi gagal:
+
+1. Baca status dan kode error (`MIGRATION_FAILED`, `SEEDER_FAILED`, dst.).
+2. Periksa log server untuk detail exception.
+3. Periksa migrasi, role, user, kategori, dan setting yang sudah terbentuk.
+4. Pulihkan backup bila database perlu dikembalikan.
+5. Hapus file status hanya setelah pemeriksaan manual selesai, lalu ulangi dari
+   database yang benar-benar kosong.
+
+Tidak ada endpoint HTTP untuk reset atau reinstall. Untuk detail keputusan,
+lihat D-90 sampai D-95 di `docs/DECISIONS.md`.

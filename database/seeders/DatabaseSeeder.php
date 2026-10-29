@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
             DocumentCategorySeeder::class,
+            CommunityCategorySeeder::class,
             SuperAdminSeeder::class,
             // Sample content for looking at the screens. Guarded by
             // config('demo.enabled'), which app:e2e:prepare turns off so the
