@@ -36,16 +36,30 @@
 
         @php
             /*
-             * The parish's favicon, if one has been uploaded. It is a media row
-             * (a media id), so the URL is resolved from it here rather than
-             * stored as a path. When unset, the committed placeholder icons are
-             * used instead.
+             * The installer renders before site_settings exists. Both blocks
+             * below read that table, so they are skipped for installation
+             * pages: the committed placeholder icons and the app name are
+             * enough, and a query here would turn the first wizard request into
+             * a 500. See docs/DECISIONS.md D-94.
              */
-            $faviconSetting = app(\App\Services\SiteSettingsService::class)->get('favicon');
-            $faviconUrl = is_string($faviconSetting) && $faviconSetting !== ''
-                ? \App\Models\Media::query()->with('variants')->find((int) $faviconSetting)?->url('thumb')
-                : null;
+            $isInstaller = str_starts_with((string) ($page['component'] ?? ''), 'installation/');
+            $faviconUrl = null;
         @endphp
+
+        @unless($isInstaller)
+            @php
+                /*
+                 * The parish's favicon, if one has been uploaded. It is a media row
+                 * (a media id), so the URL is resolved from it here rather than
+                 * stored as a path. When unset, the committed placeholder icons are
+                 * used instead.
+                 */
+                $faviconSetting = app(\App\Services\SiteSettingsService::class)->get('favicon');
+                $faviconUrl = is_string($faviconSetting) && $faviconSetting !== ''
+                    ? \App\Models\Media::query()->with('variants')->find((int) $faviconSetting)?->url('thumb')
+                    : null;
+            @endphp
+        @endunless
 
         @if($faviconUrl)
             <link rel="icon" href="{{ $faviconUrl }}">
@@ -100,47 +114,54 @@
              * because both crawlers and WhatsApp read an empty description as a
              * description.
              */
-            $seo = app(\App\Services\SiteSettingsService::class);
-            $seoRead = static function (string $key) use ($seo): ?string {
-                $value = $seo->get($key);
+            $seoSiteName = null;
+            $seoTitle = null;
+            $seoDescription = null;
+            $seoOgImage = null;
 
-                return is_string($value) && trim($value) !== '' ? $value : null;
-            };
-            $seoSiteName = $seoRead('parish_name');
-            $isHome = request()->routeIs('home');
+            if (! $isInstaller) {
+                $seo = app(\App\Services\SiteSettingsService::class);
+                $seoRead = static function (string $key) use ($seo): ?string {
+                    $value = $seo->get($key);
 
-            /*
-             * The homepage has three defaults the other pages do not need.
-             *
-             * The short name is a useful document title when the parish has not
-             * configured seo_default_title. The short description is the only
-             * honest meta description available before a page-specific one is
-             * written, and the approved hero photograph makes a valid Open
-             * Graph image even when seo_default_og_image is unset. Every value
-             * remains optional: an empty setting still omits the tag rather
-             * than emitting an empty one.
-             */
-            $seoTitle = $seoRead('seo_default_title');
+                    return is_string($value) && trim($value) !== '' ? $value : null;
+                };
+                $seoSiteName = $seoRead('parish_name');
+                $isHome = request()->routeIs('home');
 
-            if ($isHome) {
-                $seoTitle ??= $seoRead('parish_short_name') ?? $seoRead('parish_name');
+                /*
+                 * The homepage has three defaults the other pages do not need.
+                 *
+                 * The short name is a useful document title when the parish has not
+                 * configured seo_default_title. The short description is the only
+                 * honest meta description available before a page-specific one is
+                 * written, and the approved hero photograph makes a valid Open
+                 * Graph image even when seo_default_og_image is unset. Every value
+                 * remains optional: an empty setting still omits the tag rather
+                 * than emitting an empty one.
+                 */
+                $seoTitle = $seoRead('seo_default_title');
+
+                if ($isHome) {
+                    $seoTitle ??= $seoRead('parish_short_name') ?? $seoRead('parish_name');
+                }
+
+                $seoDescription = $seoRead('seo_default_description');
+
+                if ($isHome) {
+                    $seoDescription ??= $seoRead('short_description');
+                }
+
+                $seoOgImage = $seoRead('seo_default_og_image');
+
+                if ($isHome) {
+                    $seoOgImage ??= (string) config('homepage.fallback_hero_og_image');
+                }
+
+                $seoOgImage = $seoOgImage && ! str_starts_with($seoOgImage, 'http')
+                    ? rtrim(config('app.url'), '/').'/'.ltrim($seoOgImage, '/')
+                    : $seoOgImage;
             }
-
-            $seoDescription = $seoRead('seo_default_description');
-
-            if ($isHome) {
-                $seoDescription ??= $seoRead('short_description');
-            }
-
-            $seoOgImage = $seoRead('seo_default_og_image');
-
-            if ($isHome) {
-                $seoOgImage ??= (string) config('homepage.fallback_hero_og_image');
-            }
-
-            $seoOgImage = $seoOgImage && ! str_starts_with($seoOgImage, 'http')
-                ? rtrim(config('app.url'), '/').'/'.ltrim($seoOgImage, '/')
-                : $seoOgImage;
         @endphp
 
         <x-inertia::head>

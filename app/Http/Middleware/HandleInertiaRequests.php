@@ -81,6 +81,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        /**
+         * The installer runs before the database has tables. Every prop below
+         * except `name` reads site settings, so evaluating them on /install
+         * would turn the first request into a 500. `errors` and `flash` still
+         * come from the parent, which is what validation needs.
+         *
+         * @see docs/DECISIONS.md D-94
+         */
+        if ($request->is('install') || $request->is('install/*')) {
+            return [
+                ...parent::share($request),
+                'name' => config('app.name'),
+            ];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),

@@ -14,25 +14,10 @@ class DemoCommunitiesSeeder extends Seeder
 {
     public function run(Media $media): void
     {
-        /** @var array<string, array{name: string, sort_order: int}> $categories */
-        $categories = [
-            'organisasi-kategorial' => ['name' => 'Organisasi/Kategorial', 'sort_order' => 0],
-            'kelompok-doa-pelayanan' => ['name' => 'Kelompok Doa dan Pelayanan', 'sort_order' => 1],
-            'wilayah-lingkungan' => ['name' => 'Wilayah dan Lingkungan', 'sort_order' => 2],
-        ];
-
-        foreach ($categories as $slug => $fields) {
-            CommunityCategory::withTrashed()->updateOrCreate(
-                ['slug' => $slug],
-                [
-                    'name' => $fields['name'],
-                    'description' => 'Contoh kategori komunitas untuk pratinjau.',
-                    'sort_order' => $fields['sort_order'],
-                    'is_active' => true,
-                    'deleted_at' => null,
-                ],
-            );
-        }
+        // Kategori komunitas kini di-seed oleh CommunityCategorySeeder (master
+        // data, selalu jalan). Dipanggil di sini agar seeder ini tetap bisa
+        // dijalankan standalone (`php artisan db:seed --class=...`).
+        $this->call(CommunityCategorySeeder::class);
 
         /** @var array<string, array{name: string, type: AreaType, parent: string|null, leader: string, phone: string, show_contact: bool, sort: int}> $areaSamples */
         $areaSamples = [

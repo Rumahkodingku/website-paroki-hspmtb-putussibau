@@ -18,6 +18,8 @@ use App\Http\Controllers\Galeri\GalleryController;
 use App\Http\Controllers\Galeri\GalleryPhotoController;
 use App\Http\Controllers\Galeri\PublicGalleryController;
 use App\Http\Controllers\Home\PublicHomeController;
+use App\Http\Controllers\Installation\InstallationRunController;
+use App\Http\Controllers\Installation\InstallationWizardController;
 use App\Http\Controllers\Komunitas\CommunityController;
 use App\Http\Controllers\Komunitas\PublicCommunityController;
 use App\Http\Controllers\MassSchedule\MassScheduleController;
@@ -53,8 +55,63 @@ use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureAdminAccess;
+use App\Http\Middleware\EnsureInstallerAvailable;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Installation wizard
+|--------------------------------------------------------------------------
+|
+| A one-time deployment tool, enabled by INSTALLER_ENABLED and locked by the
+| status file once it completes. It lives outside /admin: there is no session
+| and no account yet, and the routes must work before the database has tables.
+| See docs/DECISIONS.md D-90 … D-94.
+|
+*/
+
+Route::middleware(EnsureInstallerAvailable::class)
+    ->prefix('install')
+    ->name('install.')
+    ->group(function () {
+        Route::get('/', [InstallationWizardController::class, 'show'])->name('show');
+
+        Route::get('requirements', [InstallationWizardController::class, 'requirements'])
+            ->name('requirements');
+        Route::post('requirements/check', [InstallationWizardController::class, 'checkRequirements'])
+            ->middleware('throttle:30,1')
+            ->name('requirements.check');
+
+        Route::get('database', [InstallationWizardController::class, 'database'])
+            ->name('database');
+        Route::post('database/test', [InstallationWizardController::class, 'testDatabase'])
+            ->middleware('throttle:10,1')
+            ->name('database.test');
+
+        Route::get('super-admin', [InstallationWizardController::class, 'superAdmin'])
+            ->name('super-admin');
+        Route::post('super-admin/validate', [InstallationWizardController::class, 'storeSuperAdmin'])
+            ->middleware('throttle:30,1')
+            ->name('super-admin.validate');
+
+        Route::get('application', [InstallationWizardController::class, 'application'])
+            ->name('application');
+        Route::post('application/validate', [InstallationWizardController::class, 'storeApplication'])
+            ->middleware('throttle:30,1')
+            ->name('application.validate');
+
+        Route::get('review', [InstallationWizardController::class, 'review'])->name('review');
+
+        Route::post('run', [InstallationRunController::class, 'run'])
+            ->middleware('throttle:5,1')
+            ->name('run');
+        Route::get('progress', [InstallationRunController::class, 'progress'])
+            ->middleware('throttle:120,1')
+            ->name('progress');
+
+        Route::get('complete', [InstallationWizardController::class, 'complete'])->name('complete');
+    });
 
 /*
 |--------------------------------------------------------------------------

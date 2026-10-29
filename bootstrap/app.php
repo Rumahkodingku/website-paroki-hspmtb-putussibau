@@ -4,6 +4,8 @@ use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\BlockWritesDuringRestore;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectToInstaller;
+use App\Http\Middleware\UseInstallerRuntime;
 use App\Jobs\BackupWorkerHeartbeatJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -22,6 +24,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        /**
+         * Before StartSession: send traffic to /install until the wizard has
+         * finished, then let the installer runtime switch the drivers.
+         *
+         * @see docs/DECISIONS.md D-96
+         */
+        $middleware->prepend(UseInstallerRuntime::class);
+        $middleware->prepend(RedirectToInstaller::class);
 
         $middleware->web(append: [
             HandleAppearance::class,

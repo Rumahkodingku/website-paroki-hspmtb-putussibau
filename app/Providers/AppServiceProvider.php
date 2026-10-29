@@ -58,9 +58,43 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureInstallerRuntime();
         $this->configureDefaults();
         $this->configureAuthorization();
         $this->registerSchedulerProcess();
+    }
+
+    /**
+     * Point the installer at filesystem stores before Fortify boots.
+     *
+     * Fortify resolves the RateLimiter singleton in its own boot() to register
+     * the `login` limiter. On a fresh install the database cache table does not
+     * exist yet, so that resolution must not pick the database store. This runs
+     * first because AppServiceProvider is listed before FortifyServiceProvider
+     * in bootstrap/providers.php.
+     *
+     * @see docs/DECISIONS.md D-94
+     */
+    private function configureInstallerRuntime(): void
+    {
+        if (! $this->app->bound('request')) {
+            return;
+        }
+
+        $request = $this->app->make('request');
+
+        if (! $request->is('install') && ! $request->is('install/*')) {
+            return;
+        }
+
+        $cacheDriver = config('cache.default') === 'array' ? 'array' : 'file';
+
+        config([
+            'session.driver' => config('session.driver') === 'array' ? 'array' : 'file',
+            'cache.default' => $cacheDriver,
+            'cache.limiter' => $cacheDriver,
+            'queue.default' => 'sync',
+        ]);
     }
 
     /**
