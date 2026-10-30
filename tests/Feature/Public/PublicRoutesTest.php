@@ -105,7 +105,7 @@ it('renders the expected page for every public route', function (string $url, st
 })->with('public pages');
 
 it('lets a guest reach every public route without signing in', function (string $url) {
-    // assertOk() is the whole point of this test. A redirect to /admin/login
+    // assertOk() is the whole point of this test. A redirect to /auth/login
     // would mean the public shell had picked up one of the three admin
     // middleware layers by accident, which is invisible until somebody clicks a
     // link from the footer and lands on a login form.

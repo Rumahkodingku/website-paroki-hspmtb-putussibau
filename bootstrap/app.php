@@ -55,6 +55,8 @@ return Application::configure(basePath: dirname(__DIR__))
          */
         $schedule->command('queue:prune-failed --hours=168')->daily();
 
+        $schedule->command('telescope:prune --hours=24')->daily();
+
         /**
          * Scheduled articles, PRD AC-POST-6/AC-POST-7.
          *

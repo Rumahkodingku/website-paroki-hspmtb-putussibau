@@ -1,4 +1,5 @@
 import type { ArticleCardData } from '@/types/news-agenda';
+import Image from '@/components/image';
 import { Link } from '@inertiajs/react';
 import { Image as ImageIcon } from 'lucide-react';
 import { Text } from '@/components/text';
@@ -20,7 +21,7 @@ export function ArticleCard({
             {/* Article image */}
             {article.image ? (
                 <div className="relative shrink-0 overflow-hidden rounded-xl bg-muted">
-                    <img
+                    <Image
                         src={article.image}
                         alt={article.image_alt ?? ''}
                         srcSet={article.image_srcset}
@@ -28,8 +29,11 @@ export function ArticleCard({
                             article.image_sizes ??
                             '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw'
                         }
+                        aspectRatio="16 / 9"
+                        fit="cover"
                         loading="lazy"
-                        className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                        imageClassName="transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                        className="w-full"
                     />
 
                     {article.image_is_illustration ? (

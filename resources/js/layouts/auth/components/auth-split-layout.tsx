@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { Text } from '@/components/text';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+import Image from '@/components/image';
 import ParishLogo from '@/components/parish-logo';
 
 export default function AuthSplitLayout({
@@ -16,11 +17,14 @@ export default function AuthSplitLayout({
             {/* Left section */}
             <div className="relative hidden h-full flex-col overflow-hidden p-10 text-white lg:flex xl:p-12">
                 {/* Background image */}
-                <img
+                <Image
                     src="/auth-section.webp"
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-0 size-full object-cover object-center"
+                    fit="cover"
+                    objectPosition="center"
+                    className="inset-0 size-full"
+                    position="absolute"
                 />
 
                 {/* Cinematic overlay */}

@@ -89,6 +89,15 @@ Route::middleware(EnsureInstallerAvailable::class)
             ->middleware('throttle:10,1')
             ->name('database.test');
 
+        Route::get('email', [InstallationWizardController::class, 'email'])
+            ->name('email');
+        Route::post('email/test', [InstallationWizardController::class, 'testEmail'])
+            ->middleware('throttle:10,1')
+            ->name('email.test');
+        Route::post('email/validate', [InstallationWizardController::class, 'storeEmail'])
+            ->middleware('throttle:30,1')
+            ->name('email.validate');
+
         Route::get('super-admin', [InstallationWizardController::class, 'superAdmin'])
             ->name('super-admin');
         Route::post('super-admin/validate', [InstallationWizardController::class, 'storeSuperAdmin'])

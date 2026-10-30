@@ -15,7 +15,6 @@ export type PublicEventCategory = {
     id: number;
     name: string;
     slug: string;
-    color_value: string;
 };
 
 /** App\Http\Resources\Public\Agenda\PublicEventResource */
@@ -40,7 +39,6 @@ export type PublicEvent = {
         id: number;
         name: string;
         slug: string;
-        color_value: string;
     } | null;
 };
 

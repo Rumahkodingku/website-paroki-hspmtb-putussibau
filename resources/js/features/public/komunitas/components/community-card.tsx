@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
@@ -16,11 +17,13 @@ export function CommunityCard({
             {/* Thumbnail */}
             <div className="relative aspect-16/10 w-full shrink-0">
                 {community.thumbnail_url ? (
-                    <img
+                    <Image
                         src={community.thumbnail_url}
                         alt=""
                         loading="lazy"
-                        className="size-full rounded-t-2xl object-cover"
+                        aspectRatio="16 / 10"
+                        fit="cover"
+                        className="size-full rounded-t-2xl"
                     />
                 ) : (
                     <div className="flex size-full items-center justify-center text-muted-foreground">

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Star } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -76,12 +77,14 @@ function ArticleImage({ src, alt }: { src: string | null; alt: string }) {
     return (
         <div className="absolute inset-0 overflow-hidden bg-muted">
             {src ? (
-                <img
+                <Image
                     src={src}
                     alt={alt}
                     loading="lazy"
                     decoding="async"
-                    className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                    fit="cover"
+                    imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                    className="size-full"
                 />
             ) : (
                 <div

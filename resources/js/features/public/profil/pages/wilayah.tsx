@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { Seo } from '@/components/seo';
 import { RichText } from '@/components/rich-text';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as areaIndex } from '@/routes/area';
@@ -52,11 +53,12 @@ export default function Wilayah({ area }: Props) {
                     )}
 
                     {area?.map ? (
-                        <img
+                        <Image
                             src={area.map}
                             alt="Peta wilayah pelayanan paroki"
                             loading="lazy"
-                            className="w-full rounded-xl border border-border object-cover"
+                            fit="cover"
+                            className="w-full rounded-xl border border-border"
                         />
                     ) : null}
 

@@ -131,11 +131,11 @@ export default function Index({ categories, filters, labels }: Props) {
 
     return (
         <>
-            <Head title="Kategori Pelayanan" />
+            <Head title="Kategori Layanan" />
 
             <div className="space-y-6 p-6">
                 <ListHeader
-                    title="Kategori Pelayanan"
+                    title="Kategori Layanan"
                     description="Kelola kategori yang mengelompokkan layanan pada halaman publik."
                     action={
                         <Button asChild>
@@ -220,6 +220,6 @@ Index.layout = {
     breadcrumbs: [
         { title: 'Beranda', href: dashboard() },
         { title: 'Master Data' },
-        { title: 'Kategori Pelayanan', href: categoriesIndex() },
+        { title: 'Kategori Layanan', href: categoriesIndex() },
     ],
 };

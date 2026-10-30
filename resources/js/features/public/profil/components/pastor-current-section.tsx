@@ -1,5 +1,6 @@
 import { SectionHeading } from '@/components/section-heading';
 import { RichText } from '@/components/rich-text';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Church, CalendarDays, UserRound } from 'lucide-react';
 import type { PublicPastor } from '../types';
@@ -52,7 +53,7 @@ export function PastorCurrentSection({ current }: { current: PublicPastor[] }) {
                                 {/* Foto pastor */}
                                 <div className="min-w-0">
                                     {pastor.photo ? (
-                                        <img
+                                        <Image
                                             src={pastor.photo}
                                             alt={
                                                 pastor.photo_alt ??
@@ -60,7 +61,11 @@ export function PastorCurrentSection({ current }: { current: PublicPastor[] }) {
                                             }
                                             loading="lazy"
                                             decoding="async"
-                                            className="aspect-video w-full rounded-xl object-cover object-top sm:aspect-16/7 lg:aspect-4/5 lg:max-h-62"
+                                            aspectRatio="16 / 9"
+                                            fit="cover"
+                                            objectPosition="top"
+                                            imageClassName="sm:aspect-16/7 lg:aspect-4/5"
+                                            className="w-full rounded-xl lg:max-h-62"
                                         />
                                     ) : (
                                         <div

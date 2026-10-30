@@ -10,6 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Field, FormInput } from '@/components/form-fields';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import type { GalleryPhotoItem } from '../types';
 
@@ -69,10 +70,12 @@ export function GalleryPhotoDialog({
 
                 <div className="space-y-4">
                     {photo?.url ? (
-                        <img
+                        <Image
                             src={photo.url}
                             alt=""
-                            className="max-h-56 w-full rounded-md object-contain"
+                            fit="contain"
+                            imageClassName="max-h-56"
+                            className="w-full rounded-md"
                         />
                     ) : null}
 

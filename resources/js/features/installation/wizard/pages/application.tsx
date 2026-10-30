@@ -1,10 +1,17 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight, Church } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Field, FormLabel } from '@/components/form-fields';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { superAdmin } from '@/routes/install';
 import { validate } from '@/routes/install/application';
@@ -27,6 +34,7 @@ export default function Application({ values, meta }: Props) {
         app_url: meta.appUrl ?? '',
         timezone: meta.timezone ?? 'Asia/Pontianak',
         locale: meta.locale ?? 'id',
+        environment: meta.environment ?? 'production',
     });
 
     const setField =
@@ -45,7 +53,7 @@ export default function Application({ values, meta }: Props) {
             <Head title="Identitas Paroki" />
 
             <StepShell
-                eyebrow="Langkah 5 dari 7"
+                eyebrow="Langkah 5 dari 8"
                 title="Identitas paroki"
                 description="Lima nilai berikut disimpan melalui Pengaturan Situs. Data opsional boleh dikosongkan; tidak ada nilai contoh yang diisi otomatis."
                 footer={
@@ -63,13 +71,12 @@ export default function Application({ values, meta }: Props) {
                             className="text-sm"
                             size="lg"
                         >
+                            Lanjutkan ke Ringkasan
                             {form.processing ? (
                                 <Spinner aria-hidden="true" />
                             ) : (
-                                <Church aria-hidden="true" />
+                                <ArrowRight aria-hidden="true" />
                             )}
-                            Lanjutkan ke Ringkasan
-                            <ArrowRight aria-hidden="true" />
                         </Button>
                     </>
                 }
@@ -260,6 +267,33 @@ export default function Application({ values, meta }: Props) {
                                 className="h-11"
                                 placeholder="id"
                             />
+                        </Field>
+
+                        <Field
+                            id="environment"
+                            label="Environment"
+                            isRequired
+                            error={form.errors.environment}
+                        >
+                            <Select
+                                value={form.data.environment}
+                                onValueChange={(value) =>
+                                    form.setData('environment', value)
+                                }
+                            >
+                                <SelectTrigger
+                                    id="environment"
+                                    className="h-11 w-full border-border bg-background py-5 font-normal shadow-none focus-visible:border-primary"
+                                >
+                                    <SelectValue placeholder="Pilih environment" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="production">
+                                        production
+                                    </SelectItem>
+                                    <SelectItem value="local">local</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </Field>
                     </div>
                 </form>

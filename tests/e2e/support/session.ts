@@ -49,7 +49,7 @@ export function resetLoginRateLimit(): void {
  * login form is a one-file edit rather than one per spec.
  */
 export async function signIn(page: Page): Promise<void> {
-    await page.goto('/admin/login');
+    await page.goto('/auth/login');
 
     await emailField(page).fill(environment.email);
     await passwordField(page).fill(environment.password);

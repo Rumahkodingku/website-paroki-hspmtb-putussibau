@@ -1,4 +1,5 @@
 import type { ArticleCardData } from '@/types/news-agenda';
+import Image from '@/components/image';
 import Text from '@/components/text';
 import { formatWibDate } from '@/lib/datetime';
 import { Link } from '@inertiajs/react';
@@ -21,11 +22,14 @@ export function RelatedArticleItem({
         >
             <div className="w-24 shrink-0 overflow-hidden rounded-md bg-muted sm:w-28">
                 {article.image ? (
-                    <img
+                    <Image
                         src={article.image}
                         alt={article.image_alt ?? ''}
+                        aspectRatio="4 / 3"
+                        fit="cover"
                         loading="lazy"
-                        className="aspect-4/3 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                        imageClassName="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                        className="h-full w-full"
                     />
                 ) : (
                     <div

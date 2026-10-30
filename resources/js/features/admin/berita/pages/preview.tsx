@@ -3,6 +3,7 @@ import { Alert } from '@/components/ui/alert';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { RichText } from '@/components/rich-text';
 import { Seo } from '@/components/seo';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { PublicSection } from '@/components/public-section';
@@ -90,10 +91,11 @@ export default function Preview({ post, isPublished }: Props) {
                     </header>
 
                     {post.image ? (
-                        <img
+                        <Image
                             src={post.image}
                             alt={post.image_alt ?? ''}
-                            className="w-full rounded-md object-cover"
+                            fit="cover"
+                            className="w-full rounded-md"
                         />
                     ) : null}
 

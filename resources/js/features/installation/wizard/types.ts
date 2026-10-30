@@ -50,8 +50,19 @@ export type ApplicationValues = {
     patron_saint: string | null;
 };
 
+export type EmailValues = {
+    mailer: string | null;
+    host: string | null;
+    port: number | null;
+    username: string | null;
+    password: string | null;
+    from_address: string | null;
+    from_name: string | null;
+};
+
 export type ReviewSummary = {
     database: DatabaseInfo;
+    email: EmailValues;
     admin: { name: string; email: string };
     application: ApplicationValues;
     meta: ApplicationMeta;

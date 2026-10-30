@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight } from 'lucide-react';
 import { Text } from '@/components/text';
 import { show as post } from '@/routes/berita';
@@ -40,12 +41,15 @@ export function PinnedStrip({
                 {/* Lead story */}
                 <article className="group relative isolate flex min-h-88 overflow-hidden rounded-xl bg-navy md:min-h-100">
                     {leadArticle.image ? (
-                        <img
+                        <Image
                             src={leadArticle.image}
                             alt={leadArticle.image_alt ?? ''}
                             loading="eager"
                             fetchPriority="high"
-                            className="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            fit="cover"
+                            imageClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+                            className="inset-0 -z-20 h-full w-full"
+                            position="absolute"
                         />
                     ) : null}
 
@@ -116,11 +120,14 @@ export function PinnedStrip({
                     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border transition-shadow">
                         {secondaryArticle.image ? (
                             <div className="overflow-hidden">
-                                <img
+                                <Image
                                     src={secondaryArticle.image}
                                     alt={secondaryArticle.image_alt ?? ''}
                                     loading="lazy"
-                                    className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    aspectRatio="16 / 9"
+                                    fit="cover"
+                                    imageClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+                                    className="w-full"
                                 />
                             </div>
                         ) : (

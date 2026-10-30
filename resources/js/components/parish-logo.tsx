@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import Image from '@/components/image';
 import type { SharedProps } from '@/types';
 
 type ParishLogoProps = {
@@ -22,12 +23,13 @@ export function ParishLogo({
 
     if (logoUrl !== null && logoUrl !== '' && !failed) {
         return (
-            <img
+            <Image
                 src={logoUrl}
                 alt={alt ?? identity.logoAlt ?? 'Logo Paroki HSPMTB Putussibau'}
                 width={width}
                 height={height}
-                className={cn('bg-transparent object-contain', className)}
+                fit="contain"
+                className={cn('bg-transparent', className)}
                 onError={() => setFailed(true)}
             />
         );

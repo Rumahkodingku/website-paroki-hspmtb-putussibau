@@ -28,9 +28,9 @@ use Spatie\Permission\Models\Role;
 */
 
 test('the admin routes live under the admin prefix', function () {
-    expect(route('login', absolute: false))->toStartWith('/admin/login')
-        ->and(route('password.request', absolute: false))->toStartWith('/admin/forgot-password')
-        ->and(route('logout', absolute: false))->toStartWith('/admin/logout')
+    expect(route('login', absolute: false))->toStartWith('/auth/login')
+        ->and(route('password.request', absolute: false))->toStartWith('/auth/forgot-password')
+        ->and(route('logout', absolute: false))->toStartWith('/auth/logout')
         ->and(route('dashboard', absolute: false))->toBe('/admin')
         ->and(route('profile.edit', absolute: false))->toBe('/admin/akun/profile')
         ->and(route('security.edit', absolute: false))->toBe('/admin/akun/security');

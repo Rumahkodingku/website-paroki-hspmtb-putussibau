@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+import Image from '@/components/image';
 import { ParishLogo } from '@/components/parish-logo';
 import { Text } from '@/components/text';
 import type { InstallationStep } from '@/types';
@@ -30,11 +31,13 @@ export default function InstallationLayout({ children }: PropsWithChildren) {
     return (
         <div className="min-h-svh bg-muted/30 lg:grid lg:grid-cols-[minmax(0,42%)_minmax(0,58%)]">
             <aside className="relative hidden overflow-hidden bg-navy-deep text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
-                <img
+                <Image
                     src="/auth-section.webp"
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-0 size-full object-cover"
+                    fit="cover"
+                    className="inset-0 size-full"
+                    position="absolute"
                 />
                 <div className="absolute inset-0 bg-linear-to-b from-navy-deep/95 via-navy-deep/75 to-navy-deep/95" />
 

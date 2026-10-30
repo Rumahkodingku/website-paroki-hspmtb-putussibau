@@ -56,8 +56,9 @@ final class InstallationRunController extends Controller
         $admin = session('installation.super_admin');
         $application = session('installation.application');
         $database = session('installation.database');
+        $email = session('installation.email');
 
-        if (! is_array($admin) || ! is_array($application) || ! is_array($database)) {
+        if (! is_array($admin) || ! is_array($application) || ! is_array($database) || ! is_array($email)) {
             return response()->json([
                 'status' => InstallationState::FAILED,
                 'error_code' => InstallationError::SessionExpired->value,
@@ -72,6 +73,7 @@ final class InstallationRunController extends Controller
             'installation.application',
             'installation.database',
             'installation.database_verified_at',
+            'installation.email',
         ]);
 
         if ($result['status'] === InstallationState::COMPLETED) {

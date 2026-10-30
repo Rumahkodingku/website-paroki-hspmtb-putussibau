@@ -14,9 +14,9 @@ import type { EventCategoryRow } from '../../types/event-category';
 
 type Props = {
     eventCategory: EventCategoryRow;
-} & Pick<FormMeta, 'labels' | 'hints'>;
+} & Pick<FormMeta, 'labels'>;
 
-export default function Edit({ eventCategory, labels, hints }: Props) {
+export default function Edit({ eventCategory, labels }: Props) {
     return (
         <>
             <Head title="Ubah Kategori Agenda" />
@@ -31,10 +31,8 @@ export default function Edit({ eventCategory, labels, hints }: Props) {
                     initial={{
                         name: eventCategory.name,
                         slug: eventCategory.slug,
-                        color: eventCategory.color,
                     }}
                     labels={labels}
-                    hints={hints}
                     submitLabel="Simpan perubahan"
                     onSubmit={(form: EventCategoryFormInstance) =>
                         form.submit(updateEventCategory(eventCategory.id))

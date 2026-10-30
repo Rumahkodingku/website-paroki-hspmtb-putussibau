@@ -16,7 +16,11 @@ import { dashboard } from '@/routes';
 import {
     ACCOUNT_ENTRIES,
     ADMINISTRATION_ENTRIES,
-    CONTENT_ENTRIES,
+    LITURGY_ENTRIES,
+    MINISTRY_ENTRIES,
+    PROFILE_ENTRIES,
+    PUBLICATION_ENTRIES,
+    REFERENCE_ENTRIES,
 } from '@/layouts/app/app-sidebar-nav';
 import { SidebarGroup } from '@/layouts/app/components/app-sidebar-entry';
 
@@ -72,7 +76,24 @@ export function AppSidebar() {
                     ]}
                 />
 
-                <SidebarGroup label="Konten" entries={CONTENT_ENTRIES} />
+                <SidebarGroup label="Profil Paroki" entries={PROFILE_ENTRIES} />
+
+                <SidebarGroup
+                    label="Liturgi & Jadwal"
+                    entries={LITURGY_ENTRIES}
+                />
+
+                <SidebarGroup label="Publikasi" entries={PUBLICATION_ENTRIES} />
+
+                <SidebarGroup
+                    label="Pelayanan & Komunitas"
+                    entries={MINISTRY_ENTRIES}
+                />
+
+                <SidebarGroup
+                    label="Referensi & Kategori"
+                    entries={REFERENCE_ENTRIES}
+                />
 
                 <SidebarGroup
                     label="Administrasi"

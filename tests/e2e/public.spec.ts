@@ -216,7 +216,7 @@ test.describe('situs publik', () => {
 
         await page
             .getByRole('contentinfo')
-            .getByRole('link', { name: 'Halaman kontak' })
+            .getByRole('link', { name: 'Kontak' })
             .click();
 
         await expect(page).toHaveURL(/\/kontak$/);
@@ -333,7 +333,7 @@ test.describe('situs publik', () => {
      * somebody who has not signed in, on the one page whose job is to be simple.
      */
     test('halaman masuk tidak memakai navigasi publik', async ({ page }) => {
-        await page.goto('/admin/login');
+        await page.goto('/auth/login');
 
         await expect(loginButton(page)).toBeVisible();
         await expect(
@@ -401,7 +401,7 @@ test.describe('tema publik', () => {
 
         await page
             .getByRole('contentinfo')
-            .getByRole('link', { name: 'Halaman kontak' })
+            .getByRole('link', { name: 'Kontak' })
             .click();
         await expect(page).toHaveURL(/\/kontak$/);
         await expect(page.locator('html')).toHaveClass(/dark/);

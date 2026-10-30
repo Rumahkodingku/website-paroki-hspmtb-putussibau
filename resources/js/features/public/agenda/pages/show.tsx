@@ -5,6 +5,7 @@ import type { SeoDefaults } from '@/types';
 import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
 import { Seo } from '@/components/seo';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { home } from '@/routes';
 import { index as agendaIndex } from '@/routes/agenda';
@@ -47,11 +48,13 @@ export default function Show({ event }: AgendaShowProps) {
                         <div className="min-w-0 space-y-8">
                             {event.poster ? (
                                 <figure className="overflow-hidden rounded-2xl">
-                                    <img
+                                    <Image
                                         src={event.poster}
                                         alt={event.poster_alt ?? ''}
-                                        className="h-auto max-h-[min(68vh,52rem)] w-full object-contain"
                                         fetchPriority="high"
+                                        fit="contain"
+                                        imageClassName="h-auto max-h-[min(68vh,52rem)]"
+                                        className="w-full"
                                     />
                                 </figure>
                             ) : (

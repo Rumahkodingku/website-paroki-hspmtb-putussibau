@@ -44,9 +44,6 @@ trait EventCategoryValidationRules
                 'max:180',
                 Rule::unique('event_categories', 'slug')->ignore($ignore?->getKey()),
             ],
-            // size:7 before the regex so a long value gets the length message
-            // rather than the pattern one, which is what an admin can act on.
-            'color' => ['required', 'string', 'size:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
 
@@ -61,9 +58,6 @@ trait EventCategoryValidationRules
             'slug.alpha_dash' => 'Slug hanya boleh berisi huruf kecil, angka, dan tanda hubung.',
             'slug.lowercase' => 'Slug hanya boleh berisi huruf kecil.',
             'slug.unique' => 'Slug ini sudah dipakai kategori lain.',
-            'color.required' => 'Warna penanda wajib diisi.',
-            'color.size' => 'Warna penanda harus tujuh karakter, termasuk tanda pagar. Contoh: #2E7D32.',
-            'color.regex' => 'Warna penanda harus berupa kode hex, contoh #2E7D32.',
         ];
     }
 
@@ -80,7 +74,7 @@ trait EventCategoryValidationRules
     {
         $input = [];
 
-        foreach (['name', 'slug', 'color'] as $field) {
+        foreach (['name', 'slug'] as $field) {
             $value = $this->input($field);
             $input[$field] = is_string($value) ? trim($value) : $value;
         }

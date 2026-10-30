@@ -50,8 +50,8 @@ it('lets a super admin through', function () {
 | Listing
 */
 
-it('lists categories with the activity count and a usable colour', function () {
-    $category = EventCategory::factory()->create(['name' => 'Liturgi', 'color' => '#2E7D32']);
+it('lists categories with the activity count', function () {
+    $category = EventCategory::factory()->create(['name' => 'Liturgi']);
     $other = EventCategory::factory()->create(['name' => 'Rapat']);
     Event::factory()->count(2)->create(['event_category_id' => $category->getKey()]);
 
@@ -64,23 +64,7 @@ it('lists categories with the activity count and a usable colour', function () {
             ->component('admin/master-data/kategori-agenda/index')
             ->has('eventCategories.data', 1)
             ->where('eventCategories.data.0.name', 'Liturgi')
-            // Shaped on the server, so no hex literal has to exist in a
-            // component. See EventCategory::colorValue().
-            ->where('eventCategories.data.0.color_value', '#2E7D32')
             ->where('eventCategories.data.0.events_count', 2)
-        );
-});
-
-it('sends a null colour rather than an unusable one', function () {
-    // Only reachable by hand-editing the column, but a null renders as an
-    // empty swatch and a bad hex renders as whatever the browser makes of it.
-    EventCategory::factory()->create(['color' => 'biru']);
-
-    $this->actingAs(superAdmin())
-        ->get(route('event-categories.index'))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('eventCategories.data.0.color', 'biru')
-            ->where('eventCategories.data.0.color_value', null)
         );
 });
 
@@ -99,34 +83,14 @@ it('creates a category', function () {
         ->post(route('event-categories.store'), [
             'name' => 'Pembinaan',
             'slug' => 'pembinaan',
-            'color' => '#1976D2',
         ])
         ->assertRedirect(route('event-categories.index'));
 
     $this->assertDatabaseHas('event_categories', [
         'name' => 'Pembinaan',
         'slug' => 'pembinaan',
-        'color' => '#1976D2',
     ]);
 });
-
-it('rejects a colour that is not a hex', function (string $color) {
-    $this->actingAs(superAdmin())
-        ->post(route('event-categories.store'), [
-            'name' => 'Uji',
-            'slug' => 'uji',
-            'color' => $color,
-        ])
-        ->assertSessionHasErrors('color');
-
-    $this->assertDatabaseCount('event_categories', 0);
-})->with([
-    'a colour word' => ['biru'],
-    'three digits' => ['#ABC'],
-    'no hash' => ['2E7D32'],
-    'too long' => ['#2E7D32AA'],
-    'an empty string' => [''],
-]);
 
 it('rejects a capitalised slug', function () {
     // The public detail route constrains slugs to [a-z0-9-]+, so a capitalised
@@ -137,7 +101,6 @@ it('rejects a capitalised slug', function () {
         ->post(route('event-categories.store'), [
             'name' => 'Uji',
             'slug' => 'Liturgi',
-            'color' => '#2E7D32',
         ])
         ->assertSessionHasErrors('slug');
 });
@@ -149,14 +112,12 @@ it('updates a category and lets it keep its own slug', function () {
         ->patch(route('event-categories.update', $category), [
             'name' => 'Baru',
             'slug' => 'lama',
-            'color' => '#7B1FA2',
         ])
         ->assertRedirect(route('event-categories.index'));
 
     $this->assertDatabaseHas('event_categories', [
         'id' => $category->getKey(),
         'name' => 'Baru',
-        'color' => '#7B1FA2',
     ]);
 });
 

@@ -12,9 +12,9 @@ import {
     type EventCategoryFormInstance,
 } from './components/event-category-form';
 
-type Props = Pick<FormMeta, 'labels' | 'hints'>;
+type Props = Pick<FormMeta, 'labels'>;
 
-export default function Create({ labels, hints }: Props) {
+export default function Create({ labels }: Props) {
     return (
         <>
             <Head title="Tambah Kategori Agenda" />
@@ -28,7 +28,6 @@ export default function Create({ labels, hints }: Props) {
                 <EventCategoryForm
                     initial={emptyEventCategoryFormData()}
                     labels={labels}
-                    hints={hints}
                     submitLabel="Simpan kategori"
                     onSubmit={(form: EventCategoryFormInstance) =>
                         form.submit(storeEventCategory())

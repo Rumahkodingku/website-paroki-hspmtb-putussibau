@@ -240,6 +240,15 @@ function installationTestSession(): array
             'email' => 'installer-admin@example.test',
             'password' => 'Installer-2026!',
         ],
+        'installation.email' => [
+            'mailer' => 'smtp',
+            'host' => '127.0.0.1',
+            'port' => 1025,
+            'username' => null,
+            'password' => null,
+            'from_address' => 'noreply@paroki-hspmtb.local',
+            'from_name' => 'Aplikasi Uji',
+        ],
         'installation.application' => [
             'parish_name' => 'Paroki Uji',
             'parish_short_name' => 'PU',

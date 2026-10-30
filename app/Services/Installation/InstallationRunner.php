@@ -6,6 +6,7 @@ use App\Enums\InstallationError;
 use App\Models\User;
 use App\Services\SiteSettingsService;
 use Database\Seeders\SuperAdminSeeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -140,6 +141,21 @@ final class InstallationRunner
             $envValues['APP_URL'] = (string) ($application['app_url'] ?? config('app.url'));
             $envValues['APP_DISPLAY_TIMEZONE'] = (string) ($application['timezone'] ?? config('app.display_timezone'));
             $envValues['APP_LOCALE'] = (string) ($application['locale'] ?? config('app.locale'));
+            $envValues['APP_ENV'] = (string) ($application['environment'] ?? 'production');
+            $envValues['APP_DEBUG'] = 'false';
+            $envValues['TELESCOPE_ENABLED'] = 'false';
+
+            $email = session('installation.email');
+
+            if (is_array($email)) {
+                $envValues['MAIL_MAILER'] = (string) Arr::get($email, 'mailer', 'smtp');
+                $envValues['MAIL_HOST'] = (string) Arr::get($email, 'host', '127.0.0.1');
+                $envValues['MAIL_PORT'] = (string) Arr::get($email, 'port', 1025);
+                $envValues['MAIL_USERNAME'] = (string) (Arr::get($email, 'username') ?? '');
+                $envValues['MAIL_PASSWORD'] = (string) (Arr::get($email, 'password') ?? '');
+                $envValues['MAIL_FROM_ADDRESS'] = (string) Arr::get($email, 'from_address', 'noreply@paroki-hspmtb.local');
+                $envValues['MAIL_FROM_NAME'] = (string) Arr::get($email, 'from_name', config('app.name'));
+            }
 
             if (! $this->environment->write($envValues)) {
                 throw new InstallationFailure(InstallationError::EnvironmentWriteFailed);

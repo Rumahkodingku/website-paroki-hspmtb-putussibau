@@ -109,7 +109,7 @@ test('the success page is refresh-safe inside the session and closed to a new on
 test('the created super admin can log in', function () {
     $this->postJson('/install/run', ['confirmed' => true])->assertOk();
 
-    $this->post('/admin/login', [
+    $this->post('/auth/login', [
         'email' => 'installer-admin@example.test',
         'password' => 'Installer-2026!',
     ])->assertRedirect('/admin');

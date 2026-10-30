@@ -156,7 +156,7 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
         items.push({
             key: 'email',
             icon: Mail,
-            label: 'Surel',
+            label: 'Email',
             value: contact.email,
             href: `mailto:${contact.email}`,
         });
@@ -281,7 +281,7 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
                             ) : null}
                         </div>
 
-                        <div className="overflow-hidden rounded-xl border border-border bg-background [&_iframe]:block [&_iframe]:h-75 [&_iframe]:w-full [&_iframe]:border-0 sm:[&_iframe]:h-95 lg:[&_iframe]:h-110">
+                        <div className="overflow-hidden rounded-xl border border-border bg-background [&_iframe]:block [&_iframe]:h-75 [&_iframe]:w-full [&_iframe]:border-0 sm:[&_iframe]:h-95 lg:[&_iframe]:h-full">
                             <ContactMap
                                 embedUrl={contact.mapsEmbedUrl}
                                 directionsUrl={contact.mapsLink}

@@ -1,3 +1,4 @@
+import Image from '@/components/image';
 import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
 import type { PublicPastor } from '../types';
@@ -10,11 +11,13 @@ export function PastorCard({ pastor }: { pastor: PublicPastor }) {
     return (
         <article className="flex flex-col gap-4 sm:flex-row sm:items-start">
             {pastor.photo ? (
-                <img
+                <Image
                     src={pastor.photo}
                     alt={pastor.photo_alt ?? displayName}
                     loading="lazy"
-                    className="aspect-4/5 w-full max-w-40 rounded-lg border border-border object-cover sm:w-40"
+                    aspectRatio="4 / 5"
+                    fit="cover"
+                    className="w-full max-w-40 rounded-lg border border-border sm:w-40"
                 />
             ) : null}
 

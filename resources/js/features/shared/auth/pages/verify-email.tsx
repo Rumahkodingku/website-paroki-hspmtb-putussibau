@@ -32,8 +32,8 @@ export default function VerifyEmail({ status }: Props) {
                     align="center"
                     className="mb-4"
                 >
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                    Tautan verifikasi baru telah dikirim ke alamat email yang
+                    Anda berikan saat pendaftaran.
                 </Text>
             )}
 
@@ -61,5 +61,5 @@ export default function VerifyEmail({ status }: Props) {
 VerifyEmail.layout = {
     title: 'Verifikasi Email',
     description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+        'Verifikasi alamat email Anda dengan mengeklik tautan yang baru kami kirimkan.',
 };

@@ -55,7 +55,7 @@ export default function ReviewSummary({
 }: {
     summary: ReviewSummaryData;
 }) {
-    const { database, admin, application, meta } = summary;
+    const { database, email, admin, application, meta } = summary;
 
     return (
         <div className="flex flex-col gap-6">
@@ -73,8 +73,22 @@ export default function ReviewSummary({
                 <Row label="Pengguna" value={database.username} />
             </Section>
 
-            <Section title="Super Admin">
-                <Row label="Nama" value={admin.name} />
+            <Section title="Email">
+                <Row label="Mailer" value={email.mailer} />
+                <Row
+                    label="Host"
+                    value={
+                        email.host
+                            ? `${email.host}${email.port ? `:${email.port}` : ''}`
+                            : null
+                    }
+                />
+                <Row label="Pengirim" value={email.from_address} />
+                <Row label="Nama pengirim" value={email.from_name} />
+            </Section>
+
+            <Section title="Akum">
+                <Row label="Nama Lengkap" value={admin.name} />
                 <Row label="Email" value={admin.email} />
             </Section>
 

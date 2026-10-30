@@ -18,7 +18,7 @@ type Props = {
 export default function Create({ labels, hints }: Props) {
     return (
         <>
-            <Head title="Tambah Kategori Pelayanan" />
+            <Head title="Tambah Kategori Layanan" />
 
             <div className="p-6">
                 <Heading
@@ -43,7 +43,7 @@ Create.layout = {
     breadcrumbs: [
         { title: 'Beranda', href: dashboard() },
         { title: 'Master Data' },
-        { title: 'Kategori Pelayanan', href: categoriesIndex() },
+        { title: 'Kategori Layanan', href: categoriesIndex() },
         { title: 'Tambah' },
     ],
 };

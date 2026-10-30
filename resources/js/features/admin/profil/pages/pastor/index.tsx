@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import type { DataColumn } from '@/components/data-table';
+import Image from '@/components/image';
 import { DataTable } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -58,11 +59,13 @@ export default function Index({ pastors, filters }: Props) {
             header: 'Foto',
             cell: ({ row }) =>
                 row.original.photo_url ? (
-                    <img
+                    <Image
                         src={row.original.photo_url}
                         alt={row.original.name}
                         loading="lazy"
-                        className="size-16 rounded-md border border-border object-cover"
+                        aspectRatio="1 / 1"
+                        fit="cover"
+                        className="size-16 rounded-md border border-border"
                     />
                 ) : (
                     <Text as="span" variant="body-sm" color="muted">

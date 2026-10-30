@@ -3,6 +3,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
 import { Seo } from '@/components/seo';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { formatWibDate } from '@/lib/datetime';
 import { home } from '@/routes';
@@ -137,11 +138,13 @@ export default function Show({ post, related, adjacent }: Props) {
                             {post.image ? (
                                 <figure className="space-y-2">
                                     <div className="overflow-hidden rounded-xl bg-muted">
-                                        <img
+                                        <Image
                                             src={post.image}
                                             alt={post.image_alt ?? ''}
                                             fetchPriority="high"
-                                            className="aspect-video w-full object-cover"
+                                            aspectRatio="16 / 9"
+                                            fit="cover"
+                                            className="w-full"
                                         />
                                     </div>
 

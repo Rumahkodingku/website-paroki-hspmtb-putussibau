@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Installation;
 use App\Enums\InstallationError;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Installation\StoreApplicationConfigurationRequest;
+use App\Http\Requests\Installation\StoreEmailConfigurationRequest;
 use App\Http\Requests\Installation\StoreSuperAdminSetupRequest;
 use App\Http\Requests\Installation\TestDatabaseConnectionRequest;
+use App\Http\Requests\Installation\TestEmailConnectionRequest;
 use App\Services\Installation\DatabaseConnectionTester;
 use App\Services\Installation\DatabaseReadinessChecker;
 use App\Services\Installation\InstallationState;
+use App\Services\Installation\MailConnectionTester;
 use App\Services\Installation\SystemRequirementsChecker;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +25,8 @@ final class InstallationWizardController extends Controller
         ['key' => 'welcome', 'label' => 'Selamat datang'],
         ['key' => 'requirements', 'label' => 'Persyaratan sistem'],
         ['key' => 'database', 'label' => 'Database'],
-        ['key' => 'super-admin', 'label' => 'Super Admin'],
+        ['key' => 'email', 'label' => 'Email'],
+        ['key' => 'super-admin', 'label' => 'Akun Super Admin'],
         ['key' => 'application', 'label' => 'Identitas paroki'],
         ['key' => 'install', 'label' => 'Instalasi'],
         ['key' => 'complete', 'label' => 'Selesai'],
@@ -42,6 +46,7 @@ final class InstallationWizardController extends Controller
         private readonly DatabaseConnectionTester $connection,
         private readonly DatabaseReadinessChecker $readiness,
         private readonly SiteSettingsService $settings,
+        private readonly MailConnectionTester $mailTester,
     ) {}
 
     public function show(): Response|RedirectResponse
@@ -130,7 +135,64 @@ final class InstallationWizardController extends Controller
 
         session(['installation.database_verified_at' => now()->toIso8601String()]);
 
+        return redirect()->route('install.email');
+    }
+
+    public function email(): Response|RedirectResponse
+    {
+        if ($redirect = $this->redirectUnlessPending()) {
+            return $redirect;
+        }
+
+        if (! session()->has('installation.database_verified_at')) {
+            return redirect()->route('install.database');
+        }
+
+        $values = session('installation.email', []);
+
+        return Inertia::render('installation/wizard/email', [
+            'steps' => self::STEPS,
+            'currentStep' => 3,
+            'values' => $this->emailValues($values),
+        ]);
+    }
+
+    public function storeEmail(StoreEmailConfigurationRequest $request): RedirectResponse
+    {
+        if ($redirect = $this->redirectUnlessPending()) {
+            return $redirect;
+        }
+
+        if (! session()->has('installation.database_verified_at')) {
+            return redirect()->route('install.database');
+        }
+
+        session(['installation.email' => $request->validated()]);
+
         return redirect()->route('install.super-admin');
+    }
+
+    public function testEmail(TestEmailConnectionRequest $request): RedirectResponse
+    {
+        if ($redirect = $this->redirectUnlessPending()) {
+            return $redirect;
+        }
+
+        if (! session()->has('installation.database_verified_at')) {
+            return redirect()->route('install.database');
+        }
+
+        $data = $request->validated();
+
+        $result = $this->mailTester->test($data);
+
+        if (! $result['ok']) {
+            return back()->withErrors(['email' => $result['message']])->withInput();
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => $result['message']]);
+
+        return back();
     }
 
     public function superAdmin(): Response|RedirectResponse
@@ -143,11 +205,15 @@ final class InstallationWizardController extends Controller
             return redirect()->route('install.database');
         }
 
+        if (! session()->has('installation.email')) {
+            return redirect()->route('install.email');
+        }
+
         $values = session('installation.super_admin', []);
 
         return Inertia::render('installation/wizard/super-admin', [
             'steps' => self::STEPS,
-            'currentStep' => 3,
+            'currentStep' => 4,
             'values' => [
                 'name' => is_string($values['name'] ?? null) ? $values['name'] : '',
                 'email' => is_string($values['email'] ?? null) ? $values['email'] : '',
@@ -163,6 +229,10 @@ final class InstallationWizardController extends Controller
 
         if (! session()->has('installation.database_verified_at')) {
             return redirect()->route('install.database');
+        }
+
+        if (! session()->has('installation.email')) {
+            return redirect()->route('install.email');
         }
 
         $data = $request->validated();
@@ -190,7 +260,7 @@ final class InstallationWizardController extends Controller
 
         return Inertia::render('installation/wizard/application', [
             'steps' => self::STEPS,
-            'currentStep' => 4,
+            'currentStep' => 5,
             'values' => $this->applicationValues($values),
             'meta' => $this->metaForForm($values),
         ]);
@@ -218,7 +288,7 @@ final class InstallationWizardController extends Controller
         if ($status === InstallationState::INSTALLING || $status === InstallationState::FAILED) {
             return Inertia::render('installation/wizard/review', [
                 'steps' => self::STEPS,
-                'currentStep' => 5,
+                'currentStep' => 6,
                 'status' => $status,
                 'progress' => $this->progressPayload(),
                 'error' => $this->errorPayload(),
@@ -234,6 +304,10 @@ final class InstallationWizardController extends Controller
             return redirect()->route('install.database');
         }
 
+        if (! session()->has('installation.email')) {
+            return redirect()->route('install.email');
+        }
+
         if (! session()->has('installation.super_admin')) {
             return redirect()->route('install.super-admin');
         }
@@ -244,15 +318,17 @@ final class InstallationWizardController extends Controller
 
         $admin = session('installation.super_admin');
         $application = session('installation.application');
+        $email = session('installation.email');
 
         return Inertia::render('installation/wizard/review', [
             'steps' => self::STEPS,
-            'currentStep' => 5,
+            'currentStep' => 6,
             'status' => InstallationState::PENDING,
             'progress' => $this->progressPayload(),
             'error' => null,
             'summary' => [
                 'database' => $this->databaseInfoForReview(),
+                'email' => $this->emailValues(is_array($email) ? $email : []),
                 'admin' => [
                     'name' => is_string($admin['name'] ?? null) ? $admin['name'] : '',
                     'email' => is_string($admin['email'] ?? null) ? $admin['email'] : '',
@@ -277,7 +353,7 @@ final class InstallationWizardController extends Controller
 
         return Inertia::render('installation/wizard/complete', [
             'steps' => self::STEPS,
-            'currentStep' => 6,
+            'currentStep' => 7,
             'siteName' => $this->siteName(),
             'admin' => [
                 'name' => is_string($admin['name'] ?? null) ? $admin['name'] : '',
@@ -402,6 +478,35 @@ final class InstallationWizardController extends Controller
 
     /**
      * @param  array<string, mixed>  $values
+     * @return array{mailer: string, host: string|null, port: int|null, username: string|null, from_address: string|null, from_name: string|null}
+     */
+    private function emailValues(array $values): array
+    {
+        return [
+            'mailer' => is_string($values['mailer'] ?? null) && trim($values['mailer']) !== ''
+                ? $values['mailer']
+                : 'smtp',
+            'host' => is_string($values['host'] ?? null) && trim($values['host']) !== ''
+                ? $values['host']
+                : '127.0.0.1',
+            'port' => is_numeric($values['port'] ?? null) ? (int) $values['port'] : 1025,
+            'username' => is_string($values['username'] ?? null) && trim($values['username']) !== ''
+                ? $values['username']
+                : null,
+            'password' => is_string($values['password'] ?? null) && trim($values['password']) !== ''
+                ? $values['password']
+                : null,
+            'from_address' => is_string($values['from_address'] ?? null) && trim($values['from_address']) !== ''
+                ? $values['from_address']
+                : 'noreply@paroki-hspmtb.local',
+            'from_name' => is_string($values['from_name'] ?? null) && trim($values['from_name']) !== ''
+                ? $values['from_name']
+                : (string) config('app.name'),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
      * @return array{appName: string, appUrl: string, timezone: string, locale: string, environment: string}
      */
     private function metaForForm(array $values): array
@@ -419,7 +524,9 @@ final class InstallationWizardController extends Controller
             'locale' => is_string($values['locale'] ?? null) && trim($values['locale']) !== ''
                 ? $values['locale']
                 : (string) config('app.locale'),
-            'environment' => app()->environment(),
+            'environment' => is_string($values['environment'] ?? null) && trim($values['environment']) !== ''
+                ? $values['environment']
+                : 'production',
         ];
     }
 

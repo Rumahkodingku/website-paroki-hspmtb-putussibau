@@ -11,7 +11,7 @@ test('confirm password screen can be rendered', function () {
     $response->assertOk();
 
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('public/auth/confirm-password'),
+        ->component('shared/auth/confirm-password'),
     );
 });
 

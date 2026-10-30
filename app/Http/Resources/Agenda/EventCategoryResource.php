@@ -29,8 +29,6 @@ class EventCategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'color' => $this->color,
-            'color_value' => $this->colorValue(),
             'events_count' => $this->whenCounted('events'),
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,

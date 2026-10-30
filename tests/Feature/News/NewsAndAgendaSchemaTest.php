@@ -272,18 +272,13 @@ it('seeds the four categories PRD 9.6 names, in order', function () {
         ->toBe(['berita', 'kegiatan', 'renungan', 'pengumuman']);
 });
 
-it('seeds the five activity categories PRD 9.7 names, with a valid hex each', function () {
+it('seeds the five activity categories PRD 9.7 names', function () {
     $this->seed(EventCategorySeeder::class);
 
     $categories = EventCategory::query()->orderBy('id')->get();
 
     expect($categories)->toHaveCount(5)
         ->and($categories->pluck('slug')->all())->toBe(['liturgi', 'pembinaan', 'sosial', 'rapat', 'lainnya']);
-
-    foreach ($categories as $category) {
-        expect($category->color)->toMatch('/^#[0-9A-F]{6}$/')
-            ->and($category->colorValue())->toBe($category->color);
-    }
 });
 
 it('leaves no content behind after seeding', function () {
