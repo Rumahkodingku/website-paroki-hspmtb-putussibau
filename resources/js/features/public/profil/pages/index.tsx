@@ -16,6 +16,7 @@ import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
 import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { home } from '@/routes';
 import { pastor, sejarah, struktur, wilayah } from '@/routes/profil';
@@ -94,11 +95,13 @@ export default function Profil({ profile }: Props) {
                     >
                         <figure className="overflow-hidden rounded-2xl border-4 border-background bg-canvas-subtle shadow-md ring-1 ring-border/50 sm:rounded-3xl">
                             <div className="aspect-16/8 sm:aspect-16/7 lg:aspect-16/6">
-                                <img
+                                <Image
                                     src={profile.cover_url!}
                                     alt={profile.cover_alt ?? ''}
                                     fetchPriority="high"
-                                    className="size-full object-cover object-center"
+                                    fit="cover"
+                                    objectPosition="center"
+                                    className="size-full"
                                 />
                             </div>
                         </figure>

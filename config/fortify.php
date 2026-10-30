@@ -92,7 +92,7 @@ return [
     |
     */
 
-    'prefix' => 'admin',
+    'prefix' => 'auth',
 
     'domain' => null,
 

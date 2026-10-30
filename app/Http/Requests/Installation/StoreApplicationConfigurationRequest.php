@@ -28,6 +28,7 @@ final class StoreApplicationConfigurationRequest extends FormRequest
         'app_url',
         'timezone',
         'locale',
+        'environment',
     ];
 
     public function authorize(): bool
@@ -67,6 +68,7 @@ final class StoreApplicationConfigurationRequest extends FormRequest
             'app_url' => ['required', 'url', 'max:255'],
             'timezone' => ['required', 'string', 'timezone'],
             'locale' => ['required', 'string', 'in:id'],
+            'environment' => ['required', 'string', 'in:production,local'],
         ];
     }
 }

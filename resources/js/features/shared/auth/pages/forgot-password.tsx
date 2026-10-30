@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { ArrowLeft, LoaderCircle, Mail } from 'lucide-react';
+import { FormLabel } from '@/components/form-fields';
 import InputError from '@/components/input-error';
 import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
@@ -38,22 +39,9 @@ export default function ForgotPassword({ status }: Props) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Text
-                                    as="label"
-                                    htmlFor="email"
-                                    variant="label"
-                                    weight="medium"
-                                >
-                                    Alamat email
-                                    <Text
-                                        as="span"
-                                        variant="label"
-                                        color="danger"
-                                        className="ml-1"
-                                    >
-                                        *
-                                    </Text>
-                                </Text>
+                                <FormLabel htmlFor="email" isRequired>
+                                    Email
+                                </FormLabel>
 
                                 <div className="relative">
                                     <Mail

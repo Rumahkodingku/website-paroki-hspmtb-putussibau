@@ -79,21 +79,6 @@ export default function Index({ eventCategories, filters }: Props) {
             sortKey: 'slug',
         },
         {
-            id: 'color',
-            accessorKey: 'color',
-            header: 'Warna',
-            cell: ({ row }) => (
-                <span
-                    aria-hidden="true"
-                    className="inline-block size-5 rounded-sm border border-border"
-                    style={{
-                        backgroundColor:
-                            row.original.color_value ?? 'transparent',
-                    }}
-                />
-            ),
-        },
-        {
             id: 'events_count',
             accessorKey: 'events_count',
             header: 'Kegiatan',

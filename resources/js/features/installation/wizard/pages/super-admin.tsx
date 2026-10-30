@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Field, FormLabel } from '@/components/form-fields';
 import PasswordInput from '@/components/password-input';
 import { Text } from '@/components/text';
@@ -44,7 +44,7 @@ export default function SuperAdmin({ values }: Props) {
             <Head title="Akun Super Admin" />
 
             <StepShell
-                eyebrow="Langkah 4 dari 7"
+                eyebrow="Langkah 4 dari 8"
                 title="Akun Super Admin"
                 description="Akun ini dibuat pada langkah terakhir. Role Super Admin ditetapkan otomatis; tidak ada pilihan role pada wizard."
                 footer={
@@ -61,14 +61,14 @@ export default function SuperAdmin({ values }: Props) {
                             form="super-admin-form"
                             disabled={form.processing}
                             className="text-sm"
+                            size="lg"
                         >
+                            Lanjutkan
                             {form.processing ? (
                                 <Spinner aria-hidden="true" />
                             ) : (
-                                <ShieldCheck aria-hidden="true" />
+                                <ArrowRight aria-hidden="true" />
                             )}
-                            Lanjutkan
-                            <ArrowRight aria-hidden="true" />
                         </Button>
                     </>
                 }

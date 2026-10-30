@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight, Images } from 'lucide-react';
 import { Text } from '@/components/text';
 import { show as galleryShow } from '@/routes/galeri';
@@ -8,11 +9,13 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
     return (
         <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {album.cover_url ? (
-                <img
+                <Image
                     src={album.cover_url}
                     alt=""
                     loading="lazy"
-                    className="aspect-4/3 w-full rounded-t-lg object-cover"
+                    aspectRatio="4 / 3"
+                    fit="cover"
+                    className="w-full rounded-t-lg"
                 />
             ) : (
                 <div className="flex aspect-4/3 w-full items-center justify-center rounded-t-lg bg-canvas-subtle text-muted-foreground">

@@ -1,5 +1,7 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import {
+    Bell,
+    BookOpen,
     CalendarClock,
     CalendarDays,
     DatabaseBackup,
@@ -8,9 +10,10 @@ import {
     HandHeart,
     History,
     Images,
-    ListChecks,
     MapPin,
     Settings,
+    Tag,
+    User,
     UserCog,
     UserRound,
     Users,
@@ -18,10 +21,7 @@ import {
 } from 'lucide-react';
 
 import { edit as editSettings } from '@/routes/settings';
-import {
-    index as massSchedulesIndex,
-    list as massSchedulesList,
-} from '@/routes/mass-schedules';
+import { list as massSchedulesList } from '@/routes/mass-schedules';
 import { index as locationsIndex } from '@/routes/locations';
 import { index as specialMassesIndex } from '@/routes/special-masses';
 import { index as scheduleNoticesIndex } from '@/routes/schedule-notices';
@@ -77,65 +77,47 @@ export function visibleEntries(
         .filter((entry) => !entry.children || entry.children.length > 0);
 }
 
-export const CONTENT_ENTRIES: Entry[] = [
-    {
-        title: 'Profil Paroki',
-        href: editParishProfile(),
-        icon: UserRound,
-        children: [
-            { title: 'Informasi Profil', href: editParishProfile() },
-            { title: 'Sejarah Paroki', href: parishHistoriesIndex() },
-            { title: 'Wilayah Pelayanan', href: editServiceArea() },
-            { title: 'Pastor Paroki', href: pastorsIndex() },
-            { title: 'Struktur Kepengurusan', href: boardPeriodsIndex() },
-        ],
-    },
-    {
-        title: 'Jadwal Misa',
-        href: massSchedulesIndex(),
-        icon: CalendarDays,
-        children: [
-            {
-                title: 'Misa Rutin',
-                href: massSchedulesList(),
-            },
-            {
-                title: 'Misa Khusus',
-                href: specialMassesIndex(),
-            },
-            {
-                title: 'Pemberitahuan',
-                href: scheduleNoticesIndex(),
-            },
-        ],
-    },
+export const PROFILE_ENTRIES: Entry[] = [
+    { title: 'Informasi Profil', href: editParishProfile(), icon: UserRound },
+    { title: 'Sejarah Paroki', href: parishHistoriesIndex(), icon: BookOpen },
+    { title: 'Wilayah Pelayanan', href: editServiceArea(), icon: MapPin },
+    { title: 'Pastor Paroki', href: pastorsIndex(), icon: User },
+    { title: 'Struktur Kepengurusan', href: boardPeriodsIndex(), icon: Users },
+];
+
+export const LITURGY_ENTRIES: Entry[] = [
+    { title: 'Misa Rutin', href: massSchedulesList(), icon: CalendarDays },
+    { title: 'Misa Khusus', href: specialMassesIndex(), icon: CalendarClock },
+    { title: 'Pemberitahuan', href: scheduleNoticesIndex(), icon: Bell },
+];
+
+export const PUBLICATION_ENTRIES: Entry[] = [
     { title: 'Berita', href: postsList(), icon: Globe },
     { title: 'Agenda', href: eventsList(), icon: CalendarClock },
-    {
-        title: 'Master Data',
-        icon: ListChecks,
-        children: [
-            { title: 'Lokasi', href: locationsIndex() },
-            { title: 'Kategori Berita', href: postCategoriesIndex() },
-            { title: 'Kategori Agenda', href: eventCategoriesIndex() },
-            { title: 'Kategori Pelayanan', href: serviceCategoriesIndex() },
-            { title: 'Kategori Komunitas', href: communityCategoriesIndex() },
-            { title: 'Kategori Dokumen', href: documentCategoriesIndex() },
-        ],
-    },
-    { title: 'Pelayanan', href: servicesIndex(), icon: HandHeart },
-    { title: 'Komunitas', href: communitiesIndex(), icon: Users },
-    { title: 'Area', href: areasIndex(), icon: MapPin },
     { title: 'Galeri', href: galleriesIndex(), icon: Images },
     { title: 'Dokumen', href: documentsIndex(), icon: FileText },
 ];
 
-export const ACCOUNT_ENTRIES: Entry[] = [
+export const MINISTRY_ENTRIES: Entry[] = [
+    { title: 'Layanan Paroki', href: servicesIndex(), icon: HandHeart },
+    { title: 'Komunitas', href: communitiesIndex(), icon: Users },
+    { title: 'Area Paroki', href: areasIndex(), icon: MapPin },
+];
+
+export const REFERENCE_ENTRIES: Entry[] = [
+    { title: 'Lokasi', href: locationsIndex(), icon: MapPin },
+    { title: 'Kategori Berita', href: postCategoriesIndex(), icon: Tag },
+    { title: 'Kategori Agenda', href: eventCategoriesIndex(), icon: Tag },
+    { title: 'Kategori Layanan', href: serviceCategoriesIndex(), icon: Tag },
     {
-        title: 'Pengaturan',
-        href: editSettings(),
-        icon: Settings,
+        title: 'Kategori Komunitas',
+        href: communityCategoriesIndex(),
+        icon: Tag,
     },
+    { title: 'Kategori Dokumen', href: documentCategoriesIndex(), icon: Tag },
+];
+
+export const ACCOUNT_ENTRIES: Entry[] = [
     {
         title: 'Akun',
         href: editProfile(),
@@ -155,5 +137,10 @@ export const ADMINISTRATION_ENTRIES: Entry[] = [
         href: backupsIndex(),
         icon: DatabaseBackup,
         ability: 'backups.view',
+    },
+    {
+        title: 'Pengaturan Situs',
+        href: editSettings(),
+        icon: Settings,
     },
 ];

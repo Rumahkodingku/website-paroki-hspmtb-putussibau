@@ -199,18 +199,8 @@ test.describe('jadwal misa admin', () => {
         const sidebar = page.getByRole('navigation', {
             name: 'Navigasi utama',
         });
-        const toggle = sidebar.getByRole('button', {
-            name: 'Jadwal Misa',
-            exact: true,
-        });
-
-        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-
-        await toggle.click();
-
-        await expect(
-            sidebar.getByRole('button', { name: 'Jadwal Misa', exact: true }),
-        ).toHaveAttribute('aria-expanded', 'true');
+        // Semua item sekarang tampil langsung (tanpa dropdown); tidak perlu
+        // membuka grup terlebih dahulu.
 
         // Tiga, bukan empat. Lokasi pindah ke grup Master Data pada Fase 05:
         // sebuah ruangan dipakai kegiatan agenda, bukan hanya misa, jadi
@@ -232,11 +222,6 @@ test.describe('jadwal misa admin', () => {
 
         await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
 
-        // Arriving on a child has to open its own group, or the page's menu
-        // entry stays hidden while the admin is standing on it.
-        await expect(
-            sidebar.getByRole('button', { name: 'Jadwal Misa', exact: true }),
-        ).toHaveAttribute('aria-expanded', 'true');
     });
 
     test('Berita dan Agenda adalah tautan langsung ke daftarnya', async ({
@@ -258,71 +243,6 @@ test.describe('jadwal misa admin', () => {
         await expect(
             sidebar.getByRole('link', { name: 'Agenda', exact: true }),
         ).toHaveAttribute('href', '/admin/agenda/daftar');
-    });
-
-    test('sub-menu tertutup lagi setelah diklik dua kali', async ({ page }) => {
-        await page.goto('/admin');
-
-        const sidebar = page.getByRole('navigation', {
-            name: 'Navigasi utama',
-        });
-
-        await sidebar
-            .getByRole('button', { name: 'Jadwal Misa', exact: true })
-            .click();
-
-        await expect(
-            sidebar.getByRole('link', { name: 'Misa Rutin', exact: true }),
-        ).toBeVisible();
-
-        await sidebar
-            .getByRole('button', { name: 'Jadwal Misa', exact: true })
-            .click();
-
-        await expect(
-            sidebar.getByRole('link', { name: 'Misa Rutin', exact: true }),
-        ).toHaveCount(0);
-    });
-
-    test('judul modul hanya membuka sub-menu, modul lewat breadcrumb', async ({
-        page,
-    }) => {
-        // Started from the location page until Lokasi moved to Master Data
-        // (D-48), which quietly changed what this test was about: that page's
-        // breadcrumb says "Master Data" now, so the "Jadwal Misa" link it was
-        // looking for stopped existing and the locator timed out. A Jadwal Misa
-        // page is what it should have used all along — the breadcrumb under
-        // test belongs to this module, not to whichever page happened to be
-        // reachable when it was written.
-        await page.goto('/admin/jadwal-misa/misa-rutin');
-
-        const sidebar = page.getByRole('navigation', {
-            name: 'Navigasi utama',
-        });
-
-        // The whole row is the disclosure, so it is a button and not a link.
-        // "Ringkasan" is not a child either, which makes the breadcrumb the way
-        // in — this asserts both halves, because either one alone would still
-        // pass if the other half broke.
-        await expect(
-            sidebar.getByRole('link', { name: 'Jadwal Misa', exact: true }),
-        ).toHaveCount(0);
-
-        await sidebar
-            .getByRole('button', { name: 'Jadwal Misa', exact: true })
-            .click();
-
-        // Clicking the title must not navigate: it only opens the sub-menu.
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
-
-        // The breadcrumb still leads there, and it lands on the list — the
-        // module root is a redirect now, so "Jadwal Misa" means "the module",
-        // not "a page of its own".
-        await page
-            .getByRole('link', { name: 'Jadwal Misa', exact: true })
-            .click();
-
-        await expect(page).toHaveURL(/\/admin\/jadwal-misa\/misa-rutin$/);
     });
 
     test('klik kolom mengurutkan lewat URL, bukan di browser', async ({

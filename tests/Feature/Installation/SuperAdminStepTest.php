@@ -13,6 +13,15 @@ beforeEach(function () {
 
     $this->withSession([
         'installation.database_verified_at' => now()->toIso8601String(),
+        'installation.email' => [
+            'mailer' => 'smtp',
+            'host' => '127.0.0.1',
+            'port' => 1025,
+            'username' => null,
+            'password' => null,
+            'from_address' => 'noreply@paroki-hspmtb.local',
+            'from_name' => 'Aplikasi Uji',
+        ],
     ]);
 });
 

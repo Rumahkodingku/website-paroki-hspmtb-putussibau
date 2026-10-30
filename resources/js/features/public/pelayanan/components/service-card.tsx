@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, HeartPulse, Image as ImageIcon } from 'lucide-react';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { show } from '@/routes/pelayanan';
@@ -37,16 +38,18 @@ export function PublicServiceCard({ service }: Props) {
                 ].join(' ')}
             >
                 {service.thumbnail ? (
-                    <img
+                    <Image
                         src={service.thumbnail}
                         alt={service.thumbnail_alt ?? ''}
                         loading="lazy"
                         decoding="async"
-                        className={[
-                            'size-full object-cover',
+                        aspectRatio="4 / 3"
+                        fit="cover"
+                        imageClassName={[
                             'transition-transform duration-300',
                             'group-hover:scale-105',
                         ].join(' ')}
+                        className="size-full"
                     />
                 ) : (
                     <div className="flex size-full items-center justify-center text-muted-foreground">

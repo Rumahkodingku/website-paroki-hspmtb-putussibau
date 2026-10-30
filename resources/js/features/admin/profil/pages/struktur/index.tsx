@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/image';
 import { Badge } from '@/components/ui/badge';
 import { dashboard } from '@/routes';
 import {
@@ -181,11 +182,13 @@ export default function Index({ periods, selected }: Props) {
                                     >
                                         <div className="flex flex-row items-center gap-3">
                                             {member.photo_url ? (
-                                                <img
+                                                <Image
                                                     src={member.photo_url}
                                                     alt={member.name}
                                                     loading="lazy"
-                                                    className="size-16 rounded-md border border-border object-cover"
+                                                    aspectRatio="1 / 1"
+                                                    fit="cover"
+                                                    className="size-16 rounded-md border border-border"
                                                 />
                                             ) : (
                                                 <div

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { show as eventShow } from '@/routes/agenda';
 import type { PublicEvent } from '../types';
@@ -86,14 +87,16 @@ export function AgendaSelectedDayPanel({
                             className="flex gap-3 py-4 first:pt-0 last:pb-0"
                         >
                             {event.poster ? (
-                                <img
+                                <Image
                                     src={event.poster}
                                     alt={
                                         event.poster_alt ||
                                         `Poster ${event.title}`
                                     }
                                     loading="lazy"
-                                    className="size-18 shrink-0 rounded-lg object-cover sm:size-20"
+                                    aspectRatio="1 / 1"
+                                    fit="cover"
+                                    className="size-18 shrink-0 rounded-lg sm:size-20"
                                 />
                             ) : (
                                 <div className="flex size-18 shrink-0 items-center justify-center rounded-lg bg-muted sm:size-20">
@@ -110,11 +113,6 @@ export function AgendaSelectedDayPanel({
                                         <Badge
                                             variant="outline"
                                             className="gap-1 rounded-full border-transparent px-2 py-0.5 text-[10px] sm:text-xs"
-                                            style={{
-                                                color: event.category
-                                                    .color_value,
-                                                backgroundColor: `${event.category.color_value}14`,
-                                            }}
                                         >
                                             {event.category.name}
                                         </Badge>

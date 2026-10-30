@@ -7,6 +7,7 @@ import {
     MapPin,
 } from 'lucide-react';
 
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,8 +45,6 @@ export function EventCard({
         year: 'numeric',
     }).format(new Date(event.start_at));
 
-    const categoryColor = event.category?.color_value;
-
     return (
         <article
             className={cn(
@@ -58,11 +57,14 @@ export function EventCard({
             <div className="grid grid-cols-[minmax(0,1fr)_84px] gap-2 sm:grid-cols-[minmax(0,1fr)_92px]">
                 <div className="relative min-h-29 overflow-hidden sm:min-h-33">
                     {event.poster ? (
-                        <img
+                        <Image
                             src={event.poster}
                             alt={event.poster_alt || `Poster ${event.title}`}
                             loading="lazy"
-                            className="absolute inset-0 size-full rounded-2xl object-cover transition-transform duration-300"
+                            fit="cover"
+                            imageClassName="transition-transform duration-300"
+                            className="inset-0 size-full rounded-2xl"
+                            position="absolute"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted">
@@ -106,12 +108,6 @@ export function EventCard({
                         <Badge
                             variant="outline"
                             className="gap-1.5 rounded-full border-transparent px-2.5 py-1"
-                            style={{
-                                color: categoryColor,
-                                backgroundColor: categoryColor
-                                    ? `${categoryColor}14`
-                                    : undefined,
-                            }}
                         >
                             {event.category.name}
                         </Badge>

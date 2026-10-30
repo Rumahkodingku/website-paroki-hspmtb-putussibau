@@ -9,6 +9,7 @@ import {
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
 import { Seo } from '@/components/seo';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { home } from '@/routes';
 import { index as pelayananIndex } from '@/routes/pelayanan';
@@ -126,7 +127,7 @@ export function HeroSection({ service }: Props) {
                     <div className="order-1 min-w-0 lg:order-2">
                         <div className="relative aspect-4/3 overflow-hidden rounded-4xl bg-muted sm:aspect-16/10 lg:aspect-5/4">
                             {service.thumbnail ? (
-                                <img
+                                <Image
                                     src={service.thumbnail}
                                     alt={
                                         service.thumbnail_alt?.trim() ||
@@ -134,7 +135,9 @@ export function HeroSection({ service }: Props) {
                                     }
                                     fetchPriority="high"
                                     decoding="async"
-                                    className="size-full object-cover"
+                                    aspectRatio="4 / 3"
+                                    fit="cover"
+                                    className="size-full"
                                 />
                             ) : (
                                 <div className="flex size-full items-center justify-center text-muted-foreground">

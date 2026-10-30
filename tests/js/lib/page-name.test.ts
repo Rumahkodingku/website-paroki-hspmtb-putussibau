@@ -23,8 +23,8 @@ describe('pageName', () => {
         expect(pageName('./features/admin/akun/pages/profile.tsx')).toBe(
             'admin/akun/profile',
         );
-        expect(pageName('./features/public/auth/pages/login.tsx')).toBe(
-            'public/auth/login',
+        expect(pageName('./features/shared/auth/pages/login.tsx')).toBe(
+            'shared/auth/login',
         );
     });
 

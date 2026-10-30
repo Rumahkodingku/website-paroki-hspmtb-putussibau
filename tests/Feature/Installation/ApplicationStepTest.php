@@ -46,6 +46,7 @@ test('optional blanks are stored as null and unknown keys are dropped', function
         'app_url' => '  https://uji.example.test  ',
         'timezone' => '  Asia/Pontianak  ',
         'locale' => '  id  ',
+        'environment' => '  production  ',
         'contact_phone' => '08123456789',
     ])->assertRedirect(route('install.review'));
 
@@ -59,6 +60,7 @@ test('optional blanks are stored as null and unknown keys are dropped', function
         'app_url' => 'https://uji.example.test',
         'timezone' => 'Asia/Pontianak',
         'locale' => 'id',
+        'environment' => 'production',
     ]);
 });
 

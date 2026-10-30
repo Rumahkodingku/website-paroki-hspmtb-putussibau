@@ -25,13 +25,7 @@ test.describe('sidebar Profil Paroki', () => {
         await signIn(page);
         await page.goto('/admin');
 
-        const toggle = page
-            .getByRole('navigation', { name: 'Navigasi utama' })
-            .getByRole('button', { name: 'Profil Paroki', exact: true });
-
-        if ((await toggle.getAttribute('aria-expanded')) === 'false') {
-            await toggle.click();
-        }
+        // Semua item sekarang tampil langsung (tanpa dropdown).
     });
 
     test('setiap anak Profil Paroki punya href yang berbeda', async ({

@@ -129,7 +129,7 @@ export function SidebarEntryLink({ entry }: { entry: Entry }) {
                 <Link href={entry.href} prefetch>
                     {entry.icon && <entry.icon />}
 
-                    <span className="truncate">{entry.title}</span>
+                    <span className="truncate text-[13px]">{entry.title}</span>
                 </Link>
             </SidebarMenuButton>
         </SidebarMenuItem>

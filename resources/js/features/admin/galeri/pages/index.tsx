@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Images } from 'lucide-react';
+import Image from '@/components/image';
 import { DataTable, type DataColumn } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
@@ -85,10 +86,12 @@ export default function Index({ albums, years, filters, empty }: Props) {
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     {row.original.cover_url ? (
-                        <img
+                        <Image
                             src={row.original.cover_url}
                             alt=""
-                            className="size-12 shrink-0 rounded-md object-cover"
+                            aspectRatio="1 / 1"
+                            fit="cover"
+                            className="size-12 shrink-0 rounded-md"
                         />
                     ) : (
                         <span

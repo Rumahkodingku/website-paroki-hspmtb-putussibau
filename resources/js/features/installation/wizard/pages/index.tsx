@@ -29,7 +29,7 @@ const SUMMARY = [
     },
     {
         icon: UserRound,
-        title: 'Super Admin',
+        title: 'Akun Super Admin',
         description:
             'Akun pertama dibuat pada langkah terakhir, bukan saat formulir diisi.',
     },
@@ -53,7 +53,7 @@ export default function Welcome() {
             <Head title="Instalasi Website" />
 
             <StepShell
-                eyebrow="Langkah 1 dari 7"
+                eyebrow="Langkah 1 dari 8"
                 title="Selamat datang di Website Paroki HSPMTB Putussibau"
                 description="Wizard ini menyiapkan instalasi baru: memeriksa server, menyiapkan database, membuat akun Super Admin, dan menyimpan identitas paroki. Tidak ada konten contoh yang dimasukkan."
                 footer={

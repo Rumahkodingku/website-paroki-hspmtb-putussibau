@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PublicSection } from '@/components/public-section';
@@ -98,20 +99,6 @@ function formatEventTime(
     return `${startTime}–${formatter.format(end)} WIB`;
 }
 
-function getCategoryColors(color?: string | null) {
-    if (!color || !/^#[0-9a-fA-F]{6}$/.test(color)) {
-        return {
-            color: '#64748b',
-            backgroundColor: '#f1f5f9',
-        };
-    }
-
-    return {
-        color,
-        backgroundColor: `${color}18`,
-    };
-}
-
 export function HomeAgendaSection({
     events,
     displayTimezone,
@@ -167,10 +154,6 @@ export function HomeAgendaSection({
                                 ? getDateParts(date, displayTimezone)
                                 : null;
 
-                            const categoryColors = getCategoryColors(
-                                event.category?.color_value,
-                            );
-
                             const time = formatEventTime(
                                 event.start_at,
                                 event.end_at,
@@ -194,12 +177,14 @@ export function HomeAgendaSection({
                                             aria-hidden="true"
                                             className="relative aspect-3/4 w-19 shrink-0 self-start overflow-hidden rounded-lg bg-muted sm:w-25"
                                         >
-                                            <img
+                                            <Image
                                                 src={event.poster}
                                                 alt=""
                                                 loading="lazy"
                                                 decoding="async"
-                                                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                fit="cover"
+                                                imageClassName="transition-transform duration-300 group-hover:scale-105"
+                                                className="size-full"
                                             />
                                         </Link>
                                     ) : (
@@ -247,11 +232,6 @@ export function HomeAgendaSection({
                                                 <Text
                                                     variant="label"
                                                     className="inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1"
-                                                    style={{
-                                                        color: categoryColors.color,
-                                                        backgroundColor:
-                                                            categoryColors.backgroundColor,
-                                                    }}
                                                 >
                                                     {event.category.name}
                                                 </Text>

@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { toast } from 'sonner';
+import { FormLabel } from '@/components/form-fields';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Text } from '@/components/text';
@@ -62,22 +63,9 @@ export default function Login({ status, canResetPassword }: Props) {
                     <div className="grid gap-5">
                         {/* Email */}
                         <div className="grid gap-2">
-                            <Text
-                                as="label"
-                                htmlFor="email"
-                                variant="label"
-                                weight="medium"
-                            >
+                            <FormLabel htmlFor="email" isRequired>
                                 Email
-                                <Text
-                                    as="span"
-                                    variant="label"
-                                    color="danger"
-                                    className="ml-1"
-                                >
-                                    *
-                                </Text>
-                            </Text>
+                            </FormLabel>
 
                             <div className="relative">
                                 <Mail
@@ -112,22 +100,9 @@ export default function Login({ status, canResetPassword }: Props) {
                         {/* Password */}
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-3">
-                                <Text
-                                    as="label"
-                                    htmlFor="password"
-                                    variant="label"
-                                    weight="medium"
-                                >
+                                <FormLabel htmlFor="password" isRequired>
                                     Kata sandi
-                                    <Text
-                                        as="span"
-                                        variant="label"
-                                        color="danger"
-                                        className="ml-1"
-                                    >
-                                        *
-                                    </Text>
-                                </Text>
+                                </FormLabel>
 
                                 {canResetPassword && (
                                     <TextLink

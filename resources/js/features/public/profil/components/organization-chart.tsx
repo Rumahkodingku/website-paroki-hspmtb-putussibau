@@ -1,3 +1,4 @@
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Church, FileText, UserRound, Users } from 'lucide-react';
 import type { PublicBoardMember } from '../types';
@@ -21,12 +22,14 @@ function MemberAvatar({
             ].join(' ')}
         >
             {member.photo ? (
-                <img
+                <Image
                     src={member.photo}
                     alt={member.photo_alt ?? `Foto ${member.name}`}
                     loading="lazy"
                     decoding="async"
-                    className="size-full object-cover object-top"
+                    fit="cover"
+                    objectPosition="top"
+                    className="size-full"
                 />
             ) : (
                 <div

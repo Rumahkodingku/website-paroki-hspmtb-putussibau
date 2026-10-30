@@ -27,7 +27,6 @@ class EventCategoryOptionResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'color_value' => $this->colorValue(),
         ];
     }
 }

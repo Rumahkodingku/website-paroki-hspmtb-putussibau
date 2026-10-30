@@ -99,14 +99,14 @@ test.describe('sidebar Area', () => {
 
         await expect(
             sidebar.getByRole('link', {
-                name: 'Area',
+                name: 'Area Paroki',
                 exact: true,
             }),
         ).toHaveAttribute('href', '/admin/area');
 
         await expect(
             sidebar.getByRole('link', {
-                name: 'Area',
+                name: 'Area Paroki',
                 exact: true,
             }),
         ).toHaveCount(1);

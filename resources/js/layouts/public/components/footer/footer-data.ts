@@ -1,7 +1,5 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
-
 import { home } from '@/routes';
-import { index as kontak } from '@/routes/kontak';
 import { privacy, terms } from '@/routes/legal';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
@@ -75,5 +73,4 @@ export const LINK_CLASS =
 export const LEGAL: LegalItem[] = [
     { label: 'Kebijakan Privasi', href: privacy() },
     { label: 'Syarat & Ketentuan', href: terms() },
-    { label: 'Kontak Sekretariat', href: kontak() },
 ];
