@@ -1,9 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Mail, MessageCircle } from 'lucide-react';
+import Image from '@/components/image';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
 import { Seo } from '@/components/seo';
+import { ContactMap } from '@/components/contact-map';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,6 +55,18 @@ export default function StasiLingkunganShow({ area }: Props) {
                     ) : null}
                 </header>
 
+                {area.photoUrl ? (
+                    <div className="mt-6 overflow-hidden rounded-xl border border-border">
+                        <Image
+                            src={area.photoUrl}
+                            alt={`Foto ${area.name}`}
+                            aspectRatio="16 / 9"
+                            fit="cover"
+                            className="w-full"
+                        />
+                    </div>
+                ) : null}
+
                 {area.parent ? (
                     <Text
                         as="p"
@@ -92,6 +106,36 @@ export default function StasiLingkunganShow({ area }: Props) {
                             </Text>
                         </div>
                     ) : null}
+
+                    {area.contact_email ? (
+                        <div className="rounded-lg border border-border p-5">
+                            <Text as="p" variant="body-sm" color="muted">
+                                Email
+                            </Text>
+                            <a
+                                href={`mailto:${area.contact_email}`}
+                                className="text-sm text-primary-on-surface underline-offset-4 hover:underline"
+                            >
+                                {area.contact_email}
+                            </a>
+                        </div>
+                    ) : null}
+
+                    {area.contact_whatsapp ? (
+                        <div className="rounded-lg border border-border p-5">
+                            <Text as="p" variant="body-sm" color="muted">
+                                WhatsApp
+                            </Text>
+                            <a
+                                href={`https://wa.me/${area.contact_whatsapp.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary-on-surface underline-offset-4 hover:underline"
+                            >
+                                {area.contact_whatsapp}
+                            </a>
+                        </div>
+                    ) : null}
                 </div>
 
                 {/*
@@ -100,7 +144,7 @@ export default function StasiLingkunganShow({ area }: Props) {
                     button on a parish page reads as a bug, not as an absence,
                     which is the reason LocationInfo behaves the same way.
                 */}
-                {area.address || area.mapsUrl ? (
+                {area.address || area.mapsUrl || area.mapsEmbedUrl ? (
                     <div className="mt-6 rounded-lg border border-border p-5">
                         <Text as="p" variant="body-sm" color="muted">
                             Alamat
@@ -114,6 +158,15 @@ export default function StasiLingkunganShow({ area }: Props) {
                             >
                                 {area.address}
                             </Text>
+                        ) : null}
+
+                        {(area.mapsEmbedUrl || area.mapsUrl) ? (
+                            <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm [&_iframe]:min-h-72 [&>div]:rounded-none">
+                                <ContactMap
+                                    embedUrl={area.mapsEmbedUrl}
+                                    directionsUrl={area.mapsUrl}
+                                />
+                            </div>
                         ) : null}
 
                         {area.mapsUrl ? (

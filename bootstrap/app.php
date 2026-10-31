@@ -142,6 +142,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
+            // The exception handler runs outside the middleware stack, so the
+            // shared props (identity, contact, seo, ...) are missing. Re-share
+            // them here so the public layout (navbar logo, footer) renders with
+            // the parish identity instead of the bare "Paroki" placeholder.
+            $shared = app(HandleInertiaRequests::class)
+                ->share($request);
+
+            Inertia::share($shared);
+
             return Inertia::render('public/error', ['status' => $status])
                 ->toResponse($request)
                 ->setStatusCode($status);

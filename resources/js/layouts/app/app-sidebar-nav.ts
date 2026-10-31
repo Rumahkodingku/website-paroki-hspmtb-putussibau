@@ -10,6 +10,7 @@ import {
     HandHeart,
     History,
     Images,
+    Map,
     MapPin,
     Settings,
     Tag,
@@ -54,12 +55,6 @@ export type Entry = {
     ability?: string;
 };
 
-/**
- * Filter navigation entries by the server-resolved abilities.
- *
- * The backend remains the security boundary; this only keeps a menu item a user
- * cannot use out of their sidebar.
- */
 export function visibleEntries(
     entries: Entry[],
     abilities: Record<string, boolean>,
@@ -80,7 +75,8 @@ export function visibleEntries(
 export const PROFILE_ENTRIES: Entry[] = [
     { title: 'Informasi Profil', href: editParishProfile(), icon: UserRound },
     { title: 'Sejarah Paroki', href: parishHistoriesIndex(), icon: BookOpen },
-    { title: 'Wilayah Pelayanan', href: editServiceArea(), icon: MapPin },
+    { title: 'Wilayah Pelayanan', href: editServiceArea(), icon: Map },
+    { title: 'Area Paroki', href: areasIndex(), icon: MapPin },
     { title: 'Pastor Paroki', href: pastorsIndex(), icon: User },
     { title: 'Struktur Kepengurusan', href: boardPeriodsIndex(), icon: Users },
 ];
@@ -101,7 +97,6 @@ export const PUBLICATION_ENTRIES: Entry[] = [
 export const MINISTRY_ENTRIES: Entry[] = [
     { title: 'Layanan Paroki', href: servicesIndex(), icon: HandHeart },
     { title: 'Komunitas', href: communitiesIndex(), icon: Users },
-    { title: 'Area Paroki', href: areasIndex(), icon: MapPin },
 ];
 
 export const REFERENCE_ENTRIES: Entry[] = [

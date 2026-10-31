@@ -424,10 +424,11 @@ function ImageInstance({
      * 2. Jika tidak, hitung dari width dan height.
      * 3. Jika keduanya tidak tersedia, biarkan gambar menentukan tinggi.
      */
-    const resolvedAspectRatio =
-        aspectRatio ?? (width && height ? `${width} / ${height}` : undefined);
-
-    const hasFixedRatio = resolvedAspectRatio !== undefined;
+    // Rasio aspek hanya aktif bila diberikan eksplisit (opt-in crop).
+    // width/height tetap dipasang sebagai atribut intrinsik (anti-CLS)
+    // tetapi tidak memaksa container dengan rasio tetap.
+    const resolvedAspectRatio = aspectRatio;
+    const hasFixedRatio = aspectRatio !== undefined;
 
     /**
      * Style dasar container.
@@ -435,6 +436,11 @@ function ImageInstance({
      * Container menggunakan aspect-ratio agar ruang gambar dapat
      * disiapkan sebelum gambar selesai diunduh.
      */
+    const isPositioned =
+        position === 'absolute' ||
+        position === 'fixed' ||
+        position === 'sticky';
+
     const wrapperStyle: CSSProperties = {
         ...(hasFixedRatio
             ? {
@@ -442,7 +448,12 @@ function ImageInstance({
                   position: position,
                   overflow: 'hidden',
               }
-            : {}),
+            : isPositioned
+              ? {
+                    position: position,
+                    overflow: 'hidden',
+                }
+              : { position: position }),
         ...style,
     };
 
@@ -458,10 +469,10 @@ function ImageInstance({
     const resolvedImageStyle: CSSProperties = {
         display: 'block',
         width: '100%',
-        height: hasFixedRatio ? '100%' : 'auto',
+        height: isPositioned || hasFixedRatio ? '100%' : 'auto',
         objectFit: fit,
         objectPosition,
-        ...(hasFixedRatio
+        ...(isPositioned || hasFixedRatio
             ? {
                   position: 'absolute',
                   inset: 0,

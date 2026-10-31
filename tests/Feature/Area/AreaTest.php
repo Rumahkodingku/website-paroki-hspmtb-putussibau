@@ -302,11 +302,11 @@ it('builds a map link from the coordinates when no url was stored', function () 
 it('prefers a stored maps url over the coordinates', function () {
     $this->actingAs(superAdmin())
         ->post(route('areas.store'), areaPayload([
-            'maps_url' => 'https://maps.app.goo.gl/contoh',
+            'maps_url' => 'https://www.google.com/maps/search/?api=1&query=-0.4312900,111.4935200',
             'latitude' => '-0.4312900',
             'longitude' => '111.4935200',
         ]))
         ->assertSessionHasNoErrors();
 
-    expect(Area::query()->sole()->mapsUrl())->toBe('https://maps.app.goo.gl/contoh');
+    expect(Area::query()->sole()->mapsUrl())->toBe('https://www.google.com/maps/search/?api=1&query=-0.4312900,111.4935200');
 });

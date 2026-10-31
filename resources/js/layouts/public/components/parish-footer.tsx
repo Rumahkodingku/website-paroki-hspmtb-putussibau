@@ -29,10 +29,6 @@ export function ParishFooter() {
         <footer className="relative isolate overflow-hidden border border-border-subtle bg-background shadow-soft-card">
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -z-10 bg-[url('/hero-section-2.webp')] bg-size-[auto_100%] bg-bottom-right bg-no-repeat opacity-[0.09] dark:opacity-[0.16]"
-            />
-            <div
-                aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-r from-background via-background/95 to-background/65 dark:from-background dark:via-background/90 dark:to-background/60"
             />
 

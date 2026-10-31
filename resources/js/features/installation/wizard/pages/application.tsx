@@ -29,6 +29,7 @@ export default function Application({ values, meta }: Props) {
         parish_short_name: values.parish_short_name ?? '',
         tagline: values.tagline ?? '',
         short_description: values.short_description ?? '',
+        motto_verse: values.motto_verse ?? '',
         patron_saint: values.patron_saint ?? '',
         app_name: meta.appName ?? '',
         app_url: meta.appUrl ?? '',
@@ -188,6 +189,31 @@ export default function Application({ values, meta }: Props) {
 
                         <Text as="p" variant="fine-print" color="muted">
                             {form.data.short_description.length}/500 karakter
+                        </Text>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <FormLabel
+                            htmlFor="motto_verse"
+                            error={form.errors.motto_verse}
+                        >
+                            Motto / ayat
+                        </FormLabel>
+
+                        <Textarea
+                            id="motto_verse"
+                            name="motto_verse"
+                            rows={3}
+                            value={form.data.motto_verse}
+                            onChange={setField('motto_verse')}
+                            maxLength={500}
+                            aria-invalid={Boolean(form.errors.motto_verse)}
+                            className="min-h-20 resize-y border-border shadow-none focus-visible:border-primary"
+                            placeholder="Contoh: Sebab di mana dua atau tiga orang berkumpul dalam nama-Ku, di situ Aku ada."
+                        />
+
+                        <Text as="p" variant="fine-print" color="muted">
+                            {form.data.motto_verse.length}/500 karakter
                         </Text>
                     </div>
 

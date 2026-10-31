@@ -47,6 +47,7 @@ export type ApplicationValues = {
     parish_short_name: string | null;
     tagline: string | null;
     short_description: string | null;
+    motto_verse: string | null;
     patron_saint: string | null;
 };
 

@@ -47,7 +47,7 @@ class AreaController extends Controller
         $status = $request->string('status')->toString();
 
         $areas = Area::query()
-            ->with('parent')
+            ->with(['parent', 'photoMedia'])
             ->when($search !== '', fn (Builder $query) => $query
                 ->where('name', 'like', "%{$search}%"))
             ->when(
@@ -129,7 +129,7 @@ class AreaController extends Controller
         Gate::authorize('update', $area);
 
         return Inertia::render('admin/area/ubah', [
-            'area' => AreaResource::make($area->load('parent'))->resolve(),
+            'area' => AreaResource::make($area->load(['parent', 'photoMedia']))->resolve(),
             'parents' => $this->parentOptions($area),
             ...$this->areaFormMeta(),
         ]);

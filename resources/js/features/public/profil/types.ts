@@ -117,8 +117,13 @@ export type PublicAreaDetail = {
     type_label: string;
     description: string | null;
     address: string | null;
+    contact_email: string | null;
+    contact_whatsapp: string | null;
+    photoUrl: string | null;
     /** Finished map link, or null; decided server-side by Area::mapsUrl(). */
     mapsUrl: string | null;
+    /** Embeddable map URL, or null; decided server-side by Area::mapsEmbedUrl(). */
+    mapsEmbedUrl: string | null;
     parent: {
         id: number;
         name: string;

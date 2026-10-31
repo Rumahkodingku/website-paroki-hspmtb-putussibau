@@ -37,6 +37,7 @@ final class InstallationWizardController extends Controller
         'parish_short_name',
         'tagline',
         'short_description',
+        'motto_verse',
         'patron_saint',
     ];
 

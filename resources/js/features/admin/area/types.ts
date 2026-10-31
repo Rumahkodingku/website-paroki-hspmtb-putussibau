@@ -14,6 +14,10 @@ export type AreaRow = {
     maps_url: string | null;
     leader_name: string | null;
     contact_phone: string | null;
+    contact_email: string | null;
+    contact_whatsapp: string | null;
+    photo_media_id: number | null;
+    photo_url: string | null;
     show_contact: boolean;
     sort_order: number;
     is_active: boolean;
@@ -55,6 +59,9 @@ export type AreaFormData = {
     maps_url: string;
     leader_name: string;
     contact_phone: string;
+    contact_email: string;
+    contact_whatsapp: string;
+    photo_media_id: string;
     show_contact: boolean;
     sort_order: string;
     is_active: boolean;

@@ -3,7 +3,9 @@
 namespace App\Concerns;
 
 use App\Enums\AreaType;
+use App\Enums\MediaStatus;
 use App\Models\Area;
+use App\Rules\GoogleMapsLink;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -55,9 +57,9 @@ trait AreaValidationRules
             'address' => ['nullable', 'string', 'max:2000'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            // url:http,https rather than plain url: this one is rendered as an
-            // anchor on the public page, not printed as text.
-            'maps_url' => ['nullable', 'string', 'url:http,https', 'max:2048'],
+            // Google Maps link: validated like site settings so an embed can be
+            // derived from it. See App\Support\MapsUrl.
+            'maps_url' => ['nullable', 'string', new GoogleMapsLink, 'max:2048'],
             'leader_name' => ['nullable', 'string', 'max:150'],
             'contact_phone' => [
                 'nullable',
@@ -68,6 +70,13 @@ trait AreaValidationRules
                         $fail('Nomor telepon tidak dikenali. Gunakan angka, boleh dengan awalan 0 atau +62.');
                     }
                 },
+            ],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_whatsapp' => ['nullable', 'string', 'max:50'],
+            'photo_media_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value),
             ],
             'show_contact' => ['required', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -92,6 +101,9 @@ trait AreaValidationRules
             'latitude.between' => 'Lintang harus antara -90 dan 90.',
             'longitude.between' => 'Bujur harus antara -180 dan 180.',
             'maps_url.url' => 'URL Google Maps harus berupa tautan http atau https.',
+            'contact_email.email' => 'Email kontak tidak valid.',
+            'contact_whatsapp.max' => 'Nomor WhatsApp maksimal :max karakter.',
+            'photo_media_id.exists' => 'Foto yang dipilih belum selesai diproses.',
         ];
     }
 
@@ -112,6 +124,9 @@ trait AreaValidationRules
             'latitude' => 'lintang',
             'longitude' => 'bujur',
             'maps_url' => 'tautan peta',
+            'contact_email' => 'email kontak',
+            'contact_whatsapp' => 'WhatsApp',
+            'photo_media_id' => 'foto',
         ];
     }
 
@@ -119,16 +134,19 @@ trait AreaValidationRules
     {
         $input = [];
 
-        foreach (['name', 'slug', 'description', 'leader_name', 'contact_phone', 'address', 'maps_url'] as $field) {
+        foreach (['name', 'slug', 'description', 'leader_name', 'contact_phone', 'contact_email', 'contact_whatsapp', 'address', 'maps_url'] as $field) {
             $value = $this->input($field);
             $input[$field] = is_string($value) ? trim($value) : $value;
         }
 
-        foreach (['description', 'leader_name', 'contact_phone', 'address', 'maps_url'] as $field) {
+        foreach (['description', 'leader_name', 'contact_phone', 'contact_email', 'contact_whatsapp', 'address', 'maps_url'] as $field) {
             if (($input[$field] ?? null) === '') {
                 $input[$field] = null;
             }
         }
+
+        $photo = $this->input('photo_media_id');
+        $input['photo_media_id'] = ($photo === null || $photo === '') ? null : (int) $photo;
 
         if (($input['slug'] ?? null) === null || $input['slug'] === '') {
             $ignoreId = $this->routeKeyId('area');

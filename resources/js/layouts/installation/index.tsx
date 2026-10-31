@@ -11,14 +11,6 @@ type InstallationLayoutProps = {
     currentStep?: number;
 };
 
-/**
- * The installer shell: branding and step navigation on the left, the current
- * step on the right, and a compact progress header on small screens.
- *
- * It reads `steps`/`currentStep` from page props because this layout is chosen
- * by page name in app.tsx and receives no props of its own. Every wizard page
- * sends both.
- */
 export default function InstallationLayout({ children }: PropsWithChildren) {
     const { steps = [], currentStep = 0 } =
         usePage<InstallationLayoutProps>().props;
@@ -47,19 +39,19 @@ export default function InstallationLayout({ children }: PropsWithChildren) {
                     <div className="flex min-w-0 flex-col gap-0.5">
                         <Text
                             as="p"
-                            variant="body"
-                            weight="semibold"
-                            color="inherit"
-                        >
-                            Paroki HSPMTB Putussibau
-                        </Text>
-                        <Text
-                            as="p"
                             variant="caption"
                             color="inherit"
                             className="text-white/70"
                         >
                             Gereja Katolik
+                        </Text>
+                        <Text
+                            as="p"
+                            variant="body"
+                            weight="semibold"
+                            color="inherit"
+                        >
+                            Paroki HSPMTB Putussibau
                         </Text>
                     </div>
                 </div>
