@@ -116,7 +116,6 @@ it('audits a community create', function () {
             'instagram' => null,
             'tiktok' => null,
             'youtube' => null,
-            'website' => null,
             'status' => 'forming',
             'is_published' => false,
         ])

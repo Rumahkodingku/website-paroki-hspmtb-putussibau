@@ -1,153 +1,21 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Suspense, lazy } from 'react';
+import { Head, Link } from '@inertiajs/react';
 import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FormLabel } from '@/components/form-fields';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import { edit } from '@/routes/settings';
-import type {
-    OfficeHoursWeek,
-    SettingValue,
-    SettingsGroupName,
-    SettingsMeta,
-} from '@/features/admin/pengaturan/types';
-import { OfficeHoursEditor } from '../components/office-hours-editor';
+import type { SettingsGroupName, SettingsMeta, SettingsProps } from '@/features/admin/pengaturan/types';
+import { SettingField } from '../components/setting-field';
+import { useSettingsForm } from '../hooks/use-settings-form';
 
-/*
- * Tiptap and ProseMirror together are a few hundred kilobytes, and this page is
- * mostly text inputs. Loaded eagerly they would land in the settings chunk and be
- * downloaded on every visit to a form where only one tab uses them.
- *
- * Radix unmounts an inactive tab by default, so making the import lazy is enough:
- * the editor chunk is fetched when the tab that contains it is first opened, and
- * not before. That also keeps it out of the way of the two tabs an administrator
- * actually visits.
- */
-const RichTextEditor = lazy(() =>
-    import('@/components/rich-text-editor').then((module) => ({
-        default: module.RichTextEditor,
-    })),
-);
-
-/** Keeps the tab panel from collapsing while the editor chunk is in flight. */
-function EditorFallback() {
-    return (
-        <div
-            aria-busy="true"
-            aria-label="Memuat penyunting teks"
-            className="min-h-40 rounded-md border border-input bg-muted/30"
-        />
-    );
-}
-
-/*
- * Site settings form, PRD 5.2 "Pengaturan situs dan kontak".
- *
- * The payload is built explicitly instead of relying on native form
- * serialisation, and that is not a style preference. A Radix Switch renders a
- * hidden checkbox that only submits when it is on, so a switch left off would
- * drop its key from the request entirely and the stored setting would keep its
- * previous value while the form appears to show something else. Posting the
- * whole key set every time makes the form's state and the stored state the same
- * thing.
- *
- * @see docs/DECISIONS.md D-23
- */
-
-type Props = {
-    groups: Record<string, Record<string, SettingValue>>;
-    meta: SettingsMeta;
-};
-
-/*
- * Tab order comes from the server. `groups` is built in the order the groups
- * are listed in config/site-settings.php, so the form does not carry a second
- * copy of the list that drifts when a group is added.
- */
-
-type FieldKind =
-    | 'text'
-    | 'multiline'
-    | 'richtext'
-    | 'url'
-    | 'number'
-    | 'switch'
-    | 'media'
-    | 'office-hours';
-
-function fieldKind(
-    key: string,
-    meta: SettingsMeta,
-    value: SettingValue,
-): FieldKind {
-    if (typeof value === 'boolean') {
-        return 'switch';
-    }
-    if (meta.officeHours.includes(key)) {
-        return 'office-hours';
-    }
-    if (meta.media.includes(key)) {
-        return 'media';
-    }
-    // Checked before `multiline` because a rich text field is also long, and a
-    // textarea for it would silently discard every tag on save.
-    if (meta.richtext.includes(key)) {
-        return 'richtext';
-    }
-    if (meta.multiline.includes(key)) {
-        return 'multiline';
-    }
-    if (meta.numericRanges[key]) {
-        return 'number';
-    }
-    if (meta.urls.includes(key)) {
-        return 'url';
-    }
-    return 'text';
-}
-
-/** Everything the backend accepts is a string on the wire, except office hours. */
-function toWire(value: SettingValue): string | OfficeHoursWeek {
-    if (value === null || value === undefined) {
-        return '';
-    }
-    if (typeof value === 'boolean') {
-        return value ? '1' : '0';
-    }
-    if (typeof value === 'object') {
-        return value;
-    }
-
-    return String(value);
-}
-
-export default function Settings({ groups, meta }: Props) {
-    const groupsInOrder = Object.keys(groups) as SettingsGroupName[];
-
-    const initial = Object.fromEntries(
-        groupsInOrder
-            .flatMap((group) => Object.entries(groups[group]))
-            .map(([key, value]) => [key, toWire(value)]),
-    ) as Record<string, string | OfficeHoursWeek>;
-
-    const { data, setData, submit, processing, errors, reset } = useForm<{
-        settings: Record<string, string | OfficeHoursWeek>;
-    }>({ settings: initial });
+export default function Settings({ groups, meta }: SettingsProps) {
+    const { groupsInOrder, form, fieldKind } = useSettingsForm(groups, meta);
+    const { data, setData, submit, processing, errors } = form;
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        // The Wayfinder object carries the route's method as well as its URL.
-        // Calling form.post(url) here sent a POST to a PUT route, which the
-        // server rejected; form.submit(action) is the contract that keeps the
-        // two in step.
         submit(SettingsController.update());
     };
 
@@ -155,32 +23,23 @@ export default function Settings({ groups, meta }: Props) {
         <>
             <Head title="Pengaturan Situs" />
 
-            <h1 className="sr-only">Pengaturan Situs</h1>
-
             <div className="space-y-6 p-6">
                 <Heading
-                    variant="small"
                     title="Pengaturan Situs"
                     description="Identitas paroki, kontak, media sosial, SEO dasar, beranda, dan kebijakan privasi"
                 />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <Tabs defaultValue={groupsInOrder[0]} className="gap-6">
-                        {/*
-                            The same tab bar the two other tabbed admin forms
-                            use (community-form.tsx, service-form.tsx): a line
-                            variant left-aligned under a border, rather than
-                            this page's earlier centred pill row.
-                        */}
                         <TabsList
                             variant="line"
-                            className="flex h-auto flex-wrap justify-start gap-1 border-b border-border bg-transparent p-0"
+                            className="flex h-auto flex-wrap justify-start gap-2 border-b border-border bg-transparent p-0"
                         >
                             {groupsInOrder.map((group) => (
                                 <TabsTrigger
                                     key={group}
                                     value={group}
-                                    className="w-auto flex-none justify-start px-4 py-2 data-[state=active]:text-primary-on-surface"
+                                    className="w-auto flex-none justify-start px-4 py-2 font-semibold data-[state=active]:text-primary-on-surface"
                                 >
                                     {meta.groupLabels[group] ?? group}
                                 </TabsTrigger>
@@ -193,278 +52,29 @@ export default function Settings({ groups, meta }: Props) {
                                 value={group}
                                 className="grid gap-6"
                             >
-                                {Object.entries(groups[group]).map(
-                                    ([key, value]) => {
-                                        const kind = fieldKind(
-                                            key,
-                                            meta,
-                                            value,
-                                        );
-                                        const label = meta.labels[key] ?? key;
-                                        const range = meta.numericRanges[key];
-                                        const inputId = `setting-${key}`;
-                                        const message =
-                                            errors[`settings.${key}`];
-
-                                        const set = (
-                                            next: string | OfficeHoursWeek,
-                                        ) =>
+                                {Object.entries(groups[group]).map(([key]) => (
+                                    <SettingField
+                                        key={key}
+                                        settingKey={key}
+                                        meta={meta}
+                                        value={groups[group][key]}
+                                        data={data.settings}
+                                        errors={errors}
+                                        onChange={(next) =>
                                             setData('settings', {
                                                 ...data.settings,
                                                 [key]: next,
-                                            });
-
-                                        const raw = data.settings[key];
-                                        const stringValue =
-                                            typeof raw === 'string' ? raw : '';
-
-                                        const mediaCurrentUrl =
-                                            meta.mediaUrls[key] ?? null;
-                                        const onMediaChange = (
-                                            mediaId: number | null,
-                                        ) =>
-                                            set(
-                                                mediaId === null
-                                                    ? ''
-                                                    : String(mediaId),
-                                            );
-
-                                        return (
-                                            <div
-                                                key={key}
-                                                className="grid gap-2"
-                                            >
-                                                {kind === 'switch' ? (
-                                                    <div className="flex items-center justify-between gap-4">
-                                                        <FormLabel
-                                                            htmlFor={inputId}
-                                                        >
-                                                            {label}
-                                                        </FormLabel>
-                                                        <Switch
-                                                            id={inputId}
-                                                            checked={
-                                                                data.settings[
-                                                                    key
-                                                                ] === '1'
-                                                            }
-                                                            onCheckedChange={(
-                                                                checked,
-                                                            ) =>
-                                                                set(
-                                                                    checked
-                                                                        ? '1'
-                                                                        : '0',
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                ) : kind === 'office-hours' ? (
-                                                    <>
-                                                        <Text
-                                                            as="p"
-                                                            variant="heading-sm"
-                                                            color="foreground"
-                                                        >
-                                                            {label}
-                                                        </Text>
-
-                                                        <OfficeHoursEditor
-                                                            id={inputId}
-                                                            value={
-                                                                data.settings[
-                                                                    key
-                                                                ] ?? null
-                                                            }
-                                                            errors={errors}
-                                                            onChange={set}
-                                                        />
-                                                    </>
-                                                ) : kind === 'media' ? (
-                                                    key === 'logo' ? (
-                                                        <MediaUploadField
-                                                            id={inputId}
-                                                            variant="logo"
-                                                            label={label}
-                                                            hint={
-                                                                meta.hints[key]
-                                                            }
-                                                            currentUrl={
-                                                                mediaCurrentUrl
-                                                            }
-                                                            fieldName={key}
-                                                            removable
-                                                            onMediaChange={
-                                                                onMediaChange
-                                                            }
-                                                        />
-                                                    ) : key === 'favicon' ? (
-                                                        <MediaUploadField
-                                                            id={inputId}
-                                                            variant="image"
-                                                            aspect={1}
-                                                            label={label}
-                                                            hint={
-                                                                meta.hints[key]
-                                                            }
-                                                            emptyHint="Belum ada favicon."
-                                                            currentUrl={
-                                                                mediaCurrentUrl
-                                                            }
-                                                            fieldName={key}
-                                                            removable
-                                                            onMediaChange={
-                                                                onMediaChange
-                                                            }
-                                                        />
-                                                    ) : (
-                                                        <MediaUploadField
-                                                            id={inputId}
-                                                            variant="image"
-                                                            aspect={16 / 9}
-                                                            label={label}
-                                                            hint={
-                                                                meta.hints[key]
-                                                            }
-                                                            currentUrl={
-                                                                mediaCurrentUrl
-                                                            }
-                                                            fieldName={key}
-                                                            removable
-                                                            onMediaChange={
-                                                                onMediaChange
-                                                            }
-                                                        />
-                                                    )
-                                                ) : (
-                                                    <>
-                                                        <FormLabel
-                                                            htmlFor={inputId}
-                                                        >
-                                                            {label}
-                                                        </FormLabel>
-
-                                                        {kind === 'richtext' ? (
-                                                            <Suspense
-                                                                fallback={
-                                                                    <EditorFallback />
-                                                                }
-                                                            >
-                                                                <RichTextEditor
-                                                                    id={inputId}
-                                                                    value={
-                                                                        stringValue
-                                                                    }
-                                                                    onChange={(
-                                                                        next,
-                                                                    ) =>
-                                                                        set(
-                                                                            next,
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </Suspense>
-                                                        ) : kind ===
-                                                          'multiline' ? (
-                                                            <Textarea
-                                                                id={inputId}
-                                                                placeholder={
-                                                                    label
-                                                                }
-                                                                value={
-                                                                    stringValue
-                                                                }
-                                                                onChange={(
-                                                                    event: any,
-                                                                ) =>
-                                                                    set(
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                            />
-                                                        ) : (
-                                                            <Input
-                                                                id={inputId}
-                                                                placeholder={
-                                                                    label
-                                                                }
-                                                                type={
-                                                                    kind ===
-                                                                    'number'
-                                                                        ? 'number'
-                                                                        : kind ===
-                                                                            'url'
-                                                                          ? 'url'
-                                                                          : 'text'
-                                                                }
-                                                                min={range?.[0]}
-                                                                max={range?.[1]}
-                                                                value={
-                                                                    stringValue
-                                                                }
-                                                                onChange={(
-                                                                    event: any,
-                                                                ) =>
-                                                                    set(
-                                                                        event
-                                                                            .target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                            />
-                                                        )}
-                                                    </>
-                                                )}
-
-                                                {meta.hints[key] &&
-                                                kind !== 'media' ? (
-                                                    <Text
-                                                        as="p"
-                                                        variant="body-sm"
-                                                        color="muted"
-                                                    >
-                                                        {meta.hints[key]}
-                                                    </Text>
-                                                ) : null}
-
-                                                {kind ===
-                                                'office-hours' ? null : (
-                                                    <InputError
-                                                        message={message}
-                                                    />
-                                                )}
-                                            </div>
-                                        );
-                                    },
-                                )}
+                                            })
+                                        }
+                                    />
+                                ))}
                             </TabsContent>
                         ))}
                     </Tabs>
 
-                    <Separator />
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            data-test="save-settings-button"
-                        >
-                            Simpan Pengaturan
-                        </Button>
-
-                        <Button asChild type="button" variant="outline">
-                            <Link href={edit()}>Batal</Link>
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => reset()}
-                            disabled={processing}
-                        >
-                            Kembalikan
+                    <div className="flex justify-end">
+                        <Button type="submit" disabled={processing}>
+                            Simpan pengaturan
                         </Button>
                     </div>
                 </form>
@@ -472,7 +82,3 @@ export default function Settings({ groups, meta }: Props) {
         </>
     );
 }
-
-Settings.layout = {
-    breadcrumbs: [{ title: 'Pengaturan Situs', href: edit() }],
-};

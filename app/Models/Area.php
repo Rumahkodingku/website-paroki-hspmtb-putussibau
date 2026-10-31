@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AreaType;
+use App\Support\MapsUrl;
 use Database\Factories\AreaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +41,9 @@ use Illuminate\Support\Collection;
  * @property string|null $longitude
  * @property string|null $leader_name
  * @property string|null $contact_phone
+ * @property string|null $contact_email
+ * @property string|null $contact_whatsapp
+ * @property int|null $photo_media_id
  * @property bool $show_contact
  * @property int $sort_order
  * @property bool $is_active
@@ -61,6 +65,9 @@ use Illuminate\Support\Collection;
     'longitude',
     'leader_name',
     'contact_phone',
+    'contact_email',
+    'contact_whatsapp',
+    'photo_media_id',
     'show_contact',
     'sort_order',
     'is_active',
@@ -86,6 +93,14 @@ class Area extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Area::class, 'parent_id');
+    }
+
+    /**
+     * @return BelongsTo<Media, $this>
+     */
+    public function photoMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'photo_media_id');
     }
 
     /**
@@ -126,6 +141,31 @@ class Area extends Model
                 $this->latitude,
                 $this->longitude
             );
+        }
+
+        return null;
+    }
+
+    /**
+     * An embeddable Google Maps URL, or null.
+     *
+     * Derived from maps_url (or the coordinate pair) via MapsUrl, so the
+     * public page can render the map directly without a hand-pasted embed.
+     */
+    public function mapsEmbedUrl(): ?string
+    {
+        if ($this->maps_url !== null && trim($this->maps_url) !== '') {
+            return MapsUrl::embed($this->maps_url);
+        }
+
+        if ($this->latitude !== null && $this->longitude !== null) {
+            $url = sprintf(
+                'https://www.google.com/maps/search/?api=1&query=%s,%s',
+                $this->latitude,
+                $this->longitude
+            );
+
+            return MapsUrl::embed($url);
         }
 
         return null;

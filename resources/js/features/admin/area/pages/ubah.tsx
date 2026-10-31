@@ -39,6 +39,9 @@ export default function Edit({
         maps_url: area.maps_url ?? '',
         leader_name: area.leader_name ?? '',
         contact_phone: area.contact_phone ?? '',
+        contact_email: area.contact_email ?? '',
+        contact_whatsapp: area.contact_whatsapp ?? '',
+        photo_media_id: area.photo_media_id === null ? '' : String(area.photo_media_id),
         show_contact: area.show_contact,
         sort_order: String(area.sort_order),
         is_active: area.is_active,
@@ -64,6 +67,7 @@ export default function Edit({
                     hints={hints}
                     areaTypes={areaTypes}
                     parents={parents}
+                    photoUrl={area.photo_url}
                     submitLabel="Simpan perubahan"
                     onSubmit={submit}
                     onCancel={() => router.visit(areasIndex())}

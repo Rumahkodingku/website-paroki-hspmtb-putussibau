@@ -36,7 +36,11 @@ class PublicAreaDetailResource extends JsonResource
              * personal data, but it is not needed by the page either.
              */
             'address' => $this->address,
+            'contact_email' => $this->show_contact ? $this->contact_email : null,
+            'contact_whatsapp' => $this->show_contact ? $this->contact_whatsapp : null,
+            'photoUrl' => $this->photoMedia?->url('medium'),
             'mapsUrl' => $this->mapsUrl(),
+            'mapsEmbedUrl' => $this->mapsEmbedUrl(),
             'parent' => $this->whenLoaded('parent', fn (): ?array => $this->parent === null ? null : [
                 'id' => $this->parent->getKey(),
                 'name' => $this->parent->name,

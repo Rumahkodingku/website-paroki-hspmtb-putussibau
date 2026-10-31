@@ -80,7 +80,6 @@ return [
             'social_instagram',
             'social_youtube',
             'social_whatsapp_channel',
-            'website',
         ],
         'seo' => [
             'seo_default_title',
@@ -187,7 +186,6 @@ return [
     'rules' => [
         'privacy_policy_content' => 'nullable|string|max:50000',
         'terms_and_conditions_content' => 'nullable|string|max:50000',
-        'website' => 'nullable|url|max:255',
         'home_hero_image_alt' => 'nullable|string|max:255|required_with:settings.home_hero_image',
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',

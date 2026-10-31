@@ -107,22 +107,19 @@ test('saving writes every key and files it under the right group', function () {
         'contact_email' => 'secretariat@example.test',
         'home_news_limit' => 5,
         'home_show_gallery' => false,
-        'website' => 'https://paroki.example.test',
     ]);
 
     $rows = SiteSetting::query()->pluck('group', 'key');
 
     expect($rows['parish_name'])->toBe('identitas')
         ->and($rows['contact_email'])->toBe('kontak')
-        ->and($rows['home_news_limit'])->toBe('beranda')
-        ->and($rows['website'])->toBe('sosial');
+        ->and($rows['home_news_limit'])->toBe('beranda');
 
     $service = settingsService();
 
     expect($service->get('parish_name'))->toBe('HSPMTB Putussibau')
         ->and($service->get('home_news_limit'))->toBe(5)
-        ->and($service->get('home_show_gallery'))->toBeFalse()
-        ->and($service->get('website'))->toBe('https://paroki.example.test');
+        ->and($service->get('home_show_gallery'))->toBeFalse();
 });
 
 test('booleans are stored as one and zero in the longtext column', function () {
@@ -319,7 +316,7 @@ test('the configured key list matches PRD Lampiran B', function () {
     //
     // Phase 9A added four homepage hero keys (D-70): title, description, image,
     // and image alt. They are an approved divergence from PRD Lampiran B.
-    expect($keys)->toHaveCount(34)
+    expect($keys)->toHaveCount(33)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
@@ -330,7 +327,6 @@ test('the configured key list matches PRD Lampiran B', function () {
             'privacy_policy_content',
             'terms_and_conditions_content',
             'logo_alt',
-            'website',
         )
         ->and($keys)->not->toContain('maps_embed_url');
 });
@@ -561,18 +557,6 @@ test('home hero alt can be left empty when no image is selected', function () {
         ->assertSessionHasNoErrors();
 });
 
-test('the social group still holds the parish website', function () {
-    expect(config('site-settings.groups.sosial'))->toBe([
-        'social_facebook',
-        'social_instagram',
-        'social_youtube',
-        'social_whatsapp_channel',
-        'website',
-    ])
-        ->and(config('site-settings.types.logo'))->toBe('media')
-        ->and(config('site-settings.types.favicon'))->toBe('media');
-});
-
 test('logo rejects a media id that has not finished processing', function () {
     $media = Media::factory()->create(); // pending
 
@@ -617,13 +601,10 @@ test('optional settings may all be left empty', function () {
     $this->actingAs(superAdmin())
         ->put(route('settings.update'), [
             'settings' => [
-                'website' => '',
                 'logo' => '',
                 'logo_alt' => '',
             ],
         ])->assertSessionHasNoErrors();
-
-    expect(settingsService()->get('website'))->toBeNull();
 });
 
 /*

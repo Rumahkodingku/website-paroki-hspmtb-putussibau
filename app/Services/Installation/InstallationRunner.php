@@ -20,6 +20,7 @@ final class InstallationRunner
         'parish_short_name',
         'tagline',
         'short_description',
+        'motto_verse',
         'patron_saint',
     ];
 
