@@ -2,10 +2,8 @@ import { Suspense, lazy } from 'react';
 import InputError from '@/components/input-error';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { Text } from '@/components/text';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormLabel } from '@/components/form-fields';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { OfficeHoursEditor } from './office-hours-editor';
@@ -37,7 +35,14 @@ type Props = {
     onChange: (next: SettingsFormValue) => void;
 };
 
-export function SettingField({ settingKey, meta, value, data, errors, onChange }: Props) {
+export function SettingField({
+    settingKey,
+    meta,
+    value,
+    data,
+    errors,
+    onChange,
+}: Props) {
     const kind = fieldKind(settingKey, meta, value);
     const label = meta.labels[settingKey] ?? settingKey;
     const inputId = `setting-${settingKey}`;
@@ -55,9 +60,7 @@ export function SettingField({ settingKey, meta, value, data, errors, onChange }
                 <Switch
                     id={inputId}
                     checked={data[settingKey] === '1'}
-                    onCheckedChange={(checked) =>
-                        onChange(checked ? '1' : '0')
-                    }
+                    onCheckedChange={(checked) => onChange(checked ? '1' : '0')}
                 />
             </div>
         );
@@ -168,7 +171,9 @@ export function SettingField({ settingKey, meta, value, data, errors, onChange }
                     onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
                         onChange(event.target.value)
                     }
-                    maxLength={meta.numericRanges[settingKey] ? undefined : 2048}
+                    maxLength={
+                        meta.numericRanges[settingKey] ? undefined : 2048
+                    }
                     className="min-h-24 resize-y border-border shadow-none focus-visible:border-primary"
                 />
                 <InputError message={message} />

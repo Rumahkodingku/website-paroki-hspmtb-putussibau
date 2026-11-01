@@ -103,7 +103,6 @@ it('names every placeholder route in the route table', function () {
         'dokumen.index',
         'dokumen.unduh',
         'kontak.index',
-        'design-system.index',
     ];
 
     foreach ($expected as $name) {

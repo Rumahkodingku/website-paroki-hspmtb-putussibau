@@ -24,13 +24,15 @@ use Illuminate\Support\Carbon;
  * @property int|null $cover_media_id
  * @property string|null $cover_alt
  * @property string|null $video_url
+ * @property string|null $video_title
+ * @property string|null $video_description
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Media|null $coverMedia
  *
  * @see docs/DECISIONS.md D-78
  */
-#[Fillable(['description', 'established_year', 'cover_media_id', 'cover_alt', 'video_url'])]
+#[Fillable(['description', 'established_year', 'cover_media_id', 'cover_alt', 'video_url', 'video_title', 'video_description'])]
 class ParishProfile extends Model
 {
     /** @use HasFactory<ParishProfileFactory> */

@@ -93,17 +93,15 @@ export default function Profil({ profile }: Props) {
                         label="Foto sampul paroki"
                         className="relative z-10 -mt-10 pt-0 pb-8 sm:-mt-14 sm:pb-10"
                     >
-                        <figure className="overflow-hidden rounded-2xl border-4 border-background bg-canvas-subtle shadow-md ring-1 ring-border/50 sm:rounded-3xl">
-                            <div className="aspect-16/8 sm:aspect-16/7 lg:aspect-16/6">
-                                <Image
-                                    src={profile.cover_url!}
-                                    alt={profile.cover_alt ?? ''}
-                                    fetchPriority="high"
-                                    fit="cover"
-                                    objectPosition="center"
-                                    className="size-full"
-                                />
-                            </div>
+                        <figure className="overflow-hidden sm:rounded-3xl">
+                            <Image
+                                src={profile.cover_url!}
+                                alt={profile.cover_alt ?? ''}
+                                fetchPriority="high"
+                                fit="cover"
+                                objectPosition="center"
+                                className="size-full"
+                            />
                         </figure>
                     </PublicSection>
                 )}
@@ -200,14 +198,23 @@ export default function Profil({ profile }: Props) {
                         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-12">
                             <SectionHeading
                                 eyebrow="Video Dokumentasi"
-                                title="Proses Pembangunan Gereja"
-                                description="Saksikan dokumentasi pembangunan gereja sebagai bagian dari perjalanan pelayanan umat di wilayah paroki."
+                                title={
+                                    profile.video_title ??
+                                    'Proses Pembangunan Gereja'
+                                }
+                                description={
+                                    profile.video_description ??
+                                    'Saksikan dokumentasi pembangunan gereja sebagai bagian dari perjalanan pelayanan umat di wilayah paroki.'
+                                }
                             />
 
                             <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-background shadow-sm">
                                 <iframe
                                     src={profile.video_embed_url!}
-                                    title="Video dokumentasi pembangunan gereja"
+                                    title={
+                                        profile.video_title ??
+                                        'Video dokumentasi pembangunan gereja'
+                                    }
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                     allowFullScreen
                                     loading="lazy"

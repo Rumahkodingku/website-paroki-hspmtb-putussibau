@@ -133,6 +133,7 @@ class ImageProcessor
     {
         $image = match ($mimeType) {
             'image/png' => @imagecreatefrompng($absolutePath),
+            'image/webp' => @imagecreatefromwebp($absolutePath),
             default => @imagecreatefromjpeg($absolutePath),
         };
 

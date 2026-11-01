@@ -5763,3 +5763,36 @@ Tanpa file status, request diteruskan normal. Setelah `completed`, situs
 berjalan normal dan tidak ada redirect.
 
 @see `docs/plan-implementation/plan-installation-redirect.md`
+
+## D-97 — Agenda multi-hari tampil sampai `end_at`
+
+`Event::scopeUpcomingFromToday()` menampilkan kegiatan selama `end_at` belum
+lewat; kegiatan tanpa `end_at` tetap mengikuti awal hari di `Asia/Pontianak`.
+Daftar bulanan memakai irisan rentang, sehingga kegiatan lintas bulan muncul di
+setiap bulan yang dilewatinya. Konsekuensinya, kegiatan satu hari dengan
+`end_at` yang sudah lewat hilang lebih cepat dari daftar.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.2 K1
+
+## D-98 — Notice bertarget tampil saat targetnya ada di halaman
+
+Notice dengan `mass_schedule_id` atau `special_mass_id` ditampilkan bila jadwal
+atau misa khusus itu ada di daftar yang sedang tampil setelah filter lokasi/hari.
+Target yang terfilter, nonaktif, atau terhapus tetap tidak menampilkan notice.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.2 K2
+
+## D-99 — `/design-system` dihapus
+
+Route dan halaman referensi dihapus setelah shell publik stabil, sesuai D-31.
+Komponen yang dipamerkan tetap dipakai halaman lain. Wayfinder menghapus modul
+route/action yang dihasilkan.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.1
+
+## D-100 — Unduhan dokumen dibatasi 30 request per menit
+
+Route `dokumen.unduh` memakai `throttle:30,1`. `download_count` tetap naik pada
+setiap unduhan sesuai PRD DL-06/AC-DL-2; tidak ada dedup per sesi.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.3

@@ -121,6 +121,9 @@ class PublicEventController extends Controller
      */
     private function monthly(Carbon $month, ?EventCategory $category): array
     {
+        $startOfMonth = $month->copy()->startOfMonth()->utc();
+        $endOfMonth = $month->copy()->endOfMonth()->utc();
+
         return array_values(PublicEventResource::collection(
             Event::query()
                 ->published()
@@ -130,10 +133,16 @@ class PublicEventController extends Controller
                 ->with(['category', 'location'])
                 ->when($category !== null, fn (Builder $query) => $query
                     ->where('event_category_id', $category->getKey()))
-                ->whereBetween('start_at', [
-                    $month->copy()->startOfMonth()->utc(),
-                    $month->copy()->endOfMonth()->utc(),
-                ])
+                // A multi-day activity belongs to every month it overlaps, not
+                // only the month it starts in.
+                ->where('start_at', '<=', $endOfMonth)
+                ->where(function (Builder $query) use ($startOfMonth): void {
+                    $query->where(function (Builder $query) use ($startOfMonth): void {
+                        $query->whereNull('end_at')->where('start_at', '>=', $startOfMonth);
+                    })->orWhere(function (Builder $query) use ($startOfMonth): void {
+                        $query->whereNotNull('end_at')->where('end_at', '>=', $startOfMonth);
+                    });
+                })
                 ->orderBy('start_at')
                 ->orderBy('id')
                 ->get()

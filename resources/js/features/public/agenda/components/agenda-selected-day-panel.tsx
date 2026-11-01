@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Image from '@/components/image';
 import { Text } from '@/components/text';
+import { formatWibClockValue, formatWibDate } from '@/lib/datetime';
 import { show as eventShow } from '@/routes/agenda';
 import type { PublicEvent } from '../types';
 
@@ -18,22 +19,16 @@ export function AgendaSelectedDayPanel({
     displayTimezone: string;
     events: PublicEvent[];
 }) {
-    const selectedDateLabel = new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: displayTimezone,
-    }).format(new Date(`${selectedDate}T12:00:00Z`));
+    const selectedDateLabel = formatWibDate(
+        `${selectedDate}T12:00:00Z`,
+        displayTimezone,
+    );
 
-    const formatEventTime = (value: string) =>
-        new Intl.DateTimeFormat('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: displayTimezone,
-        })
-            .format(new Date(value))
-            .replace('.', ':') + ' WIB';
+    const formatEventTime = (value: string) => {
+        const time = formatWibClockValue(value, displayTimezone);
+
+        return time === '' ? '' : `${time.replace('.', ':')} WIB`;
+    };
 
     const formatEventRange = (event: PublicEvent) => {
         if (event.is_all_day) {

@@ -40,7 +40,7 @@ export default function Wilayah({ area }: Props) {
             <PublicSection>
                 <div className="space-y-10">
                     {area?.content ? (
-                        <RichText html={area.content} className="max-w-3xl" />
+                        <RichText html={area.content} className="max-w-7xl" />
                     ) : (
                         <Text
                             as="p"
@@ -62,29 +62,12 @@ export default function Wilayah({ area }: Props) {
                         />
                     ) : null}
 
-                    {area?.map_url ? (
-                        <a
-                            href={area.map_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-primary-on-surface hover:underline"
-                        >
-                            <Text as="span" variant="label">
-                                Buka peta
-                            </Text>
-                            <ExternalLink
-                                className="size-4"
-                                aria-hidden="true"
-                            />
-                        </a>
-                    ) : null}
-
                     <div className="flex flex-col items-start gap-3 border-t border-border pt-6">
                         <Text as="p" variant="body" color="muted">
                             Daftar rinci stasi, wilayah, dan lingkungan beserta
                             pengurusnya tersedia pada halaman berikut.
                         </Text>
-                        <Button asChild>
+                        <Button asChild className="text-sm" size="lg">
                             <Link href={areaIndex()}>
                                 Lihat Area
                                 <ExternalLink

@@ -1,11 +1,15 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import Image from '@/components/image';
 import { ArrowRight, Images } from 'lucide-react';
 import { Text } from '@/components/text';
+import { formatWibLongDate } from '@/lib/datetime';
 import { show as galleryShow } from '@/routes/galeri';
+import type { SharedProps } from '@/types';
 import type { PublicGalleryCard as PublicGalleryCardData } from '../types';
 
 export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
+    const { displayTimezone } = usePage<SharedProps>().props;
+
     return (
         <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {album.cover_url ? (
@@ -30,11 +34,7 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
 
                 {album.event_date ? (
                     <Text as="p" variant="body-sm" color="muted">
-                        {new Intl.DateTimeFormat('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                        }).format(new Date(album.event_date))}
+                        {formatWibLongDate(album.event_date, displayTimezone)}
                     </Text>
                 ) : null}
 

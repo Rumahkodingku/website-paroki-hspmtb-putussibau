@@ -1,5 +1,4 @@
 import { Head, router } from '@inertiajs/react';
-import Heading from '@/components/heading';
 import { dashboard } from '@/routes';
 import { update as updateServiceArea } from '@/routes/parish-service-area';
 import {
@@ -7,6 +6,7 @@ import {
     serviceAreaToFormData,
 } from '@/features/admin/profil/components/service-area-form';
 import type { ParishServiceAreaRow } from '@/features/admin/profil/types';
+import { ListHeader } from '@/components/list-parts';
 
 type Props = {
     area: ParishServiceAreaRow;
@@ -20,10 +20,9 @@ export default function Wilayah({ area, labels, hints }: Props) {
             <Head title="Wilayah Pelayanan" />
 
             <div className="p-6">
-                <Heading
+                <ListHeader
                     title="Wilayah Pelayanan"
                     description="Narasi cakupan wilayah pelayanan paroki yang tampil pada halaman /profil/wilayah."
-                    variant="default"
                 />
 
                 <ServiceAreaForm

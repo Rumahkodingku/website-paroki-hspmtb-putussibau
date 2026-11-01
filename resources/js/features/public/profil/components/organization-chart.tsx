@@ -1,6 +1,6 @@
-import Image from '@/components/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Text } from '@/components/text';
-import { Church, FileText, UserRound, Users } from 'lucide-react';
+import { Church, UserRound, Users } from 'lucide-react';
 import type { PublicBoardMember } from '../types';
 
 function sortMembers(members: PublicBoardMember[]): PublicBoardMember[] {
@@ -15,34 +15,28 @@ function MemberAvatar({
     featured?: boolean;
 }) {
     return (
-        <div
+        <Avatar
             className={[
-                'relative shrink-0 overflow-hidden rounded-full bg-muted',
+                'shrink-0',
                 featured ? 'size-24 sm:size-28' : 'size-14 sm:size-16',
             ].join(' ')}
         >
             {member.photo ? (
-                <Image
+                <AvatarImage
                     src={member.photo}
                     alt={member.photo_alt ?? `Foto ${member.name}`}
                     loading="lazy"
                     decoding="async"
-                    fit="cover"
-                    objectPosition="top"
-                    className="size-full"
+                    className="aspect-square size-full object-cover object-top"
                 />
-            ) : (
-                <div
-                    aria-hidden="true"
-                    className="flex size-full items-center justify-center text-muted-foreground"
-                >
-                    <UserRound
-                        className={featured ? 'size-10' : 'size-6'}
-                        strokeWidth={1.5}
-                    />
-                </div>
-            )}
-        </div>
+            ) : null}
+            <AvatarFallback className="flex size-full items-center justify-center text-muted-foreground">
+                <UserRound
+                    className={featured ? 'size-10' : 'size-6'}
+                    strokeWidth={1.5}
+                />
+            </AvatarFallback>
+        </Avatar>
     );
 }
 
@@ -86,11 +80,6 @@ function MemberDescription({
 
     return (
         <div className="flex items-start gap-2">
-            <FileText
-                className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                aria-hidden="true"
-            />
-
             <Text as="p" variant="body-sm" color="muted" className="min-w-0">
                 {description}
             </Text>

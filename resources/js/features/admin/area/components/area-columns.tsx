@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import type { AreaRow } from '../types';
 
 export function areaColumns(
-    nameById: Map<number, string>,
     actions: RowActions<AreaRow>,
 ): DataColumn<AreaRow>[] {
     return [
@@ -52,7 +51,7 @@ export function areaColumns(
             cell: ({ row }) =>
                 row.original.parent_id === null
                     ? '—'
-                    : (nameById.get(row.original.parent_id) ?? '—'),
+                    : (row.original.parent?.name ?? '—'),
         },
         {
             id: 'leader_name',

@@ -27,8 +27,8 @@ it('seeds the seven services active with full content', function () {
     $this->seed(ServiceCategorySeeder::class);
     $this->seed(ServiceSeeder::class);
 
-    expect(Service::count())->toBe(7)
-        ->and(Service::query()->where('is_active', true)->count())->toBe(7);
+    expect(Service::count())->toBe(8)
+        ->and(Service::query()->where('is_active', true)->count())->toBe(8);
 
     foreach (Service::query()->get() as $service) {
         expect($service->requirements()->count())->toBeGreaterThan(0)
@@ -54,7 +54,7 @@ it('does not duplicate records when run twice', function () {
     $this->seed(ServiceCategorySeeder::class);
     $this->seed(ServiceSeeder::class);
 
-    expect(Service::count())->toBe(7)
+    expect(Service::count())->toBe(8)
         ->and(ServiceCategory::count())->toBe(3);
 });
 

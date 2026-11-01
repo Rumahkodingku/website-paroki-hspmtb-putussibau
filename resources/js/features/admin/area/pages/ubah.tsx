@@ -41,7 +41,8 @@ export default function Edit({
         contact_phone: area.contact_phone ?? '',
         contact_email: area.contact_email ?? '',
         contact_whatsapp: area.contact_whatsapp ?? '',
-        photo_media_id: area.photo_media_id === null ? '' : String(area.photo_media_id),
+        photo_media_id:
+            area.photo_media_id === null ? '' : String(area.photo_media_id),
         show_contact: area.show_contact,
         sort_order: String(area.sort_order),
         is_active: area.is_active,

@@ -66,6 +66,36 @@ it('uses CRLF on every line', function () {
         ->and(preg_match('/(?<!\r)\n/', $ics))->toBe(0);
 });
 
+it('folds a long line at 75 octets', function () {
+    $event = Event::factory()->create([
+        'title' => 'Retret',
+        'description' => str_repeat('Doa bersama umat paroki. ', 20),
+    ]);
+
+    $ics = (new IcsCalendarBuilder)->calendar($event);
+
+    foreach (explode("\r\n", $ics) as $line) {
+        expect(strlen($line))->toBeLessThanOrEqual(75);
+    }
+
+    expect($ics)->toContain('Retret')
+        ->and(mb_check_encoding($ics, 'UTF-8'))->toBeTrue();
+});
+
+it('does not split a multibyte character when folding', function () {
+    $event = Event::factory()->create([
+        'title' => str_repeat('Misa Syukur — ', 12),
+    ]);
+
+    $ics = (new IcsCalendarBuilder)->calendar($event);
+
+    expect(mb_check_encoding($ics, 'UTF-8'))->toBeTrue();
+
+    foreach (explode("\r\n", $ics) as $line) {
+        expect(strlen($line))->toBeLessThanOrEqual(75);
+    }
+});
+
 it('terminates the last line', function () {
     $ics = (new IcsCalendarBuilder)->calendar(Event::factory()->create());
 

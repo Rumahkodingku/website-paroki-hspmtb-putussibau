@@ -1,17 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
-import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
-import { edit } from '@/routes/settings';
-import type { SettingsGroupName, SettingsMeta, SettingsProps } from '@/features/admin/pengaturan/types';
+import type { SettingsProps } from '@/features/admin/pengaturan/types';
 import { SettingField } from '../components/setting-field';
 import { useSettingsForm } from '../hooks/use-settings-form';
 
 export default function Settings({ groups, meta }: SettingsProps) {
-    const { groupsInOrder, form, fieldKind } = useSettingsForm(groups, meta);
+    const { groupsInOrder, form } = useSettingsForm(groups);
     const { data, setData, submit, processing, errors } = form;
 
     const handleSubmit = (event: React.FormEvent) => {

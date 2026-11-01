@@ -48,6 +48,8 @@ it('renders the profile summary with its editorial content', function () {
         'cover_media_id' => $media->getKey(),
         'cover_alt' => 'Sampul paroki',
         'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'video_title' => 'Judul video paroki',
+        'video_description' => 'Deskripsi singkat video paroki.',
     ]);
 
     $this->get('/profil')
@@ -57,7 +59,9 @@ it('renders the profile summary with its editorial content', function () {
             ->where('profile.description', '<p>Profil paroki.</p>')
             ->where('profile.established_year', 1956)
             ->where('profile.cover_alt', 'Sampul paroki')
-            ->where('profile.video_embed_url', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'));
+            ->where('profile.video_embed_url', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+            ->where('profile.video_title', 'Judul video paroki')
+            ->where('profile.video_description', 'Deskripsi singkat video paroki.'));
 });
 
 it('renders the summary without a profile row', function () {
@@ -68,7 +72,9 @@ it('renders the summary without a profile row', function () {
             ->where('profile.description', null)
             ->where('profile.established_year', null)
             ->where('profile.cover_url', null)
-            ->where('profile.video_embed_url', null));
+            ->where('profile.video_embed_url', null)
+            ->where('profile.video_title', null)
+            ->where('profile.video_description', null));
 });
 
 it('shows only published history items', function () {

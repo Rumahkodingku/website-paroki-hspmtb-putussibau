@@ -126,7 +126,6 @@ Use the following priority when information conflicts:
 - Head and OG tags are defined in both `resources/views/app.blade.php` and `resources/js/components/seo.tsx`, connected through `data-inertia`. Add a new `head-key` in both places when required.
 - Local `upload_max_filesize` is 2M, while the PRD specifies 3 MB. Adjust the relevant local `php.ini` setting when testing media uploads that require the larger limit.
 - `config()` values are cached in tests; `composer test` clears configuration first.
-- `npm audit` critical findings are pre-existing (`shell-quote` via `concurrently`). Do not attempt to resolve them with `--force` without investigating the dependency impact and choosing an approved fix.
 
 ## Architecture Pointers
 

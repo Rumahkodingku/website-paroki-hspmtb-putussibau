@@ -50,7 +50,7 @@ export function fieldKind(
     return 'text';
 }
 
-export function useSettingsForm(groups: SettingsGroups, meta: SettingsMeta) {
+export function useSettingsForm(groups: SettingsGroups) {
     const groupsInOrder = Object.keys(groups) as (keyof SettingsGroups)[];
 
     const initial = Object.fromEntries(
@@ -59,9 +59,9 @@ export function useSettingsForm(groups: SettingsGroups, meta: SettingsMeta) {
             .map(([key, value]) => [key, toWire(value)]),
     ) as Record<string, string | OfficeHoursWeek>;
 
-    const form = useForm<{ settings: Record<string, string | OfficeHoursWeek> }>(
-        { settings: initial },
-    );
+    const form = useForm<{
+        settings: Record<string, string | OfficeHoursWeek>;
+    }>({ settings: initial });
 
     return { groupsInOrder, form, fieldKind };
 }

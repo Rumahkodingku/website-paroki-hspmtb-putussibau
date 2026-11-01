@@ -6,6 +6,7 @@ import Image from '@/components/image';
 import { Text } from '@/components/text';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { formatWibLongDate } from '@/lib/datetime';
 import { index as berita } from '@/routes/berita';
 
 type HomeNewsArticle = {
@@ -30,26 +31,6 @@ type HomeNewsSectionProps = {
     news: HomeNewsArticle[];
     displayTimezone: string;
 };
-
-function formatPublishedDate(
-    date: string | null | undefined,
-    timeZone: string,
-) {
-    if (!date) return null;
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        return null;
-    }
-
-    return new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone,
-    }).format(parsedDate);
-}
 
 function getArticleData(article: HomeNewsArticle) {
     return {
@@ -116,7 +97,7 @@ function ArticleDate({
 }) {
     if (!date) return null;
 
-    const formattedDate = formatPublishedDate(date, displayTimezone);
+    const formattedDate = formatWibLongDate(date, displayTimezone);
 
     if (!formattedDate) return null;
 

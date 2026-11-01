@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Actions\Audit\RecordAuditEventAction;
 use App\Models\User;
-use BackedEnum;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -34,12 +32,12 @@ class AuditLogger
         $attributes = $subject->getAttributes();
         $result = [];
 
-        foreach ($this->allowedFields($module) as $field) {
+        foreach ($this->recorder->allowedFields($module) as $field) {
             if (! array_key_exists($field, $attributes)) {
                 continue;
             }
 
-            $result[$field] = $this->normalize($subject->getAttribute($field));
+            $result[$field] = $this->recorder->normalize($subject->getAttribute($field));
         }
 
         return $result;
@@ -411,54 +409,5 @@ class AuditLogger
         }
 
         return null;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function allowedFields(string $module): array
-    {
-        if ($module === 'settings') {
-            $groups = (array) config('site-settings.groups', []);
-
-            if ($groups === []) {
-                return [];
-            }
-
-            /** @var array<string, list<string>> $groups */
-            return array_values(array_unique(array_merge(...array_values($groups))));
-        }
-
-        /** @var list<string> $fields */
-        $fields = array_values((array) config("audit.fields.{$module}", []));
-
-        return $fields;
-    }
-
-    private function normalize(mixed $value): mixed
-    {
-        if ($value instanceof BackedEnum) {
-            return $value->value;
-        }
-
-        if ($value instanceof DateTimeInterface) {
-            return Carbon::instance($value)->toIso8601String();
-        }
-
-        if (is_array($value)) {
-            $result = [];
-
-            foreach ($value as $key => $item) {
-                $result[$key] = $this->normalize($item);
-            }
-
-            return $result;
-        }
-
-        if (is_object($value)) {
-            return null;
-        }
-
-        return $value;
     }
 }

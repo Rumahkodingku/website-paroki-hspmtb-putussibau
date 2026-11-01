@@ -47,6 +47,7 @@ class PublicAreaController extends Controller
     {
         $area->load([
             'parent',
+            'photoMedia.variants',
             'children' => fn ($query) => $query->active()->ordered(),
         ]);
 

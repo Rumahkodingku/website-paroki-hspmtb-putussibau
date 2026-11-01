@@ -1,34 +1,20 @@
+import { formatWibClock, formatWibDayParts } from '@/lib/datetime';
 import type { UpcomingEvent } from './types';
 
 export function getEventDate(
     value: string,
     displayTimezone: string,
 ): { day: string; month: string; weekday: string } {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
+    if (Number.isNaN(new Date(value).getTime())) {
         return { day: '--', month: '---', weekday: '' };
     }
 
-    const options = { timeZone: displayTimezone };
+    const parts = formatWibDayParts(value, displayTimezone);
 
     return {
-        day: new Intl.DateTimeFormat('id-ID', {
-            ...options,
-            day: 'numeric',
-        }).format(date),
-        month: new Intl.DateTimeFormat('id-ID', {
-            ...options,
-            month: 'short',
-        })
-            .format(date)
-            .replace('.', ''),
-        weekday: new Intl.DateTimeFormat('id-ID', {
-            ...options,
-            weekday: 'short',
-        })
-            .format(date)
-            .replace('.', ''),
+        day: parts.day,
+        month: parts.month,
+        weekday: parts.weekday,
     };
 }
 
@@ -40,12 +26,5 @@ export function getEventTime(
         return 'Sepanjang hari';
     }
 
-    return (
-        new Intl.DateTimeFormat('id-ID', {
-            timeZone: displayTimezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            hourCycle: 'h23',
-        }).format(new Date(event.start_at)) + ' WIB'
-    );
+    return formatWibClock(event.start_at, displayTimezone);
 }

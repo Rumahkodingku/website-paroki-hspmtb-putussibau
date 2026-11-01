@@ -65,6 +65,8 @@ class IcsCalendarBuilder
 
         $lines[] = 'END:VCALENDAR';
 
+        $lines = array_map($this->fold(...), $lines);
+
         // The trailing CRLF is part of the format, not decoration: a file whose
         // last line has no terminator is rejected by some parsers.
         return implode("\r\n", $lines)."\r\n";
@@ -179,6 +181,37 @@ class IcsCalendarBuilder
     private function displayTimezone(): string
     {
         return (string) config('app.display_timezone');
+    }
+
+    /**
+     * Fold a content line at 75 octets (RFC 5545 section 3.1).
+     *
+     * A continuation line starts with one space, so its payload is 74 octets.
+     * mb_strcut keeps a multibyte character whole; the offset advances by the
+     * bytes actually taken.
+     */
+    private function fold(string $line): string
+    {
+        if (strlen($line) <= 75) {
+            return $line;
+        }
+
+        $folded = '';
+        $offset = 0;
+        $length = strlen($line);
+
+        while ($offset < $length) {
+            $chunk = mb_strcut($line, $offset, $folded === '' ? 75 : 74, 'UTF-8');
+
+            if ($chunk === '') {
+                break;
+            }
+
+            $offset += strlen($chunk);
+            $folded .= ($folded === '' ? '' : "\r\n ").$chunk;
+        }
+
+        return $folded;
     }
 
     /**

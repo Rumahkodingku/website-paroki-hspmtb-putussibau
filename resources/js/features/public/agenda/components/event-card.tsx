@@ -12,7 +12,12 @@ import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatWibClock, formatWibDate } from '@/lib/datetime';
+import {
+    formatWibClock,
+    formatWibDate,
+    formatWibDayParts,
+    formatWibWeekdayYear,
+} from '@/lib/datetime';
 import { show as eventShow } from '@/routes/agenda';
 import type { PublicEvent } from '../types';
 
@@ -27,23 +32,10 @@ export function EventCard({
 }) {
     const isNotHappening = event.status !== 'scheduled';
 
-    const dateParts = new Intl.DateTimeFormat('id-ID', {
-        timeZone: displayTimezone,
-        day: '2-digit',
-        month: 'short',
-    }).formatToParts(new Date(event.start_at));
-
-    const day = dateParts.find((part) => part.type === 'day')?.value;
-    const month = dateParts
-        .find((part) => part.type === 'month')
-        ?.value.replace('.', '')
-        .toUpperCase();
-
-    const weekdayYear = new Intl.DateTimeFormat('id-ID', {
-        timeZone: displayTimezone,
-        weekday: 'long',
-        year: 'numeric',
-    }).format(new Date(event.start_at));
+    const dateParts = formatWibDayParts(event.start_at, displayTimezone);
+    const day = dateParts.day;
+    const month = dateParts.month.toUpperCase();
+    const weekdayYear = formatWibWeekdayYear(event.start_at, displayTimezone);
 
     return (
         <article

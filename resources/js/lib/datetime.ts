@@ -91,11 +91,15 @@ export function formatMassTime(date: string, timeZone?: string | null): string {
 }
 
 /**
- * Format an ISO instant as "HH.MM WIB", matching the clock portion of
- * `formatWibDateTime`. Used by the special-mass card so it no longer has to
- * split a formatted string.
+ * Format an ISO instant as "HH.MM" without a suffix.
+ *
+ * Callers that join two clocks ("07.30–09.00") need the value without one WIB
+ * per side.
  */
-export function formatWibClock(iso: string, timeZone?: string | null): string {
+export function formatWibClockValue(
+    iso: string,
+    timeZone?: string | null,
+): string {
     const date = new Date(iso);
 
     if (Number.isNaN(date.getTime())) {
@@ -112,7 +116,18 @@ export function formatWibClock(iso: string, timeZone?: string | null): string {
     const hour = parts.find((part) => part.type === 'hour')?.value ?? '00';
     const minute = parts.find((part) => part.type === 'minute')?.value ?? '00';
 
-    return `${hour}.${minute} WIB`;
+    return `${hour}.${minute}`;
+}
+
+/**
+ * Format an ISO instant as "HH.MM WIB", matching the clock portion of
+ * `formatWibDateTime`. Used by the special-mass card so it no longer has to
+ * split a formatted string.
+ */
+export function formatWibClock(iso: string, timeZone?: string | null): string {
+    const value = formatWibClockValue(iso, timeZone);
+
+    return value === '' ? '' : `${value} WIB`;
 }
 
 /**
@@ -172,6 +187,105 @@ export function formatWibDateTime(
     const minute = parts.find((part) => part.type === 'minute')?.value ?? '00';
 
     return `${formatWibDate(iso, timeZone)} · ${hour}.${minute} WIB`;
+}
+
+export type WibDayParts = {
+    day: string;
+    month: string;
+    weekday: string;
+};
+
+/**
+ * Short day, month and weekday for a badge ("14", "Nov", "Sab").
+ *
+ * One implementation for the five cards that each used to build these three
+ * parts themselves; the visible strings are unchanged.
+ */
+export function formatWibDayParts(
+    iso: string,
+    timeZone?: string | null,
+): WibDayParts {
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) {
+        return { day: '', month: '', weekday: '' };
+    }
+
+    const parts = new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        day: '2-digit',
+        month: 'short',
+        weekday: 'short',
+    }).formatToParts(date);
+
+    const value = (type: string): string =>
+        parts.find((part) => part.type === type)?.value.replace('.', '') ?? '';
+
+    return {
+        day: value('day'),
+        month: value('month'),
+        weekday: value('weekday'),
+    };
+}
+
+/**
+ * "Sabtu" — the long weekday on its own.
+ */
+export function formatWibWeekday(
+    iso: string,
+    timeZone?: string | null,
+): string {
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        weekday: 'long',
+    }).format(date);
+}
+
+/**
+ * The weekday and year the event card reads together ("2026 Sabtu").
+ */
+export function formatWibWeekdayYear(
+    iso: string,
+    timeZone?: string | null,
+): string {
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        weekday: 'long',
+        year: 'numeric',
+    }).format(date);
+}
+
+/**
+ * "14 November 2026" — no weekday, and a calendar date does not shift.
+ */
+export function formatWibLongDate(
+    iso: string,
+    timeZone?: string | null,
+): string {
+    const date = new Date(iso);
+
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('id-ID', {
+        timeZone: timezone(timeZone),
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(date);
 }
 
 /**

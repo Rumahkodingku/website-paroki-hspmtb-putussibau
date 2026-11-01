@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Demo;
 
 use App\Enums\AreaType;
 use App\Enums\CommunityStatus;
@@ -8,12 +8,15 @@ use App\Models\Area;
 use App\Models\Community;
 use App\Models\CommunityCategory;
 use App\Models\Media;
+use Database\Seeders\CommunityCategorySeeder;
 use Illuminate\Database\Seeder;
 
 class DemoCommunitiesSeeder extends Seeder
 {
-    public function run(Media $media): void
+    public function run(): void
     {
+        $media = Media::query()->where('path', 'media/originals/dummy-paroki.jpg')->firstOrFail();
+
         // Kategori komunitas kini di-seed oleh CommunityCategorySeeder (master
         // data, selalu jalan). Dipanggil di sini agar seeder ini tetap bisa
         // dijalankan standalone (`php artisan db:seed --class=...`).

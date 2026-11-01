@@ -49,53 +49,6 @@ dataset('public pages', fn (): array => [
     '/galeri' => ['/galeri', 'public/galeri'],
     '/dokumen' => ['/dokumen', 'public/dokumen'],
     '/kontak' => ['/kontak', 'public/kontak'],
-    '/design-system' => ['/design-system', 'public/design-system'],
-]);
-
-/**
- * The pages that are still placeholders.
- *
- * Phase 04 gave /jadwal-misa a controller, four resources and a resolver, so it
- * now sends props — and the "no page-specific props" test below would fail on it
- * while telling the truth about a page that is no longer a placeholder.
- *
- * Phase 05 did the same for /berita and /agenda, which is why they left this
- * list. Their props are asserted by the modules that own them.
- *
- * Phase 06B did the same for /pelayanan: it now queries active services and
- * groups them, so it left this list too. Its props are asserted by
- * tests/Feature/Pelayanan/PublicServicePageTest.php.
- *
- * Phase 07 did the same for /komunitas: it now queries published communities and
- * renders a directory, so it left this list too. Its props are asserted by
- * tests/Feature/Komunitas/PublicCommunityDirectoryTest.php.
- *
- * Phase 08A did the same for /galeri: it now queries published albums and
- * renders the directory, so it left this list too. Its props are asserted by
- * tests/Feature/Galeri/PublicGalleryDirectoryTest.php. See D-65.
- *
- * Phase 08B did the same for /dokumen: it now queries published documents and
- * renders the directory, so it left this list too. Its props are asserted by
- * tests/Feature/Document/PublicDocumentPageTest.php. See D-66.
- *
- * Phase 08C did the same for /kontak: it is no longer a placeholder. It reads
- * the shared `contact` prop (no page-specific query), so it left this list. Its
- * contract is asserted by tests/Feature/Contact/ContactPageTest.php. See D-67.
- *
- * Phase 09A did the same for /: it is now a controller that aggregates the
- * published modules, so it left this list too. Its contract is asserted by
- * tests/Feature/Public/PublicHomepageTest.php. See D-70.
- *
- * Excluded by name rather than filtered by inspection, because the assertion
- * exists precisely to notice a page that starts receiving props before its module
- * exists. Deriving the list from what currently has no props would make the test
- * pass by construction and check nothing.
- *
- * When another module lands, move its URL out of here deliberately. That edit is
- * the moment to notice the placeholder set shrinking.
- */
-dataset('placeholder pages', fn (): array => [
-    '/design-system' => ['/design-system', 'public/design-system'],
 ]);
 
 it('renders the expected page for every public route', function (string $url, string $component) {
@@ -114,30 +67,6 @@ it('lets a guest reach every public route without signing in', function (string 
     $response->assertOk();
     expect($response->getStatusCode())->toBeLessThan(300);
 })->with('public pages');
-
-/**
- * The placeholder contract from roadmap section 10, restated as a test.
- *
- * A page that receives props is a page that has started depending on something,
- * and for a page whose module does not exist yet there is nothing legitimate for
- * it to depend on. The moment one of these fails, the page has grown business
- * logic before its module arrived - which is the exact thing to catch.
- *
- * Runs against the placeholder dataset rather than all of them: /jadwal-misa left
- * that set in Phase 04, and this assertion is about the ones still in it.
- */
-it('sends no page-specific props from a placeholder', function (string $url) {
-    $props = $this->get($url)->viewData('page')['props'];
-
-    // `media` is shared for the same reason `seo` is: the upload limits are
-    // config/media.php's to decide and the browser needs them everywhere. See
-    // D-62. `contact` is shared for the same reason: the footer renders it on
-    // every public page (D-67). `identity` is shared because the navbar and
-    // footer render the parish identity on every public page (D-69).
-    $shared = ['name', 'auth', 'locale', 'displayTimezone', 'abilities', 'sidebarOpen', 'seo', 'identity', 'media', 'documentUploads', 'contact', 'errors'];
-
-    expect(array_diff(array_keys($props), $shared))->toBe([]);
-})->with('placeholder pages');
 
 it('serves the same shared SEO defaults on every public page', function (string $url) {
     // NFR-SEO: the meta tags must be in the first HTML response, and the blade

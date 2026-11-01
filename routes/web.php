@@ -176,14 +176,13 @@ Route::get('/galeri/{gallery:slug}', [PublicGalleryController::class, 'show'])
 Route::get('/dokumen', [PublicDocumentController::class, 'index'])->name('dokumen.index');
 Route::get('/dokumen/{document}/unduh', [PublicDocumentController::class, 'download'])
     ->where('document', '[0-9]+')
+    ->middleware('throttle:30,1')
     ->name('dokumen.unduh');
 
 Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
 
 Route::get('/kebijakan-privasi', [PublicLegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/syarat-ketentuan', [PublicLegalController::class, 'terms'])->name('legal.terms');
-
-Route::inertia('/design-system', 'public/design-system')->name('design-system.index');
 
 /*
 |--------------------------------------------------------------------------
