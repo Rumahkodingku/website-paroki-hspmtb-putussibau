@@ -38,6 +38,7 @@ import { index as communitiesIndex } from '@/routes/communities';
 import { index as communityCategoriesIndex } from '@/routes/community-categories';
 import { index as galleriesIndex } from '@/routes/galleries';
 import { index as livestreamsIndex } from '@/routes/livestreams';
+import { index as livestreamCategoriesIndex } from '@/routes/livestream-categories';
 import { index as documentsIndex } from '@/routes/documents';
 import { index as documentCategoriesIndex } from '@/routes/document-categories';
 import { index as areasIndex } from '@/routes/areas';
@@ -118,6 +119,12 @@ export const REFERENCE_ENTRIES: Entry[] = [
         icon: Tag,
     },
     { title: 'Kategori Dokumen', href: documentCategoriesIndex(), icon: Tag },
+    {
+        title: 'Kategori Livestreaming',
+        href: livestreamCategoriesIndex(),
+        icon: Tag,
+        ability: 'livestreamcategories.view',
+    },
 ];
 
 export const ACCOUNT_ENTRIES: Entry[] = [

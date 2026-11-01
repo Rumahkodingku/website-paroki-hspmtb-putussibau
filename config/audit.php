@@ -56,6 +56,7 @@ return [
         'galleries',
         'gallery_photos',
         'livestreams',
+        'livestream_categories',
         'backups',
     ],
 
@@ -226,6 +227,9 @@ return [
             'name', 'slug', 'description', 'sort_order', 'is_active',
         ],
         'community_categories' => [
+            'name', 'slug', 'description', 'sort_order', 'is_active',
+        ],
+        'livestream_categories' => [
             'name', 'slug', 'description', 'sort_order', 'is_active',
         ],
         'communities' => [

@@ -4,7 +4,6 @@ use App\Models\Media;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\SiteSettingsService;
-use Database\Seeders\SiteSettingsSeeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -605,73 +604,4 @@ test('optional settings may all be left empty', function () {
                 'logo_alt' => '',
             ],
         ])->assertSessionHasNoErrors();
-});
-
-/*
-|--------------------------------------------------------------------------
-| The seeder
-|--------------------------------------------------------------------------
-*/
-
-test('the seeder writes the identity values and the homepage limits', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(SiteSetting::query()->pluck('value', 'key')->all())->toBe([
-        'privacy_policy_content' => '<p>Kebijakan Privasi ini menjelaskan bagaimana Paroki HSPMTB Putussibau mengelola informasi yang Anda berikan saat menggunakan situs ini.</p><p>Kami hanya menggunakan data yang diperlukan untuk pelayanan paroki, seperti permintaan informasi, pendaftaran pelayanan, dan komunikasi pastoral. Data tidak dibagikan kepada pihak lain kecuali untuk keperluan pelayanan yang Anda minta atau jika diwajibkan oleh ketentuan yang berlaku.</p><p>Situs ini dapat menautkan ke layanan pihak ketiga. Kebijakan privasi masing-masing layanan berlaku saat Anda mengunjungi tautan tersebut. Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
-        'terms_and_conditions_content' => '<p>Syarat dan Ketentuan ini mengatur penggunaan situs Paroki HSPMTB Putussibau. Dengan mengakses situs ini, Anda setuju untuk mematuhi ketentuan yang berlaku.</p><ul><li>Informasi di situs ini disediakan untuk kebutuhan pastoral dan informasi paroki.</li><li>Pengguna tidak boleh menyalahgunakan situs, termasuk menyebarkan konten yang melanggar hukum atau mengganggu pelayanan paroki.</li><li>Paroki dapat memperbarui isi situs dan ketentuan ini sewaktu-waktu.</li></ul><p>Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
-        'parish_name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
-        'parish_short_name' => 'HSPMTB',
-        'home_news_limit' => '4',
-        'home_events_limit' => '4',
-        'home_gallery_limit' => '6',
-    ]);
-});
-
-test('the seeder files identity values under identitas and limits under beranda', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(SiteSetting::query()->pluck('group', 'key')->all())
-        ->toBe([
-            'privacy_policy_content' => 'privasi',
-            'terms_and_conditions_content' => 'syarat',
-            'parish_name' => 'identitas',
-            'parish_short_name' => 'identitas',
-            'home_news_limit' => 'beranda',
-            'home_events_limit' => 'beranda',
-            'home_gallery_limit' => 'beranda',
-        ]);
-});
-
-test('re-running the seeder does not undo an admin edit or replace the logo', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    settingsService()->setMany([
-        'parish_short_name' => 'HSPTB-U',
-        'logo' => '42',
-        'home_news_limit' => 6,
-    ]);
-
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(settingsService()->get('parish_short_name'))->toBe('HSPTB-U')
-        ->and(settingsService()->get('logo'))->toBe('42')
-        ->and(settingsService()->get('home_news_limit'))->toBe(6);
-});
-
-test('only the seeded keys get a row, and logo stays unset', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    $service = settingsService();
-
-    expect(SiteSetting::query()->count())->toBe(7)
-        ->and(SiteSetting::query()->where('key', 'logo')->exists())->toBeFalse()
-        ->and($service->get('home_news_limit'))->toBe(4)
-        ->and($service->get('home_events_limit'))->toBe(4)
-        ->and($service->get('home_gallery_limit'))->toBe(6)
-        ->and($service->get('home_show_devotion'))->toBeTrue();
-
-    // A text key with no default is genuinely unconfigured, and says so with
-    // null rather than pretending to be blank.
-    expect($service->get('contact_phone'))->toBeNull()
-        ->and($service->get('maps_link'))->toBeNull();
 });

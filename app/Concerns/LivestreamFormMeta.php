@@ -3,8 +3,8 @@
 namespace App\Concerns;
 
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
+use App\Models\LivestreamCategory;
 
 /**
  * The labels, hints and interface copy the Livestreaming admin screens share.
@@ -28,7 +28,15 @@ trait LivestreamFormMeta
             'hints' => (array) __('livestreaming.hints'),
             'copy' => (array) __('livestreaming.admin'),
             'empty' => (array) __('livestreaming.empty'),
-            'categories' => LivestreamCategory::options(),
+            'categories' => LivestreamCategory::query()
+                ->active()
+                ->ordered()
+                ->get()
+                ->map(fn (LivestreamCategory $category): array => [
+                    'value' => (string) $category->id,
+                    'label' => $category->name,
+                ])
+                ->all(),
             'statuses' => LivestreamEditorialStatus::options(),
             'broadcastStatuses' => LivestreamBroadcastStatus::options(),
         ];

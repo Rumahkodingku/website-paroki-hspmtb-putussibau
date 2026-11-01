@@ -25,7 +25,7 @@ function livestreamStatePayload(array $overrides = []): array
         'title' => 'Misa Minggu Pagi',
         'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         'description' => 'Perayaan Ekaristi Minggu pagi.',
-        'category' => 'liturgi',
+        'livestream_category_id' => null,
         'location' => 'Gereja Paroki HSPMTB',
         'scheduled_at' => '2026-11-08T08:00:00+07:00',
         'recorded_at' => null,

@@ -26,7 +26,7 @@ export function emptyLivestreamFormData(): LivestreamFormData {
         title: '',
         youtube_url: '',
         description: '',
-        category: '',
+        livestream_category_id: '',
         location_id: '',
         scheduled_at: '',
         status: 'draft',
@@ -165,12 +165,14 @@ export function LivestreamForm({
                     id="livestream-category"
                     label={labels.category ?? 'Kategori'}
                     hint={hints.category}
-                    error={form.errors.category}
+                    error={form.errors.livestream_category_id}
                 >
                     <ChoiceSelect
                         id="livestream-category"
-                        value={form.data.category}
-                        onChange={(value) => form.setData('category', value)}
+                        value={form.data.livestream_category_id}
+                        onChange={(value) =>
+                            form.setData('livestream_category_id', value)
+                        }
                         options={categories}
                         placeholder="Tanpa kategori"
                     />

@@ -37,7 +37,7 @@ class LivestreamFactory extends Factory
             'youtube_video_id' => $videoId,
             'youtube_url' => 'https://www.youtube.com/watch?v='.$videoId,
             'location_id' => null,
-            'category' => null,
+            'livestream_category_id' => null,
             'status' => LivestreamEditorialStatus::Draft,
             'broadcast_status' => LivestreamBroadcastStatus::Scheduled,
             'live_slot' => null,

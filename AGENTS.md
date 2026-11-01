@@ -41,7 +41,7 @@ Laravel 13 + Inertia v3 + React 19 + Vite 8 + Tailwind CSS v4 parish website. PH
   ```
 
 - Never edit a migration that has already run; create a new migration instead.
-- Seeders: `PermissionSeeder`, `SiteSettingsSeeder`, and `SuperAdminSeeder`. `SuperAdminSeeder` skips creation when `ADMIN_EMAIL` or `ADMIN_PASSWORD` is blank.
+- Seeders: `PermissionSeeder` and `SuperAdminSeeder`. `SuperAdminSeeder` skips creation when `ADMIN_EMAIL` or `ADMIN_PASSWORD` is blank. Site identity and homepage limits are configured via the installation wizard or admin settings instead of a seeder.
 - Do not introduce additional seed data without a documented requirement.
 
 ## Generated Files and Routing

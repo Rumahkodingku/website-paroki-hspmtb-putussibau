@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Livestream;
 
-use App\Enums\LivestreamCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Public\Livestream\PublicLivestreamResource;
 use App\Models\Livestream;
+use App\Models\LivestreamCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,7 +36,7 @@ class PublicLivestreamController extends Controller
         $year = $request->string('tahun')->toString();
 
         $archives = Livestream::query()
-            ->with('location')
+            ->with(['location', 'category'])
             ->published()
             ->archiveReady()
             ->when($search !== '', fn (Builder $query) => $query->where(
@@ -45,8 +45,8 @@ class PublicLivestreamController extends Controller
                     ->orWhere('livestreams.description', 'like', "%{$search}%")
             ))
             ->when(
-                in_array($category, LivestreamCategory::values(), true),
-                fn (Builder $query) => $query->where('livestreams.category', $category)
+                $category !== '' && LivestreamCategory::query()->where('slug', $category)->exists(),
+                fn (Builder $query) => $query->whereHas('category', fn (Builder $inner) => $inner->where('slug', $category))
             )
             ->when(
                 ctype_digit($year),
@@ -64,7 +64,15 @@ class PublicLivestreamController extends Controller
                 : PublicLivestreamResource::make($activeStream)->resolve(),
             'archives' => PublicLivestreamResource::collection($archives),
             'years' => $this->availableYears(),
-            'categories' => LivestreamCategory::options(),
+            'categories' => LivestreamCategory::query()
+                ->active()
+                ->ordered()
+                ->get()
+                ->map(fn (LivestreamCategory $category): array => [
+                    'value' => $category->slug,
+                    'label' => $category->name,
+                ])
+                ->all(),
             'filters' => [
                 'search' => $search,
                 'kategori' => $category,

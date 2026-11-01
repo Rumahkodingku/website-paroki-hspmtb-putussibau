@@ -47,7 +47,9 @@ export default function Edit({
         title: livestream.title,
         youtube_url: livestream.youtube_url,
         description: livestream.description ?? '',
-        category: livestream.category ?? '',
+        livestream_category_id: livestream.category_id
+            ? String(livestream.category_id)
+            : '',
         location_id:
             currentLocationIsActive && livestream.location_id !== null
                 ? String(livestream.location_id)
