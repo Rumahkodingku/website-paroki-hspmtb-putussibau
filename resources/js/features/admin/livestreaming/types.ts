@@ -19,6 +19,7 @@ export type LivestreamRow = {
     thumbnail_url: string | null;
     location_id: number | null;
     location: string | null;
+    category_id: number | null;
     category: string | null;
     category_label: string | null;
     status: LivestreamEditorialStatus;
@@ -42,7 +43,7 @@ export type LivestreamFormData = {
     title: string;
     youtube_url: string;
     description: string;
-    category: string;
+    livestream_category_id: string;
     location_id: string;
     scheduled_at: string;
     status: LivestreamEditorialStatus;

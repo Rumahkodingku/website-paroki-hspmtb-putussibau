@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use Database\Factories\LivestreamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -46,8 +45,9 @@ use Illuminate\Support\Carbon;
  * @property string $youtube_video_id
  * @property string $youtube_url
  * @property int|null $location_id
- * @property LivestreamCategory|null $category
+ * @property int|null $livestream_category_id
  * @property LivestreamEditorialStatus $status
+ * @property-read LivestreamCategory|null $category
  * @property LivestreamBroadcastStatus $broadcast_status
  * @property int|null $live_slot
  * @property Carbon|null $scheduled_at
@@ -71,7 +71,7 @@ use Illuminate\Support\Carbon;
     'youtube_video_id',
     'youtube_url',
     'location_id',
-    'category',
+    'livestream_category_id',
     'status',
     'scheduled_at',
     'started_at',
@@ -99,6 +99,14 @@ class Livestream extends Model
     }
 
     /**
+     * @return BelongsTo<LivestreamCategory, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(LivestreamCategory::class, 'livestream_category_id');
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function createdBy(): BelongsTo
@@ -120,7 +128,6 @@ class Livestream extends Model
     protected function casts(): array
     {
         return [
-            'category' => LivestreamCategory::class,
             'status' => LivestreamEditorialStatus::class,
             'broadcast_status' => LivestreamBroadcastStatus::class,
             'live_slot' => 'integer',

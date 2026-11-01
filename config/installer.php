@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use Database\Seeders\CommunityCategorySeeder;
 use Database\Seeders\DocumentCategorySeeder;
 use Database\Seeders\EventCategorySeeder;
+use Database\Seeders\LivestreamCategorySeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\PostCategorySeeder;
 use Database\Seeders\ServiceCategorySeeder;
@@ -124,6 +125,7 @@ return [
             ServiceCategorySeeder::class,
             DocumentCategorySeeder::class,
             CommunityCategorySeeder::class,
+            LivestreamCategorySeeder::class,
         ],
     ],
 

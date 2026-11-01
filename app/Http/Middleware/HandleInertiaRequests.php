@@ -119,6 +119,7 @@ class HandleInertiaRequests extends Middleware
                 'backups.delete' => (bool) $request->user()?->can('backups.delete'),
                 'backups.settings' => (bool) $request->user()?->can('backups.settings'),
                 'livestreams.view' => (bool) $request->user()?->can('livestreams.view'),
+                'livestreamcategories.view' => (bool) $request->user()?->can('livestreamcategories.view'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'seo' => fn (): array => $this->seoDefaults(),

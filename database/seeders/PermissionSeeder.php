@@ -275,6 +275,14 @@ class PermissionSeeder extends Seeder
         'livestreams.delete',
 
         /*
+         * Livestream categories, added with the module.
+         */
+        'livestreamcategories.view',
+        'livestreamcategories.create',
+        'livestreamcategories.update',
+        'livestreamcategories.delete',
+
+        /*
          * Backup & Recovery.
          *
          * `backups.settings` rather than the specification's

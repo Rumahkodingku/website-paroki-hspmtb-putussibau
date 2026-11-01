@@ -2,6 +2,7 @@
 
 use App\Enums\LivestreamEditorialStatus;
 use App\Models\Livestream;
+use App\Models\LivestreamCategory;
 use App\Models\Location;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -92,12 +93,15 @@ it('searches title and description', function () {
 });
 
 it('filters by category and year and ignores invalid values', function () {
+    $liturgiCategory = LivestreamCategory::factory()->create(['slug' => 'liturgi', 'name' => 'Liturgi']);
+    $devosiCategory = LivestreamCategory::factory()->create(['slug' => 'devosi', 'name' => 'Devosi']);
+
     $liturgi = Livestream::factory()->ended()->recordingAvailable()->create([
-        'category' => 'liturgi',
+        'livestream_category_id' => $liturgiCategory->id,
         'recorded_at' => '2025-01-01 10:00:00',
     ]);
     Livestream::factory()->ended()->recordingAvailable()->create([
-        'category' => 'devosi',
+        'livestream_category_id' => $devosiCategory->id,
         'recorded_at' => '2024-01-01 10:00:00',
     ]);
 

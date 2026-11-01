@@ -35,7 +35,7 @@ export function NavLogo({ transparent, compact = false }: NavLogoProps) {
                     color="muted"
                     weight="medium"
                     className={cn(
-                        'transition-colors duration-300',
+                        'hidden transition-colors duration-300 md:inline',
                         transparent && 'text-white/75!',
                     )}
                 >

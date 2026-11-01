@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use App\Models\Livestream;
+use App\Models\LivestreamCategory;
 use App\Models\Location;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Schema;
@@ -38,7 +38,7 @@ it('has the columns the archive and homepage depend on', function () {
         'youtube_video_id',
         'youtube_url',
         'location_id',
-        'category',
+        'livestream_category_id',
         'status',
         'broadcast_status',
         'live_slot',
@@ -55,14 +55,16 @@ it('has the columns the archive and homepage depend on', function () {
 });
 
 it('casts the enums and datetimes', function () {
+    $category = LivestreamCategory::factory()->create();
+
     $stream = Livestream::factory()->create([
-        'category' => LivestreamCategory::Liturgi,
+        'livestream_category_id' => $category->id,
         'status' => LivestreamEditorialStatus::Published,
         'broadcast_status' => LivestreamBroadcastStatus::Ended,
         'scheduled_at' => now(),
     ]);
 
-    expect($stream->category)->toBe(LivestreamCategory::Liturgi)
+    expect($stream->category?->is($category))->toBeTrue()
         ->and($stream->status)->toBe(LivestreamEditorialStatus::Published)
         ->and($stream->broadcast_status)->toBe(LivestreamBroadcastStatus::Ended)
         ->and($stream->scheduled_at)->not->toBeNull();

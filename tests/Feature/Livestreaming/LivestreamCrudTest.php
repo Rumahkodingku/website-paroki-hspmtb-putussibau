@@ -31,7 +31,7 @@ function livestreamPayload(array $overrides = []): array
         'title' => 'Misa Minggu Pagi',
         'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         'description' => 'Perayaan Ekaristi Minggu pagi dari Gereja Paroki.',
-        'category' => 'liturgi',
+        'livestream_category_id' => null,
         'location_id' => null,
         'scheduled_at' => '2026-11-08T08:00:00+07:00',
         'recorded_at' => null,
@@ -146,7 +146,7 @@ it('updates metadata without losing the derived fields', function () {
         ->patch(route('livestreams.update', $stream), livestreamPayload([
             'title' => 'Misa Minggu Sore',
             'status' => 'published',
-            'category' => 'hari_raya',
+            'livestream_category_id' => null,
             'location_id' => $location->getKey(),
         ]))
         ->assertSessionHasNoErrors();
@@ -154,7 +154,7 @@ it('updates metadata without losing the derived fields', function () {
     $stream->refresh();
 
     expect($stream->title)->toBe('Misa Minggu Sore')
-        ->and($stream->category->value)->toBe('hari_raya')
+        ->and($stream->livestream_category_id)->toBeNull()
         ->and($stream->location?->name)->toBe('Kapel Santa Maria')
         ->and($stream->youtube_video_id)->toBe('dQw4w9WgXcQ')
         ->and($stream->published_at)->not->toBeNull();

@@ -31,6 +31,7 @@ use App\Http\Controllers\MassSchedule\SpecialMassController;
 use App\Http\Controllers\MasterData\CommunityCategoryController;
 use App\Http\Controllers\MasterData\DocumentCategoryController;
 use App\Http\Controllers\MasterData\EventCategoryController;
+use App\Http\Controllers\MasterData\LivestreamCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
 use App\Http\Controllers\MasterData\PostCategoryController;
 use App\Http\Controllers\MasterData\ServiceCategoryController;
@@ -485,6 +486,10 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::post('/livestreaming/{livestream}/mulai', [LivestreamController::class, 'start'])->name('livestreams.start');
         Route::post('/livestreaming/{livestream}/akhiri', [LivestreamController::class, 'end'])->name('livestreams.end');
         Route::post('/livestreaming/{livestream}/tidak-tersedia', [LivestreamController::class, 'unavailable'])->name('livestreams.unavailable');
+
+        Route::resource('livestream-categories', LivestreamCategoryController::class)
+            ->names('livestream-categories')
+            ->parameters(['livestream-categories' => 'livestreamCategory']);
 
         /*
          * ------------------------------------------------------------------

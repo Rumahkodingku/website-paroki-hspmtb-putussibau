@@ -3,9 +3,9 @@
 namespace Database\Seeders\Demo;
 
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use App\Models\Livestream;
+use App\Models\LivestreamCategory;
 use App\Models\Location;
 use App\Models\User;
 use App\Support\YoutubeEmbed;
@@ -69,7 +69,7 @@ class DemoLivestreamingSeeder extends Seeder
             'youtube_video_id' => $videoId,
             'youtube_url' => self::YOUTUBE_URL,
             'location_id' => $locationId,
-            'category' => LivestreamCategory::Liturgi,
+            'livestream_category_id' => LivestreamCategory::query()->where('slug', 'liturgi')->value('id'),
             'status' => LivestreamEditorialStatus::Published,
             'scheduled_at' => Carbon::now(),
             'started_at' => Carbon::now(),

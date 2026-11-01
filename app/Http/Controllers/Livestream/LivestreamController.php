@@ -9,7 +9,6 @@ use App\Actions\Livestream\StartLivestreamAction;
 use App\Concerns\LivestreamFormMeta;
 use App\Concerns\SortsAdminList;
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Livestream\StoreLivestreamRequest;
@@ -17,6 +16,7 @@ use App\Http\Requests\Livestream\UpdateLivestreamRequest;
 use App\Http\Resources\Livestream\LivestreamResource;
 use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Models\Livestream;
+use App\Models\LivestreamCategory;
 use App\Models\Location;
 use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,7 +59,7 @@ class LivestreamController extends Controller
         $category = $request->string('kategori')->toString();
 
         $livestreams = Livestream::query()
-            ->with('location')
+            ->with(['location', 'category'])
             ->when($search !== '', fn (Builder $query) => $query
                 ->where('livestreams.title', 'like', "%{$search}%"))
             ->when(
@@ -71,8 +71,8 @@ class LivestreamController extends Controller
                 fn (Builder $query) => $query->where('livestreams.broadcast_status', $broadcastStatus)
             )
             ->when(
-                in_array($category, LivestreamCategory::values(), true),
-                fn (Builder $query) => $query->where('livestreams.category', $category)
+                $category !== '' && ctype_digit($category) && LivestreamCategory::query()->whereKey((int) $category)->exists(),
+                fn (Builder $query) => $query->where('livestreams.livestream_category_id', (int) $category)
             );
 
         $livestreams = $this->applyAdminSort(

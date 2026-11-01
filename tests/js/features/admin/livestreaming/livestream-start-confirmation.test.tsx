@@ -27,6 +27,7 @@ function stream(overrides: Partial<LivestreamRow> = {}): LivestreamRow {
         thumbnail_url: null,
         location_id: null,
         location: null,
+        category_id: null,
         category: 'liturgi',
         category_label: 'Liturgi',
         status: 'published',

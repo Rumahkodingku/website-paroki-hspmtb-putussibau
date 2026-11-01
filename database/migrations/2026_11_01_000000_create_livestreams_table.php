@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\LivestreamBroadcastStatus;
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -54,7 +53,7 @@ return new class extends Migration
 
             $table->string('location', 150)->nullable();
 
-            $table->enum('category', LivestreamCategory::values())->nullable();
+            $table->string('category', 50)->nullable();
 
             // Editorial visibility: draft, published, archived.
             $table->enum('status', LivestreamEditorialStatus::values())

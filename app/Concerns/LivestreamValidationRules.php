@@ -2,7 +2,6 @@
 
 namespace App\Concerns;
 
-use App\Enums\LivestreamCategory;
 use App\Enums\LivestreamEditorialStatus;
 use App\Rules\YoutubeUrl;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -38,7 +37,11 @@ trait LivestreamValidationRules
             'title' => ['required', 'string', 'min:3', 'max:150'],
             'youtube_url' => ['required', 'string', 'max:500', new YoutubeUrl],
             'description' => ['nullable', 'string', 'max:1000'],
-            'category' => ['nullable', Rule::in(LivestreamCategory::values())],
+            'livestream_category_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('livestream_categories', 'id')->where('is_active', true),
+            ],
             'location_id' => [
                 'nullable',
                 'integer',
@@ -63,7 +66,7 @@ trait LivestreamValidationRules
             'youtube_url.required' => 'URL YouTube wajib diisi.',
             'youtube_url.max' => 'URL YouTube maksimal :max karakter.',
             'description.max' => 'Deskripsi maksimal :max karakter.',
-            'category.in' => 'Kategori yang dipilih tidak valid.',
+            'livestream_category_id.exists' => 'Kategori yang dipilih tidak tersedia atau sedang nonaktif.',
             'location_id.exists' => 'Lokasi yang dipilih tidak tersedia atau sedang nonaktif.',
             'scheduled_at.date' => 'Jadwal siaran tidak valid.',
             'recorded_at.date' => 'Waktu rekaman tidak valid.',
@@ -81,7 +84,7 @@ trait LivestreamValidationRules
             'title' => 'judul livestreaming',
             'youtube_url' => 'URL YouTube',
             'description' => 'deskripsi',
-            'category' => 'kategori',
+            'livestream_category_id' => 'kategori',
             'location_id' => 'lokasi',
             'scheduled_at' => 'jadwal siaran',
             'recorded_at' => 'waktu rekaman',
@@ -102,7 +105,7 @@ trait LivestreamValidationRules
             $input[$field] = is_string($value) ? trim($value) : $value;
         }
 
-        foreach (['description', 'category', 'location_id', 'scheduled_at', 'recorded_at'] as $field) {
+        foreach (['description', 'livestream_category_id', 'location_id', 'scheduled_at', 'recorded_at'] as $field) {
             $value = $this->input($field);
             $input[$field] = $value === '' || $value === null
                 ? null
