@@ -1,11 +1,12 @@
 import { Head } from '@inertiajs/react';
-import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import type { SettingsProps } from '@/features/admin/pengaturan/types';
 import { SettingField } from '../components/setting-field';
 import { useSettingsForm } from '../hooks/use-settings-form';
+import { ListHeader } from '@/components/list-parts';
+import { dashboard } from '@/routes';
 
 export default function Settings({ groups, meta }: SettingsProps) {
     const { groupsInOrder, form } = useSettingsForm(groups);
@@ -21,7 +22,7 @@ export default function Settings({ groups, meta }: SettingsProps) {
             <Head title="Pengaturan Situs" />
 
             <div className="space-y-6 p-6">
-                <Heading
+                <ListHeader
                     title="Pengaturan Situs"
                     description="Identitas paroki, kontak, media sosial, SEO dasar, beranda, dan kebijakan privasi"
                 />
@@ -79,3 +80,10 @@ export default function Settings({ groups, meta }: SettingsProps) {
         </>
     );
 }
+
+Settings.layout = {
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Pengaturan Situs' },
+    ],
+};

@@ -55,6 +55,7 @@ return [
         'locations',
         'galleries',
         'gallery_photos',
+        'livestreams',
         'backups',
     ],
 
@@ -74,6 +75,9 @@ return [
         'archived',
         'cancelled',
         'postponed',
+        'broadcast_started',
+        'broadcast_ended',
+        'broadcast_unavailable',
         'deleted',
         'restored',
         'activated',
@@ -248,6 +252,11 @@ return [
         'gallery_photos' => [
             'gallery_album_id', 'media_id', 'caption', 'alt_text', 'sort_order',
         ],
+        'livestreams' => [
+            'title', 'description', 'youtube_video_id', 'youtube_url', 'location_id',
+            'category', 'status', 'broadcast_status', 'scheduled_at', 'started_at',
+            'ended_at', 'recorded_at', 'is_recording_available', 'published_at',
+        ],
         'backups' => [
             'type', 'source', 'status', 'validation_status', 'file_size',
             'checksum', 'format_version', 'note', 'failure_code', 'scheduled_slot',
@@ -279,6 +288,7 @@ return [
         'mass_schedules' => ['source_id', 'destination_location_id', 'count', 'ids'],
         'galleries' => ['photo_ids', 'count'],
         'gallery_photos' => ['count', 'ids'],
+        'livestreams' => ['previous_live_id', 'replaced_by'],
         'services' => ['count', 'ids'],
         'service_requirements' => ['count', 'ids'],
         'service_steps' => ['count', 'ids'],
@@ -330,6 +340,7 @@ return [
         ],
         'areas' => ['description'],
         'galleries' => ['description'],
+        'livestreams' => ['description'],
         'documents' => ['description'],
         'backups' => ['note'],
     ],

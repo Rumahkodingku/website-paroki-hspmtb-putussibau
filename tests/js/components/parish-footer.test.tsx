@@ -27,6 +27,7 @@ const EXPECTED_LINKS: Record<string, string> = {
     'Berita & Artikel': '/berita',
     Agenda: '/agenda',
     Galeri: '/galeri',
+    Livestreaming: '/livestreaming',
     'Sakramen Baptis': '/pelayanan',
     'Komuni Pertama': '/pelayanan',
     Krisma: '/pelayanan',

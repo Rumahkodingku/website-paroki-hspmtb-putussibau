@@ -46,6 +46,7 @@ use Illuminate\Support\Collection;
  * @property-read Collection<int, MassSchedule> $massSchedules
  * @property-read Collection<int, SpecialMass> $specialMasses
  * @property-read Collection<int, ScheduleNotice> $scheduleNotices
+ * @property-read Collection<int, Livestream> $livestreams
  */
 #[Fillable([
     'name',
@@ -87,6 +88,19 @@ class Location extends Model
     public function scheduleNotices(): HasMany
     {
         return $this->hasMany(ScheduleNotice::class);
+    }
+
+    /**
+     * The livestream records that point at this location.
+     *
+     * Used by LocationController::destroy(): a location an archive still refers
+     * to cannot be removed, the same rule the schedules already follow.
+     *
+     * @return HasMany<Livestream, $this>
+     */
+    public function livestreams(): HasMany
+    {
+        return $this->hasMany(Livestream::class);
     }
 
     /**

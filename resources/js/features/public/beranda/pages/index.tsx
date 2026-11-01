@@ -6,6 +6,7 @@ import { HomeAgendaSection } from '../components/home-agenda-section';
 import { HomeDevotionSection } from '../components/home-devotion-section';
 import { HomeGallerySection } from '../components/home-gallery-section';
 import { HomeHero } from '../components/home-hero';
+import { HomeLivestreamSection } from '../components/home-livestream-section';
 import { HomeNewsSection } from '../components/home-news-section';
 import { HomeNextMassSection } from '../components/home-next-mass-section';
 import { HomeQuickLinks } from '../components/home-quick-links';
@@ -20,6 +21,7 @@ export default function Beranda({
     services,
     galleryPhotos,
     galleryIllustrations,
+    liveStream,
     hero,
     sections,
 }: HomepageProps) {
@@ -42,6 +44,11 @@ export default function Beranda({
             <HomeHero hero={hero} identity={identity} />
 
             <HomeQuickLinks />
+
+            <HomeLivestreamSection
+                stream={liveStream}
+                enabled={sections.livestreaming}
+            />
 
             <HomeNextMassSection
                 nextMass={nextMass}

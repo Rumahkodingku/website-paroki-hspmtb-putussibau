@@ -30,6 +30,10 @@ class DemoContentSeeder extends Seeder
         $this->call(DemoPastorSeeder::class);
         $this->call(DemoParishBoardSeeder::class);
 
-        $this->command->info('Data contoh Profil Paroki, Jadwal Misa, Berita & Agenda, Pelayanan, dan Komunitas dimuat.');
+        $this->call(DemoGallerySeeder::class);
+        $this->call(DemoDocumentSeeder::class);
+        $this->call(DemoLivestreamingSeeder::class);
+
+        $this->command->info('Data contoh Profil Paroki, Jadwal Misa, Berita & Agenda, Pelayanan, Komunitas, Galeri, Dokumen, dan Livestreaming dimuat.');
     }
 }

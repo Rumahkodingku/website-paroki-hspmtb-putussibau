@@ -159,6 +159,11 @@ test('the foundation permissions are seeded with resource.action names', functio
         'galleries.update',
         'galleries.delete',
 
+        'livestreams.view',
+        'livestreams.create',
+        'livestreams.update',
+        'livestreams.delete',
+
         'documents.view',
         'documents.create',
         'documents.update',

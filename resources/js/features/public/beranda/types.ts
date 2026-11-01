@@ -1,5 +1,6 @@
 import type { ArticleCardData } from '@/types/news-agenda';
 import type { EventCardData } from '@/components/event-card';
+import type { PublicLivestream } from '@/components/livestream-player';
 import type { NextMassCardData } from '@/components/next-mass-card';
 
 /*
@@ -67,6 +68,7 @@ export type HomeSections = {
     devotion: boolean;
     services: boolean;
     gallery: boolean;
+    livestreaming: boolean;
 };
 
 export type HomepageProps = {
@@ -77,6 +79,7 @@ export type HomepageProps = {
     services: HomeService[];
     galleryPhotos: HomeGalleryPhoto[];
     galleryIllustrations: HomeIllustration[];
+    liveStream: PublicLivestream | null;
     hero: HomeHero;
     sections: HomeSections;
 };

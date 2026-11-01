@@ -9,6 +9,7 @@ import { index as kontak } from '@/routes/kontak';
 import { privacy, terms } from '@/routes/legal';
 import { index as dokumen } from '@/routes/dokumen';
 import { index as galeri } from '@/routes/galeri';
+import { index as livestreaming } from '@/routes/livestreaming';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
@@ -88,22 +89,21 @@ export const PELAYANAN_CHILDREN: NavEntry[] = [
     { label: 'Dokumen', href: dokumen(), match: 'section' },
 ];
 
+export const IBADAH_CHILDREN: NavEntry[] = [
+    { label: 'Jadwal Misa', href: jadwalMisa(), match: 'section' },
+    { label: 'Agenda', href: agenda(), match: 'section' },
+    { label: 'Livestreaming', href: livestreaming(), match: 'section' },
+];
+
 export const DRAWER_ENTRIES: NavItem[] = [
     { kind: 'link', entry: { label: 'Beranda', href: home(), match: 'exact' } },
     { kind: 'group', label: 'Profil', children: PROFIL_CHILDREN },
-    {
-        kind: 'link',
-        entry: { label: 'Jadwal Misa', href: jadwalMisa(), match: 'section' },
-    },
-    {
-        kind: 'link',
-        entry: { label: 'Berita & Artikel', href: berita(), match: 'section' },
-    },
-    {
-        kind: 'link',
-        entry: { label: 'Agenda', href: agenda(), match: 'section' },
-    },
+    { kind: 'group', label: 'Ibadah', children: IBADAH_CHILDREN },
     { kind: 'group', label: 'Pelayanan', children: PELAYANAN_CHILDREN },
+    {
+        kind: 'link',
+        entry: { label: 'Berita', href: berita(), match: 'section' },
+    },
     {
         kind: 'link',
         entry: { label: 'Kontak', href: kontak(), match: 'section' },
@@ -113,19 +113,12 @@ export const DRAWER_ENTRIES: NavItem[] = [
 export const DESKTOP_ENTRIES: NavItem[] = [
     { kind: 'link', entry: { label: 'Beranda', href: home(), match: 'exact' } },
     { kind: 'group', label: 'Profil', children: PROFIL_CHILDREN },
-    {
-        kind: 'link',
-        entry: { label: 'Jadwal Misa', href: jadwalMisa(), match: 'section' },
-    },
-    {
-        kind: 'link',
-        entry: { label: 'Berita & Artikel', href: berita(), match: 'section' },
-    },
-    {
-        kind: 'link',
-        entry: { label: 'Agenda', href: agenda(), match: 'section' },
-    },
+    { kind: 'group', label: 'Ibadah', children: IBADAH_CHILDREN },
     { kind: 'group', label: 'Pelayanan', children: PELAYANAN_CHILDREN },
+    {
+        kind: 'link',
+        entry: { label: 'Berita', href: berita(), match: 'section' },
+    },
     {
         kind: 'link',
         entry: { label: 'Kontak', href: kontak(), match: 'section' },
