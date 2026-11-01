@@ -55,12 +55,10 @@ it('orders by type, then urutan, then name when no sort is asked for', function 
         ->get(route('areas.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            // A non-paginated list is a plain array, not {data: [...]} (D-39).
-            ->missing('areas.data')
-            ->where('areas.0.name', 'Beta')
-            ->where('areas.1.name', 'Alfa')
-            ->where('areas.2.name', 'Midang')
-            ->where('areas.3.name', 'Zulu')
+            ->where('areas.data.0.name', 'Beta')
+            ->where('areas.data.1.name', 'Alfa')
+            ->where('areas.data.2.name', 'Midang')
+            ->where('areas.data.3.name', 'Zulu')
         );
 });
 
@@ -72,17 +70,17 @@ it('sorts by name in either direction', function () {
     $this->actingAs(superAdmin())
         ->get(route('areas.index', ['sort' => 'name', 'direction' => 'asc']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.name', 'Alfa')
-            ->where('areas.1.name', 'Mano')
-            ->where('areas.2.name', 'Zulu')
+            ->where('areas.data.0.name', 'Alfa')
+            ->where('areas.data.1.name', 'Mano')
+            ->where('areas.data.2.name', 'Zulu')
         );
 
     $this->actingAs(superAdmin())
         ->get(route('areas.index', ['sort' => 'name', 'direction' => 'desc']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.name', 'Zulu')
-            ->where('areas.1.name', 'Mano')
-            ->where('areas.2.name', 'Alfa')
+            ->where('areas.data.0.name', 'Zulu')
+            ->where('areas.data.1.name', 'Mano')
+            ->where('areas.data.2.name', 'Alfa')
         );
 });
 
@@ -94,17 +92,17 @@ it('sorts by type', function () {
     $this->actingAs(superAdmin())
         ->get(route('areas.index', ['sort' => 'type', 'direction' => 'asc']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.type', 'lingkungan')
-            ->where('areas.1.type', 'stasi')
-            ->where('areas.2.type', 'wilayah')
+            ->where('areas.data.0.type', 'lingkungan')
+            ->where('areas.data.1.type', 'stasi')
+            ->where('areas.data.2.type', 'wilayah')
         );
 
     $this->actingAs(superAdmin())
         ->get(route('areas.index', ['sort' => 'type', 'direction' => 'desc']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.type', 'wilayah')
-            ->where('areas.1.type', 'stasi')
-            ->where('areas.2.type', 'lingkungan')
+            ->where('areas.data.0.type', 'wilayah')
+            ->where('areas.data.1.type', 'stasi')
+            ->where('areas.data.2.type', 'lingkungan')
         );
 });
 
@@ -123,9 +121,9 @@ it('sorts by urutan and by status', function () {
     $this->actingAs(superAdmin())
         ->get(route('areas.index', ['sort' => 'sort_order', 'direction' => 'asc']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.name', 'Mano')
-            ->where('areas.1.name', 'Alfa')
-            ->where('areas.2.name', 'Zulu')
+            ->where('areas.data.0.name', 'Mano')
+            ->where('areas.data.1.name', 'Alfa')
+            ->where('areas.data.2.name', 'Zulu')
         );
 
     $this->actingAs(superAdmin())
@@ -134,10 +132,10 @@ it('sorts by urutan and by status', function () {
             // Mano is the only inactive one, so it leads. The two actives then
             // tie on is_active and the id tie-breaker decides between them:
             // Zulu was created first, so it comes second overall.
-            ->where('areas.0.name', 'Mano')
-            ->where('areas.0.is_active', false)
-            ->where('areas.1.name', 'Zulu')
-            ->where('areas.2.name', 'Alfa')
+            ->where('areas.data.0.name', 'Mano')
+            ->where('areas.data.0.is_active', false)
+            ->where('areas.data.1.name', 'Zulu')
+            ->where('areas.data.2.name', 'Alfa')
         );
 });
 
@@ -150,9 +148,9 @@ it('ignores an unknown sort key and keeps the default order', function () {
         ->get(route('areas.index', ['sort' => 'parent_id', 'direction' => 'asc']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('areas.0.type', 'lingkungan')
-            ->where('areas.1.type', 'stasi')
-            ->where('areas.2.type', 'wilayah')
+            ->where('areas.data.0.type', 'lingkungan')
+            ->where('areas.data.1.type', 'stasi')
+            ->where('areas.data.2.type', 'wilayah')
         );
 });
 

@@ -25,6 +25,14 @@ class UpdateParishProfileRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->sanitizeHtmlFields(['description']);
+
+        foreach (['video_title', 'video_description'] as $field) {
+            $value = $this->input($field);
+
+            if (is_string($value)) {
+                $this->merge([$field => trim($value)]);
+            }
+        }
     }
 
     /**
@@ -38,6 +46,8 @@ class UpdateParishProfileRequest extends FormRequest
             'cover_media_id' => ['nullable', 'integer', $this->readyMediaRule()],
             'cover_alt' => ['nullable', 'string', 'max:255', 'required_with:cover_media_id'],
             'video_url' => ['nullable', 'string', 'max:500', new YoutubeUrl],
+            'video_title' => ['nullable', 'string', 'max:150'],
+            'video_description' => ['nullable', 'string', 'max:300'],
         ];
     }
 
@@ -51,6 +61,8 @@ class UpdateParishProfileRequest extends FormRequest
             'established_year.between' => 'Tahun berdiri harus di antara 1000 dan tahun ini.',
             'cover_media_id.exists' => $this->mediaReadyMessage(),
             'cover_alt.required_with' => 'Teks alternatif sampul wajib diisi saat gambar dipilih.',
+            'video_title.max' => 'Judul video maksimal :max karakter.',
+            'video_description.max' => 'Deskripsi singkat video maksimal :max karakter.',
         ];
     }
 }

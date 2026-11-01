@@ -6,7 +6,7 @@ use App\Enums\AreaType;
 use App\Enums\MediaStatus;
 use App\Models\Area;
 use App\Rules\GoogleMapsLink;
-use App\Support\PhoneNumber;
+use App\Rules\PhoneNumberRule;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -61,16 +61,7 @@ trait AreaValidationRules
             // derived from it. See App\Support\MapsUrl.
             'maps_url' => ['nullable', 'string', new GoogleMapsLink, 'max:2048'],
             'leader_name' => ['nullable', 'string', 'max:150'],
-            'contact_phone' => [
-                'nullable',
-                'string',
-                'max:50',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if (is_string($value) && trim($value) !== '' && ! PhoneNumber::isValid($value)) {
-                        $fail('Nomor telepon tidak dikenali. Gunakan angka, boleh dengan awalan 0 atau +62.');
-                    }
-                },
-            ],
+            'contact_phone' => ['nullable', 'string', 'max:50', new PhoneNumberRule],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_whatsapp' => ['nullable', 'string', 'max:50'],
             'photo_media_id' => [

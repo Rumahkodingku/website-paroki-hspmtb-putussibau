@@ -159,6 +159,7 @@ return [
         ],
         'parish_profile' => [
             'description', 'established_year', 'cover_media_id', 'cover_alt', 'video_url',
+            'video_title', 'video_description',
         ],
         'parish_histories' => [
             'title', 'year', 'date', 'description', 'narrative', 'media_id',
@@ -179,7 +180,7 @@ return [
             'photo_alt', 'description', 'sort_order', 'is_published',
         ],
         'parish_service_area' => [
-            'content', 'map_media_id', 'map_url', 'is_published',
+            'content', 'map_media_id', 'is_published',
         ],
         'services' => [
             'title', 'slug', 'service_category_id', 'thumbnail_media_id',

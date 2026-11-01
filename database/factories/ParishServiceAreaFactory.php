@@ -18,7 +18,6 @@ class ParishServiceAreaFactory extends Factory
         return [
             'content' => '<p>'.fake()->paragraph(4).'</p>',
             'map_media_id' => null,
-            'map_url' => null,
             'is_published' => true,
         ];
     }

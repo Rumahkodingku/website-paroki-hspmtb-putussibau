@@ -364,9 +364,10 @@ validation of 3 MB is correct and the host is short of it. `PHP_INI_PERDIR`
 cannot be changed from `.env`. Raise it in your `php.ini` before testing media
 uploads.
 
-**Five `npm audit` criticals are pre-existing.** They are `shell-quote@1.9.0`,
-pulled in by `concurrently` from the starter kit. Nothing in this project added
-them, and `npm audit fix --force` would try to replace the package manager.
+**`npm audit` findings are checked before release.** `concurrently` was removed
+with the audit refactor, which also removed its `shell-quote` chain. Run
+`npm audit` for the current list; do not use `--force` without checking what it
+would replace.
 
 **Head tags live in two places.** With SSR off (D-26), `<Head>` in React never
 reaches a crawler, so Open Graph and Twitter Card tags are also rendered in

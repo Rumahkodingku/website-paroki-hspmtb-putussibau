@@ -3,10 +3,16 @@
 require_once __DIR__.'/Support.php';
 
 use App\Models\Document;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     Storage::fake('local');
+});
+
+afterEach(function () {
+    // The rate limiter lives in the array cache, which outlives a test.
+    Cache::flush();
 });
 
 it('serves a published document as a safe attachment', function () {
@@ -60,6 +66,17 @@ it('increments download_count on every attachment request', function () {
     $this->get(route('dokumen.unduh', $document))->assertOk();
 
     expect($document->fresh()->download_count)->toBe(2);
+});
+
+it('throttles repeated download requests', function () {
+    $document = Document::factory()->published()->create();
+    putDocumentFile($document);
+
+    for ($request = 0; $request < 30; $request++) {
+        $this->get(route('dokumen.unduh', $document))->assertOk();
+    }
+
+    $this->get(route('dokumen.unduh', $document))->assertTooManyRequests();
 });
 
 it('serves pdf inline without incrementing the counter', function () {

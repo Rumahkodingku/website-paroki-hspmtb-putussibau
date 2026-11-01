@@ -26,6 +26,25 @@ it('drops sensitive keys before writing the event', function () {
         ->and(json_encode($event->metadata))->not->toContain('hidden');
 });
 
+it('drops sensitive keys inside a nested snapshot value', function () {
+    app(RecordAuditEventAction::class)->handle([
+        'actor_type' => 'system',
+        'module' => 'settings',
+        'action' => 'settings_updated',
+        'result' => 'success',
+        'description' => 'Pengaturan diperbarui.',
+        'after' => [
+            'office_hours' => [
+                'monday' => ['open' => '08:00', 'password' => 'secret'],
+            ],
+        ],
+    ]);
+
+    $event = AuditEvent::query()->sole();
+
+    expect(json_encode($event->after))->not->toContain('secret');
+});
+
 it('summarizes rich text settings instead of storing the full HTML', function () {
     $this->actingAs(superAdmin());
 

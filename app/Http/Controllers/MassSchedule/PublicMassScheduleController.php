@@ -15,6 +15,7 @@ use App\Models\ScheduleNotice;
 use App\Models\SpecialMass;
 use App\Services\NextMassResolver;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -50,11 +51,24 @@ class PublicMassScheduleController extends Controller
         $location = $this->filteredLocation($request);
         $day = $this->filteredDay($request);
 
+        $regularMasses = $this->regularMasses($location, $day);
+        $specialMasses = $this->specialMasses($location);
+
         return Inertia::render('public/jadwal-misa', [
             'nextMass' => $this->nextMass($location),
-            'regularMasses' => $this->regularMasses($location, $day),
-            'specialMasses' => $this->specialMasses($location),
-            'notices' => $this->notices($location),
+            'regularMasses' => array_values(
+                PublicMassScheduleResource::collection($regularMasses)->resolve()
+            ),
+            'specialMasses' => array_values(
+                PublicSpecialMassResource::collection($specialMasses)->resolve()
+            ),
+            // A notice for one mass is shown only while that mass is on the
+            // page: the ids come from the same filtered lists above.
+            'notices' => $this->notices(
+                $location,
+                $regularMasses->modelKeys(),
+                $specialMasses->modelKeys(),
+            ),
             // Through the public resource, never the raw model. LocationResource
             // carries slug, coordinates, notes, is_active and the timestamps,
             // and handing it to a visitor would publish every one of them —
@@ -79,61 +93,58 @@ class PublicMassScheduleController extends Controller
      * The day filter is applied in SQL rather than in the browser, so a filtered
      * list really is the only list that left the server.
      *
-     * @return list<array<string, mixed>>
+     * @return Collection<int, MassSchedule>
      */
-    public function regularMasses(?Location $location, ?DayOfWeek $day): array
+    public function regularMasses(?Location $location, ?DayOfWeek $day): Collection
     {
-        return array_values(PublicMassScheduleResource::collection(
-            MassSchedule::query()
-                ->active()
-                ->when($location, fn (Builder $query) => $query->where('location_id', $location->getKey()))
-                ->when($day, fn (Builder $query) => $query->where('day_of_week', $day->value))
-                ->with('location')
-                ->orderBy('day_of_week')
-                ->orderBy('start_time')
-                ->get()
-        )->resolve());
+        return MassSchedule::query()
+            ->active()
+            ->when($location, fn (Builder $query) => $query->where('location_id', $location->getKey()))
+            ->when($day, fn (Builder $query) => $query->where('day_of_week', $day->value))
+            ->with('location')
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
     }
 
     /**
      * Special masses still to come, soonest first (MASS-02).
      *
-     * @return list<array<string, mixed>>
+     * @return Collection<int, SpecialMass>
      */
-    public function specialMasses(?Location $location): array
+    public function specialMasses(?Location $location): Collection
     {
-        return array_values(PublicSpecialMassResource::collection(
-            SpecialMass::query()
-                ->upcoming()
-                ->when($location, fn (Builder $query) => $query->where('location_id', $location->getKey()))
-                ->with('location')
-                ->orderBy('start_at')
-                ->get()
-        )->resolve());
+        return SpecialMass::query()
+            ->upcoming()
+            ->when($location, fn (Builder $query) => $query->where('location_id', $location->getKey()))
+            ->with('location')
+            ->orderBy('start_at')
+            ->get();
     }
 
     /**
      * Notices to show as a banner.
      *
-     * General notices always apply. A targeted notice applies only when the
-     * visitor is looking at that target: a notice about one schedule should not
-     * appear above an unfiltered list as though it concerned every mass there.
-     * That is what roadmap 7.1 means by showing notices "sesuai targetnya".
+     * General notices always apply. A targeted notice applies only when its
+     * target is on the page: the location being filtered, or a schedule or
+     * special mass present in the lists above.
      *
+     * @param  array<int, int|string>  $scheduleIds
+     * @param  array<int, int|string>  $specialMassIds
      * @return list<array<string, mixed>>
      */
-    public function notices(?Location $location): array
-    {
+    public function notices(
+        ?Location $location,
+        array $scheduleIds = [],
+        array $specialMassIds = [],
+    ): array {
         return array_values(PublicScheduleNoticeResource::collection(
             ScheduleNotice::query()
                 ->currentlyVisible()
-                // Two branches, and they have to be OR'd: either the notice has
-                // no target at all, or it names the location currently being
-                // filtered. Written as one group with a `->when()` inside it,
-                // the second condition is AND-ed onto the first and the group
-                // can never be true — a location-targeted notice would then be
-                // invisible on the one page it was written for.
-                ->where(function (Builder $targeted) use ($location): void {
+                // All branches have to be OR'd: a `->when()` inside the group
+                // ANDs its condition onto the general branch and makes the
+                // targeted notice invisible on the one page it was written for.
+                ->where(function (Builder $targeted) use ($location, $scheduleIds, $specialMassIds): void {
                     $targeted->where(function (Builder $general): void {
                         $general
                             ->whereNull('location_id')
@@ -143,6 +154,14 @@ class PublicMassScheduleController extends Controller
 
                     if ($location !== null) {
                         $targeted->orWhere('location_id', $location->getKey());
+                    }
+
+                    if ($scheduleIds !== []) {
+                        $targeted->orWhereIn('mass_schedule_id', $scheduleIds);
+                    }
+
+                    if ($specialMassIds !== []) {
+                        $targeted->orWhereIn('special_mass_id', $specialMassIds);
                     }
                 })
                 ->orderByDesc('starts_at')

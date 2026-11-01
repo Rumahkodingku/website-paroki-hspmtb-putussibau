@@ -151,6 +151,16 @@ it('closes registration when there is no form URL', function () {
 |--------------------------------------------------------------------------
 */
 
+it('rejects a phone that is not a phone number', function () {
+    $category = ServiceCategory::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('services.store'), servicePayload($category, [
+            'contact_phone' => 'bukan-nomor',
+        ]))
+        ->assertSessionHasErrors('contact_phone');
+});
+
 it('refuses to activate an emergency service without a contact phone', function () {
     $category = ServiceCategory::factory()->create();
 

@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Mail, MessageCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Image from '@/components/image';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
@@ -160,7 +160,7 @@ export default function StasiLingkunganShow({ area }: Props) {
                             </Text>
                         ) : null}
 
-                        {(area.mapsEmbedUrl || area.mapsUrl) ? (
+                        {area.mapsEmbedUrl || area.mapsUrl ? (
                             <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm [&_iframe]:min-h-72 [&>div]:rounded-none">
                                 <ContactMap
                                     embedUrl={area.mapsEmbedUrl}

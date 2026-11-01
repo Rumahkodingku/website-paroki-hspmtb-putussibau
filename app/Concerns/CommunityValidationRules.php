@@ -6,8 +6,8 @@ use App\Enums\CommunityStatus;
 use App\Enums\MediaStatus;
 use App\Models\Community;
 use App\Models\CommunityCategory;
+use App\Rules\PhoneNumberRule;
 use App\Services\HtmlSanitizer;
-use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -77,16 +77,7 @@ trait CommunityValidationRules
             'eligibility' => ['nullable', 'string', 'max:5000'],
             'joining_info' => ['nullable', 'string', 'max:5000'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => [
-                'nullable',
-                'string',
-                'max:50',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if (is_string($value) && trim($value) !== '' && ! PhoneNumber::isValid($value)) {
-                        $fail('Nomor telepon tidak dikenali. Gunakan angka, boleh dengan awalan 0 atau +62.');
-                    }
-                },
-            ],
+            'contact_phone' => ['nullable', 'string', 'max:50', new PhoneNumberRule],
             'show_contact' => ['required', 'boolean'],
 
             /*

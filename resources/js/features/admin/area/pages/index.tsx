@@ -9,6 +9,7 @@ import {
     ListToolbar,
     ResetFilters,
 } from '@/components/list-parts';
+import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
@@ -20,9 +21,10 @@ import {
 } from '@/routes/areas';
 import { areaColumns } from '../components/area-columns';
 import type { AreaRow, AreaTypeOption } from '../types';
+import type { Paginated } from '@/types';
 
 type Props = {
-    areas: AreaRow[];
+    areas: Paginated<AreaRow>;
     filters: {
         search: string;
         type: string;
@@ -79,8 +81,6 @@ export default function Index({
             direction: '',
         });
 
-    const nameById = new Map(areas.map((area) => [area.id, area.name]));
-
     return (
         <>
             <Head title="Area" />
@@ -132,7 +132,7 @@ export default function Index({
                 </ListToolbar>
 
                 <DataTable
-                    columns={areaColumns(nameById, (row) => (
+                    columns={areaColumns((row) => (
                         <RowActions
                             canUpdate={row.can.update}
                             canDelete={row.can.delete}
@@ -140,7 +140,7 @@ export default function Index({
                             onDelete={() => setDeleting(row)}
                         />
                     ))}
-                    rows={areas}
+                    rows={areas.data}
                     sort={filters.sort}
                     direction={filters.direction}
                     onSort={sortBy}
@@ -161,6 +161,12 @@ export default function Index({
                             }
                         />
                     }
+                />
+
+                <ListPagination
+                    meta={areas.meta}
+                    previous={areas.links.prev}
+                    next={areas.links.next}
                 />
             </div>
 

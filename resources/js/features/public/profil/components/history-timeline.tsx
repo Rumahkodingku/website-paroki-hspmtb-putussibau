@@ -5,7 +5,7 @@ import type { PublicHistoryItem } from '../types';
 
 export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
     return (
-        <ol className="relative">
+        <ol className="relative mt-10">
             {/* Garis timeline desktop */}
             <span
                 aria-hidden="true"
@@ -80,19 +80,24 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                                     as="p"
                                     variant="display-md"
                                     color="danger"
-                                    className="leading-none"
+                                    className="mb-4 leading-none"
+                                    italic
                                 >
                                     {year}
                                 </Text>
 
-                                <Text as="h3" variant="h4" className="mt-2">
+                                <Text
+                                    as="h3"
+                                    variant="h4"
+                                    className="mt-2 font-bold"
+                                >
                                     {item.title}
                                 </Text>
 
                                 {item.description ? (
                                     <RichText
                                         html={item.description}
-                                        className="mt-2 max-w-xl"
+                                        className="text-md mt-2 max-w-xl"
                                     />
                                 ) : null}
                             </div>

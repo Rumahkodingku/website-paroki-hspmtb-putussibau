@@ -22,7 +22,6 @@ class PublicParishServiceAreaResource extends JsonResource
         return [
             'content' => $this->content,
             'map' => $this->whenLoaded('mapMedia', fn () => $this->mediaUrl($this->mapMedia, 'large')),
-            'map_url' => $this->map_url,
         ];
     }
 }

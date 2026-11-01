@@ -131,15 +131,15 @@ class Event extends Model
     }
 
     /**
-     * Activities that have not finished their day yet.
+     * Activities that have not finished yet.
      *
-     * "Ahead" means from the start of today in the parish's timezone, not from
-     * now(): an activity that began an hour ago and has not finished is still
-     * something somebody might walk into, and one that began this morning
-     * belongs on today's list rather than yesterday's.
+     * An activity with an end time stays until that end time passes, so a
+     * retreat that started yesterday is still on the list today. One with no
+     * end time keeps its old rule: it belongs to its start day, from the start
+     * of today in the parish's timezone.
      *
-     * One definition, used by both /agenda and the homepage. A second copy of
-     * this boundary is how the two pages end up disagreeing at midnight.
+     * One definition, used by /agenda, the homepage and the dashboard. A second
+     * copy of this boundary is how those pages end up disagreeing at midnight.
      *
      * @param  Builder<Event>  $query
      * @return Builder<Event>
@@ -151,7 +151,15 @@ class Event extends Model
             ->startOfDay()
             ->utc();
 
-        return $query->where('start_at', '>=', $startOfToday);
+        $now = Carbon::now();
+
+        return $query->where(function (Builder $query) use ($startOfToday, $now): void {
+            $query->where(function (Builder $query) use ($startOfToday): void {
+                $query->whereNull('end_at')->where('start_at', '>=', $startOfToday);
+            })->orWhere(function (Builder $query) use ($now): void {
+                $query->whereNotNull('end_at')->where('end_at', '>=', $now);
+            });
+        });
     }
 
     /**

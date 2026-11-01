@@ -1,6 +1,16 @@
 import { Head } from '@inertiajs/react';
 import type { PublicEventDetail } from '../types';
 
+/**
+ * Serialize JSON-LD so no value can close the script element.
+ *
+ * A title of `</script><img onerror=...>` is valid plain text and reaches this
+ * component unchanged. The `<` escape keeps it inside the script as data.
+ */
+export function serializeJsonLd(data: Record<string, unknown>): string {
+    return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export function EventJsonLd({
     event,
     url,
@@ -75,7 +85,7 @@ export function EventJsonLd({
                 type="application/ld+json"
                 data-head-key="event-json-ld"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(data),
+                    __html: serializeJsonLd(data),
                 }}
             />
         </Head>

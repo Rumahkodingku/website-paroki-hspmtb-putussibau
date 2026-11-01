@@ -47,7 +47,7 @@ class AreaController extends Controller
         $status = $request->string('status')->toString();
 
         $areas = Area::query()
-            ->with(['parent', 'photoMedia'])
+            ->with(['parent', 'photoMedia.variants'])
             ->when($search !== '', fn (Builder $query) => $query
                 ->where('name', 'like', "%{$search}%"))
             ->when(
@@ -85,12 +85,11 @@ class AreaController extends Controller
                 ['areas.sort_order', 'asc'],
                 ['areas.name', 'asc'],
             ],
-        )->get();
+        )->paginate($this->perPage($request))
+            ->withQueryString();
 
         return Inertia::render('admin/area', [
-            // A non-paginated Resource::collection serialises to {data: [...]}
-            // (D-39), so it is resolved to a plain list.
-            'areas' => array_values(AreaResource::collection($areas)->resolve()),
+            'areas' => AreaResource::collection($areas),
             'filters' => [
                 'search' => $search,
                 'type' => $type,
@@ -129,7 +128,7 @@ class AreaController extends Controller
         Gate::authorize('update', $area);
 
         return Inertia::render('admin/area/ubah', [
-            'area' => AreaResource::make($area->load(['parent', 'photoMedia']))->resolve(),
+            'area' => AreaResource::make($area->load(['parent', 'photoMedia.variants']))->resolve(),
             'parents' => $this->parentOptions($area),
             ...$this->areaFormMeta(),
         ]);

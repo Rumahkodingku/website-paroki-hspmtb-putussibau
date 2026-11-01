@@ -309,7 +309,6 @@ test.describe('situs publik', () => {
             '/profil/sejarah',
             '/jadwal-misa',
             '/kontak',
-            '/design-system',
         ]) {
             await page.goto(url);
 
@@ -438,7 +437,6 @@ test.describe('tema publik', () => {
             '/',
             '/profil/sejarah',
             '/kontak',
-            '/design-system',
         ]) {
             await page.goto(url);
             await toggle(page).click();

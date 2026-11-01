@@ -45,6 +45,8 @@ class PublicParishProfileController extends Controller
                 'cover_url' => $profile->coverMedia?->url('large'),
                 'cover_alt' => $profile->cover_alt,
                 'video_embed_url' => YoutubeEmbed::url($profile->video_url),
+                'video_title' => $profile->video_title,
+                'video_description' => $profile->video_description,
             ],
         ]);
     }

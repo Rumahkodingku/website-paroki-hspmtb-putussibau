@@ -4,6 +4,8 @@ export type PublicParishProfile = {
     cover_url: string | null;
     cover_alt: string | null;
     video_embed_url: string | null;
+    video_title: string | null;
+    video_description: string | null;
 };
 
 export type PublicHistoryItem = {
@@ -19,7 +21,6 @@ export type PublicHistoryItem = {
 export type PublicServiceArea = {
     content: string | null;
     map: string | null;
-    map_url: string | null;
 };
 
 export type PublicPastor = {

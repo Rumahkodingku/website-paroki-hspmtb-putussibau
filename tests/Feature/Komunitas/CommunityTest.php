@@ -62,6 +62,16 @@ it('creates a community and lands on its edit page', function () {
         ->and($community->published_at)->toBeNull();
 });
 
+it('rejects a phone that is not a phone number', function () {
+    $category = CommunityCategory::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('communities.store'), communityPayload($category, [
+            'contact_phone' => 'bukan-nomor',
+        ]))
+        ->assertSessionHasErrors('contact_phone');
+});
+
 it('rejects invalid input and persists nothing', function () {
     $category = CommunityCategory::factory()->create();
 

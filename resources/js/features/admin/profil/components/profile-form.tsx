@@ -18,6 +18,8 @@ export function profileToFormData(
         cover_media_id: row.cover_media_id,
         cover_alt: row.cover_alt ?? '',
         video_url: row.video_url ?? '',
+        video_title: row.video_title ?? '',
+        video_description: row.video_description ?? '',
     };
 }
 
@@ -47,7 +49,7 @@ export function ProfileForm({
                 event.preventDefault();
                 onSubmit(form);
             }}
-            className="space-y-6"
+            className="mt-8 space-y-6"
         >
             <RichTextEditor
                 id="profile-description"
@@ -69,7 +71,7 @@ export function ProfileForm({
                     onChange={(value) =>
                         form.setData('established_year', value)
                     }
-                    placeholder="1956"
+                    placeholder="Contoh: 1939"
                 />
             </Field>
 
@@ -89,6 +91,36 @@ export function ProfileForm({
                 fieldName="cover_media_id"
                 removable
             />
+
+            <Field
+                id="profile-video-title"
+                label={labels.video_title ?? 'Judul video'}
+                hint={hints.video_title}
+                error={form.errors.video_title}
+            >
+                <FormInput
+                    id="profile-video-title"
+                    value={form.data.video_title}
+                    onChange={(value) => form.setData('video_title', value)}
+                    placeholder="Contoh: Proses Pembangunan Gereja"
+                />
+            </Field>
+
+            <Field
+                id="profile-video-description"
+                label={labels.video_description ?? 'Deskripsi singkat video'}
+                hint={hints.video_description}
+                error={form.errors.video_description}
+            >
+                <FormInput
+                    id="profile-video-description"
+                    value={form.data.video_description}
+                    onChange={(value) =>
+                        form.setData('video_description', value)
+                    }
+                    placeholder="Saksikan dokumentasi pembangunan gereja..."
+                />
+            </Field>
 
             <Field
                 id="profile-video-url"
