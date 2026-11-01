@@ -22,6 +22,15 @@ final class InstallationRunner
         'short_description',
         'motto_verse',
         'patron_saint',
+        'contact_address',
+        'contact_phone',
+        'contact_whatsapp',
+        'contact_email',
+        'maps_link',
+        'social_facebook',
+        'social_instagram',
+        'social_youtube',
+        'social_whatsapp_channel',
     ];
 
     public function __construct(

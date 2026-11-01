@@ -27,6 +27,7 @@ class PublicAreaCardResource extends JsonResource
             'slug' => $this->slug,
             'type' => $this->type->value,
             'type_label' => $this->type->label(),
+            'photoUrl' => $this->photoMedia?->url('medium'),
         ];
 
         if ($this->show_contact) {

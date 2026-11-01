@@ -125,10 +125,11 @@ class LocationController extends Controller
 
         $schedules = $location->massSchedules()->count();
         $specialMasses = $location->specialMasses()->count();
+        $livestreams = $location->livestreams()->count();
 
-        if ($schedules > 0 || $specialMasses > 0) {
+        if ($schedules > 0 || $specialMasses > 0 || $livestreams > 0) {
             return to_route('locations.index')->withErrors([
-                'location' => $this->occupiedMessage($schedules, $specialMasses),
+                'location' => $this->occupiedMessage($schedules, $specialMasses, $livestreams),
             ]);
         }
 
@@ -146,11 +147,11 @@ class LocationController extends Controller
     /**
      * The refusal, naming what is in the way.
      *
-     * Two separate counts because an admin who is told "this location has
-     * schedules" and then finds a special mass as well has learned nothing they
-     * can act on.
+     * Separate counts because an admin who is told "this location has
+     * schedules" and then finds a special mass or a livestream as well has
+     * learned nothing they can act on.
      */
-    private function occupiedMessage(int $schedules, int $specialMasses): string
+    private function occupiedMessage(int $schedules, int $specialMasses, int $livestreams): string
     {
         $parts = [];
 
@@ -167,6 +168,14 @@ class LocationController extends Controller
                 '{1} :count misa khusus|[2,*] :count misa khusus',
                 $specialMasses,
                 ['count' => $specialMasses]
+            );
+        }
+
+        if ($livestreams > 0) {
+            $parts[] = trans_choice(
+                '{1} :count livestreaming|[2,*] :count livestreaming',
+                $livestreams,
+                ['count' => $livestreams]
             );
         }
 

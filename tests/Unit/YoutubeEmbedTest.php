@@ -31,3 +31,18 @@ it('builds a privacy-friendly embed URL', function () {
         ->and(YoutubeEmbed::url('https://example.test/video'))->toBeNull()
         ->and(YoutubeEmbed::url(null))->toBeNull();
 });
+
+it('builds the public URLs from an already extracted id', function () {
+    expect(YoutubeEmbed::embedUrl('dQw4w9WgXcQ'))
+        ->toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+        ->and(YoutubeEmbed::watchUrl('dQw4w9WgXcQ'))
+        ->toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+        ->and(YoutubeEmbed::thumbnailUrl('dQw4w9WgXcQ'))
+        ->toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+});
+
+it('refuses to build a URL from an invalid id', function () {
+    expect(YoutubeEmbed::embedUrl('too-short'))->toBeNull()
+        ->and(YoutubeEmbed::watchUrl(null))->toBeNull()
+        ->and(YoutubeEmbed::thumbnailUrl('dQw4w9WgXcQ<script>'))->toBeNull();
+});

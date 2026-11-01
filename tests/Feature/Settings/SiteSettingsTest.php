@@ -54,7 +54,7 @@ test('a stored setting is returned', function () {
 
 test('a missing setting falls back to its configured default', function () {
     // Nothing is seeded, so an unset numeric toggle has to still be usable.
-    expect(settingsService()->get('home_news_limit'))->toBe(3)
+    expect(settingsService()->get('home_news_limit'))->toBe(4)
         ->and(settingsService()->get('home_show_gallery'))->toBeTrue();
 });
 
@@ -225,7 +225,7 @@ test('the page renders with every configured group', function () {
             ->has('meta')
             ->where('groups.identitas.parish_name', 'HSPMTB')
             // Unset keys still carry their defaults so the form can bind to them.
-            ->where('groups.beranda.home_news_limit', 3)
+            ->where('groups.beranda.home_news_limit', 4)
         );
 });
 
@@ -257,7 +257,7 @@ test('a value outside the documented range is rejected in Indonesian', function 
         ])
         ->assertSessionHasErrors('settings.home_news_limit');
 
-    expect(settingsService()->get('home_news_limit'))->toBe(3);
+    expect(settingsService()->get('home_news_limit'))->toBe(4);
 });
 
 test('an unknown key is rejected by the request', function () {
@@ -613,7 +613,7 @@ test('optional settings may all be left empty', function () {
 |--------------------------------------------------------------------------
 */
 
-test('the seeder writes only the two values PRD Lampiran D names', function () {
+test('the seeder writes the identity values and the homepage limits', function () {
     $this->seed(SiteSettingsSeeder::class);
 
     expect(SiteSetting::query()->pluck('value', 'key')->all())->toBe([
@@ -621,10 +621,13 @@ test('the seeder writes only the two values PRD Lampiran D names', function () {
         'terms_and_conditions_content' => '<p>Syarat dan Ketentuan ini mengatur penggunaan situs Paroki HSPMTB Putussibau. Dengan mengakses situs ini, Anda setuju untuk mematuhi ketentuan yang berlaku.</p><ul><li>Informasi di situs ini disediakan untuk kebutuhan pastoral dan informasi paroki.</li><li>Pengguna tidak boleh menyalahgunakan situs, termasuk menyebarkan konten yang melanggar hukum atau mengganggu pelayanan paroki.</li><li>Paroki dapat memperbarui isi situs dan ketentuan ini sewaktu-waktu.</li></ul><p>Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
         'parish_name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
         'parish_short_name' => 'HSPMTB',
+        'home_news_limit' => '4',
+        'home_events_limit' => '4',
+        'home_gallery_limit' => '6',
     ]);
 });
 
-test('the seeder files both values under identitas', function () {
+test('the seeder files identity values under identitas and limits under beranda', function () {
     $this->seed(SiteSettingsSeeder::class);
 
     expect(SiteSetting::query()->pluck('group', 'key')->all())
@@ -633,28 +636,38 @@ test('the seeder files both values under identitas', function () {
             'terms_and_conditions_content' => 'syarat',
             'parish_name' => 'identitas',
             'parish_short_name' => 'identitas',
+            'home_news_limit' => 'beranda',
+            'home_events_limit' => 'beranda',
+            'home_gallery_limit' => 'beranda',
         ]);
 });
 
-test('re-running the seeder does not undo an admin edit', function () {
+test('re-running the seeder does not undo an admin edit or replace the logo', function () {
     $this->seed(SiteSettingsSeeder::class);
 
-    settingsService()->setMany(['parish_short_name' => 'HSPTB-U']);
+    settingsService()->setMany([
+        'parish_short_name' => 'HSPTB-U',
+        'logo' => '42',
+        'home_news_limit' => 6,
+    ]);
 
     $this->seed(SiteSettingsSeeder::class);
 
-    expect(settingsService()->get('parish_short_name'))->toBe('HSPTB-U');
+    expect(settingsService()->get('parish_short_name'))->toBe('HSPTB-U')
+        ->and(settingsService()->get('logo'))->toBe('42')
+        ->and(settingsService()->get('home_news_limit'))->toBe(6);
 });
 
-test('only those two keys get a row, and unset keys stay unset', function () {
+test('only the seeded keys get a row, and logo stays unset', function () {
     $this->seed(SiteSettingsSeeder::class);
 
     $service = settingsService();
 
-    expect(SiteSetting::query()->count())->toBe(4);
-
-    // A key with a configured default is usable even with no row behind it.
-    expect($service->get('home_news_limit'))->toBe(3)
+    expect(SiteSetting::query()->count())->toBe(7)
+        ->and(SiteSetting::query()->where('key', 'logo')->exists())->toBeFalse()
+        ->and($service->get('home_news_limit'))->toBe(4)
+        ->and($service->get('home_events_limit'))->toBe(4)
+        ->and($service->get('home_gallery_limit'))->toBe(6)
         ->and($service->get('home_show_devotion'))->toBeTrue();
 
     // A text key with no default is genuinely unconfigured, and says so with

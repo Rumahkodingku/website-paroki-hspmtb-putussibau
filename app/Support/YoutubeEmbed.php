@@ -64,9 +64,41 @@ final class YoutubeEmbed
      */
     public static function url(?string $url): ?string
     {
-        $id = self::id($url);
+        return self::embedUrl(self::id($url));
+    }
+
+    /**
+     * The privacy-friendly embed URL for an already extracted video id.
+     */
+    public static function embedUrl(?string $videoId): ?string
+    {
+        $id = self::validId($videoId);
 
         return $id === null ? null : "https://www.youtube-nocookie.com/embed/{$id}";
+    }
+
+    /**
+     * The canonical YouTube watch URL for an already extracted video id.
+     */
+    public static function watchUrl(?string $videoId): ?string
+    {
+        $id = self::validId($videoId);
+
+        return $id === null ? null : "https://www.youtube.com/watch?v={$id}";
+    }
+
+    /**
+     * The YouTube thumbnail for an already extracted video id.
+     *
+     * hqdefault is the size YouTube has produced consistently for years;
+     * maxresdefault can be missing for older or low-resolution uploads. The UI
+     * crops it to 16:9 and the Image component handles a failed load.
+     */
+    public static function thumbnailUrl(?string $videoId): ?string
+    {
+        $id = self::validId($videoId);
+
+        return $id === null ? null : "https://i.ytimg.com/vi/{$id}/hqdefault.jpg";
     }
 
     private static function validId(?string $id): ?string

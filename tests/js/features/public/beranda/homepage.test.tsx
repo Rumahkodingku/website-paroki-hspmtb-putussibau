@@ -113,6 +113,7 @@ function props(overrides: Partial<HomepageProps> = {}): HomepageProps {
         services: [],
         galleryPhotos: [],
         galleryIllustrations: [],
+        liveStream: null,
         hero: {
             title: null,
             description: null,
@@ -127,6 +128,7 @@ function props(overrides: Partial<HomepageProps> = {}): HomepageProps {
             devotion: true,
             services: true,
             gallery: true,
+            livestreaming: true,
         },
         ...overrides,
     };
@@ -277,6 +279,7 @@ describe('Beranda', () => {
                 devotion: false,
                 services: false,
                 gallery: false,
+                livestreaming: false,
             },
         });
 

@@ -18,6 +18,7 @@ import {
     UserCog,
     UserRound,
     Users,
+    Video,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -36,6 +37,7 @@ import { index as serviceCategoriesIndex } from '@/routes/service-categories';
 import { index as communitiesIndex } from '@/routes/communities';
 import { index as communityCategoriesIndex } from '@/routes/community-categories';
 import { index as galleriesIndex } from '@/routes/galleries';
+import { index as livestreamsIndex } from '@/routes/livestreams';
 import { index as documentsIndex } from '@/routes/documents';
 import { index as documentCategoriesIndex } from '@/routes/document-categories';
 import { index as areasIndex } from '@/routes/areas';
@@ -91,6 +93,12 @@ export const PUBLICATION_ENTRIES: Entry[] = [
     { title: 'Berita', href: postsList(), icon: Globe },
     { title: 'Agenda', href: eventsList(), icon: CalendarClock },
     { title: 'Galeri', href: galleriesIndex(), icon: Images },
+    {
+        title: 'Livestreaming',
+        href: livestreamsIndex(),
+        icon: Video,
+        ability: 'livestreams.view',
+    },
     { title: 'Dokumen', href: documentsIndex(), icon: FileText },
 ];
 

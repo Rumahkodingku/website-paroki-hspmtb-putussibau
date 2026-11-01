@@ -106,6 +106,24 @@ export default function ReviewSummary({
                 <Row label="Patron santo" value={application.patron_saint} />
             </Section>
 
+            <Section title="Kontak">
+                <Row label="Alamat" value={application.contact_address} />
+                <Row label="Telepon" value={application.contact_phone} />
+                <Row label="WhatsApp" value={application.contact_whatsapp} />
+                <Row label="Surel" value={application.contact_email} />
+                <Row label="Tautan Google Maps" value={application.maps_link} />
+            </Section>
+
+            <Section title="Media sosial">
+                <Row label="Facebook" value={application.social_facebook} />
+                <Row label="Instagram" value={application.social_instagram} />
+                <Row label="YouTube" value={application.social_youtube} />
+                <Row
+                    label="Kanal WhatsApp"
+                    value={application.social_whatsapp_channel}
+                />
+            </Section>
+
             <Section title="Konfigurasi aplikasi">
                 <Row label="Nama aplikasi" value={meta.appName} />
                 <Row label="URL aplikasi" value={meta.appUrl} />

@@ -2,6 +2,7 @@
 
 use App\Enums\DayOfWeek;
 use App\Enums\LocationType;
+use App\Models\Livestream;
 use App\Models\Location;
 use App\Models\MassSchedule;
 use App\Models\ScheduleNotice;
@@ -143,6 +144,22 @@ it('refuses to delete a location that still has a special mass', function () {
         ->assertSessionHasErrors('location');
 
     expect($this->location->fresh()->trashed())->toBeFalse();
+});
+
+it('refuses to delete a location that is used by a livestream', function () {
+    Livestream::factory()->forLocation($this->location)->create();
+
+    $this->actingAs(superAdmin())
+        ->from(route('locations.index'))
+        ->delete(route('locations.destroy', $this->location))
+        ->assertRedirect(route('locations.index'))
+        ->assertSessionHasErrors('location');
+
+    expect($this->location->fresh()->trashed())->toBeFalse();
+
+    $message = session('errors')->first('location');
+
+    expect($message)->toContain('livestreaming');
 });
 
 it('names both counts in the refusal', function () {

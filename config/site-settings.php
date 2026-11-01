@@ -145,19 +145,21 @@ return [
     | Defaults
     |--------------------------------------------------------------------------
     |
-    | Returned when no row exists yet. Nothing is seeded into the table, so an
-    | unset setting and a deliberately blank setting stay distinguishable.
+    | Returned when no row exists yet. The seeder writes the initial identity
+    | and homepage-list values; these defaults cover a key whose row has not
+    | been created (or was removed) so the page still has a usable value.
     |
     | The two ranges below come from PRD Lampiran B: home_news_limit 3-6 and
-    | home_events_limit 3-5. The show_* defaults are an assumption, not from the
+    | home_events_limit 3-5. The initial 4/4/6 layout is the parish's choice,
+    | within those ranges. The show_* defaults are an assumption, not from the
     | document: a parish is expected to hide the blocks it does not use, so
     | everything starts visible. Recorded in D-23.
     |
     */
 
     'defaults' => [
-        'home_news_limit' => 3,
-        'home_events_limit' => 3,
+        'home_news_limit' => 4,
+        'home_events_limit' => 4,
         'home_gallery_limit' => 6,
         'home_show_devotion' => true,
         'home_show_gallery' => true,

@@ -89,6 +89,7 @@ export type PublicAreaCard = {
     slug: string;
     type: 'wilayah' | 'lingkungan' | 'stasi';
     type_label: string;
+    photoUrl: string | null;
     /** Present only when the area allows its leader's contact. */
     leader_name?: string | null;
     contact_phone?: string | null;

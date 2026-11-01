@@ -49,6 +49,15 @@ export type ApplicationValues = {
     short_description: string | null;
     motto_verse: string | null;
     patron_saint: string | null;
+    contact_address: string | null;
+    contact_phone: string | null;
+    contact_whatsapp: string | null;
+    contact_email: string | null;
+    maps_link: string | null;
+    social_facebook: string | null;
+    social_instagram: string | null;
+    social_youtube: string | null;
+    social_whatsapp_channel: string | null;
 };
 
 export type EmailValues = {

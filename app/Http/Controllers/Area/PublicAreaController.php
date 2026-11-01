@@ -33,7 +33,7 @@ class PublicAreaController extends Controller
     {
         $areas = Area::query()
             ->active()
-            ->with('parent')
+            ->with(['parent', 'photoMedia.variants'])
             ->ordered()
             ->get();
 

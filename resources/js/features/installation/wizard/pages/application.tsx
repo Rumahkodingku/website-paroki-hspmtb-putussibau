@@ -1,6 +1,11 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
 import { Field, FormLabel } from '@/components/form-fields';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +36,15 @@ export default function Application({ values, meta }: Props) {
         short_description: values.short_description ?? '',
         motto_verse: values.motto_verse ?? '',
         patron_saint: values.patron_saint ?? '',
+        contact_address: values.contact_address ?? '',
+        contact_phone: values.contact_phone ?? '',
+        contact_whatsapp: values.contact_whatsapp ?? '',
+        contact_email: values.contact_email ?? '',
+        maps_link: values.maps_link ?? '',
+        social_facebook: values.social_facebook ?? '',
+        social_instagram: values.social_instagram ?? '',
+        social_youtube: values.social_youtube ?? '',
+        social_whatsapp_channel: values.social_whatsapp_channel ?? '',
         app_name: meta.appName ?? '',
         app_url: meta.appUrl ?? '',
         timezone: meta.timezone ?? 'Asia/Pontianak',
@@ -216,6 +230,241 @@ export default function Application({ values, meta }: Props) {
                             {form.data.motto_verse.length}/500 karakter
                         </Text>
                     </div>
+
+                    <Collapsible
+                        defaultOpen={false}
+                        className="group rounded-xl border border-border"
+                    >
+                        <CollapsibleTrigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-sm font-semibold">
+                                    Kontak
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    Opsional. Alamat, telepon, WhatsApp, surel,
+                                    dan tautan Google Maps paroki.
+                                </span>
+                            </div>
+                            <ChevronDown
+                                className="size-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                                aria-hidden="true"
+                            />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="border-t border-border px-4 py-4">
+                            <div className="flex flex-col gap-5">
+                                <div className="flex flex-col gap-2">
+                                    <FormLabel
+                                        htmlFor="contact_address"
+                                        error={form.errors.contact_address}
+                                    >
+                                        Alamat
+                                    </FormLabel>
+                                    <Textarea
+                                        id="contact_address"
+                                        name="contact_address"
+                                        rows={3}
+                                        value={form.data.contact_address}
+                                        onChange={setField('contact_address')}
+                                        maxLength={2048}
+                                        aria-invalid={Boolean(
+                                            form.errors.contact_address,
+                                        )}
+                                        className="min-h-20 resize-y border-border shadow-none focus-visible:border-primary"
+                                        placeholder="Alamat sekretariat paroki"
+                                    />
+                                </div>
+
+                                <div className="grid gap-5 sm:grid-cols-2">
+                                    <Field
+                                        id="contact_phone"
+                                        label="Telepon"
+                                        error={form.errors.contact_phone}
+                                    >
+                                        <Input
+                                            id="contact_phone"
+                                            name="contact_phone"
+                                            value={form.data.contact_phone}
+                                            onChange={setField('contact_phone')}
+                                            maxLength={32}
+                                            aria-invalid={Boolean(
+                                                form.errors.contact_phone,
+                                            )}
+                                            className="h-11"
+                                            placeholder="0561-..."
+                                        />
+                                    </Field>
+
+                                    <Field
+                                        id="contact_whatsapp"
+                                        label="No WhatsApp"
+                                        error={form.errors.contact_whatsapp}
+                                    >
+                                        <Input
+                                            id="contact_whatsapp"
+                                            name="contact_whatsapp"
+                                            value={form.data.contact_whatsapp}
+                                            onChange={setField(
+                                                'contact_whatsapp',
+                                            )}
+                                            maxLength={32}
+                                            aria-invalid={Boolean(
+                                                form.errors.contact_whatsapp,
+                                            )}
+                                            className="h-11"
+                                            placeholder="0812..."
+                                        />
+                                    </Field>
+
+                                    <Field
+                                        id="contact_email"
+                                        label="Surel / Email"
+                                        error={form.errors.contact_email}
+                                    >
+                                        <Input
+                                            id="contact_email"
+                                            name="contact_email"
+                                            type="email"
+                                            value={form.data.contact_email}
+                                            onChange={setField('contact_email')}
+                                            maxLength={255}
+                                            aria-invalid={Boolean(
+                                                form.errors.contact_email,
+                                            )}
+                                            className="h-11"
+                                            placeholder="paroki@example.org"
+                                        />
+                                    </Field>
+
+                                    <Field
+                                        id="maps_link"
+                                        label="Tautan Full Google Maps"
+                                        error={form.errors.maps_link}
+                                    >
+                                        <Input
+                                            id="maps_link"
+                                            name="maps_link"
+                                            type="url"
+                                            value={form.data.maps_link}
+                                            onChange={setField('maps_link')}
+                                            maxLength={2048}
+                                            aria-invalid={Boolean(
+                                                form.errors.maps_link,
+                                            )}
+                                            className="h-11"
+                                            placeholder="https://www.google.com/maps/..."
+                                        />
+                                    </Field>
+                                </div>
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+
+                    <Collapsible
+                        defaultOpen={false}
+                        className="group rounded-xl border border-border"
+                    >
+                        <CollapsibleTrigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-sm font-semibold">
+                                    Media Sosial
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    Opsional. Tautan akun media sosial paroki.
+                                </span>
+                            </div>
+                            <ChevronDown
+                                className="size-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                                aria-hidden="true"
+                            />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="border-t border-border px-4 py-4">
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <Field
+                                    id="social_facebook"
+                                    label="Facebook"
+                                    error={form.errors.social_facebook}
+                                >
+                                    <Input
+                                        id="social_facebook"
+                                        name="social_facebook"
+                                        type="url"
+                                        value={form.data.social_facebook}
+                                        onChange={setField('social_facebook')}
+                                        maxLength={255}
+                                        aria-invalid={Boolean(
+                                            form.errors.social_facebook,
+                                        )}
+                                        className="h-11"
+                                        placeholder="https://facebook.com/..."
+                                    />
+                                </Field>
+
+                                <Field
+                                    id="social_instagram"
+                                    label="Instagram"
+                                    error={form.errors.social_instagram}
+                                >
+                                    <Input
+                                        id="social_instagram"
+                                        name="social_instagram"
+                                        type="url"
+                                        value={form.data.social_instagram}
+                                        onChange={setField('social_instagram')}
+                                        maxLength={255}
+                                        aria-invalid={Boolean(
+                                            form.errors.social_instagram,
+                                        )}
+                                        className="h-11"
+                                        placeholder="https://instagram.com/..."
+                                    />
+                                </Field>
+
+                                <Field
+                                    id="social_youtube"
+                                    label="Youtube"
+                                    error={form.errors.social_youtube}
+                                >
+                                    <Input
+                                        id="social_youtube"
+                                        name="social_youtube"
+                                        type="url"
+                                        value={form.data.social_youtube}
+                                        onChange={setField('social_youtube')}
+                                        maxLength={255}
+                                        aria-invalid={Boolean(
+                                            form.errors.social_youtube,
+                                        )}
+                                        className="h-11"
+                                        placeholder="https://youtube.com/..."
+                                    />
+                                </Field>
+
+                                <Field
+                                    id="social_whatsapp_channel"
+                                    label="Kanal WhatsApp"
+                                    error={form.errors.social_whatsapp_channel}
+                                >
+                                    <Input
+                                        id="social_whatsapp_channel"
+                                        name="social_whatsapp_channel"
+                                        type="url"
+                                        value={
+                                            form.data.social_whatsapp_channel
+                                        }
+                                        onChange={setField(
+                                            'social_whatsapp_channel',
+                                        )}
+                                        maxLength={255}
+                                        aria-invalid={Boolean(
+                                            form.errors.social_whatsapp_channel,
+                                        )}
+                                        className="h-11"
+                                        placeholder="https://whatsapp.com/channel/..."
+                                    />
+                                </Field>
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
 
                     <div className="grid gap-5 sm:grid-cols-2">
                         <Field
