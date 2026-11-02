@@ -117,11 +117,19 @@ export const DESKTOP_ENTRIES: NavItem[] = [
     { kind: 'group', label: 'Pelayanan', children: PELAYANAN_CHILDREN },
     {
         kind: 'link',
-        entry: { label: 'Berita', href: berita(), match: 'section' },
+        entry: {
+            label: 'Berita & Artikel',
+            href: berita(),
+            match: 'section',
+        },
     },
     {
         kind: 'link',
-        entry: { label: 'Kontak', href: kontak(), match: 'section' },
+        entry: {
+            label: 'Kontak',
+            href: kontak(),
+            match: 'section',
+        },
     },
 ];
 

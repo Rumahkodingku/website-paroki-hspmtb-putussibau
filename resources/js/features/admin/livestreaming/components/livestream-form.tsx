@@ -196,41 +196,45 @@ export function LivestreamForm({
                     />
                 </Field>
 
-                <Field
-                    id="livestream-scheduled-at"
-                    label={labels.scheduled_at ?? 'Jadwal Siaran'}
-                    hint={hints.scheduled_at}
-                    error={form.errors.scheduled_at}
-                >
-                    <DateTimePicker
+                <div className="md:col-span-2">
+                    <Field
                         id="livestream-scheduled-at"
-                        value={form.data.scheduled_at}
-                        onChange={(value) =>
-                            form.setData('scheduled_at', value)
-                        }
-                    />
-                </Field>
+                        label={labels.scheduled_at ?? 'Jadwal Siaran'}
+                        hint={hints.scheduled_at}
+                        error={form.errors.scheduled_at}
+                    >
+                        <DateTimePicker
+                            id="livestream-scheduled-at"
+                            value={form.data.scheduled_at}
+                            onChange={(value) =>
+                                form.setData('scheduled_at', value)
+                            }
+                        />
+                    </Field>
+                </div>
 
-                <Field
-                    id="livestream-status"
-                    label={labels.status ?? 'Status Publikasi'}
-                    hint={hints.status}
-                    error={form.errors.status}
-                    required
-                >
-                    <ChoiceSelect
+                <div className="md:col-span-2">
+                    <Field
                         id="livestream-status"
-                        value={form.data.status}
-                        onChange={(value) =>
-                            form.setData(
-                                'status',
-                                value as LivestreamEditorialStatus,
-                            )
-                        }
-                        options={statuses}
-                        disabled={isLive}
-                    />
-                </Field>
+                        label={labels.status ?? 'Status Publikasi'}
+                        hint={hints.status}
+                        error={form.errors.status}
+                        required
+                    >
+                        <ChoiceSelect
+                            id="livestream-status"
+                            value={form.data.status}
+                            onChange={(value) =>
+                                form.setData(
+                                    'status',
+                                    value as LivestreamEditorialStatus,
+                                )
+                            }
+                            options={statuses}
+                            disabled={isLive}
+                        />
+                    </Field>
+                </div>
 
                 <div className="space-y-2 border-t pt-6 md:col-span-2">
                     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -254,18 +258,22 @@ export function LivestreamForm({
                     </div>
                 </div>
 
-                <Field
-                    id="livestream-recorded-at"
-                    label={labels.recorded_at ?? 'Waktu Rekaman'}
-                    hint={hints.recorded_at}
-                    error={form.errors.recorded_at}
-                >
-                    <DateTimePicker
+                <div className="md:col-span-2">
+                    <Field
                         id="livestream-recorded-at"
-                        value={form.data.recorded_at}
-                        onChange={(value) => form.setData('recorded_at', value)}
-                    />
-                </Field>
+                        label={labels.recorded_at ?? 'Waktu Rekaman'}
+                        hint={hints.recorded_at}
+                        error={form.errors.recorded_at}
+                    >
+                        <DateTimePicker
+                            id="livestream-recorded-at"
+                            value={form.data.recorded_at}
+                            onChange={(value) =>
+                                form.setData('recorded_at', value)
+                            }
+                        />
+                    </Field>
+                </div>
             </div>
 
             <FormActions

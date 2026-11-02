@@ -44,7 +44,7 @@ const DRAWER_MENU = [
 
 const DESKTOP_LINKS = [
     { label: 'Beranda', href: '/' },
-    { label: 'Berita', href: '/berita' },
+    { label: 'Berita & Artikel', href: '/berita' },
     { label: 'Kontak', href: '/kontak' },
 ];
 
