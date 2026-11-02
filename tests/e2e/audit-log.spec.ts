@@ -90,6 +90,6 @@ test.describe('audit log', () => {
 
         await page.goto('/admin/audit-log');
 
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 });

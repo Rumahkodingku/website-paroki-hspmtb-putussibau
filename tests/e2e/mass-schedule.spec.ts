@@ -23,7 +23,7 @@ import { resetLoginRateLimit, signIn } from './support/session';
  * tests/e2e/.auth.json, which `php artisan app:e2e:prepare` writes (D-29 §5).
  */
 
-const LOKASI = 'Gereja Paroki E2E';
+const LOKASI = 'Gereja Paroki Mass E2E';
 
 test.describe('jadwal misa publik', () => {
     test('halaman memuat kartu Misa Berikutnya dan kedua tab', async ({
@@ -157,12 +157,14 @@ test.describe('jadwal misa publik', () => {
     }) => {
         await page.goto('/');
 
-        // AC-MASS-1: Beranda → menu → Jadwal Misa.
-        await page
-            .getByRole('navigation', { name: 'Navigasi utama' })
-            .getByRole('link', { name: 'Jadwal Misa' })
-            .first()
-            .click();
+        // AC-MASS-1: Beranda → menu → Jadwal Misa. Jadwal Misa sits inside
+        // the Ibadah group, so the group has to be opened first.
+        const navigation = page.getByRole('navigation', {
+            name: 'Navigasi utama',
+        });
+
+        await navigation.getByRole('button', { name: 'Ibadah' }).click();
+        await navigation.getByRole('link', { name: 'Jadwal Misa' }).click();
 
         await expect(page).toHaveURL(/\/jadwal-misa$/);
     });
@@ -381,6 +383,6 @@ test.describe('jadwal misa admin', () => {
 
         await page.goto('/admin/jadwal-misa');
 
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 });

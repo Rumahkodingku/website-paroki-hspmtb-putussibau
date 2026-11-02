@@ -58,11 +58,12 @@ test.describe('pengaturan situs', () => {
         await expect(page.locator('input#setting-favicon')).toHaveCount(0);
     });
 
-    test('field situs web berada di tab Media Sosial', async ({ page }) => {
+    test('tab Media Sosial menampilkan kolom media sosial', async ({ page }) => {
         await page.goto('/admin/pengaturan');
 
         await page.getByRole('tab', { name: 'Media Sosial' }).click();
-        await expect(page.getByText('Situs web paroki')).toBeVisible();
+        await expect(page.locator('#setting-social_facebook')).toBeVisible();
+        await expect(page.locator('#setting-social_instagram')).toBeVisible();
     });
 
     test('editor rich text termuat saat tab privasi dibuka', async ({
@@ -110,7 +111,7 @@ test.describe('pengaturan situs', () => {
                     response.url().includes('/admin/pengaturan') &&
                     ['POST', 'PUT'].includes(response.request().method()),
             ),
-            page.getByTestId('save-settings-button').click(),
+            page.getByRole('button', { name: 'Simpan pengaturan' }).click(),
         ]);
 
         await page.reload();
@@ -130,6 +131,6 @@ test.describe('pengaturan situs', () => {
 
         await page.goto('/admin/pengaturan');
 
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 });

@@ -46,6 +46,7 @@ return [
         'galleries' => 'Galeri',
         'gallery_photos' => 'Foto Galeri',
         'livestreams' => 'Livestreaming',
+        'livestream_categories' => 'Kategori Livestreaming',
         'backups' => 'Backup & Pemulihan',
     ],
 
