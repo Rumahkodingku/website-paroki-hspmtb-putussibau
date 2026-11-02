@@ -54,16 +54,17 @@ test('ci:check runs every gate the phase claims to have', function () {
     $scripts = composerScripts();
 
     // T29 TypeScript, T30 ESLint, T31 Pint, T32 Larastan, the Vitest suite, and
-    // the Pest suite.
-    //
-    // `npm run test:unit` is named rather than relying on the bare `test`
-    // assertion below: that substring is satisfied by @test alone, so without it
-    // the frontend suite could be dropped from the gate and this file would
-    // still pass.
+    // the Pest suite. `npm run check` owns the frontend half; naming it alone
+    // would let its contents shrink silently, so the package script is checked
+    // too.
     expect($scripts['ci:check'] ?? '')->toContain('npm run check')
-        ->toContain('npm run types:check')
-        ->toContain('npm run test:unit')
         ->toContain('test');
+
+    $package = json_decode((string) file_get_contents(base_path('package.json')), true);
+
+    expect($package['scripts']['check'] ?? '')
+        ->toContain('types:check')
+        ->toContain('test:unit');
 });
 
 test('the Playwright suite stays out of ci:check and out of pre-commit', function () {

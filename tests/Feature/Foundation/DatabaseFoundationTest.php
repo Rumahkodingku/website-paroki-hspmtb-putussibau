@@ -141,9 +141,8 @@ test('the seeder creates no fabricated parish or admin data', function () {
         ->and(User::query()->where('email', 'test@example.org')->exists())->toBeFalse()
         ->and(User::query()->where('name', 'Test User')->exists())->toBeFalse();
 
-    // site_settings was asserted empty while seeding was still undecided. PRD
-    // Lampiran D settles it: exactly two keys may exist, both quoted from the
-    // document. Anything beyond that pair would be fabricated parish data.
+    // Site identity is written by the installation wizard, not the seeder. The
+    // only settings a fresh migration may insert are the two legal pages.
     expect(DB::table('site_settings')->pluck('key')->sort()->values()->all())
-        ->toBe(['parish_name', 'parish_short_name', 'privacy_policy_content', 'terms_and_conditions_content']);
+        ->toBe(['privacy_policy_content', 'terms_and_conditions_content']);
 });

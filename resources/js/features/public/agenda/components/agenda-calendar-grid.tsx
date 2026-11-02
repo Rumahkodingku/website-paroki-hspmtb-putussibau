@@ -51,19 +51,6 @@ export function AgendaCalendarGrid({
 
                                 const isCurrentDate = day.key === today;
 
-                                const categoryColors = [
-                                    ...new Set(
-                                        dayEvents
-                                            .map(
-                                                (event) =>
-                                                    event.category?.color_value,
-                                            )
-                                            .filter((color): color is string =>
-                                                Boolean(color),
-                                            ),
-                                    ),
-                                ].slice(0, 3);
-
                                 return (
                                     <td
                                         key={
@@ -115,28 +102,11 @@ export function AgendaCalendarGrid({
                                                 {day.date}
                                             </span>
 
-                                            {/* Category indicators */}
-                                            <span
-                                                aria-hidden="true"
-                                                className="flex min-h-1.5 items-center justify-center gap-0.5 sm:ml-1 sm:justify-start"
-                                            >
-                                                {categoryColors.map((color) => (
-                                                    <span
-                                                        key={color}
-                                                        className="size-1 rounded-full sm:size-1.5"
-                                                        style={{
-                                                            backgroundColor:
-                                                                color,
-                                                        }}
-                                                    />
-                                                ))}
-
-                                                {dayEvents.length > 3 && (
-                                                    <span className="hidden text-[9px] text-muted-foreground sm:inline">
-                                                        +{dayEvents.length - 3}
-                                                    </span>
-                                                )}
-                                            </span>
+                                            {dayEvents.length > 3 && (
+                                                <span className="hidden text-[9px] text-muted-foreground sm:inline">
+                                                    +{dayEvents.length - 3}
+                                                </span>
+                                            )}
 
                                             {/* Event titles are hidden on mobile
                                                 to preserve equal calendar cells. */}

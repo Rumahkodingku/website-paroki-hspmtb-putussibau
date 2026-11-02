@@ -4,6 +4,8 @@ export type PublicParishProfile = {
     cover_url: string | null;
     cover_alt: string | null;
     video_embed_url: string | null;
+    video_title: string | null;
+    video_description: string | null;
 };
 
 export type PublicHistoryItem = {
@@ -19,7 +21,6 @@ export type PublicHistoryItem = {
 export type PublicServiceArea = {
     content: string | null;
     map: string | null;
-    map_url: string | null;
 };
 
 export type PublicPastor = {
@@ -88,6 +89,7 @@ export type PublicAreaCard = {
     slug: string;
     type: 'wilayah' | 'lingkungan' | 'stasi';
     type_label: string;
+    photoUrl: string | null;
     /** Present only when the area allows its leader's contact. */
     leader_name?: string | null;
     contact_phone?: string | null;
@@ -117,8 +119,13 @@ export type PublicAreaDetail = {
     type_label: string;
     description: string | null;
     address: string | null;
+    contact_email: string | null;
+    contact_whatsapp: string | null;
+    photoUrl: string | null;
     /** Finished map link, or null; decided server-side by Area::mapsUrl(). */
     mapsUrl: string | null;
+    /** Embeddable map URL, or null; decided server-side by Area::mapsEmbedUrl(). */
+    mapsEmbedUrl: string | null;
     parent: {
         id: number;
         name: string;

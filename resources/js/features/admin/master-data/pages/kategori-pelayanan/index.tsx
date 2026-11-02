@@ -7,11 +7,11 @@ import {
     ListEmpty,
     ListHeader,
     ListToolbar,
+    StatusBadge,
 } from '@/components/list-parts';
 import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
 import { Text } from '@/components/text';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 import {
@@ -40,7 +40,7 @@ const STATUS_OPTIONS = [
     { value: 'inactive', label: 'Nonaktif' },
 ];
 
-export default function Index({ categories, filters, labels }: Props) {
+export default function Index({ categories, filters }: Props) {
     const [deleting, setDeleting] = useState<ServiceCategoryRow | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -92,7 +92,7 @@ export default function Index({ categories, filters, labels }: Props) {
         },
         {
             id: 'services_count',
-            header: labels.services_count ?? 'Jumlah layanan',
+            header: 'Jumlah Layanan',
             cell: ({ row }) => row.original.services_count ?? '—',
         },
         {
@@ -100,13 +100,7 @@ export default function Index({ categories, filters, labels }: Props) {
             accessorKey: 'is_active',
             header: 'Status',
             sortKey: 'is_active',
-            cell: ({ row }) => (
-                <Badge
-                    variant={row.original.is_active ? 'default' : 'secondary'}
-                >
-                    {row.original.is_active ? 'Aktif' : 'Nonaktif'}
-                </Badge>
-            ),
+            cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
         },
         {
             id: 'sort_order',
@@ -121,7 +115,10 @@ export default function Index({ categories, filters, labels }: Props) {
             cell: ({ row }) => (
                 <RowActions
                     canUpdate={row.original.can.update}
-                    canDelete={row.original.can.delete}
+                    canDelete={
+                        row.original.can.delete &&
+                        (row.original.services_count ?? 0) === 0
+                    }
                     updateHref={editCategory(row.original.id)}
                     onDelete={() => setDeleting(row.original)}
                 />
@@ -131,11 +128,11 @@ export default function Index({ categories, filters, labels }: Props) {
 
     return (
         <>
-            <Head title="Kategori Pelayanan" />
+            <Head title="Kategori Layanan" />
 
             <div className="space-y-6 p-6">
                 <ListHeader
-                    title="Kategori Pelayanan"
+                    title="Kategori Layanan"
                     description="Kelola kategori yang mengelompokkan layanan pada halaman publik."
                     action={
                         <Button asChild>
@@ -220,6 +217,6 @@ Index.layout = {
     breadcrumbs: [
         { title: 'Beranda', href: dashboard() },
         { title: 'Master Data' },
-        { title: 'Kategori Pelayanan', href: categoriesIndex() },
+        { title: 'Kategori Layanan', href: categoriesIndex() },
     ],
 };

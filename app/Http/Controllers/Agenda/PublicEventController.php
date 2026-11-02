@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Agenda;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Http\Resources\Public\Agenda\PublicEventCategoryResource;
 use App\Http\Resources\Public\Agenda\PublicEventDetailResource;
 use App\Http\Resources\Public\Agenda\PublicEventResource;
 use App\Models\Event;
 use App\Models\EventCategory;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,8 +34,6 @@ use Inertia\Response;
  */
 class PublicEventController extends Controller
 {
-    use ResolvesNestedResources;
-
     /**
      * How many activities the upcoming list asks for.
      */
@@ -121,6 +119,9 @@ class PublicEventController extends Controller
      */
     private function monthly(Carbon $month, ?EventCategory $category): array
     {
+        $startOfMonth = $month->copy()->startOfMonth()->utc();
+        $endOfMonth = $month->copy()->endOfMonth()->utc();
+
         return array_values(PublicEventResource::collection(
             Event::query()
                 ->published()
@@ -130,10 +131,16 @@ class PublicEventController extends Controller
                 ->with(['category', 'location'])
                 ->when($category !== null, fn (Builder $query) => $query
                     ->where('event_category_id', $category->getKey()))
-                ->whereBetween('start_at', [
-                    $month->copy()->startOfMonth()->utc(),
-                    $month->copy()->endOfMonth()->utc(),
-                ])
+                // A multi-day activity belongs to every month it overlaps, not
+                // only the month it starts in.
+                ->where('start_at', '<=', $endOfMonth)
+                ->where(function (Builder $query) use ($startOfMonth): void {
+                    $query->where(function (Builder $query) use ($startOfMonth): void {
+                        $query->whereNull('end_at')->where('start_at', '>=', $startOfMonth);
+                    })->orWhere(function (Builder $query) use ($startOfMonth): void {
+                        $query->whereNotNull('end_at')->where('end_at', '>=', $startOfMonth);
+                    });
+                })
                 ->orderBy('start_at')
                 ->orderBy('id')
                 ->get()
@@ -199,14 +206,18 @@ class PublicEventController extends Controller
     private function filteredMonth(string $value): Carbon
     {
         $timezone = (string) config('app.display_timezone');
+        $current = Carbon::now()->setTimezone($timezone)->startOfMonth();
 
-        if (preg_match('/^\d{4}-\d{2}$/', $value) === 1) {
-            // The regex has already reduced this to `YYYY-MM-01`, so parse
-            // cannot fail and createFromFormat's false branch would be dead
-            // code that still has to be handled.
-            return Carbon::parse($value.'-01', $timezone)->startOfMonth();
+        if (preg_match('/^\d{4}-\d{2}$/', $value) !== 1) {
+            return $current;
         }
 
-        return Carbon::now()->setTimezone($timezone)->startOfMonth();
+        try {
+            $month = Carbon::parse($value.'-01', $timezone)->startOfMonth();
+        } catch (InvalidFormatException) {
+            return $current;
+        }
+
+        return $month->format('Y-m') === $value ? $month : $current;
     }
 }

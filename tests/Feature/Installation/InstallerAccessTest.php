@@ -23,7 +23,7 @@ test('the welcome step renders on a fresh installation', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('installation/wizard')
             ->where('currentStep', 0)
-            ->has('steps', 7));
+            ->has('steps', 8));
 });
 
 test('the installer still opens when the configured session driver is database', function () {
@@ -75,6 +75,21 @@ test('the review step redirects to the missing prerequisite step', function () {
     $this->get('/install/review')->assertRedirect(route('install.database'));
 
     $this->withSession(['installation.database_verified_at' => now()->toIso8601String()])
+        ->get('/install/review')
+        ->assertRedirect(route('install.email'));
+
+    $this->withSession([
+        'installation.database_verified_at' => now()->toIso8601String(),
+        'installation.email' => [
+            'mailer' => 'smtp',
+            'host' => '127.0.0.1',
+            'port' => 1025,
+            'username' => null,
+            'password' => null,
+            'from_address' => 'noreply@paroki-hspmtb.local',
+            'from_name' => 'Aplikasi Uji',
+        ],
+    ])
         ->get('/install/review')
         ->assertRedirect(route('install.super-admin'));
 });

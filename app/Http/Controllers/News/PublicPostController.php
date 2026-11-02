@@ -4,7 +4,6 @@ namespace App\Http\Controllers\News;
 
 use App\Actions\News\RecordPostViewAction;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Http\Resources\Public\News\PublicPostCategoryResource;
 use App\Http\Resources\Public\News\PublicPostDetailResource;
 use App\Http\Resources\Public\News\PublicPostResource;
@@ -33,8 +32,6 @@ use Inertia\Response;
  */
 class PublicPostController extends Controller
 {
-    use ResolvesNestedResources;
-
     /**
      * POST-07. Two, and capped in the query as well as in the form request.
      */

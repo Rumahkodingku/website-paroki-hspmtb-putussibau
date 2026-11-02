@@ -53,6 +53,8 @@ export type ParishProfileRow = {
     cover_alt: string | null;
     cover_url: string | null;
     video_url: string | null;
+    video_title: string | null;
+    video_description: string | null;
     can: { update: boolean };
 };
 
@@ -62,6 +64,8 @@ export type ParishProfileFormData = {
     cover_media_id: number | null;
     cover_alt: string;
     video_url: string;
+    video_title: string;
+    video_description: string;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -72,7 +76,6 @@ export type ParishServiceAreaRow = {
     id: number | null;
     content: string | null;
     map_media_id: number | null;
-    map_url: string | null;
     map_media_url: string | null;
     is_published: boolean;
     can: { update: boolean };
@@ -81,7 +84,6 @@ export type ParishServiceAreaRow = {
 export type ParishServiceAreaFormData = {
     content: string;
     map_media_id: number | null;
-    map_url: string;
     is_published: boolean;
 };
 

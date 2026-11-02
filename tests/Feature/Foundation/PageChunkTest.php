@@ -45,8 +45,8 @@ test('a public index page resolves under the public audience', function () {
 });
 
 test('a public feature page keeps its file name in the page name', function () {
-    expect(PageChunk::source('public/auth/login'))
-        ->toBe('resources/js/features/public/auth/pages/login.tsx');
+    expect(PageChunk::source('shared/auth/login'))
+        ->toBe('resources/js/features/shared/auth/pages/login.tsx');
 });
 
 test('an index fallback is not offered to a name with three segments', function () {
@@ -73,11 +73,11 @@ test('every page in the application is discoverable by name', function () {
     expect(array_keys($pages))->toContain(
         'public/beranda',
         'public/error',
-        'public/auth/login',
-        'public/auth/forgot-password',
-        'public/auth/reset-password',
-        'public/auth/confirm-password',
-        'public/auth/verify-email',
+        'shared/auth/login',
+        'shared/auth/forgot-password',
+        'shared/auth/reset-password',
+        'shared/auth/confirm-password',
+        'shared/auth/verify-email',
         'admin/dashboard',
         'admin/pengaturan',
         'admin/akun/profile',

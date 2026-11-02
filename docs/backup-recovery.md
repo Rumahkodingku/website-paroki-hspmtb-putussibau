@@ -21,6 +21,14 @@ Backup disimpan di disk privat `backups` (`storage/app/private/backups`).
 Backup lokal **bukan** pengganti backup infrastruktur atau salinan di lokasi
 lain. Jika server hilang, backup di server yang sama juga hilang.
 
+Sebelum backup penuh dimulai, aplikasi menghitung total ukuran file sumber dan
+menolak jika sisa disk kurang dari `2 × ukuran sumber + low_disk_threshold_megabytes`.
+Setelah `mysqldump`, cek diulang dengan ukuran dump aktual:
+`2 × (ukuran sumber + ukuran dump) + low_disk_threshold_megabytes`. Backup database
+memakai ukuran sumber `0`, sehingga setelah dump memerlukan
+`2 × ukuran dump + low_disk_threshold_megabytes`. Dump yang sangat besar masih bisa
+memenuhi disk selama `mysqldump`; estimasi awal belum diterapkan.
+
 ## 2. Format dan integritas
 
 - Database: `hspmtb-db-YYYY-MM-DD-HHmmss.sql.gz`.

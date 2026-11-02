@@ -220,7 +220,7 @@ class RecordAuditEventAction
     /**
      * @return list<string>
      */
-    private function allowedFields(string $module): array
+    public function allowedFields(string $module): array
     {
         if ($module === 'settings') {
             $groups = (array) config('site-settings.groups', []);
@@ -254,7 +254,7 @@ class RecordAuditEventAction
         return false;
     }
 
-    private function normalize(mixed $value): mixed
+    public function normalize(mixed $value): mixed
     {
         if ($value instanceof BackedEnum) {
             return $value->value;

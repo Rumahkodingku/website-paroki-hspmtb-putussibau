@@ -22,6 +22,7 @@ export type DocumentCategoryFormData = {
 
 export type DocumentCategoryFilters = {
     search: string;
+    status: string;
     sort: string;
     direction: string;
 };

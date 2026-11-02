@@ -1,12 +1,11 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
-
 import { home } from '@/routes';
-import { index as kontak } from '@/routes/kontak';
 import { privacy, terms } from '@/routes/legal';
 import { index as agenda } from '@/routes/agenda';
 import { index as berita } from '@/routes/berita';
 import { index as dokumen } from '@/routes/dokumen';
 import { index as galeri } from '@/routes/galeri';
+import { index as livestreaming } from '@/routes/livestreaming';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
 import { index as komunitas } from '@/routes/komunitas';
 import { index as pelayanan } from '@/routes/pelayanan';
@@ -42,6 +41,7 @@ export const MENU_UTAMA: FooterGroup = {
         { label: 'Berita & Artikel', href: berita() },
         { label: 'Agenda', href: agenda() },
         { label: 'Galeri', href: galeri() },
+        { label: 'Livestreaming', href: livestreaming() },
     ],
 };
 
@@ -75,5 +75,4 @@ export const LINK_CLASS =
 export const LEGAL: LegalItem[] = [
     { label: 'Kebijakan Privasi', href: privacy() },
     { label: 'Syarat & Ketentuan', href: terms() },
-    { label: 'Kontak Sekretariat', href: kontak() },
 ];

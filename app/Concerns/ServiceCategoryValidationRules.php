@@ -25,6 +25,7 @@ use Illuminate\Validation\Validator;
 trait ServiceCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>

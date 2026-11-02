@@ -80,7 +80,6 @@ return [
             'social_instagram',
             'social_youtube',
             'social_whatsapp_channel',
-            'website',
         ],
         'seo' => [
             'seo_default_title',
@@ -146,19 +145,21 @@ return [
     | Defaults
     |--------------------------------------------------------------------------
     |
-    | Returned when no row exists yet. Nothing is seeded into the table, so an
-    | unset setting and a deliberately blank setting stay distinguishable.
+    | Returned when no row exists yet. The seeder writes the initial identity
+    | and homepage-list values; these defaults cover a key whose row has not
+    | been created (or was removed) so the page still has a usable value.
     |
     | The two ranges below come from PRD Lampiran B: home_news_limit 3-6 and
-    | home_events_limit 3-5. The show_* defaults are an assumption, not from the
+    | home_events_limit 3-5. The initial 4/4/6 layout is the parish's choice,
+    | within those ranges. The show_* defaults are an assumption, not from the
     | document: a parish is expected to hide the blocks it does not use, so
     | everything starts visible. Recorded in D-23.
     |
     */
 
     'defaults' => [
-        'home_news_limit' => 3,
-        'home_events_limit' => 3,
+        'home_news_limit' => 4,
+        'home_events_limit' => 4,
         'home_gallery_limit' => 6,
         'home_show_devotion' => true,
         'home_show_gallery' => true,
@@ -187,7 +188,6 @@ return [
     'rules' => [
         'privacy_policy_content' => 'nullable|string|max:50000',
         'terms_and_conditions_content' => 'nullable|string|max:50000',
-        'website' => 'nullable|url|max:255',
         'home_hero_image_alt' => 'nullable|string|max:255|required_with:settings.home_hero_image',
         'home_news_limit' => 'integer|between:3,6',
         'home_events_limit' => 'integer|between:3,5',

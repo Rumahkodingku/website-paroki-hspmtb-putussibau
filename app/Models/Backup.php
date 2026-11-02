@@ -139,11 +139,6 @@ class Backup extends Model
         return $this->status->isActive();
     }
 
-    public function isProtected(): bool
-    {
-        return $this->protected_until !== null && $this->protected_until->isFuture();
-    }
-
     /**
      * @return array<string, string>
      */

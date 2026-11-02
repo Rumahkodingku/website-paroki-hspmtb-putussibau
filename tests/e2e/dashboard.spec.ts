@@ -54,7 +54,7 @@ test.describe('dashboard admin', () => {
         }
     });
 
-    test('database kosong tetap menampilkan empty state, bukan galat', async ({
+    test('database kosong tetap menampilkan panel perhatian, bukan galat', async ({
         page,
     }) => {
         const main = page.getByRole('main');
@@ -64,7 +64,7 @@ test.describe('dashboard admin', () => {
         ).toBeVisible();
         await expect(main.getByText('Belum ada berita terbit')).toBeVisible();
         await expect(
-            main.getByText('Tidak ada yang perlu ditindaklanjuti'),
+            main.getByText('Perlu Perhatian', { exact: true }),
         ).toBeVisible();
     });
 
@@ -108,6 +108,6 @@ test.describe('dashboard admin', () => {
 test('tamu tidak dapat membuka dashboard', async ({ page }) => {
     await page.goto('/admin');
 
-    await expect(page).toHaveURL(/\/admin\/login$/);
+    await expect(page).toHaveURL(/\/auth\/login$/);
     await expect(page.getByTestId('login-button')).toBeVisible();
 });

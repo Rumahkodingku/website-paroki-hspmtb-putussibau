@@ -54,7 +54,7 @@ Edit.layout = {
     breadcrumbs: [
         { title: 'Beranda', href: dashboard() },
         { title: 'Master Data' },
-        { title: 'Kategori Pelayanan', href: categoriesIndex() },
+        { title: 'Kategori Layanan', href: categoriesIndex() },
         { title: 'Edit' },
     ],
 };

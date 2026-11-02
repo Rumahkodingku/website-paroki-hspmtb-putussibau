@@ -41,7 +41,7 @@ export default function Requirements({ checks, passed }: Props) {
             <Head title="Persyaratan Sistem" />
 
             <StepShell
-                eyebrow="Langkah 2 dari 7"
+                eyebrow="Langkah 2 dari 8"
                 title="Persyaratan sistem"
                 description="Pemeriksaan ini hanya membaca kondisi server. Tidak ada tabel atau data yang dibuat."
                 footer={

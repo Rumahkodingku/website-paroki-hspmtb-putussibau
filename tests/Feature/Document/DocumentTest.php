@@ -215,6 +215,26 @@ it('lists and filters documents in the admin', function () {
         ->assertInertia(fn ($page) => $page->has('documents.data', 1));
 });
 
+it('shows download totals and the most downloaded published documents', function () {
+    $popular = Document::factory()->published()->create(['title' => 'Pedoman Populer']);
+    $popular->forceFill(['download_count' => 12])->save();
+
+    $second = Document::factory()->published()->create(['title' => 'Pedoman Kedua']);
+    $second->forceFill(['download_count' => 5])->save();
+
+    $draft = Document::factory()->create(['title' => 'Draf Internal']);
+    $draft->forceFill(['download_count' => 99])->save();
+
+    $this->actingAs(superAdmin())
+        ->get(route('documents.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('downloadSummary.total', 17)
+            ->where('downloadSummary.top.0.id', $popular->getKey())
+            ->where('downloadSummary.top.0.download_count', 12)
+            ->has('downloadSummary.top', 2)
+        );
+});
+
 it('ignores an unknown sort key', function () {
     Document::factory()->create();
 

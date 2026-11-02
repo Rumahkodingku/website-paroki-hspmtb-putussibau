@@ -89,28 +89,59 @@ export type ContentRef = {
     title: string;
 };
 
-export type DashboardContentType = 'post' | 'event' | 'document' | 'service';
+export type DashboardContentType =
+    | 'post'
+    | 'event'
+    | 'document'
+    | 'service'
+    | 'community'
+    | 'pastor'
+    | 'gallery'
+    | 'livestream';
+
+export type AttentionTone = 'danger' | 'warning' | 'info';
+
+export type AttentionKey =
+    | 'backup_health'
+    | 'expired_documents'
+    | 'media_alt_text'
+    | 'stale_drafts'
+    | 'site_identity'
+    | 'unpublished_galleries'
+    | 'scheduled_posts';
 
 /**
  * An attention indicator. `items` is empty for a pure count, and carries the
- * rows to link to when the indicator is a list.
+ * rows to link to when the indicator is a list. `details` carries the
+ * non-content facts behind a count-only block, such as a failing backup check.
  */
 export type AttentionItem = {
-    key: 'expired_documents' | 'media_alt_text';
+    key: AttentionKey;
+    tone: AttentionTone;
     count: number;
     items: ContentRef[];
+    href: string | null;
+    details: string[];
 };
 
 /** A row in the merged Konten Terbaru panel. */
 export type RecentContentItem = {
-    type: 'post' | 'event' | 'document';
+    type: DashboardContentType;
     id: number;
     title: string;
     status: string;
     status_label: string;
-    /** Only defined for events; null for articles and documents. */
+    /** Only defined for events; null for every other content type. */
     is_published: boolean | null;
     updated_at: string;
+};
+
+export type NextLivestream = {
+    id: number;
+    title: string;
+    is_live: boolean;
+    broadcast_status_label: string;
+    scheduled_at: string | null;
 };
 
 export type DashboardProps = {
@@ -119,4 +150,5 @@ export type DashboardProps = {
     recentPosts: RecentPost[];
     attentionItems: AttentionItem[];
     recentContent: RecentContentItem[];
+    nextLivestream: NextLivestream | null;
 };

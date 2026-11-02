@@ -18,14 +18,14 @@ use App\Enums\PastorPosition;
  */
 trait ProfilFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function profilFormMeta(): array
     {
-        return [
-            'labels' => (array) __('profil.labels'),
-            'hints' => (array) __('profil.hints'),
+        return $this->buildFormMeta('profil', [
             'positions' => array_map(
                 static fn (PastorPosition $position): array => [
                     'value' => $position->value,
@@ -33,6 +33,6 @@ trait ProfilFormMeta
                 ],
                 PastorPosition::cases(),
             ),
-        ];
+        ], false);
     }
 }

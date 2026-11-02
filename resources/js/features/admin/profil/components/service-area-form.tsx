@@ -1,10 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import {
-    ActiveSwitch,
-    Field,
-    FormActions,
-    FormInput,
-} from '@/components/form-fields';
+import { ActiveSwitch, FormActions } from '@/components/form-fields';
 import { MediaUploadField } from '@/components/media-upload-field';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type { ParishServiceAreaFormData, ParishServiceAreaRow } from '../types';
@@ -17,7 +12,6 @@ export function emptyServiceAreaFormData(): ParishServiceAreaFormData {
     return {
         content: '',
         map_media_id: null,
-        map_url: '',
         is_published: false,
     };
 }
@@ -28,7 +22,6 @@ export function serviceAreaToFormData(
     return {
         content: row.content ?? '',
         map_media_id: row.map_media_id,
-        map_url: row.map_url ?? '',
         is_published: row.is_published,
     };
 }
@@ -46,7 +39,7 @@ export function ServiceAreaForm({
     initial,
     currentMapUrl,
     labels,
-    hints,
+    hints: _hints,
     onSubmit,
     onCancel,
 }: Props) {
@@ -59,7 +52,7 @@ export function ServiceAreaForm({
                 event.preventDefault();
                 onSubmit(form);
             }}
-            className="space-y-6"
+            className="mt-8 space-y-6"
         >
             <RichTextEditor
                 id="service-area-content"
@@ -67,21 +60,6 @@ export function ServiceAreaForm({
                 value={form.data.content}
                 onChange={(html) => form.setData('content', html)}
             />
-
-            <Field
-                id="service-area-map-url"
-                label={labels.map_url ?? 'Tautan peta'}
-                hint={hints.map_url}
-                error={form.errors.map_url}
-            >
-                <FormInput
-                    id="service-area-map-url"
-                    inputMode="url"
-                    value={form.data.map_url}
-                    onChange={(value) => form.setData('map_url', value)}
-                    placeholder="https://maps.google.com/..."
-                />
-            </Field>
 
             {/*
              * No `aspect`, so nothing is cropped: this is a map, and cutting it

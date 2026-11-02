@@ -37,18 +37,11 @@ export type Choice = { value: string; label: string };
 
 /**
  * A category or location as a dropdown needs it.
- *
- * `color_value` is only ever a colour already shaped into a CSS value, or null.
- * The hex lives in the database and is validated there; a component must never
- * carry one as a literal, which is what
- * ArchitectureTest::'no component reaches for a brand colour by hex value' is
- * for. See EventCategory::colorValue().
  */
 export type Option = {
     id: number;
     name: string;
     slug: string;
-    color_value?: string | null;
 };
 
 /** What both category list pages read back out of the URL. */

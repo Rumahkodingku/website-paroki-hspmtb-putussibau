@@ -8,8 +8,7 @@ use App\Models\Document;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Rules\GoogleFormUrl;
-use App\Services\HtmlSanitizer;
-use App\Support\PhoneNumber;
+use App\Rules\PhoneNumberRule;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -40,6 +39,8 @@ use Illuminate\Validation\Validator;
 trait ServiceValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
+    use SanitizesHtmlFields;
 
     /**
      * The closure on contact_phone is a rule too: Laravel accepts a closure as a
@@ -75,16 +76,7 @@ trait ServiceValidationRules
             'schedule_info' => ['nullable', 'string', 'max:5000'],
             'fee_info' => ['nullable', 'string', 'max:5000'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => [
-                'nullable',
-                'string',
-                'max:50',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if (is_string($value) && trim($value) !== '' && ! PhoneNumber::isValid($value)) {
-                        $fail('Nomor telepon tidak dikenali. Gunakan angka, boleh dengan awalan 0 atau +62.');
-                    }
-                },
-            ],
+            'contact_phone' => ['nullable', 'string', 'max:50', new PhoneNumberRule],
             'form_url' => ['nullable', 'string', 'max:2048', new GoogleFormUrl],
             'form_button_label' => ['required', 'string', 'max:100'],
             'is_form_open' => ['required', 'boolean'],
@@ -285,26 +277,5 @@ trait ServiceValidationRules
                 }
             }
         };
-    }
-
-    /**
-     * Sanitize each named HTML field in place (PRD D-14, XC-S1).
-     *
-     * @param  list<string>  $fields
-     */
-    protected function sanitizeHtmlFields(array $fields): void
-    {
-        $sanitizer = app(HtmlSanitizer::class);
-        $merge = [];
-
-        foreach ($fields as $field) {
-            $clean = $sanitizer->clean(
-                is_string($this->input($field)) ? $this->input($field) : null,
-            );
-
-            $merge[$field] = $clean === '' ? null : $clean;
-        }
-
-        $this->merge($merge);
     }
 }

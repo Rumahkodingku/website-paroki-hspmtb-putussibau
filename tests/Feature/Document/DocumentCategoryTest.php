@@ -45,6 +45,18 @@ it('lists categories with a document count', function () {
             ->where('categories.data.0.documents_count', 2));
 });
 
+it('filters categories by status', function () {
+    DocumentCategory::factory()->create(['is_active' => true]);
+    $inactive = DocumentCategory::factory()->create(['is_active' => false]);
+
+    $this->actingAs(superAdmin())
+        ->get(route('document-categories.index', ['status' => 'inactive']))
+        ->assertInertia(fn ($page) => $page
+            ->where('categories.data.0.id', $inactive->getKey())
+            ->has('categories.data', 1)
+            ->where('filters.status', 'inactive'));
+});
+
 it('updates a category', function () {
     $category = DocumentCategory::factory()->create();
 

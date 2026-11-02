@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+import Image from '@/components/image';
 import { ParishLogo } from '@/components/parish-logo';
 import { Text } from '@/components/text';
 import type { InstallationStep } from '@/types';
@@ -10,14 +11,6 @@ type InstallationLayoutProps = {
     currentStep?: number;
 };
 
-/**
- * The installer shell: branding and step navigation on the left, the current
- * step on the right, and a compact progress header on small screens.
- *
- * It reads `steps`/`currentStep` from page props because this layout is chosen
- * by page name in app.tsx and receives no props of its own. Every wizard page
- * sends both.
- */
 export default function InstallationLayout({ children }: PropsWithChildren) {
     const { steps = [], currentStep = 0 } =
         usePage<InstallationLayoutProps>().props;
@@ -30,11 +23,13 @@ export default function InstallationLayout({ children }: PropsWithChildren) {
     return (
         <div className="min-h-svh bg-muted/30 lg:grid lg:grid-cols-[minmax(0,42%)_minmax(0,58%)]">
             <aside className="relative hidden overflow-hidden bg-navy-deep text-white lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-14">
-                <img
+                <Image
                     src="/auth-section.webp"
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-0 size-full object-cover"
+                    fit="cover"
+                    className="inset-0 size-full"
+                    position="absolute"
                 />
                 <div className="absolute inset-0 bg-linear-to-b from-navy-deep/95 via-navy-deep/75 to-navy-deep/95" />
 
@@ -44,19 +39,19 @@ export default function InstallationLayout({ children }: PropsWithChildren) {
                     <div className="flex min-w-0 flex-col gap-0.5">
                         <Text
                             as="p"
-                            variant="body"
-                            weight="semibold"
-                            color="inherit"
-                        >
-                            Paroki HSPMTB Putussibau
-                        </Text>
-                        <Text
-                            as="p"
                             variant="caption"
                             color="inherit"
                             className="text-white/70"
                         >
                             Gereja Katolik
+                        </Text>
+                        <Text
+                            as="p"
+                            variant="body"
+                            weight="semibold"
+                            color="inherit"
+                        >
+                            Paroki HSPMTB Putussibau
                         </Text>
                     </div>
                 </div>

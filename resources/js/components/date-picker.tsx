@@ -2,7 +2,6 @@ import * as React from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
     Popover,
@@ -49,22 +48,23 @@ export function DatePicker({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button
+                <button
                     id={id}
                     type="button"
-                    variant="outline"
                     disabled={disabled}
                     className={cn(
-                        'w-full justify-start text-left font-normal',
+                        'flex h-11 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-left text-base font-normal shadow-none transition-[color,box-shadow] outline-none md:text-sm',
+                        'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                        'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
                         !selected && 'text-muted-foreground',
                         className,
                     )}
                 >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="size-4 shrink-0" />
                     {selected
                         ? format(selected, 'd MMMM yyyy', { locale: idLocale })
                         : placeholder}
-                </Button>
+                </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
                 <Calendar

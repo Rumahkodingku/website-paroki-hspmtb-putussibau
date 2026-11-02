@@ -1,6 +1,10 @@
 import { ChevronRight, Clock3, MapPin } from 'lucide-react';
 import { Text } from '@/components/text';
-import { formatWibClock } from '@/lib/datetime';
+import {
+    formatWibClock,
+    formatWibDayParts,
+    formatWibWeekday,
+} from '@/lib/datetime';
 import type { PublicSpecialMass } from '../types';
 
 type Props = {
@@ -9,22 +13,10 @@ type Props = {
 };
 
 export function SpecialMassScheduleCard({ mass, displayTimezone }: Props) {
-    const startDate = new Date(mass.start_at);
-
-    const dateParts = new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        timeZone: displayTimezone,
-    }).formatToParts(startDate);
-
-    const dayNumber =
-        dateParts.find((part) => part.type === 'day')?.value ?? '';
-    const month = dateParts.find((part) => part.type === 'month')?.value ?? '';
-
-    const weekday = new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        timeZone: displayTimezone,
-    }).format(startDate);
+    const dateParts = formatWibDayParts(mass.start_at, displayTimezone);
+    const dayNumber = dateParts.day;
+    const month = dateParts.month;
+    const weekday = formatWibWeekday(mass.start_at, displayTimezone);
 
     const startTime = formatWibClock(mass.start_at, displayTimezone);
 

@@ -259,6 +259,30 @@ class PermissionSeeder extends Seeder
         'documentcategories.delete',
 
         /*
+         * Livestreaming, added with the module.
+         *
+         * Four verbs only. Publishing is a field of the update form, not a
+         * separate ability (D-36, D-65, D-101). Starting, ending and marking a
+         * stream unavailable are mutations of one record, so they ride on
+         * `livestreams.update`.
+         *
+         * All single words, per D-36: RbacFoundationTest asserts every
+         * permission matches /^[a-z]+\.[a-z]+$/.
+         */
+        'livestreams.view',
+        'livestreams.create',
+        'livestreams.update',
+        'livestreams.delete',
+
+        /*
+         * Livestream categories, added with the module.
+         */
+        'livestreamcategories.view',
+        'livestreamcategories.create',
+        'livestreamcategories.update',
+        'livestreamcategories.delete',
+
+        /*
          * Backup & Recovery.
          *
          * `backups.settings` rather than the specification's

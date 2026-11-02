@@ -33,7 +33,7 @@ class PublicAreaController extends Controller
     {
         $areas = Area::query()
             ->active()
-            ->with('parent')
+            ->with(['parent', 'photoMedia.variants'])
             ->ordered()
             ->get();
 
@@ -47,6 +47,7 @@ class PublicAreaController extends Controller
     {
         $area->load([
             'parent',
+            'photoMedia.variants',
             'children' => fn ($query) => $query->active()->ordered(),
         ]);
 

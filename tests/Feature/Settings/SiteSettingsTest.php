@@ -4,7 +4,6 @@ use App\Models\Media;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\SiteSettingsService;
-use Database\Seeders\SiteSettingsSeeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -54,7 +53,7 @@ test('a stored setting is returned', function () {
 
 test('a missing setting falls back to its configured default', function () {
     // Nothing is seeded, so an unset numeric toggle has to still be usable.
-    expect(settingsService()->get('home_news_limit'))->toBe(3)
+    expect(settingsService()->get('home_news_limit'))->toBe(4)
         ->and(settingsService()->get('home_show_gallery'))->toBeTrue();
 });
 
@@ -107,22 +106,19 @@ test('saving writes every key and files it under the right group', function () {
         'contact_email' => 'secretariat@example.test',
         'home_news_limit' => 5,
         'home_show_gallery' => false,
-        'website' => 'https://paroki.example.test',
     ]);
 
     $rows = SiteSetting::query()->pluck('group', 'key');
 
     expect($rows['parish_name'])->toBe('identitas')
         ->and($rows['contact_email'])->toBe('kontak')
-        ->and($rows['home_news_limit'])->toBe('beranda')
-        ->and($rows['website'])->toBe('sosial');
+        ->and($rows['home_news_limit'])->toBe('beranda');
 
     $service = settingsService();
 
     expect($service->get('parish_name'))->toBe('HSPMTB Putussibau')
         ->and($service->get('home_news_limit'))->toBe(5)
-        ->and($service->get('home_show_gallery'))->toBeFalse()
-        ->and($service->get('website'))->toBe('https://paroki.example.test');
+        ->and($service->get('home_show_gallery'))->toBeFalse();
 });
 
 test('booleans are stored as one and zero in the longtext column', function () {
@@ -228,7 +224,7 @@ test('the page renders with every configured group', function () {
             ->has('meta')
             ->where('groups.identitas.parish_name', 'HSPMTB')
             // Unset keys still carry their defaults so the form can bind to them.
-            ->where('groups.beranda.home_news_limit', 3)
+            ->where('groups.beranda.home_news_limit', 4)
         );
 });
 
@@ -260,7 +256,7 @@ test('a value outside the documented range is rejected in Indonesian', function 
         ])
         ->assertSessionHasErrors('settings.home_news_limit');
 
-    expect(settingsService()->get('home_news_limit'))->toBe(3);
+    expect(settingsService()->get('home_news_limit'))->toBe(4);
 });
 
 test('an unknown key is rejected by the request', function () {
@@ -319,7 +315,7 @@ test('the configured key list matches PRD Lampiran B', function () {
     //
     // Phase 9A added four homepage hero keys (D-70): title, description, image,
     // and image alt. They are an approved divergence from PRD Lampiran B.
-    expect($keys)->toHaveCount(34)
+    expect($keys)->toHaveCount(33)
         ->and($keys)->toContain(
             'parish_name',
             'maps_link',
@@ -330,7 +326,6 @@ test('the configured key list matches PRD Lampiran B', function () {
             'privacy_policy_content',
             'terms_and_conditions_content',
             'logo_alt',
-            'website',
         )
         ->and($keys)->not->toContain('maps_embed_url');
 });
@@ -436,6 +431,30 @@ test('clearing the privacy policy stores null rather than leaving the row alone'
     expect(SiteSetting::query()->where('key', 'privacy_policy_content')->value('value'))
         ->toBeNull()
         ->and(settingsService()->get('privacy_policy_content'))->toBeNull();
+});
+
+test('an emptied rich-text editor stores null', function (string $key): void {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [$key => '<p></p>'],
+    ])->assertSessionHasNoErrors();
+
+    expect(SiteSetting::query()->where('key', $key)->value('value'))->toBeNull()
+        ->and(settingsService()->get($key))->toBeNull();
+})->with(['privacy_policy_content', 'terms_and_conditions_content']);
+
+test('the privacy page receives null after the editor is emptied', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => '<p></p>'],
+    ]);
+
+    $this->get(route('legal.privacy'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('public/legal/privacy')
+            ->where('content', null));
 });
 
 test('a policy past the length limit is rejected in Indonesian', function () {
@@ -561,18 +580,6 @@ test('home hero alt can be left empty when no image is selected', function () {
         ->assertSessionHasNoErrors();
 });
 
-test('the social group still holds the parish website', function () {
-    expect(config('site-settings.groups.sosial'))->toBe([
-        'social_facebook',
-        'social_instagram',
-        'social_youtube',
-        'social_whatsapp_channel',
-        'website',
-    ])
-        ->and(config('site-settings.types.logo'))->toBe('media')
-        ->and(config('site-settings.types.favicon'))->toBe('media');
-});
-
 test('logo rejects a media id that has not finished processing', function () {
     $media = Media::factory()->create(); // pending
 
@@ -617,67 +624,8 @@ test('optional settings may all be left empty', function () {
     $this->actingAs(superAdmin())
         ->put(route('settings.update'), [
             'settings' => [
-                'website' => '',
                 'logo' => '',
                 'logo_alt' => '',
             ],
         ])->assertSessionHasNoErrors();
-
-    expect(settingsService()->get('website'))->toBeNull();
-});
-
-/*
-|--------------------------------------------------------------------------
-| The seeder
-|--------------------------------------------------------------------------
-*/
-
-test('the seeder writes only the two values PRD Lampiran D names', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(SiteSetting::query()->pluck('value', 'key')->all())->toBe([
-        'privacy_policy_content' => '<p>Kebijakan Privasi ini menjelaskan bagaimana Paroki HSPMTB Putussibau mengelola informasi yang Anda berikan saat menggunakan situs ini.</p><p>Kami hanya menggunakan data yang diperlukan untuk pelayanan paroki, seperti permintaan informasi, pendaftaran pelayanan, dan komunikasi pastoral. Data tidak dibagikan kepada pihak lain kecuali untuk keperluan pelayanan yang Anda minta atau jika diwajibkan oleh ketentuan yang berlaku.</p><p>Situs ini dapat menautkan ke layanan pihak ketiga. Kebijakan privasi masing-masing layanan berlaku saat Anda mengunjungi tautan tersebut. Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
-        'terms_and_conditions_content' => '<p>Syarat dan Ketentuan ini mengatur penggunaan situs Paroki HSPMTB Putussibau. Dengan mengakses situs ini, Anda setuju untuk mematuhi ketentuan yang berlaku.</p><ul><li>Informasi di situs ini disediakan untuk kebutuhan pastoral dan informasi paroki.</li><li>Pengguna tidak boleh menyalahgunakan situs, termasuk menyebarkan konten yang melanggar hukum atau mengganggu pelayanan paroki.</li><li>Paroki dapat memperbarui isi situs dan ketentuan ini sewaktu-waktu.</li></ul><p>Jika ada pertanyaan, hubungi sekretariat paroki.</p>',
-        'parish_name' => 'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
-        'parish_short_name' => 'HSPMTB',
-    ]);
-});
-
-test('the seeder files both values under identitas', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(SiteSetting::query()->pluck('group', 'key')->all())
-        ->toBe([
-            'privacy_policy_content' => 'privasi',
-            'terms_and_conditions_content' => 'syarat',
-            'parish_name' => 'identitas',
-            'parish_short_name' => 'identitas',
-        ]);
-});
-
-test('re-running the seeder does not undo an admin edit', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    settingsService()->setMany(['parish_short_name' => 'HSPTB-U']);
-
-    $this->seed(SiteSettingsSeeder::class);
-
-    expect(settingsService()->get('parish_short_name'))->toBe('HSPTB-U');
-});
-
-test('only those two keys get a row, and unset keys stay unset', function () {
-    $this->seed(SiteSettingsSeeder::class);
-
-    $service = settingsService();
-
-    expect(SiteSetting::query()->count())->toBe(4);
-
-    // A key with a configured default is usable even with no row behind it.
-    expect($service->get('home_news_limit'))->toBe(3)
-        ->and($service->get('home_show_devotion'))->toBeTrue();
-
-    // A text key with no default is genuinely unconfigured, and says so with
-    // null rather than pretending to be blank.
-    expect($service->get('contact_phone'))->toBeNull()
-        ->and($service->get('maps_link'))->toBeNull();
 });

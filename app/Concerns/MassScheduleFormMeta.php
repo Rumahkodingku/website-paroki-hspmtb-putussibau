@@ -24,6 +24,8 @@ use App\Enums\MassKind;
  */
 trait MassScheduleFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * Everything the admin forms need that is not a record.
      *
@@ -31,16 +33,14 @@ trait MassScheduleFormMeta
      */
     protected function formMeta(): array
     {
-        return [
-            'labels' => (array) __('mass-schedule.labels'),
-            'hints' => (array) __('mass-schedule.hints'),
+        return $this->buildFormMeta('mass-schedule', [
             'statuses' => (array) __('mass-schedule.statuses'),
             'noticeStatuses' => (array) __('mass-schedule.notice_statuses'),
             'noticeScopes' => (array) __('mass-schedule.notice_scopes'),
             'days' => $this->dayChoices(),
             'types' => $this->locationTypeChoices(),
             'kinds' => $this->massKindChoices(),
-        ];
+        ], false);
     }
 
     /**

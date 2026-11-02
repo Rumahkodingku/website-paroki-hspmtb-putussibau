@@ -29,12 +29,18 @@ class DocumentCategoryController extends Controller
         Gate::authorize('viewAny', DocumentCategory::class);
 
         $search = $request->string('search')->toString();
+        $status = $request->string('status')->toString();
 
         $categories = DocumentCategory::query()
             ->withCount(['documents' => fn (Builder $query) => $query
                 ->withoutGlobalScope(SoftDeletingScope::class)])
             ->when($search !== '', fn (Builder $query) => $query
-                ->where('document_categories.name', 'like', "%{$search}%"));
+                ->where('document_categories.name', 'like', "%{$search}%"))
+            ->when(
+                in_array($status, ['active', 'inactive'], true),
+                fn (Builder $query) => $query
+                    ->where('document_categories.is_active', $status === 'active')
+            );
 
         $categories = $this->applyAdminSort(
             $categories,
@@ -43,6 +49,7 @@ class DocumentCategoryController extends Controller
                 'name' => 'document_categories.name',
                 'slug' => 'document_categories.slug',
                 'sort_order' => 'document_categories.sort_order',
+                'is_active' => 'document_categories.is_active',
             ],
             [['document_categories.sort_order', 'asc'], ['document_categories.name', 'asc']],
         )->paginate($this->perPage($request))->withQueryString();
@@ -51,6 +58,7 @@ class DocumentCategoryController extends Controller
             'categories' => DocumentCategoryResource::collection($categories),
             'filters' => [
                 'search' => $search,
+                'status' => $status,
                 'sort' => $request->string('sort')->toString(),
                 'direction' => $request->string('direction')->toString(),
             ],

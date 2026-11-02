@@ -67,7 +67,7 @@ void createInertiaApp({
                 return PublicLayout;
             case name.startsWith('installation/'):
                 return InstallationLayout;
-            case name.startsWith('public/auth/'):
+            case name.startsWith('shared/auth/'):
                 return AuthLayout;
             case name.startsWith('public/'):
                 return PublicLayout;

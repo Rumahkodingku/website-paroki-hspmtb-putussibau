@@ -30,9 +30,9 @@ export function DesktopNav({ transparent }: DesktopNavProps) {
         <NavigationMenu
             viewport={false}
             aria-label="Navigasi utama"
-            className="hidden lg:flex"
+            className="hidden xl:flex"
         >
-            <NavigationMenuList className="gap-1">
+            <NavigationMenuList className="gap-4">
                 {DESKTOP_ENTRIES.map((item: NavItem) => {
                     if (item.kind === 'link') {
                         const active = isActive(item.entry);
@@ -44,7 +44,7 @@ export function DesktopNav({ transparent }: DesktopNavProps) {
                                     aria-current={active ? 'page' : undefined}
                                     className={cn(
                                         navigationMenuTriggerStyle(),
-                                        'relative font-medium transition-colors duration-300',
+                                        'relative px-2 text-sm font-medium transition-colors duration-300',
                                         linkColors,
                                         active && activeColors,
                                     )}
@@ -68,7 +68,7 @@ export function DesktopNav({ transparent }: DesktopNavProps) {
                                 data-active={active ? 'true' : undefined}
                                 aria-current={active ? 'page' : undefined}
                                 className={cn(
-                                    'font-medium transition-colors duration-300',
+                                    'px-2 text-sm font-medium transition-colors duration-300',
                                     linkColors,
                                     active && activeColors,
                                 )}
@@ -82,7 +82,7 @@ export function DesktopNav({ transparent }: DesktopNavProps) {
                             </NavigationMenuTrigger>
 
                             <NavigationMenuContent>
-                                <ul className="grid w-[16rem] gap-1">
+                                <ul className="grid w-56 gap-1">
                                     {item.children.map((child) => {
                                         const childActive = isActive(child);
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Media;
+use App\Models\MediaVariant;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\ServiceFaq;
@@ -52,6 +54,22 @@ it('shows an active service detail', function () {
         ->assertInertia(fn ($page) => $page
             ->component('public/pelayanan/show')
             ->where('service.title', 'Baptis Bayi'));
+});
+
+it('shows thumbnails on the other services strip', function () {
+    $service = Service::factory()->active()->create();
+    $other = Service::factory()->active()->create();
+
+    $media = Media::factory()->ready()->create();
+    MediaVariant::factory()->create([
+        'media_id' => $media->getKey(),
+        'name' => 'medium',
+    ]);
+    $other->update(['thumbnail_media_id' => $media->getKey()]);
+
+    $this->get(route('pelayanan.show', $service))
+        ->assertInertia(fn ($page) => $page
+            ->where('otherServices.0.thumbnail', fn ($url): bool => is_string($url) && $url !== ''));
 });
 
 it('answers 404 for an inactive service', function () {

@@ -23,6 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR |
+                Request::HEADER_X_FORWARDED_HOST |
+                Request::HEADER_X_FORWARDED_PORT |
+                Request::HEADER_X_FORWARDED_PROTO,
+        );
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         /**
@@ -54,6 +61,8 @@ return Application::configure(basePath: dirname(__DIR__))
          * @see docs/DECISIONS.md D-26
          */
         $schedule->command('queue:prune-failed --hours=168')->daily();
+
+        $schedule->command('telescope:prune --hours=24')->daily();
 
         /**
          * Scheduled articles, PRD AC-POST-6/AC-POST-7.
@@ -136,9 +145,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $status = $response->getStatusCode();
 
-            if (! in_array($status, [403, 404, 419, 500, 503], true)) {
+            if (! in_array($status, [403, 404, 419, 429, 500, 503], true)) {
                 return $response;
             }
+
+            // The exception handler runs outside the middleware stack, so the
+            // shared props (identity, contact, seo, ...) are missing. Re-share
+            // them here so the public layout (navbar logo, footer) renders with
+            // the parish identity instead of the bare "Paroki" placeholder.
+            $shared = app(HandleInertiaRequests::class)
+                ->share($request);
+
+            Inertia::share($shared);
 
             return Inertia::render('public/error', ['status' => $status])
                 ->toResponse($request)

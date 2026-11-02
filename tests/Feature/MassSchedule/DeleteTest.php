@@ -2,6 +2,7 @@
 
 use App\Enums\DayOfWeek;
 use App\Enums\LocationType;
+use App\Models\Livestream;
 use App\Models\Location;
 use App\Models\MassSchedule;
 use App\Models\ScheduleNotice;
@@ -143,6 +144,22 @@ it('refuses to delete a location that still has a special mass', function () {
         ->assertSessionHasErrors('location');
 
     expect($this->location->fresh()->trashed())->toBeFalse();
+});
+
+it('refuses to delete a location that is used by a livestream', function () {
+    Livestream::factory()->forLocation($this->location)->create();
+
+    $this->actingAs(superAdmin())
+        ->from(route('locations.index'))
+        ->delete(route('locations.destroy', $this->location))
+        ->assertRedirect(route('locations.index'))
+        ->assertSessionHasErrors('location');
+
+    expect($this->location->fresh()->trashed())->toBeFalse();
+
+    $message = session('errors')->first('location');
+
+    expect($message)->toContain('livestreaming');
 });
 
 it('names both counts in the refusal', function () {
@@ -377,11 +394,10 @@ it('stops publishing a notice whose location was deleted', function () {
 });
 
 /*
- * A notice aimed at a schedule or a special mass is not shown by the public
- * query at all - it matches neither "no target" nor "the filtered location".
- * That is a gap in Phase 04, not something D-40 introduced, and it is left
- * alone here: widening the public page is a separate decision. What matters
- * for deletion is that the admin can see it, which is the next test.
+ * A notice aimed at a schedule or a special mass is shown while that target is
+ * on the page. Once the schedule is deleted it is not in the list, so the
+ * notice disappears from the public page too. What matters for deletion is
+ * that the admin can still see the orphaned row, which is the next test.
  */
 
 it('flags a notice whose target was deleted in the admin list', function () {

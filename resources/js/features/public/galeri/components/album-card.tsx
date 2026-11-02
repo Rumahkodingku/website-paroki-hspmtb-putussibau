@@ -1,18 +1,25 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight, Images } from 'lucide-react';
 import { Text } from '@/components/text';
+import { formatWibLongDate } from '@/lib/datetime';
 import { show as galleryShow } from '@/routes/galeri';
+import type { SharedProps } from '@/types';
 import type { PublicGalleryCard as PublicGalleryCardData } from '../types';
 
 export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
+    const { displayTimezone } = usePage<SharedProps>().props;
+
     return (
         <article className="group relative overflow-hidden rounded-lg border border-border transition-colors focus-within:border-primary-on-surface hover:border-primary-on-surface">
             {album.cover_url ? (
-                <img
+                <Image
                     src={album.cover_url}
                     alt=""
                     loading="lazy"
-                    className="aspect-4/3 w-full rounded-t-lg object-cover"
+                    aspectRatio="4 / 3"
+                    fit="cover"
+                    className="w-full rounded-t-lg"
                 />
             ) : (
                 <div className="flex aspect-4/3 w-full items-center justify-center rounded-t-lg bg-canvas-subtle text-muted-foreground">
@@ -27,11 +34,7 @@ export function AlbumCard({ album }: { album: PublicGalleryCardData }) {
 
                 {album.event_date ? (
                     <Text as="p" variant="body-sm" color="muted">
-                        {new Intl.DateTimeFormat('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                        }).format(new Date(album.event_date))}
+                        {formatWibLongDate(album.event_date, displayTimezone)}
                     </Text>
                 ) : null}
 

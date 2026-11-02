@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 trait DocumentCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @return array<string, array<int, ValidationRule|string>>

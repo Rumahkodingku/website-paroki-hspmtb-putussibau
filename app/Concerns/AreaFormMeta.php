@@ -16,16 +16,14 @@ use App\Enums\AreaType;
  */
 trait AreaFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function areaFormMeta(): array
     {
-        return [
-            'labels' => (array) __('area.labels'),
-            'hints' => (array) __('area.hints'),
-            'copy' => (array) __('area.admin'),
-            'empty' => (array) __('area.empty'),
+        return $this->buildFormMeta('area', [
             'areaTypes' => array_map(
                 fn (string $value): array => [
                     'value' => $value,
@@ -33,6 +31,6 @@ trait AreaFormMeta
                 ],
                 AreaType::values(),
             ),
-        ];
+        ]);
     }
 }

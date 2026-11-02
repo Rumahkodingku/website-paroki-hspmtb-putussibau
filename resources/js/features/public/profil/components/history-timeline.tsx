@@ -1,10 +1,11 @@
 import { RichText } from '@/components/rich-text';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import type { PublicHistoryItem } from '../types';
 
 export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
     return (
-        <ol className="relative">
+        <ol className="relative mt-10">
             {/* Garis timeline desktop */}
             <span
                 aria-hidden="true"
@@ -43,12 +44,15 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                                 ].join(' ')}
                             >
                                 {item.image ? (
-                                    <img
+                                    <Image
                                         src={item.image}
                                         alt={item.image_alt ?? ''}
                                         loading="lazy"
                                         decoding="async"
-                                        className="aspect-video w-full rounded-xl object-cover shadow-sm ring-1 ring-black/5"
+                                        aspectRatio="16 / 9"
+                                        fit="cover"
+                                        imageClassName="shadow-sm ring-1 ring-black/5"
+                                        className="w-full rounded-xl"
                                     />
                                 ) : (
                                     <div className="flex aspect-video w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/30">
@@ -76,19 +80,24 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                                     as="p"
                                     variant="display-md"
                                     color="danger"
-                                    className="leading-none"
+                                    className="mb-4 leading-none"
+                                    italic
                                 >
                                     {year}
                                 </Text>
 
-                                <Text as="h3" variant="h4" className="mt-2">
+                                <Text
+                                    as="h3"
+                                    variant="h4"
+                                    className="mt-2 font-bold"
+                                >
                                     {item.title}
                                 </Text>
 
                                 {item.description ? (
                                     <RichText
                                         html={item.description}
-                                        className="mt-2 max-w-xl"
+                                        className="text-md mt-2 max-w-xl"
                                     />
                                 ) : null}
                             </div>

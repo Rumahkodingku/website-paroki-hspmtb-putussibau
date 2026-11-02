@@ -33,10 +33,10 @@ class PublicGalleryController extends Controller
 
         $albums = GalleryAlbum::query()
             ->published()
-            ->withCount('photos')
+            ->withCount(['photos' => fn ($query) => $query->ready()])
             ->with([
                 'coverPhoto.media.variants',
-                'photos' => fn ($query) => $query->ready()->with('media.variants'),
+                'photos' => fn ($query) => $query->ready()->with('media.variants')->limit(1),
             ])
             ->when(
                 ctype_digit($year),

@@ -22,6 +22,8 @@ use App\Http\Controllers\Installation\InstallationRunController;
 use App\Http\Controllers\Installation\InstallationWizardController;
 use App\Http\Controllers\Komunitas\CommunityController;
 use App\Http\Controllers\Komunitas\PublicCommunityController;
+use App\Http\Controllers\Livestream\LivestreamController;
+use App\Http\Controllers\Livestream\PublicLivestreamController;
 use App\Http\Controllers\MassSchedule\MassScheduleController;
 use App\Http\Controllers\MassSchedule\PublicMassScheduleController;
 use App\Http\Controllers\MassSchedule\ScheduleNoticeController;
@@ -29,6 +31,7 @@ use App\Http\Controllers\MassSchedule\SpecialMassController;
 use App\Http\Controllers\MasterData\CommunityCategoryController;
 use App\Http\Controllers\MasterData\DocumentCategoryController;
 use App\Http\Controllers\MasterData\EventCategoryController;
+use App\Http\Controllers\MasterData\LivestreamCategoryController;
 use App\Http\Controllers\MasterData\LocationController;
 use App\Http\Controllers\MasterData\PostCategoryController;
 use App\Http\Controllers\MasterData\ServiceCategoryController;
@@ -88,6 +91,15 @@ Route::middleware(EnsureInstallerAvailable::class)
         Route::post('database/test', [InstallationWizardController::class, 'testDatabase'])
             ->middleware('throttle:10,1')
             ->name('database.test');
+
+        Route::get('email', [InstallationWizardController::class, 'email'])
+            ->name('email');
+        Route::post('email/test', [InstallationWizardController::class, 'testEmail'])
+            ->middleware('throttle:10,1')
+            ->name('email.test');
+        Route::post('email/validate', [InstallationWizardController::class, 'storeEmail'])
+            ->middleware('throttle:30,1')
+            ->name('email.validate');
 
         Route::get('super-admin', [InstallationWizardController::class, 'superAdmin'])
             ->name('super-admin');
@@ -164,17 +176,19 @@ Route::get('/galeri/{gallery:slug}', [PublicGalleryController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('galeri.show');
 
+Route::get('/livestreaming', [PublicLivestreamController::class, 'index'])
+    ->name('livestreaming.index');
+
 Route::get('/dokumen', [PublicDocumentController::class, 'index'])->name('dokumen.index');
 Route::get('/dokumen/{document}/unduh', [PublicDocumentController::class, 'download'])
     ->where('document', '[0-9]+')
+    ->middleware('throttle:30,1')
     ->name('dokumen.unduh');
 
 Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
 
 Route::get('/kebijakan-privasi', [PublicLegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/syarat-ketentuan', [PublicLegalController::class, 'terms'])->name('legal.terms');
-
-Route::inertia('/design-system', 'public/design-system')->name('design-system.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -450,6 +464,32 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
         Route::post('/galeri/{gallery}/foto/sampul', [GalleryPhotoController::class, 'cover'])->name('gallery-photos.cover');
         Route::patch('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'update'])->name('gallery-photos.update');
         Route::delete('/galeri/{gallery}/foto/{photo}', [GalleryPhotoController::class, 'destroy'])->name('gallery-photos.destroy');
+
+        /*
+         * ------------------------------------------------------------------
+         * Livestreaming
+         * ------------------------------------------------------------------
+         |
+         | The list itself is the module root. Publication is an ordinary field
+         | of the update form (D-36, D-65); starting, ending and marking a
+         | stream unavailable are POST actions because they change operational
+         | state and must be authorized as their own operations.
+         |
+         */
+        Route::get('/livestreaming', [LivestreamController::class, 'index'])->name('livestreams.index');
+        Route::get('/livestreaming/tambah', [LivestreamController::class, 'create'])->name('livestreams.create');
+        Route::post('/livestreaming', [LivestreamController::class, 'store'])->name('livestreams.store');
+        Route::get('/livestreaming/{livestream}/ubah', [LivestreamController::class, 'edit'])->name('livestreams.edit');
+        Route::patch('/livestreaming/{livestream}', [LivestreamController::class, 'update'])->name('livestreams.update');
+        Route::delete('/livestreaming/{livestream}', [LivestreamController::class, 'destroy'])->name('livestreams.destroy');
+
+        Route::post('/livestreaming/{livestream}/mulai', [LivestreamController::class, 'start'])->name('livestreams.start');
+        Route::post('/livestreaming/{livestream}/akhiri', [LivestreamController::class, 'end'])->name('livestreams.end');
+        Route::post('/livestreaming/{livestream}/tidak-tersedia', [LivestreamController::class, 'unavailable'])->name('livestreams.unavailable');
+
+        Route::resource('livestream-categories', LivestreamCategoryController::class)
+            ->names('livestream-categories')
+            ->parameters(['livestream-categories' => 'livestreamCategory']);
 
         /*
          * ------------------------------------------------------------------

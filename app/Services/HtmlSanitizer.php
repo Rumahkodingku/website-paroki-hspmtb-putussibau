@@ -52,6 +52,26 @@ class HtmlSanitizer
     }
 
     /**
+     * Clean rich text, turning an emptied editor into null.
+     *
+     * Tiptap posts `<p></p>` for a blank document. Stored as-is it is truthy,
+     * so a public page draws a heading over nothing. A document holding an
+     * image is `<p><img ...></p>`, which does not match and survives.
+     */
+    public function cleanOrNull(?string $html): ?string
+    {
+        $clean = $this->clean($html);
+
+        return $this->isBlankMarkup($clean) ? null : $clean;
+    }
+
+    private function isBlankMarkup(string $clean): bool
+    {
+        return $clean === ''
+            || preg_match('/^(?:<p>\s*(?:<br\s*\/?>)?\s*<\/p>|<br\s*\/?>|\s)+$/i', $clean) === 1;
+    }
+
+    /**
      * Reduce sanitized HTML to readable plain text.
      *
      * For the places that need prose rather than markup: a meta description, an

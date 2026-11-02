@@ -26,6 +26,8 @@ class ParishProfileResource extends JsonResource
             'cover_alt' => $this->cover_alt,
             'cover_url' => $this->whenLoaded('coverMedia', fn () => $this->mediaUrl($this->coverMedia)),
             'video_url' => $this->video_url,
+            'video_title' => $this->video_title,
+            'video_description' => $this->video_description,
             'can' => [
                 'update' => $request->user()?->can('update', $this->resource) ?? false,
             ],

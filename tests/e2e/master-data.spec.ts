@@ -33,13 +33,7 @@ test.describe('sidebar Master Data', () => {
         await signIn(page);
         await page.goto('/admin');
 
-        const toggle = page
-            .getByRole('navigation', { name: 'Navigasi utama' })
-            .getByRole('button', { name: 'Master Data', exact: true });
-
-        if ((await toggle.getAttribute('aria-expanded')) === 'false') {
-            await toggle.click();
-        }
+        // Semua item sekarang tampil langsung (tanpa dropdown); tidak perlu membuka grup.
     });
 
     test('setiap anak Master Data punya href yang berbeda', async ({
@@ -54,7 +48,7 @@ test.describe('sidebar Master Data', () => {
                 'Lokasi',
                 'Kategori Berita',
                 'Kategori Agenda',
-                'Kategori Pelayanan',
+                'Kategori Layanan',
                 'Kategori Komunitas',
             ].map((title) =>
                 sidebar
@@ -80,7 +74,7 @@ test.describe('sidebar Master Data', () => {
             ['Lokasi', '/admin/master-data/lokasi'],
             ['Kategori Berita', '/admin/master-data/kategori-berita'],
             ['Kategori Agenda', '/admin/master-data/kategori-agenda'],
-            ['Kategori Pelayanan', '/admin/master-data/kategori-pelayanan'],
+            ['Kategori Layanan', '/admin/master-data/kategori-pelayanan'],
             ['Kategori Komunitas', '/admin/master-data/kategori-komunitas'],
         ] as const) {
             await expect(
@@ -105,11 +99,6 @@ test.describe('sidebar Master Data', () => {
             .click();
 
         await expect(page).toHaveURL(/\/admin\/master-data\/lokasi$/);
-
-        // Berdiri di salah satu anaknya harus membuka grubnya sendiri.
-        await expect(
-            sidebar.getByRole('button', { name: 'Master Data', exact: true }),
-        ).toHaveAttribute('aria-expanded', 'true');
     });
 
     /**
@@ -150,14 +139,14 @@ test.describe('sidebar Master Data', () => {
     }) => {
         await page
             .getByRole('navigation', { name: 'Navigasi utama' })
-            .getByRole('link', { name: 'Kategori Pelayanan', exact: true })
+            .getByRole('link', { name: 'Kategori Layanan', exact: true })
             .click();
 
         await expect(page).toHaveURL(
             /\/admin\/master-data\/kategori-pelayanan$/,
         );
         await expect(
-            page.getByRole('heading', { name: 'Kategori Pelayanan' }),
+            page.getByRole('heading', { name: 'Kategori Layanan' }),
         ).toBeVisible();
     });
 
@@ -177,19 +166,6 @@ test.describe('sidebar Master Data', () => {
         ).toBeVisible();
     });
 
-    test('judul grup hanya membuka, bukan berpindah', async ({ page }) => {
-        const sidebar = page.getByRole('navigation', {
-            name: 'Navigasi utama',
-        });
-
-        const before = page.url();
-
-        await sidebar
-            .getByRole('button', { name: 'Master Data', exact: true })
-            .click();
-
-        expect(page.url()).toBe(before);
-    });
 });
 
 test.describe('lokasi admin', () => {

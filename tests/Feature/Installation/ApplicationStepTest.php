@@ -41,11 +41,13 @@ test('optional blanks are stored as null and unknown keys are dropped', function
         'parish_short_name' => '  PU  ',
         'tagline' => '   ',
         'short_description' => '',
+        'motto_verse' => '   ',
         'patron_saint' => null,
         'app_name' => '  Aplikasi Uji  ',
         'app_url' => '  https://uji.example.test  ',
         'timezone' => '  Asia/Pontianak  ',
         'locale' => '  id  ',
+        'environment' => '  production  ',
         'contact_phone' => '08123456789',
     ])->assertRedirect(route('install.review'));
 
@@ -54,11 +56,22 @@ test('optional blanks are stored as null and unknown keys are dropped', function
         'parish_short_name' => 'PU',
         'tagline' => null,
         'short_description' => null,
+        'motto_verse' => null,
         'patron_saint' => null,
+        'contact_address' => null,
+        'contact_phone' => '08123456789',
+        'contact_whatsapp' => null,
+        'contact_email' => null,
+        'maps_link' => null,
+        'social_facebook' => null,
+        'social_instagram' => null,
+        'social_youtube' => null,
+        'social_whatsapp_channel' => null,
         'app_name' => 'Aplikasi Uji',
         'app_url' => 'https://uji.example.test',
         'timezone' => 'Asia/Pontianak',
         'locale' => 'id',
+        'environment' => 'production',
     ]);
 });
 

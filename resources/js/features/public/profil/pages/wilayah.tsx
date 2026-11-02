@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { Seo } from '@/components/seo';
 import { RichText } from '@/components/rich-text';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as areaIndex } from '@/routes/area';
@@ -39,7 +40,7 @@ export default function Wilayah({ area }: Props) {
             <PublicSection>
                 <div className="space-y-10">
                     {area?.content ? (
-                        <RichText html={area.content} className="max-w-3xl" />
+                        <RichText html={area.content} className="max-w-7xl" />
                     ) : (
                         <Text
                             as="p"
@@ -52,29 +53,13 @@ export default function Wilayah({ area }: Props) {
                     )}
 
                     {area?.map ? (
-                        <img
+                        <Image
                             src={area.map}
                             alt="Peta wilayah pelayanan paroki"
                             loading="lazy"
-                            className="w-full rounded-xl border border-border object-cover"
+                            fit="cover"
+                            className="w-full rounded-xl border border-border"
                         />
-                    ) : null}
-
-                    {area?.map_url ? (
-                        <a
-                            href={area.map_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-primary-on-surface hover:underline"
-                        >
-                            <Text as="span" variant="label">
-                                Buka peta
-                            </Text>
-                            <ExternalLink
-                                className="size-4"
-                                aria-hidden="true"
-                            />
-                        </a>
                     ) : null}
 
                     <div className="flex flex-col items-start gap-3 border-t border-border pt-6">
@@ -82,7 +67,7 @@ export default function Wilayah({ area }: Props) {
                             Daftar rinci stasi, wilayah, dan lingkungan beserta
                             pengurusnya tersedia pada halaman berikut.
                         </Text>
-                        <Button asChild>
+                        <Button asChild className="text-sm" size="lg">
                             <Link href={areaIndex()}>
                                 Lihat Area
                                 <ExternalLink

@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Area;
+use App\Models\Media;
+use App\Models\MediaVariant;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,22 @@ it('lists only active areas, grouped by type', function () {
             ->has('sections', 2)
             ->where('sections.0.type', 'stasi')
             ->where('sections.1.type', 'lingkungan'));
+});
+
+it('shows the photo of an area detail', function () {
+    $media = Media::factory()->ready()->create();
+    MediaVariant::factory()->for($media)->create(['name' => 'medium']);
+
+    $area = Area::factory()->create([
+        'slug' => 'stasi-berfoto',
+        'photo_media_id' => $media->getKey(),
+    ]);
+
+    $this->get(route('area.show', $area->slug))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('area.photoUrl', fn (?string $url): bool => $url !== null)
+        );
 });
 
 it('renders an empty directory when nothing is active', function () {

@@ -36,7 +36,7 @@ test('a successful test and a fresh database advance to the next step', function
         'username' => (string) config('database.connections.mysql.username'),
         'password' => (string) config('database.connections.mysql.password'),
     ])
-        ->assertRedirect(route('install.super-admin'))
+        ->assertRedirect(route('install.email'))
         ->assertSessionHas('installation.database_verified_at')
         ->assertSessionHas('installation.database');
 });

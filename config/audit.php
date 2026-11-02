@@ -55,6 +55,8 @@ return [
         'locations',
         'galleries',
         'gallery_photos',
+        'livestreams',
+        'livestream_categories',
         'backups',
     ],
 
@@ -74,6 +76,9 @@ return [
         'archived',
         'cancelled',
         'postponed',
+        'broadcast_started',
+        'broadcast_ended',
+        'broadcast_unavailable',
         'deleted',
         'restored',
         'activated',
@@ -159,6 +164,7 @@ return [
         ],
         'parish_profile' => [
             'description', 'established_year', 'cover_media_id', 'cover_alt', 'video_url',
+            'video_title', 'video_description',
         ],
         'parish_histories' => [
             'title', 'year', 'date', 'description', 'narrative', 'media_id',
@@ -179,7 +185,7 @@ return [
             'photo_alt', 'description', 'sort_order', 'is_published',
         ],
         'parish_service_area' => [
-            'content', 'map_media_id', 'map_url', 'is_published',
+            'content', 'map_media_id', 'is_published',
         ],
         'services' => [
             'title', 'slug', 'service_category_id', 'thumbnail_media_id',
@@ -223,6 +229,9 @@ return [
         'community_categories' => [
             'name', 'slug', 'description', 'sort_order', 'is_active',
         ],
+        'livestream_categories' => [
+            'name', 'slug', 'description', 'sort_order', 'is_active',
+        ],
         'communities' => [
             'community_category_id', 'name', 'slug', 'logo_media_id', 'logo_alt',
             'thumbnail_media_id', 'thumbnail_alt', 'description', 'vision',
@@ -246,6 +255,11 @@ return [
         ],
         'gallery_photos' => [
             'gallery_album_id', 'media_id', 'caption', 'alt_text', 'sort_order',
+        ],
+        'livestreams' => [
+            'title', 'description', 'youtube_video_id', 'youtube_url', 'location_id',
+            'category', 'status', 'broadcast_status', 'scheduled_at', 'started_at',
+            'ended_at', 'recorded_at', 'is_recording_available', 'published_at',
         ],
         'backups' => [
             'type', 'source', 'status', 'validation_status', 'file_size',
@@ -278,6 +292,7 @@ return [
         'mass_schedules' => ['source_id', 'destination_location_id', 'count', 'ids'],
         'galleries' => ['photo_ids', 'count'],
         'gallery_photos' => ['count', 'ids'],
+        'livestreams' => ['previous_live_id', 'replaced_by'],
         'services' => ['count', 'ids'],
         'service_requirements' => ['count', 'ids'],
         'service_steps' => ['count', 'ids'],
@@ -329,6 +344,7 @@ return [
         ],
         'areas' => ['description'],
         'galleries' => ['description'],
+        'livestreams' => ['description'],
         'documents' => ['description'],
         'backups' => ['note'],
     ],

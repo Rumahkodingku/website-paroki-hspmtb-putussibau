@@ -4,6 +4,7 @@ use App\Enums\DayOfWeek;
 use App\Models\Location;
 use App\Models\MassSchedule;
 use App\Models\ScheduleNotice;
+use App\Models\SpecialMass;
 use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -351,6 +352,59 @@ it('sends a general notice in its window', function () {
             ->where('notices.0.title', 'Penting')
             ->where('notices.0.is_general', true)
         );
+});
+
+it('sends a notice targeted at a recurring mass that is on the page', function () {
+    $schedule = MassSchedule::factory()->for($this->location)
+        ->onDay(DayOfWeek::Minggu, '07:30')
+        ->create();
+
+    ScheduleNotice::factory()->forSchedule($schedule)->create([
+        'title' => 'Misa 07.30 dibatalkan',
+    ]);
+
+    $this->get('/jadwal-misa')
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('notices', 1)
+            ->where('notices.0.title', 'Misa 07.30 dibatalkan')
+        );
+});
+
+it('sends a notice targeted at a special mass that is on the page', function () {
+    $mass = SpecialMass::factory()->for($this->location)->create();
+
+    ScheduleNotice::factory()->create([
+        'special_mass_id' => $mass->getKey(),
+        'title' => 'Misa khusus diundur',
+    ]);
+
+    $this->get('/jadwal-misa')
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('notices', 1)
+            ->where('notices.0.title', 'Misa khusus diundur')
+        );
+});
+
+it('hides a notice for a schedule at another location', function () {
+    $schedule = MassSchedule::factory()->for($this->other)
+        ->onDay(DayOfWeek::Minggu, '07:30')
+        ->create();
+
+    ScheduleNotice::factory()->forSchedule($schedule)->create();
+
+    $this->get(route('jadwal-misa.index', ['lokasi' => $this->location->getKey()]))
+        ->assertInertia(fn (Assert $page) => $page->has('notices', 0));
+});
+
+it('hides a notice for a schedule removed by the day filter', function () {
+    $schedule = MassSchedule::factory()->for($this->location)
+        ->onDay(DayOfWeek::Senin, '06:00')
+        ->create();
+
+    ScheduleNotice::factory()->forSchedule($schedule)->create();
+
+    $this->get(route('jadwal-misa.index', ['hari' => DayOfWeek::Minggu->value]))
+        ->assertInertia(fn (Assert $page) => $page->has('notices', 0));
 });
 
 it('sends nothing when there is no notice to show', function () {

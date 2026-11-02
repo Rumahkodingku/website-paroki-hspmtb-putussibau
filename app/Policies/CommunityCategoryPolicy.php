@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\CommunityCategory;
-use App\Models\User;
+use App\Policies\Concerns\ChecksModulePermission;
 
 /**
  * Who may manage CommunityCategory rows.
@@ -19,23 +18,10 @@ use App\Models\User;
  */
 class CommunityCategoryPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->can('communitycategories.view');
-    }
+    use ChecksModulePermission;
 
-    public function create(User $user): bool
+    protected function permissionPrefix(): string
     {
-        return $user->can('communitycategories.create');
-    }
-
-    public function update(User $user, CommunityCategory $model): bool
-    {
-        return $user->can('communitycategories.update');
-    }
-
-    public function delete(User $user, CommunityCategory $model): bool
-    {
-        return $user->can('communitycategories.delete');
+        return 'communitycategories';
     }
 }

@@ -2,30 +2,10 @@
 
 namespace App\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 trait GeneratesUniqueSlug
 {
-    protected function routeKeyId(string ...$names): ?int
-    {
-        foreach ($names as $name) {
-            $route = $this->route($name);
-
-            if ($route instanceof Model) {
-                $key = $route->getKey();
-
-                return is_numeric($key) ? (int) $key : null;
-            }
-
-            if (is_numeric($route)) {
-                return (int) $route;
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Build a slug that is not already in use, keeping a typed slug as-is.
      *

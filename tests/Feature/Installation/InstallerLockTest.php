@@ -57,3 +57,13 @@ test('the installer refuses to run when it is disabled', function () {
 
     $this->postJson('/install/run', ['confirmed' => true])->assertNotFound();
 });
+
+test('a run is refused when the application database already has tables', function () {
+    $this->withSession(installationTestSession())
+        ->postJson('/install/run', ['confirmed' => true])
+        ->assertOk()
+        ->assertJson([
+            'status' => 'failed',
+            'error_code' => 'DATABASE_NOT_FRESH',
+        ]);
+});

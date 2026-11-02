@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Church } from 'lucide-react';
 import { useState } from 'react';
 import { PublicContainer } from '@/components/public-container';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as jadwalMisa } from '@/routes/jadwal-misa';
@@ -41,7 +42,7 @@ export function HomeHero({
         <section className="relative isolate overflow-hidden bg-navy text-white">
             {/* Hero background image */}
             {!imageFailed && hero.image && (
-                <img
+                <Image
                     src={hero.image}
                     alt={hero.imageAlt}
                     width={hero.width}
@@ -50,7 +51,11 @@ export function HomeHero({
                     fetchPriority="high"
                     decoding="async"
                     onError={() => setImageFailed(true)}
-                    className="absolute inset-0 size-full object-cover object-[62%_center] md:object-center"
+                    fit="cover"
+                    objectPosition="62% center"
+                    imageClassName="md:object-center"
+                    className="inset-0 size-full"
+                    position="absolute"
                 />
             )}
 
@@ -76,11 +81,6 @@ export function HomeHero({
                         <div className="w-full max-w-3xl space-y-5 md:space-y-6">
                             {eyebrow && (
                                 <div className="flex items-center gap-4">
-                                    <span
-                                        aria-hidden="true"
-                                        className="h-0.5 w-8 shrink-0 bg-gold"
-                                    />
-
                                     <Text
                                         as="p"
                                         variant="label"
@@ -95,7 +95,7 @@ export function HomeHero({
                             <Text
                                 as="h1"
                                 variant="hero"
-                                className="max-w-3xl text-4xl leading-[1.08] font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+                                className="max-w-3xl text-6xl leading-[1.08] font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
                             >
                                 {titlePrefix}
                                 {accentWord && (

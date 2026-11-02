@@ -148,7 +148,7 @@ class UpdateSettingsRequest extends FormRequest
         }
 
         if ($this->isRichText($key) && is_string($value)) {
-            return app(HtmlSanitizer::class)->clean($value);
+            return app(HtmlSanitizer::class)->cleanOrNull($value);
         }
 
         return $value;

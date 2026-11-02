@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import type { PublicCommunityDetail } from '../types';
@@ -17,11 +18,13 @@ export function CommunityProfileHeader({
         <header className="mt-6">
             <div className="relative aspect-16/8 overflow-hidden rounded-3xl bg-canvas-subtle sm:aspect-16/7 lg:aspect-16/6">
                 {community.thumbnail_url ? (
-                    <img
+                    <Image
                         src={community.thumbnail_url}
                         alt=""
                         fetchPriority="high"
-                        className="size-full object-cover"
+                        aspectRatio="16 / 8"
+                        fit="cover"
+                        className="size-full"
                     />
                 ) : (
                     <div className="flex size-full items-center justify-center text-muted-foreground">
@@ -39,11 +42,12 @@ export function CommunityProfileHeader({
                     <div className="flex min-w-0 items-start gap-4 sm:gap-5">
                         {community.logo_url ? (
                             <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-white p-2 sm:size-20 sm:p-2.5">
-                                <img
+                                <Image
                                     src={community.logo_url}
                                     alt=""
                                     loading="lazy"
-                                    className="size-full object-contain"
+                                    fit="contain"
+                                    className="size-full"
                                 />
                             </div>
                         ) : null}

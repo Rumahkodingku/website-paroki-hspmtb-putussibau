@@ -36,6 +36,11 @@ are absent on purpose:
   a `status` enum, but publishing and archiving are still ordinary fields of the
   update form, so they ride on `documents.update` (D-66). The admin preview route
   is gated on `documents.view` through `DocumentPolicy::view`.
+- There is no `livestreams.publish`. The livestream module has an editorial
+  `status` enum, but publishing and archiving are ordinary fields of the update
+  form (D-101). Starting, ending and marking a stream unavailable are mutations
+  of one record, so they ride on `livestreams.update` through
+  `LivestreamPolicy::update`.
 - The service-area narrative is a singleton, so it carries only
   `parishprofiles.view` and `parishprofiles.update`. There is no create or
   delete endpoint for a row that must always be exactly one. The Informasi
@@ -69,6 +74,7 @@ are absent on purpose:
 | Community categories | `communitycategories.view`, `communitycategories.create`, `communitycategories.update`, `communitycategories.delete` |
 | Areas (wilayah/lingkungan/stasi) | `areas.view`, `areas.create`, `areas.update`, `areas.delete` |
 | Galleries | `galleries.view`, `galleries.create`, `galleries.update`, `galleries.delete` |
+| Livestreams | `livestreams.view`, `livestreams.create`, `livestreams.update`, `livestreams.delete` |
 | Documents | `documents.view`, `documents.create`, `documents.update`, `documents.delete` |
 | Document categories | `documentcategories.view`, `documentcategories.create`, `documentcategories.update`, `documentcategories.delete` |
 

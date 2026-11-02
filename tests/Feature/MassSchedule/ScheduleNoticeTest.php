@@ -75,6 +75,21 @@ it('creates a general notice', function () {
         ->and($stored->targetKind())->toBeNull();
 });
 
+it('rejects a malformed notice date instead of failing', function () {
+    $this->actingAs(superAdmin())
+        ->post(route('schedule-notices.store'), [
+            'title' => 'Perubahan Jadwal',
+            'message' => 'Misa dipindahkan.',
+            'location_id' => null,
+            'mass_schedule_id' => null,
+            'special_mass_id' => null,
+            'starts_at' => 'garbage',
+            'ends_at' => null,
+            'is_active' => true,
+        ])
+        ->assertSessionHasErrors('starts_at');
+});
+
 it('creates a notice targeted at a location', function () {
     $this->actingAs(superAdmin())
         ->post(route('schedule-notices.store'), [

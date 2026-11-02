@@ -2,6 +2,7 @@
 
 namespace App\Actions\News;
 
+use App\Concerns\GeneratesUniqueSlug;
 use App\Enums\MediaStatus;
 use App\Enums\PostStatus;
 use App\Models\Media;
@@ -36,6 +37,8 @@ use Illuminate\Support\Str;
  */
 class SavePostAction
 {
+    use GeneratesUniqueSlug;
+
     public function __construct(private readonly AuditLogger $audit) {}
 
     /**
@@ -52,7 +55,7 @@ class SavePostAction
                 ...$attributes,
                 'author_id' => $author->getKey(),
                 'author_name' => $this->authorName($attributes['author_name'] ?? null, $author),
-                'slug' => $this->resolveSlug($post, $attributes),
+                'slug' => $this->resolveSlug($attributes),
                 'published_at' => $this->resolvePublishedAt($attributes),
                 'featured_image' => $this->resolveFeaturedImage($post, $attributes),
             ]);
@@ -112,7 +115,7 @@ class SavePostAction
      * articles titled the same thing is ordinary and two identical URLs is not.
      */
     /** @param  array<string, mixed>  $attributes */
-    private function resolveSlug(Post $post, array $attributes): string
+    private function resolveSlug(array $attributes): string
     {
         $given = $attributes['slug'] ?? null;
 
@@ -121,27 +124,12 @@ class SavePostAction
         }
 
         $base = Str::slug($attributes['title'] ?? '');
-        $slug = $base;
-        $suffix = 2;
 
-        // Deterministic and bounded: slug, slug-2, slug-3. The count makes the
-        // worst case a handful of queries on a collision, which is not a
-        // concern for two admins writing articles.
-        while (Post::query()->withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$suffix;
-            $suffix++;
-
-            if ($suffix > 100) {
-                // A title that collides a hundred times is not a title, it is a
-                // loop. Falling back to the key makes it unique without looping
-                // forever, and the article is still saved rather than 500.
-                $slug = $base.'-'.Str::random(6);
-
-                break;
-            }
+        if ($base === '') {
+            return (string) Str::uuid();
         }
 
-        return $slug === '' ? (string) Str::uuid() : $slug;
+        return $this->resolveUniqueSlug(Post::class, null, $base, null, true);
     }
 
     /**
@@ -197,35 +185,6 @@ class SavePostAction
             return $post->featured_image;
         }
 
-        return $media->variantPath($this->largestVariantName());
-    }
-
-    /**
-     * The name of the widest configured variant.
-     *
-     * Read from config('media.variants') rather than written as the literal
-     * 'large', because the column stores a path and the path's directory carries
-     * the variant name — hard-coding a name that the config can change would
-     * leave every article pointing at a directory nothing writes to.
-     */
-    private function largestVariantName(): ?string
-    {
-        $variants = (array) config('media.variants');
-
-        if ($variants === []) {
-            return null;
-        }
-
-        $name = null;
-        $widest = -1;
-
-        foreach ($variants as $candidate => $width) {
-            if ((int) $width > $widest) {
-                $widest = (int) $width;
-                $name = (string) $candidate;
-            }
-        }
-
-        return $name;
+        return $media->largestVariantPath();
     }
 }

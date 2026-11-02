@@ -1,12 +1,21 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, CalendarClock, ChevronRight, MapPin } from 'lucide-react';
+import {
+    ArrowRight,
+    CalendarClock,
+    ChevronRight,
+    MapPin,
+    Radio,
+    Video,
+} from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
+import { formatWibDateTime } from '@/lib/datetime';
 import { create as createEvent, list as eventsList } from '@/routes/events';
+import { edit as editLivestream } from '@/routes/livestreams';
 import { cn } from '@/lib/utils';
 import { contentEditHref } from '../content-target';
 import { getEventDate, getEventTime } from '../event-date';
-import type { UpcomingEvent } from '../types';
+import type { NextLivestream, UpcomingEvent } from '../types';
 import { ContentStatusBadge } from './content-status-badge';
 import { Panel } from './panel';
 
@@ -122,12 +131,90 @@ function UpcomingEventItem({
     );
 }
 
+function LivestreamStrip({
+    livestream,
+    displayTimezone,
+}: {
+    livestream: NextLivestream;
+    displayTimezone: string;
+}) {
+    const Icon = livestream.is_live ? Radio : Video;
+
+    return (
+        <div className="border-t border-border px-4 py-3.5 sm:px-5">
+            <Link
+                href={editLivestream(livestream.id).url}
+                className={cn(
+                    'group flex min-w-0 items-center gap-3 rounded-lg',
+                    'px-2 py-2 transition-colors hover:bg-muted/60',
+                    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                )}
+            >
+                <span
+                    className={cn(
+                        'flex size-9 shrink-0 items-center justify-center rounded-lg',
+                        livestream.is_live
+                            ? 'bg-destructive/10 text-destructive'
+                            : 'bg-primary/10 text-primary',
+                    )}
+                    aria-hidden="true"
+                >
+                    <Icon className="size-4" />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                    <Text
+                        as="span"
+                        variant="fine-print"
+                        color="muted"
+                        className="block"
+                    >
+                        {livestream.is_live
+                            ? 'Sedang live'
+                            : 'Livestream berikutnya'}
+                    </Text>
+
+                    <Text
+                        as="span"
+                        variant="label"
+                        lineClamp={1}
+                        className="block font-medium text-foreground group-hover:text-primary"
+                    >
+                        {livestream.title}
+                    </Text>
+
+                    {!livestream.is_live && livestream.scheduled_at ? (
+                        <Text
+                            as="span"
+                            variant="fine-print"
+                            color="muted"
+                            className="mt-0.5 block tabular-nums"
+                        >
+                            {formatWibDateTime(
+                                livestream.scheduled_at,
+                                displayTimezone,
+                            )}
+                        </Text>
+                    ) : null}
+                </span>
+
+                <ChevronRight
+                    className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                    aria-hidden="true"
+                />
+            </Link>
+        </div>
+    );
+}
+
 export function UpcomingEventsPanel({
     events,
+    livestream,
     displayTimezone,
     className,
 }: {
     events: UpcomingEvent[];
+    livestream: NextLivestream | null;
     displayTimezone: string;
     className?: string;
 }) {
@@ -176,6 +263,13 @@ export function UpcomingEventsPanel({
                     ))}
                 </ul>
             )}
+
+            {livestream ? (
+                <LivestreamStrip
+                    livestream={livestream}
+                    displayTimezone={displayTimezone}
+                />
+            ) : null}
         </Panel>
     );
 }

@@ -236,11 +236,20 @@ export function FormActions({
     extra?: ReactNode;
 }) {
     return (
-        <div className="flex flex-wrap items-center justify-end gap-3">
-            <Button type="submit" disabled={processing}>
+        <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-end gap-3 border-t border-border bg-background py-3">
+            <Button
+                type="submit"
+                disabled={processing}
+                className="cursor-pointer text-sm"
+            >
                 {submitLabel}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                className="cursor-pointer text-sm"
+            >
                 Batal
             </Button>
             {extra}

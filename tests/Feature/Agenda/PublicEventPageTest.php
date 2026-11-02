@@ -83,9 +83,8 @@ it('leaves out a soft-deleted activity', function () {
 });
 
 it('leaves out an activity that has already finished', function () {
-    // "Ahead" means from the start of today, not from now(): an activity that
-    // began an hour ago and runs until noon is still something somebody can walk
-    // into, and one that began this morning belongs on today's list.
+    // An activity with an end time stays until that time passes; one with no
+    // end time belongs to its start day. Both are still "ahead" while they run.
     Event::factory()->past()->create();
     $today = Event::factory()->create([
         'start_at' => Carbon::now()->subHours(2),
@@ -96,6 +95,41 @@ it('leaves out an activity that has already finished', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->where('upcoming.0.id', $today->getKey())
             ->has('upcoming', 1)
+        );
+});
+
+it('keeps a multi-day activity visible after its first day', function () {
+    $retreat = Event::factory()->create([
+        'start_at' => Carbon::now()->subDay()->utc(),
+        'end_at' => Carbon::now()->addDay()->utc(),
+    ]);
+
+    $this->get('/agenda')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('upcoming.0.id', $retreat->getKey())
+            ->has('upcoming', 1)
+        );
+});
+
+it('hides a same-day activity once its end time has passed', function () {
+    Event::factory()->create([
+        'start_at' => Carbon::now()->subHours(3)->utc(),
+        'end_at' => Carbon::now()->subHour()->utc(),
+    ]);
+
+    $this->get('/agenda')
+        ->assertInertia(fn (Assert $page) => $page->where('upcoming', []));
+});
+
+it('keeps an activity with no end time for its start day', function () {
+    $event = Event::factory()->create([
+        'start_at' => Carbon::now()->utc(),
+        'end_at' => null,
+    ]);
+
+    $this->get('/agenda')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('upcoming.0.id', $event->getKey())
         );
 });
 
@@ -194,6 +228,19 @@ it('sends the activities of the requested month', function () {
         );
 });
 
+it('sends an activity that overlaps the requested month', function () {
+    $retreat = Event::factory()->create([
+        'start_at' => Carbon::parse('2026-10-31 02:00:00', 'UTC'),
+        'end_at' => Carbon::parse('2026-11-02 10:00:00', 'UTC'),
+    ]);
+
+    $this->get('/agenda?bulan=2026-11')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('monthly.0.id', $retreat->getKey())
+            ->has('monthly', 1)
+        );
+});
+
 it('ignores a month that is not a month', function () {
     // The month reaches ORDER BY and a BETWEEN, so an unchecked string from a
     // bookmarked link would be a 500 rather than the current month.
@@ -204,6 +251,14 @@ it('ignores a month that is not a month', function () {
             // string, so that assertion fails on a type error rather than on a
             // wrong month.
             ->where('filters.bulan', fn (string $value): bool => (bool) preg_match('/^\d{4}-\d{2}$/', $value))
+        );
+});
+
+it('falls back to the current month for a numeric month that does not exist', function () {
+    $this->get('/agenda?bulan=2026-13')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.bulan', now(config('app.display_timezone'))->format('Y-m'))
         );
 });
 

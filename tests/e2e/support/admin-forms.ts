@@ -21,13 +21,17 @@ import { expect, type Page } from '@playwright/test';
  *
  * The trigger is addressed by label. SelectTrigger renders a <button>, which
  * is a labelable element, so the form's <Label htmlFor> still names it.
+ *
+ * Required fields render an asterisk inside their <Label>, which becomes part
+ * of the accessible name ("Status Publikasi *"). Pass exact = false for those.
  */
 export async function pilih(
     page: Page,
     label: string,
     option: string,
+    exact = true,
 ): Promise<void> {
-    await page.getByLabel(label, { exact: true }).click();
+    await page.getByLabel(label, { exact }).click();
     await page.getByRole('option', { name: option, exact: true }).click();
 
     // Wait for the list to close, or the next click lands on an overlay.

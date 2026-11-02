@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import Image from '@/components/image';
 import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { PublicSection } from '@/components/public-section';
@@ -7,58 +8,13 @@ import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { index as agenda } from '@/routes/agenda';
 import { cn } from '@/lib/utils';
+import { formatWibClockValue, formatWibDayParts } from '@/lib/datetime';
 import type { EventCardData } from '@/components/event-card';
 
 type HomeAgendaSectionProps = {
     events: EventCardData[];
     displayTimezone: string;
 };
-
-const WEEKDAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as const;
-
-const MONTHS = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-] as const;
-
-function getDateParts(date: Date, timezone: string) {
-    const parts = new Intl.DateTimeFormat('en-GB', {
-        timeZone: timezone,
-        day: '2-digit',
-        month: '2-digit',
-        weekday: 'short',
-    }).formatToParts(date);
-
-    const values = Object.fromEntries(
-        parts.map((part) => [part.type, part.value]),
-    );
-
-    const weekdayMap: Record<string, number> = {
-        Sun: 0,
-        Mon: 1,
-        Tue: 2,
-        Wed: 3,
-        Thu: 4,
-        Fri: 5,
-        Sat: 6,
-    };
-
-    return {
-        day: values.day,
-        month: MONTHS[Number(values.month) - 1],
-        weekday: WEEKDAYS[weekdayMap[values.weekday] ?? 0],
-    };
-}
 
 function formatEventTime(
     startAt: string,
@@ -70,46 +26,26 @@ function formatEventTime(
         return 'Sepanjang hari';
     }
 
-    const start = new Date(startAt);
+    const startTime = formatWibClockValue(startAt, timezone);
 
-    if (Number.isNaN(start.getTime())) {
+    if (startTime === '') {
         return 'Waktu belum tersedia';
     }
-
-    const formatter = new Intl.DateTimeFormat('id-ID', {
-        timeZone: timezone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23',
-    });
-
-    const startTime = formatter.format(start);
 
     if (!endAt) {
         return `${startTime} WIB`;
     }
 
-    const end = new Date(endAt);
+    const endTime = formatWibClockValue(endAt, timezone);
 
-    if (Number.isNaN(end.getTime()) || end.getTime() <= start.getTime()) {
+    if (
+        endTime === '' ||
+        new Date(endAt).getTime() <= new Date(startAt).getTime()
+    ) {
         return `${startTime} WIB`;
     }
 
-    return `${startTime}–${formatter.format(end)} WIB`;
-}
-
-function getCategoryColors(color?: string | null) {
-    if (!color || !/^#[0-9a-fA-F]{6}$/.test(color)) {
-        return {
-            color: '#64748b',
-            backgroundColor: '#f1f5f9',
-        };
-    }
-
-    return {
-        color,
-        backgroundColor: `${color}18`,
-    };
+    return `${startTime}–${endTime} WIB`;
 }
 
 export function HomeAgendaSection({
@@ -160,16 +96,14 @@ export function HomeAgendaSection({
                 {filteredEvents.length > 0 ? (
                     <div className="grid gap-x-4 gap-y-4 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-2">
                         {filteredEvents.map((event) => {
-                            const date = new Date(event.start_at);
-                            const validDate = !Number.isNaN(date.getTime());
-
-                            const dateParts = validDate
-                                ? getDateParts(date, displayTimezone)
-                                : null;
-
-                            const categoryColors = getCategoryColors(
-                                event.category?.color_value,
-                            );
+                            const dateParts = Number.isNaN(
+                                new Date(event.start_at).getTime(),
+                            )
+                                ? null
+                                : formatWibDayParts(
+                                      event.start_at,
+                                      displayTimezone,
+                                  );
 
                             const time = formatEventTime(
                                 event.start_at,
@@ -194,12 +128,14 @@ export function HomeAgendaSection({
                                             aria-hidden="true"
                                             className="relative aspect-3/4 w-19 shrink-0 self-start overflow-hidden rounded-lg bg-muted sm:w-25"
                                         >
-                                            <img
+                                            <Image
                                                 src={event.poster}
                                                 alt=""
                                                 loading="lazy"
                                                 decoding="async"
-                                                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                fit="cover"
+                                                imageClassName="transition-transform duration-300 group-hover:scale-105"
+                                                className="size-full"
                                             />
                                         </Link>
                                     ) : (
@@ -247,11 +183,6 @@ export function HomeAgendaSection({
                                                 <Text
                                                     variant="label"
                                                     className="inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1"
-                                                    style={{
-                                                        color: categoryColors.color,
-                                                        backgroundColor:
-                                                            categoryColors.backgroundColor,
-                                                    }}
                                                 >
                                                     {event.category.name}
                                                 </Text>

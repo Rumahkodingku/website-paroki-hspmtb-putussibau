@@ -6,6 +6,7 @@ import {
     Star,
     Trash,
 } from 'lucide-react';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,11 +64,13 @@ export function GalleryPhotoGrid({
                     >
                         <div className="relative aspect-4/3 bg-muted">
                             {photo.url ? (
-                                <img
+                                <Image
                                     src={photo.url}
                                     alt={photo.alt_text ?? ''}
                                     loading="lazy"
-                                    className="size-full object-cover"
+                                    aspectRatio="4 / 3"
+                                    fit="cover"
+                                    className="size-full"
                                 />
                             ) : (
                                 <span className="flex size-full items-center justify-center text-muted-foreground">
