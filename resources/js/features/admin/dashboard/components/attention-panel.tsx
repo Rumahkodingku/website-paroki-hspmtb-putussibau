@@ -3,23 +3,45 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Text } from '@/components/text';
 import { cn } from '@/lib/utils';
 import { contentEditHref, contentTypeLabel } from '../content-target';
-import type { AttentionItem } from '../types';
+import type { AttentionItem, AttentionTone } from '../types';
 import { ATTENTION_COPY, type AttentionCopy } from '../attention-copy';
 import { Panel } from './panel';
 
-const COPY = ATTENTION_COPY as Record<AttentionItem['key'], AttentionCopy>;
+const COPY: Record<AttentionItem['key'], AttentionCopy> = ATTENTION_COPY;
+
+const TONE_STYLES: Record<
+    AttentionTone,
+    { icon: string; badge: string; label: string }
+> = {
+    danger: {
+        icon: 'bg-destructive/10 text-destructive',
+        badge: 'bg-destructive/10 text-destructive',
+        label: 'Perlu tindakan',
+    },
+    warning: {
+        icon: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+        badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+        label: 'Perlu diperiksa',
+    },
+    info: {
+        icon: 'bg-primary/10 text-primary',
+        badge: 'bg-primary/10 text-primary',
+        label: 'Antrean',
+    },
+};
 
 function AttentionBlock({ item }: { item: AttentionItem }) {
     const copy = COPY[item.key];
     const Icon = copy.icon;
+    const tone = TONE_STYLES[item.tone];
 
     return (
-        <section className="px-4 py-4 sm:px-5">
+        <section className="bg-card px-4 py-4 sm:px-5">
             <div className="flex items-start gap-3">
                 <span
                     className={cn(
                         'flex size-10 shrink-0 items-center justify-center rounded-xl',
-                        'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+                        tone.icon,
                     )}
                     aria-hidden="true"
                 >
@@ -36,8 +58,13 @@ function AttentionBlock({ item }: { item: AttentionItem }) {
                             {copy.title(item.count)}
                         </Text>
 
-                        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
-                            Perlu diperiksa
+                        <span
+                            className={cn(
+                                'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                                tone.badge,
+                            )}
+                        >
+                            {tone.label}
                         </span>
                     </div>
 
@@ -52,8 +79,25 @@ function AttentionBlock({ item }: { item: AttentionItem }) {
                 </div>
             </div>
 
+            {item.details.length > 0 && (
+                <ul className="mt-3 space-y-1.5 border-t border-border pt-3">
+                    {item.details.map((detail) => (
+                        <li
+                            key={detail}
+                            className="flex items-start gap-2 text-fine-print text-muted-foreground"
+                        >
+                            <span
+                                className="mt-1.5 size-1.5 shrink-0 rounded-full bg-current"
+                                aria-hidden="true"
+                            />
+                            <span>{detail}</span>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
             {item.items.length > 0 && (
-                <ul className="mt-4 space-y-2 border-t border-border pt-3">
+                <ul className="mt-3 space-y-2 border-t border-border pt-3">
                     {item.items.map((entry) => (
                         <li key={`${entry.type}-${entry.id}`}>
                             <Link
@@ -93,6 +137,22 @@ function AttentionBlock({ item }: { item: AttentionItem }) {
                         </li>
                     ))}
                 </ul>
+            )}
+
+            {item.href && copy.action && (
+                <Link
+                    href={item.href}
+                    className={cn(
+                        'mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-md',
+                        'text-sm font-medium text-primary',
+                        'transition-colors hover:text-primary/80',
+                        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                        'focus-visible:ring-offset-2',
+                    )}
+                >
+                    {copy.action}
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
             )}
         </section>
     );

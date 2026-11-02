@@ -7,11 +7,11 @@ import {
     ListEmpty,
     ListHeader,
     ListToolbar,
+    StatusBadge,
 } from '@/components/list-parts';
 import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
 import { Text } from '@/components/text';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 import {
@@ -41,12 +41,7 @@ const STATUS_OPTIONS = [
     { value: 'inactive', label: 'Nonaktif' },
 ];
 
-export default function Index({
-    categories,
-    filters,
-    labels = {},
-    empty = {},
-}: Props) {
+export default function Index({ categories, filters, empty = {} }: Props) {
     const [deleting, setDeleting] = useState<LivestreamCategoryRow | null>(
         null,
     );
@@ -100,7 +95,7 @@ export default function Index({
         },
         {
             id: 'livestreams_count',
-            header: labels.livestreams_count ?? 'Jumlah Livestreaming',
+            header: 'Jumlah Livestreaming',
             cell: ({ row }) => row.original.livestreams_count ?? '—',
         },
         {
@@ -108,13 +103,7 @@ export default function Index({
             accessorKey: 'is_active',
             header: 'Status',
             sortKey: 'is_active',
-            cell: ({ row }) => (
-                <Badge
-                    variant={row.original.is_active ? 'default' : 'secondary'}
-                >
-                    {row.original.is_active ? 'Aktif' : 'Nonaktif'}
-                </Badge>
-            ),
+            cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
         },
         {
             id: 'sort_order',
@@ -129,7 +118,10 @@ export default function Index({
             cell: ({ row }) => (
                 <RowActions
                     canUpdate={row.original.can.update}
-                    canDelete={row.original.can.delete}
+                    canDelete={
+                        row.original.can.delete &&
+                        (row.original.livestreams_count ?? 0) === 0
+                    }
                     updateHref={editCategory(row.original.id)}
                     onDelete={() => setDeleting(row.original)}
                 />

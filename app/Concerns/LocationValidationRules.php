@@ -28,6 +28,7 @@ use Illuminate\Validation\Validator;
 trait LocationValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
     use ValidatesActiveLocationReference;
 
     /**

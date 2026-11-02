@@ -18,6 +18,7 @@ use Illuminate\Validation\Rule;
 trait CommunityCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>

@@ -8,6 +8,7 @@ use App\Http\Requests\Audit\AuditLogIndexRequest;
 use App\Http\Resources\Audit\AuditEventDetailResource;
 use App\Http\Resources\Audit\AuditEventListResource;
 use App\Models\AuditEvent;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -154,37 +155,25 @@ class AuditLogController extends Controller
      */
     private function actorOptions(): array
     {
-        $rows = AuditEvent::query()
-            ->select(['actor_type', 'actor_id', 'actor_name'])
-            ->distinct()
-            ->orderBy('actor_name')
-            ->limit(200)
-            ->get();
+        // shortcut: deleted actors no longer appear in the filter; cache a
+        // distinct audit_events scan if that becomes a real need.
+        $options = [
+            'system' => [
+                'value' => 'system',
+                'label' => (string) __('audit.actors.system'),
+            ],
+            'anonymous' => [
+                'value' => 'anonymous',
+                'label' => (string) __('audit.actors.anonymous'),
+            ],
+        ];
 
-        $options = [];
-
-        foreach ($rows as $row) {
-            $value = match ($row->actor_type) {
-                'system' => 'system',
-                'anonymous' => 'anonymous',
-                default => $row->actor_id === null
-                    ? 'anonymous'
-                    : 'user:'.$row->actor_id,
-            };
-
-            $label = match ($row->actor_type) {
-                'system' => (string) __('audit.actors.system'),
-                'anonymous' => (string) __('audit.actors.anonymous'),
-                default => $row->actor_id === null
-                    ? (string) __('audit.actors.anonymous')
-                    : (is_string($row->actor_name) && trim($row->actor_name) !== ''
-                        ? $row->actor_name
-                        : 'Pengguna #'.$row->actor_id),
-            };
+        foreach (User::query()->orderBy('name')->limit(200)->get(['id', 'name']) as $user) {
+            $value = 'user:'.$user->getKey();
 
             $options[$value] = [
                 'value' => $value,
-                'label' => $label,
+                'label' => $user->name,
             ];
         }
 

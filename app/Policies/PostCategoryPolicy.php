@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\PostCategory;
-use App\Models\User;
+use App\Policies\Concerns\ChecksModulePermission;
 
 /**
  * Who may manage PostCategory rows.
@@ -22,31 +21,10 @@ use App\Models\User;
  */
 class PostCategoryPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->can('postcategories.view');
-    }
+    use ChecksModulePermission;
 
-    public function create(User $user): bool
+    protected function permissionPrefix(): string
     {
-        return $user->can('postcategories.create');
-    }
-
-    public function update(User $user, PostCategory $model): bool
-    {
-        return $user->can('postcategories.update');
-    }
-
-    /**
-     * A soft delete, and reserved for super admins.
-     *
-     * The same reasoning MassSchedulePolicy records: nothing else guards it, so
-     * the permission has to be real. For the categories it also has to be real
-     * in the other direction — a delete that would orphan content is refused by
-     * the database, and the policy is what stops the request reaching it.
-     */
-    public function delete(User $user, PostCategory $model): bool
-    {
-        return $user->can('postcategories.delete');
+        return 'postcategories';
     }
 }

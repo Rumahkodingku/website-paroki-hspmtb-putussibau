@@ -254,6 +254,14 @@ it('ignores a month that is not a month', function () {
         );
 });
 
+it('falls back to the current month for a numeric month that does not exist', function () {
+    $this->get('/agenda?bulan=2026-13')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.bulan', now(config('app.display_timezone'))->format('Y-m'))
+        );
+});
+
 it('keeps a past month reachable', function () {
     // A calendar that could only show the current month would be useless for
     // "what was on last month", which is a real question about a parish year.

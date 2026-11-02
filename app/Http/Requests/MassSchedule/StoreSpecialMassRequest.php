@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\MassSchedule;
 
+use App\Concerns\ConvertsLocalDateTime;
 use App\Concerns\ValidatesActiveLocationReference;
 use App\Models\SpecialMass;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Carbon;
 
 /**
  * Validates creating a one-off mass.
@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  */
 class StoreSpecialMassRequest extends FormRequest
 {
+    use ConvertsLocalDateTime;
     use ValidatesActiveLocationReference;
 
     /**
@@ -83,19 +84,5 @@ class StoreSpecialMassRequest extends FormRequest
         }
 
         return $validated;
-    }
-
-    /**
-     * Read a posted local wall clock as Asia/Pontianak and return UTC.
-     *
-     * An empty string is a cleared optional field, not the epoch.
-     */
-    protected function toUtc(mixed $value): mixed
-    {
-        if (! is_string($value) || trim($value) === '') {
-            return $value === '' ? null : $value;
-        }
-
-        return Carbon::parse($value, config('app.display_timezone'))->utc();
     }
 }

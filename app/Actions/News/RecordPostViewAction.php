@@ -73,13 +73,8 @@ class RecordPostViewAction
 
         $key = 'post-view:'.$post->getKey().':'.hash('sha256', $ip.'|'.trim($userAgent));
 
-        if (Cache::has($key)) {
-            return true;
-        }
-
-        Cache::put($key, true, now()->addDay());
-
-        return false;
+        // add() is atomic: two tabs opened at once cannot both count.
+        return ! Cache::add($key, true, now()->addDay());
     }
 
     private function looksLikeABot(string $userAgent): bool

@@ -2,28 +2,14 @@
 
 namespace App\Policies;
 
-use App\Models\DocumentCategory;
-use App\Models\User;
+use App\Policies\Concerns\ChecksModulePermission;
 
 class DocumentCategoryPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->can('documentcategories.view');
-    }
+    use ChecksModulePermission;
 
-    public function create(User $user): bool
+    protected function permissionPrefix(): string
     {
-        return $user->can('documentcategories.create');
-    }
-
-    public function update(User $user, DocumentCategory $category): bool
-    {
-        return $user->can('documentcategories.update');
-    }
-
-    public function delete(User $user, DocumentCategory $category): bool
-    {
-        return $user->can('documentcategories.delete');
+        return 'documentcategories';
     }
 }

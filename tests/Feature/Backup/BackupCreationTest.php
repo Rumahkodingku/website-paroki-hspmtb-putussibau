@@ -4,8 +4,11 @@ use App\Enums\BackupSource;
 use App\Enums\BackupStatus;
 use App\Enums\BackupType;
 use App\Enums\BackupValidationStatus;
+use App\Exceptions\BackupException;
 use App\Jobs\CreateBackupJob;
 use App\Models\Backup;
+use App\Services\Backup\BackupSettingsService;
+use App\Services\Backup\BackupStorage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -57,6 +60,60 @@ test('it creates and validates a database backup', function (): void {
         ->and($header)->toStartWith('-- MySQL dump');
 
     gzclose($handle);
+});
+
+test('it refuses to start when free disk space is below the requirement', function (): void {
+    app()->instance(BackupStorage::class, new BackupStorage(1024 * 1024 - 1));
+
+    $settings = app(BackupSettingsService::class);
+    $settings->model();
+    $settings->update([
+        'low_disk_threshold_megabytes' => 1,
+    ]);
+
+    $backup = Backup::query()->create([
+        'uuid' => (string) Str::uuid(),
+        'type' => BackupType::Database,
+        'source' => BackupSource::Manual,
+        'status' => BackupStatus::Queued,
+        'validation_status' => BackupValidationStatus::Pending,
+        'disk' => 'backups',
+        'created_by_label' => 'Super Admin',
+    ]);
+
+    expect(fn () => runBackupJob($backup))->toThrow(BackupException::class);
+
+    $backup->refresh();
+
+    expect($backup->status)->toBe(BackupStatus::Failed)
+        ->and($backup->failure_code)->toBe('disk_full');
+});
+
+test('it refuses after the dump when the dump leaves too little space', function (): void {
+    app()->instance(BackupStorage::class, new BackupStorage(1024 * 1024 + 1));
+
+    $settings = app(BackupSettingsService::class);
+    $settings->model();
+    $settings->update([
+        'low_disk_threshold_megabytes' => 1,
+    ]);
+
+    $backup = Backup::query()->create([
+        'uuid' => (string) Str::uuid(),
+        'type' => BackupType::Database,
+        'source' => BackupSource::Manual,
+        'status' => BackupStatus::Queued,
+        'validation_status' => BackupValidationStatus::Pending,
+        'disk' => 'backups',
+        'created_by_label' => 'Super Admin',
+    ]);
+
+    expect(fn () => runBackupJob($backup))->toThrow(BackupException::class);
+
+    $backup->refresh();
+
+    expect($backup->status)->toBe(BackupStatus::Failed)
+        ->and($backup->failure_code)->toBe('disk_full');
 });
 
 test('it creates a full backup with the configured file scopes', function (): void {

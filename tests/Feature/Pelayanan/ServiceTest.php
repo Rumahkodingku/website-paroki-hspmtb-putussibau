@@ -96,6 +96,18 @@ it('sanitizes the introduction on the way in', function () {
 |--------------------------------------------------------------------------
 */
 
+it('stores an emptied introduction as null', function () {
+    $category = ServiceCategory::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('services.store'), servicePayload($category, [
+            'introduction' => '<p></p>',
+        ]))
+        ->assertSessionHasNoErrors();
+
+    expect(Service::query()->sole()->introduction)->toBeNull();
+});
+
 it('accepts a service with no Google Form', function () {
     $category = ServiceCategory::factory()->create();
 

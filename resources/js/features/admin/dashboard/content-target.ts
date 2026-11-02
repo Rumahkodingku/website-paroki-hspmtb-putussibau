@@ -1,5 +1,9 @@
+import { edit as editCommunity } from '@/routes/communities';
 import { edit as editDocument } from '@/routes/documents';
 import { edit as editEvent } from '@/routes/events';
+import { photos as galleryPhotos } from '@/routes/galleries';
+import { edit as editLivestream } from '@/routes/livestreams';
+import { edit as editPastor } from '@/routes/pastors';
 import { edit as editPost } from '@/routes/posts';
 import { edit as editService } from '@/routes/services';
 import type { DashboardContentType } from './types';
@@ -30,6 +34,14 @@ export function contentEditHref(
             return editDocument(id).url;
         case 'service':
             return editService(id).url;
+        case 'community':
+            return editCommunity(id).url;
+        case 'pastor':
+            return editPastor(id).url;
+        case 'gallery':
+            return galleryPhotos(id).url;
+        case 'livestream':
+            return editLivestream(id).url;
     }
 }
 
@@ -44,5 +56,13 @@ export function contentTypeLabel(type: DashboardContentType): string {
             return 'Dokumen';
         case 'service':
             return 'Pelayanan';
+        case 'community':
+            return 'Komunitas';
+        case 'pastor':
+            return 'Pastor';
+        case 'gallery':
+            return 'Galeri';
+        case 'livestream':
+            return 'Livestreaming';
     }
 }

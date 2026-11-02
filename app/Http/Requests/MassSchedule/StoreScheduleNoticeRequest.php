@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\MassSchedule;
 
+use App\Concerns\ConvertsLocalDateTime;
 use App\Concerns\ValidatesActiveLocationReference;
 use App\Models\ScheduleNotice;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -29,6 +29,7 @@ use Illuminate\Validation\Validator;
  */
 class StoreScheduleNoticeRequest extends FormRequest
 {
+    use ConvertsLocalDateTime;
     use ValidatesActiveLocationReference;
 
     /**
@@ -138,17 +139,5 @@ class StoreScheduleNoticeRequest extends FormRequest
         }
 
         return $validated;
-    }
-
-    /**
-     * A posted local wall clock becomes UTC; an empty optional field is null.
-     */
-    protected function toUtc(mixed $value): mixed
-    {
-        if (! is_string($value) || trim($value) === '') {
-            return $value === '' ? null : $value;
-        }
-
-        return Carbon::parse($value, config('app.display_timezone'))->utc();
     }
 }

@@ -132,10 +132,66 @@ class Media extends Model
     }
 
     /**
-     * True while variants are still expected.
+     * The path of the widest configured variant.
      */
-    public function isPending(): bool
+    public function largestVariantPath(): ?string
     {
-        return in_array($this->status, [MediaStatus::Pending, MediaStatus::Processing], true);
+        $name = null;
+        $widest = -1;
+
+        foreach ((array) config('media.variants') as $candidate => $width) {
+            if ((int) $width > $widest) {
+                $widest = (int) $width;
+                $name = (string) $candidate;
+            }
+        }
+
+        return $this->variantPath($name);
+    }
+
+    /**
+     * Whether any content still points at this upload.
+     *
+     * The foreign keys are nullOnDelete, but the content also stores a variant
+     * path (featured_image, poster_path), so deleting a referenced row would
+     * leave a 404 on a public page.
+     */
+    public function isReferencedByContent(): bool
+    {
+        // shortcut: a new media column must be added here by hand; a
+        // schema-driven check is the upgrade path.
+        $id = $this->getKey();
+        $variantPrefix = trim((string) config('media.paths.variants'), '/').'/'.$id.'/';
+
+        return Post::withTrashed()->where('media_id', $id)->exists()
+            || Post::withTrashed()->where('featured_image', 'like', $variantPrefix.'%')->exists()
+            || Event::withTrashed()->where('media_id', $id)->exists()
+            || Event::withTrashed()->where('poster_path', 'like', $variantPrefix.'%')->exists()
+            || Service::withTrashed()->where('thumbnail_media_id', $id)->exists()
+            || Community::withTrashed()->where(fn ($query) => $query
+                ->where('logo_media_id', $id)
+                ->orWhere('thumbnail_media_id', $id))->exists()
+            || Area::withTrashed()->where('photo_media_id', $id)->exists()
+            || Pastor::where('photo_media_id', $id)->exists()
+            || ParishBoardMember::where('photo_media_id', $id)->exists()
+            || ParishProfile::where('cover_media_id', $id)->exists()
+            || GalleryPhoto::where('media_id', $id)->exists()
+            || SiteSetting::query()
+                ->whereIn('key', $this->mediaSettingKeys())
+                ->where('value', (string) $id)
+                ->exists();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function mediaSettingKeys(): array
+    {
+        $types = (array) config('site-settings.types');
+
+        return array_map(
+            strval(...),
+            array_keys(array_filter($types, fn (mixed $type): bool => $type === 'media')),
+        );
     }
 }

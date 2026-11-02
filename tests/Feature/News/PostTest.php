@@ -115,6 +115,12 @@ it('creates an article', function () {
         ->and($post->author_name)->toBe($user->name);
 });
 
+it('rejects a malformed publication date instead of failing', function () {
+    $this->actingAs(superAdmin())
+        ->post(route('posts.store'), validPost(['published_at' => 'garbage']))
+        ->assertSessionHasErrors('published_at');
+});
+
 it('never takes view_count from the request', function () {
     $this->actingAs(superAdmin())
         ->post(route('posts.store'), validPost(['view_count' => 9999]));
@@ -282,6 +288,30 @@ it('requires a future date when scheduling', function (string $date, string $fie
     'no date at all' => ['', 'published_at'],
     'a date in the past' => ['2026-10-10T09:00', 'published_at'],
 ]);
+
+it('reports the scheduled date error alongside an unrelated field error', function () {
+    Carbon::setTestNow('2026-10-11 09:00:00');
+
+    $this->actingAs(superAdmin())
+        ->post(route('posts.store'), validPost([
+            'title' => '',
+            'status' => PostStatus::Scheduled->value,
+            'published_at' => '2026-10-10T09:00',
+        ]))
+        ->assertSessionHasErrors(['title', 'published_at']);
+
+    Carbon::setTestNow();
+});
+
+it('does not parse a malformed scheduled date when another field has an error', function () {
+    $this->actingAs(superAdmin())
+        ->post(route('posts.store'), validPost([
+            'title' => '',
+            'status' => PostStatus::Scheduled->value,
+            'published_at' => 'garbage',
+        ]))
+        ->assertSessionHasErrors(['title', 'published_at']);
+});
 
 /*
 |--------------------------------------------------------------------------

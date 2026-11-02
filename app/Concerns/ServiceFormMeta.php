@@ -17,20 +17,16 @@ namespace App\Concerns;
  */
 trait ServiceFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function serviceFormMeta(): array
     {
-        return [
-            'labels' => (array) __('pelayanan.labels'),
-            'hints' => (array) __('pelayanan.hints'),
+        return $this->buildFormMeta('pelayanan', [
             'methods' => (array) __('pelayanan.methods'),
             'conditions' => (array) __('pelayanan.requirement_conditions'),
-            // The remaining interface copy — headings, buttons, dialogs, tabs and
-            // empty states — so the components hold no string of their own. PRD 3.3.
-            'copy' => (array) __('pelayanan.admin'),
-            'empty' => (array) __('pelayanan.empty'),
-        ];
+        ]);
     }
 }

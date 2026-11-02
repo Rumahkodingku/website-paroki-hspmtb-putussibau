@@ -66,6 +66,15 @@ export type DocumentFilters = {
     direction: string;
 };
 
+export type DocumentDownloadSummary = {
+    total: number;
+    top: {
+        id: number;
+        title: string;
+        download_count: number;
+    }[];
+};
+
 export type DocumentFormMeta = {
     labels: Record<string, string>;
     hints: Record<string, string>;

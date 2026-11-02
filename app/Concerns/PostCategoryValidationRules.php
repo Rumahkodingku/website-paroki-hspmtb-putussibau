@@ -24,6 +24,7 @@ use Illuminate\Validation\Rule;
 trait PostCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @param  PostCategory|null  $ignore  the record being updated, so it keeps its own slug

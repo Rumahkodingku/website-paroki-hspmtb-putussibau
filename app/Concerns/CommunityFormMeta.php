@@ -16,18 +16,14 @@ use App\Enums\CommunityStatus;
  */
 trait CommunityFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function communityFormMeta(): array
     {
-        return [
-            'labels' => (array) __('komunitas.labels'),
-            'hints' => (array) __('komunitas.hints'),
-            // The remaining interface copy — headings, buttons, dialogs, tabs
-            // and empty states — so the components hold no string of their own.
-            'copy' => (array) __('komunitas.admin'),
-            'empty' => (array) __('komunitas.empty'),
+        return $this->buildFormMeta('komunitas', [
             'statuses' => array_map(
                 fn (string $value): array => [
                     'value' => $value,
@@ -35,6 +31,6 @@ trait CommunityFormMeta
                 ],
                 CommunityStatus::values(),
             ),
-        ];
+        ]);
     }
 }

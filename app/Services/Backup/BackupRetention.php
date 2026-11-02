@@ -55,24 +55,4 @@ final class BackupRetention
             })
             ->whereDoesntHave('restores', fn (Builder $query): Builder => $query->active());
     }
-
-    public function eligible(Backup $backup, ?Carbon $now = null): bool
-    {
-        $now ??= Carbon::now();
-        $values = $this->settings->values();
-
-        if ($backup->restores()->active()->exists()) {
-            return false;
-        }
-
-        return match ($backup->source) {
-            BackupSource::Manual => false,
-            BackupSource::Scheduled => $backup->type === BackupType::Database
-                ? $backup->created_at->lt($now->copy()->subDays((int) $values['retention_daily_days']))
-                : $backup->created_at->lt($now->copy()->subWeeks((int) $values['retention_weekly_weeks'])),
-            BackupSource::Uploaded => $backup->status->value === 'failed'
-                && $backup->created_at->lt($now->copy()->subDays((int) $values['retention_invalid_upload_days'])),
-            BackupSource::PreRestore => ! $backup->isProtected(),
-        };
-    }
 }

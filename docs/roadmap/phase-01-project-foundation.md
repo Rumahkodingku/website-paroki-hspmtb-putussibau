@@ -1772,7 +1772,7 @@ Do not force unnecessary restructuring.
 - [x] Verify Composer.
 - [x] Verify frontend.
 - [x] Verify existing tests.
-- [ ] Remove unnecessary starter artifacts. — *belum*: `.codex/config.toml` (membocorkan path absolut mesin) dan `pnpm-workspace.yaml` (proyek memakai npm) masih ikut ter-track. Keduanya sudah ada di `main` sejak initial commit.
+- [x] Remove unnecessary starter artifacts. — `.codex/config.toml` (path absolut mesin) dan `pnpm-workspace.yaml` (proyek memakai npm) dihapus pada refactoring audit November 2026.
 
 ## P02 — Laravel Config
 

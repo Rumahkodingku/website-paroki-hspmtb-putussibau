@@ -7,7 +7,6 @@ use App\Enums\MediaStatus;
 use App\Models\Community;
 use App\Models\CommunityCategory;
 use App\Rules\PhoneNumberRule;
-use App\Services\HtmlSanitizer;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -42,6 +41,8 @@ use Illuminate\Validation\Validator;
 trait CommunityValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
+    use SanitizesHtmlFields;
 
     /**
      * @param  Community|null  $ignore  the record being updated, so it keeps its own slug
@@ -221,53 +222,6 @@ trait CommunityValidationRules
          * as "sanitizing does nothing" rather than as a lost merge.
          */
         $this->sanitizeHtmlFields(['vision', 'mission']);
-    }
-
-    /**
-     * Clean the given fields as sanitized HTML, turning a cleared one into null.
-     *
-     * The same method exists in ServiceValidationRules and ProfilValidationRules;
-     * three copies is a smell, but the alternative is a shared trait for a
-     * fourteen-line helper, and D-61's cleanup should decide that once rather
-     * than three modules guessing differently today.
-     *
-     * @param  list<string>  $fields
-     */
-    protected function sanitizeHtmlFields(array $fields): void
-    {
-        $sanitizer = app(HtmlSanitizer::class);
-        $merge = [];
-
-        foreach ($fields as $field) {
-            $clean = $sanitizer->clean(
-                is_string($this->input($field)) ? $this->input($field) : null,
-            );
-
-            $merge[$field] = $this->isBlankMarkup($clean) ? null : $clean;
-        }
-
-        $this->merge($merge);
-    }
-
-    /**
-     * Is this cleaned markup an editor that was emptied rather than written?
-     *
-     * Tiptap does not post an empty string for a blank document, it posts
-     * `<p></p>`. Stored as-is that becomes a truthy value, so the public page
-     * draws a "Visi" heading over nothing - the one case where switching a
-     * textarea for a rich text editor shows up as a visible bug.
-     *
-     * Deliberately narrow: it matches only the empty-paragraph wrappers an
-     * emptied document is made of. A document holding an image is `<p><img
-     * ...></p>`, which does not match, so a vision that is one picture survives.
-     * A text-extraction check would have dropped it, which is why this is a
-     * pattern and not HtmlSanitizer::toPlainText().
-     */
-    private function isBlankMarkup(?string $clean): bool
-    {
-        return $clean === null
-            || $clean === ''
-            || preg_match('/^(?:<p>\s*(?:<br\s*\/?>)?\s*<\/p>|<br\s*\/?>|\s)+$/i', $clean) === 1;
     }
 
     /**

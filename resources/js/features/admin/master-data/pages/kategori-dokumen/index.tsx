@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { DataTable, type DataColumn } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import {
+    FilterSelect,
     ListEmpty,
     ListHeader,
     ListToolbar,
@@ -11,6 +12,7 @@ import {
 } from '@/components/list-parts';
 import { ListPagination } from '@/components/list-pagination';
 import { RowActions } from '@/components/row-actions';
+import { Text } from '@/components/text';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
@@ -31,6 +33,12 @@ type Props = {
     filters: DocumentCategoryFilters;
     copy: Record<string, string>;
 };
+
+const STATUS_OPTIONS = [
+    { value: '', label: 'Semua status' },
+    { value: 'active', label: 'Aktif' },
+    { value: 'inactive', label: 'Nonaktif' },
+];
 
 export default function Index({ categories, filters, copy }: Props) {
     const { errors } = usePage<{ errors: Record<string, string> }>().props;
@@ -53,7 +61,7 @@ export default function Index({ categories, filters, copy }: Props) {
         );
     };
 
-    const hasFilter = filters.search !== '';
+    const hasFilter = filters.search !== '' || filters.status !== '';
     const canDelete = (row: DocumentCategoryRow) =>
         row.can.delete && (row.documents_count ?? 0) === 0;
 
@@ -66,32 +74,42 @@ export default function Index({ categories, filters, copy }: Props) {
         {
             id: 'name',
             accessorKey: 'name',
-            header: 'Nama kategori',
+            header: 'Nama Kategori',
             sortKey: 'name',
+            cell: ({ row }) => (
+                <div className="space-y-0.5">
+                    <Text as="p" variant="label">
+                        {row.original.name}
+                    </Text>
+                    <Text as="p" variant="body-sm" color="muted">
+                        {row.original.slug}
+                    </Text>
+                </div>
+            ),
         },
         {
-            id: 'slug',
-            accessorKey: 'slug',
-            header: 'Slug',
-            sortKey: 'slug',
+            id: 'description',
+            header: 'Deskripsi',
+            cell: ({ row }) => row.original.description ?? '—',
+        },
+        {
+            id: 'documents_count',
+            accessorKey: 'documents_count',
+            header: 'Jumlah Dokumen',
+            cell: ({ row }) => row.original.documents_count ?? '—',
+        },
+        {
+            id: 'is_active',
+            accessorKey: 'is_active',
+            header: 'Status',
+            sortKey: 'is_active',
+            cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
         },
         {
             id: 'sort_order',
             accessorKey: 'sort_order',
             header: 'Urutan',
             sortKey: 'sort_order',
-        },
-        {
-            id: 'documents_count',
-            accessorKey: 'documents_count',
-            header: 'Dokumen',
-            cell: ({ row }) => row.original.documents_count,
-        },
-        {
-            id: 'is_active',
-            accessorKey: 'is_active',
-            header: 'Status',
-            cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
         },
         {
             id: 'actions',
@@ -139,11 +157,20 @@ export default function Index({ categories, filters, copy }: Props) {
                     searchPlaceholder="Cari kategori dokumen"
                     onSearch={(search) => applyFilter({ search })}
                 >
+                    <FilterSelect
+                        id="filter-status"
+                        label="Filter status"
+                        value={filters.status}
+                        onChange={(status) => applyFilter({ status })}
+                        options={STATUS_OPTIONS}
+                    />
+
                     {hasFilter ? (
                         <ResetFilters
                             onReset={() =>
                                 applyFilter({
                                     search: '',
+                                    status: '',
                                     sort: '',
                                     direction: '',
                                 })

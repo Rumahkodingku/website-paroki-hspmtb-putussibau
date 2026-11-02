@@ -61,6 +61,7 @@ class PublicServiceController extends Controller
 
         $otherServices = Service::active()
             ->whereKeyNot($service->getKey())
+            ->with('thumbnailMedia.variants')
             ->ordered()
             ->limit(6)
             ->get();

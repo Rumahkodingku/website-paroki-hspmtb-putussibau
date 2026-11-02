@@ -15,6 +15,7 @@ export default function Dashboard({
     recentPosts,
     attentionItems,
     recentContent,
+    nextLivestream,
 }: DashboardProps) {
     const { auth, displayTimezone } = usePage<SharedProps>().props;
 
@@ -42,6 +43,7 @@ export default function Dashboard({
                     >
                         <UpcomingEventsPanel
                             events={upcomingEvents}
+                            livestream={nextLivestream}
                             displayTimezone={displayTimezone}
                             className="h-full"
                         />
@@ -62,18 +64,15 @@ export default function Dashboard({
                     {/* Attention and follow-up items */}
                     <section
                         aria-label="Perlu perhatian"
-                        className="min-w-0 xl:col-span-5"
+                        className="min-w-0 xl:col-span-12"
                     >
-                        <AttentionPanel
-                            items={attentionItems}
-                            className="h-full"
-                        />
+                        <AttentionPanel items={attentionItems} />
                     </section>
 
                     {/* Recently updated content */}
                     <section
                         aria-label="Konten terbaru"
-                        className="min-w-0 xl:col-span-7"
+                        className="min-w-0 xl:col-span-12"
                     >
                         <RecentContentPanel
                             items={recentContent}

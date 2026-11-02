@@ -3,7 +3,6 @@
 namespace App\Concerns;
 
 use App\Enums\MediaStatus;
-use App\Services\HtmlSanitizer;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 
@@ -26,33 +25,14 @@ use Illuminate\Validation\Rules\Exists;
  */
 trait ProfilValidationRules
 {
+    use SanitizesHtmlFields;
+
     /**
      * A `Rule::exists` for a media row that finished processing.
      */
     protected function readyMediaRule(): Exists
     {
         return Rule::exists('media', 'id')->where('status', MediaStatus::Ready->value);
-    }
-
-    /**
-     * Sanitize each named HTML field in place.
-     *
-     * @param  list<string>  $fields
-     */
-    protected function sanitizeHtmlFields(array $fields): void
-    {
-        $sanitizer = app(HtmlSanitizer::class);
-        $merge = [];
-
-        foreach ($fields as $field) {
-            $clean = $sanitizer->clean(
-                is_string($this->input($field)) ? $this->input($field) : null,
-            );
-
-            $merge[$field] = $clean === '' ? null : $clean;
-        }
-
-        $this->merge($merge);
     }
 
     /**

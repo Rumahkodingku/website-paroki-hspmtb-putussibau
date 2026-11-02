@@ -69,19 +69,24 @@ export default function Index({ eventCategories, filters }: Props) {
         {
             id: 'name',
             accessorKey: 'name',
-            header: 'Nama kategori',
+            header: 'Nama Kategori',
             sortKey: 'name',
-        },
-        {
-            id: 'slug',
-            accessorKey: 'slug',
-            header: 'Slug',
-            sortKey: 'slug',
+            cell: ({ row }) => (
+                <div className="space-y-0.5">
+                    <Text as="p" variant="label">
+                        {row.original.name}
+                    </Text>
+                    <Text as="p" variant="body-sm" color="muted">
+                        {row.original.slug}
+                    </Text>
+                </div>
+            ),
         },
         {
             id: 'events_count',
             accessorKey: 'events_count',
-            header: 'Kegiatan',
+            header: 'Jumlah Kegiatan',
+            cell: ({ row }) => row.original.events_count ?? '—',
         },
         {
             id: 'actions',

@@ -29,6 +29,7 @@ use Illuminate\Validation\Rule;
 trait GalleryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @param  GalleryAlbum|null  $ignore  the record being updated, so it keeps its own slug

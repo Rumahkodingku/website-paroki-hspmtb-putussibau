@@ -3,6 +3,7 @@
 use App\Models\AuditEvent;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('defaults to the newest event first', function () {
@@ -21,6 +22,18 @@ it('defaults to the newest event first', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->where('events.data.0.id', $newer->getKey())
             ->where('events.data.1.id', $older->getKey()));
+});
+
+it('offers users in the actor filter', function () {
+    $user = User::factory()->create(['name' => 'Petugas Arsip']);
+
+    $this->actingAs(superAdmin())
+        ->get(route('audit-logs.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('options.actors', fn (Collection $actors): bool => $actors
+                ->contains(fn (array $actor): bool => $actor['value'] === 'user:'.$user->getKey()))
+        );
 });
 
 it('filters by module, action, result, and actor', function () {

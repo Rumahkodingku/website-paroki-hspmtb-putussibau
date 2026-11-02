@@ -18,16 +18,14 @@ use App\Models\LivestreamCategory;
  */
 trait LivestreamFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function livestreamFormMeta(): array
     {
-        return [
-            'labels' => (array) __('livestreaming.labels'),
-            'hints' => (array) __('livestreaming.hints'),
-            'copy' => (array) __('livestreaming.admin'),
-            'empty' => (array) __('livestreaming.empty'),
+        return $this->buildFormMeta('livestreaming', [
             'categories' => LivestreamCategory::query()
                 ->active()
                 ->ordered()
@@ -39,6 +37,6 @@ trait LivestreamFormMeta
                 ->all(),
             'statuses' => LivestreamEditorialStatus::options(),
             'broadcastStatuses' => LivestreamBroadcastStatus::options(),
-        ];
+        ]);
     }
 }
