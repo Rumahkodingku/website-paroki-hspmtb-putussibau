@@ -53,6 +53,17 @@ it('stores the profile and sanitizes the description', function () {
         ->and($profile->video_url)->toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
 });
 
+it('stores an emptied description as null', function () {
+    $this->actingAs(superAdmin())
+        ->put(route('parish-profile.update'), [
+            'description' => '<p></p>',
+            'established_year' => 1956,
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect(ParishProfile::current()->description)->toBeNull();
+});
+
 it('stores the video title and short description', function () {
     $this->actingAs(superAdmin())
         ->put(route('parish-profile.update'), [

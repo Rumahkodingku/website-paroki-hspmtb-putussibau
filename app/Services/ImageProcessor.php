@@ -107,26 +107,6 @@ class ImageProcessor
     }
 
     /**
-     * The dimensions and mime type of a file on disk, without decoding it.
-     *
-     * @return array{width: int, height: int, mime_type: string}
-     */
-    public function measure(string $absolutePath): array
-    {
-        $size = @getimagesize($absolutePath);
-
-        if ($size === false) {
-            throw UnprocessableImage::unreadablePath($absolutePath);
-        }
-
-        return [
-            'width' => (int) $size[0],
-            'height' => (int) $size[1],
-            'mime_type' => $size['mime'],
-        ];
-    }
-
-    /**
      * Decode a file into a GD resource, uprighting it first if EXIF says so.
      */
     private function decode(string $absolutePath, string $mimeType): \GdImage

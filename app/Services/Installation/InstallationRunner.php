@@ -69,6 +69,19 @@ final class InstallationRunner
 
             @set_time_limit(300);
 
+            // The wizard may be pointed at a different, empty database. Check the
+            // application's own connection first, or a lost status file would let
+            // anyone install into a fresh database and overwrite .env. An
+            // unreachable database is not evidence that it is fresh.
+            $applicationReadiness = $this->readiness->check();
+
+            if (! $applicationReadiness['ok']) {
+                throw new InstallationFailure(
+                    InstallationError::tryFrom((string) $applicationReadiness['code'])
+                        ?? InstallationError::DatabaseUnreachable,
+                );
+            }
+
             if (is_array($database)) {
                 $this->applyDatabaseConfig($database);
             }

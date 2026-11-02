@@ -14,18 +14,13 @@ namespace App\Concerns;
  */
 trait GalleryFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function galleryFormMeta(): array
     {
-        return [
-            'labels' => (array) __('galeri.labels'),
-            'hints' => (array) __('galeri.hints'),
-            // Headings, buttons, dialogs and empty states, so the components
-            // hold no string of their own.
-            'copy' => (array) __('galeri.admin'),
-            'empty' => (array) __('galeri.empty'),
-        ];
+        return $this->buildFormMeta('galeri');
     }
 }

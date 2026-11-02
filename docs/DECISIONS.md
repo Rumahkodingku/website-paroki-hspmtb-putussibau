@@ -1498,9 +1498,11 @@ dan CI memakai `coverage: none`. **Level PHPStan tetap 7** — tidak ada satu pu
 dokumen yang menyebut level, jadi mengubahnya jadi keputusan tanpa dokumen.
 **Plugin `profanity`** tidak dipakai: kosmetik.
 
-Satu catatan pengamatan, bukan pekerjaan P13: `laravel/sail` masih ada di
-`require-dev` padahal D-15 menghapus Docker. Itu milik butir P01 "remove
-starter artifacts"
+`laravel/sail` sudah dihapus dari `require-dev` pada refactoring audit
+November 2026 (Fase 7), bersama `laravel/chisel`. `pnpm-workspace.yaml` dan
+`.codex/config.toml` juga sudah dibersihkan sebagai starter artifact.
+`laravel/pao` dipertahankan karena auto-register provider dan Pest plugin-nya.
+
 ---
 
 ## D-28 — Git workflow: husky, commitlint, dan gate penuh saat commit
@@ -2145,8 +2147,7 @@ dirender sebagai teks, dan `Breadcrumbs` memperlakukan href yang hilang sebagai
 ### 11. Kebutuhan variant Button sudah terpenuhi
 
 `ui/button.tsx` sudah memetakan `primary / secondary / navy / gold / icon /
-utility`. Tidak ada primitive baru. `ParishCta` membungkus slot sekundernya dalam
-outline Button sehingga secara struktural tidak mungkin menjadi primary kedua.
+utility`. Tidak ada primitive baru.
 
 ### 12. Arch test bersifat tekstual, termasuk untuk prosa
 
@@ -5203,7 +5204,6 @@ permukaan tertentu; ini tidak mengubah token `primary`.
 | `OrganizationChart`    | `features/public/profil/components/organization-chart.tsx`      |
 | `ServiceAreaMap`       | `components/contact-map.tsx` + `features/public/area/*`         |
 | `ParishGallery`        | `features/public/galeri/components/photo-grid.tsx` (+ lightbox) |
-| `ParishCTA`            | `components/parish-cta.tsx`                                     |
 | `ParishFooter`         | `layouts/public/components/parish-footer.tsx`                   |
 
 ### 4. Tabrakan `text-body`
@@ -5669,14 +5669,19 @@ diklaim lulus.
 @see `docs/plan-implementation/plan-backup-recovery.md`
 @see `docs/backup-recovery.md`
 
-## D-90 — Installation Wizard: konfigurasi environment dikelola deployment
+## D-90 — Installation Wizard: konfigurasi environment dikelola wizard
 
-Wizard tidak menulis `.env`. Operator menyiapkan `DB_*`, `APP_KEY`, `APP_URL`,
-dan `INSTALLER_ENABLED` sebelum membuka `/install`; Step 3 hanya menampilkan
-nilai koneksi (tanpa password), menguji koneksi, dan memeriksa kelayakan
-database. Ini menghindari masalah permission, escaping, dan config cache basi
-yang muncul bila aplikasi web menulis file environment. Konsekuensi: Step 3
-bukan form input, dan Step 5 tidak mengubah URL/timezone/nama aplikasi.
+Wizard menulis kunci `.env` yang dipilih melalui `EnvironmentWriter` (atomik,
+dengan backup `.env.pre-install`): `DB_*`, `MAIL_*`, `APP_NAME`, `APP_URL`,
+`APP_DISPLAY_TIMEZONE`, `APP_LOCALE`, `APP_ENV`, `APP_DEBUG`, dan
+`TELESCOPE_ENABLED`. `APP_KEY` dan `INSTALLER_ENABLED` tetap disiapkan operator
+sebelum membuka `/install`; wizard tidak membuat application key.
+
+Karena wizard dapat diarahkan ke database lain, `InstallationRunner` memeriksa
+koneksi aplikasi yang sedang dikonfigurasi lebih dulu dan menolak instalasi bila
+database itu sudah berisi tabel (`DATABASE_NOT_FRESH`) atau tidak dapat
+dihubungi (`DATABASE_UNREACHABLE`). Ini menutup skenario status file hilang
+yang membuka kembali `/install` saat database aplikasi sedang down.
 
 `INSTALLER_ENABLED=false` adalah default. Flag ini hanya untuk deployment yang
 memang sedang memasang instalasi baru.

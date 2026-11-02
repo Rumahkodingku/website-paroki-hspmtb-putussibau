@@ -340,8 +340,8 @@ describe('Text', () => {
 
     /**
      * `default` emits no colour class at all rather than text-foreground, so a
-     * Text inside a surface that sets its own colour - ParishCta's bg-navy
-     * with text-white - inherits it instead of fighting it.
+     * Text inside a surface that sets its own colour - such as bg-navy with
+     * text-white - inherits it instead of fighting it.
      */
     it('emits no colour class by default so the surface colour wins', () => {
         render(<Text variant="heading-sm">Ikut induk</Text>);

@@ -74,8 +74,33 @@ class DocumentController extends Controller
                 'sort' => $request->string('sort')->toString(),
                 'direction' => $request->string('direction')->toString(),
             ],
+            'downloadSummary' => $this->downloadSummary(),
             ...$this->documentFormMeta(),
         ]);
+    }
+
+    /**
+     * @return array{total: int, top: list<array{id: int, title: string, download_count: int}>}
+     */
+    private function downloadSummary(): array
+    {
+        return [
+            'total' => (int) Document::query()->published()->sum('download_count'),
+            'top' => array_values(
+                Document::query()
+                    ->published()
+                    ->orderByDesc('download_count')
+                    ->orderByDesc('id')
+                    ->limit(5)
+                    ->get(['id', 'title', 'download_count'])
+                    ->map(fn (Document $document): array => [
+                        'id' => $document->id,
+                        'title' => $document->title,
+                        'download_count' => $document->download_count,
+                    ])
+                    ->all()
+            ),
+        ];
     }
 
     public function create(): Response

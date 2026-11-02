@@ -87,24 +87,6 @@ class AuditEvent extends Model
      * @param  Builder<AuditEvent>  $query
      * @return Builder<AuditEvent>
      */
-    public function scopeLatestFirst(Builder $query): Builder
-    {
-        return $query->orderByDesc('occurred_at')->orderByDesc('id');
-    }
-
-    /**
-     * @param  Builder<AuditEvent>  $query
-     * @return Builder<AuditEvent>
-     */
-    public function scopeOccurredBetween(Builder $query, Carbon $from, Carbon $to): Builder
-    {
-        return $query->whereBetween('occurred_at', [$from, $to]);
-    }
-
-    /**
-     * @param  Builder<AuditEvent>  $query
-     * @return Builder<AuditEvent>
-     */
     public function scopeForActor(Builder $query, int|string $actor): Builder
     {
         if (is_int($actor)) {

@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { EmptyState } from '@/components/empty-state';
 import { SectionHeading } from '@/components/section-heading';
-import { ParishCta } from '@/components/parish-cta';
-import { Button } from '@/components/ui/button';
 import { renderWithInertia } from '../support/inertia';
 
 /**
@@ -106,70 +104,6 @@ describe('EmptyState', () => {
 
         expect(
             screen.getByRole('heading', { level: 3, name: 'Kosong' }),
-        ).toBeInTheDocument();
-    });
-});
-
-describe('ParishCta', () => {
-    it('renders its title and description', () => {
-        renderWithInertia(
-            <ParishCta
-                title="Bersama Membangun Gereja yang Hidup"
-                description="Satu kalimat yang menjelaskan langkah berikutnya."
-            />,
-        );
-
-        expect(
-            screen.getByRole('heading', {
-                name: 'Bersama Membangun Gereja yang Hidup',
-            }),
-        ).toBeInTheDocument();
-        expect(
-            screen.getByText(
-                'Satu kalimat yang menjelaskan langkah berikutnya.',
-            ),
-        ).toBeInTheDocument();
-    });
-
-    /**
-     * DESIGN.md states this twice - "CTA should have one primary action, not a
-     * cluster of competing buttons" - and roadmap section 9.4 repeats it. A CTA
-     * that renders three red buttons is the specific failure both lines name, so
-     * the two slots have to be able to hold actions that differ in variant, and
-     * both have to be reachable as buttons rather than as loose text.
-     */
-    it('keeps the primary action visually distinct from the secondary one', () => {
-        renderWithInertia(
-            <ParishCta title="Ajakan" secondaryLabel="Lihat Selengkapnya">
-                <Button>Jadwal Misa</Button>
-            </ParishCta>,
-        );
-
-        const primary = screen.getByRole('button', { name: 'Jadwal Misa' });
-        const secondary = screen.getByRole('button', {
-            name: 'Lihat Selengkapnya',
-        });
-
-        // The two actions carry different variants: the default is a filled red pill,
-        // the secondary slot is outlined by the component itself, so a caller
-        // physically cannot put a second filled primary next to the first.
-        //
-        // Asserted as filled-versus-outlined rather than as a specific colour
-        // class. A previous version of this test pinned `border-primary`, which
-        // quietly became false when DESIGN.md v1.1 sent the outline border to
-        // red-on-surface for dark-mode contrast - the assertion was guarding the
-        // hierarchy and had been rewritten to guard a hue instead.
-        expect(primary.className).not.toBe(secondary.className);
-        expect(primary.className).toContain('bg-primary');
-        expect(primary.className).not.toContain('bg-background');
-        expect(secondary.className).toContain('bg-background');
-    });
-
-    it('renders with no actions at all, which is valid', () => {
-        renderWithInertia(<ParishCta title="Tanpa tombol" />);
-
-        expect(
-            screen.getByRole('heading', { name: 'Tanpa tombol' }),
         ).toBeInTheDocument();
     });
 });

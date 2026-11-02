@@ -2,6 +2,8 @@
 
 use App\Models\GalleryAlbum;
 use App\Models\GalleryPhoto;
+use App\Models\Media;
+use Illuminate\Support\Facades\Event;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +45,40 @@ it('shows a photo count and a cover url', function () {
         ->assertInertia(fn ($page) => $page
             ->where('albums.data.0.photo_count', 2)
             ->has('albums.data.0.cover_url'));
+});
+
+it('counts only photos whose media is ready', function () {
+    $album = GalleryAlbum::factory()->published()->create();
+    $ready = Media::factory()->ready()->create();
+    $pending = Media::factory()->create();
+
+    GalleryPhoto::factory()->create([
+        'gallery_album_id' => $album->getKey(),
+        'media_id' => $ready->getKey(),
+    ]);
+    GalleryPhoto::factory()->create([
+        'gallery_album_id' => $album->getKey(),
+        'media_id' => $pending->getKey(),
+    ]);
+
+    $this->get('/galeri')
+        ->assertInertia(fn ($page) => $page
+            ->where('albums.data.0.photo_count', 1));
+});
+
+it('loads only one photo per album for the cover fallback', function () {
+    $album = GalleryAlbum::factory()->published()->create();
+    GalleryPhoto::factory()->count(5)->create(['gallery_album_id' => $album->getKey()]);
+
+    $retrieved = 0;
+
+    Event::listen('eloquent.retrieved: '.GalleryPhoto::class, function () use (&$retrieved): void {
+        $retrieved++;
+    });
+
+    $this->get('/galeri')->assertOk();
+
+    expect($retrieved)->toBeLessThanOrEqual(1);
 });
 
 it('filters the directory by year', function () {

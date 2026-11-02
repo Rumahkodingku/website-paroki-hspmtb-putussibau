@@ -21,6 +21,16 @@ use Illuminate\Support\Facades\DB;
 final class SiteSettingsService
 {
     /**
+     * The cached map for this request.
+     *
+     * A page reads a setting a few dozen times (middleware, Blade, controller).
+     * Without this, each read is one query against the cache table.
+     *
+     * @var array<string, string|null>|null
+     */
+    private ?array $values = null;
+
+    /**
      * Every setting that currently has a row, keyed by name.
      *
      * Returns raw database contents, so a key with no row is absent rather than
@@ -39,7 +49,7 @@ final class SiteSettingsService
          * Consistency  eventual, which is fine because nothing in the codebase
          *              reads settings inside a transaction that also writes them.
          */
-        return Cache::remember(
+        return $this->values ??= Cache::remember(
             config('site-settings.cache.key'),
             config('site-settings.cache.ttl'),
             fn (): array => SiteSetting::query()->pluck('value', 'key')->all(),
@@ -130,6 +140,8 @@ final class SiteSettingsService
      */
     public function forget(): void
     {
+        $this->values = null;
+
         Cache::forget(config('site-settings.cache.key'));
     }
 

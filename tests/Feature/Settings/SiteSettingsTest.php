@@ -433,6 +433,30 @@ test('clearing the privacy policy stores null rather than leaving the row alone'
         ->and(settingsService()->get('privacy_policy_content'))->toBeNull();
 });
 
+test('an emptied rich-text editor stores null', function (string $key): void {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => [$key => '<p></p>'],
+    ])->assertSessionHasNoErrors();
+
+    expect(SiteSetting::query()->where('key', $key)->value('value'))->toBeNull()
+        ->and(settingsService()->get($key))->toBeNull();
+})->with(['privacy_policy_content', 'terms_and_conditions_content']);
+
+test('the privacy page receives null after the editor is emptied', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->put(route('settings.update'), [
+        'settings' => ['privacy_policy_content' => '<p></p>'],
+    ]);
+
+    $this->get(route('legal.privacy'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('public/legal/privacy')
+            ->where('content', null));
+});
+
 test('a policy past the length limit is rejected in Indonesian', function () {
     $admin = superAdmin();
 

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Services\HtmlSanitizer;
+use App\Services\SiteSettingsService;
 use App\Support\PageFinder;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
          * @see docs/DECISIONS.md D-25
          */
         $this->app->singleton(HtmlSanitizer::class);
+
+        // Scoped, not singleton: a queue worker must not keep yesterday's
+        // settings between jobs.
+        $this->app->scoped(SiteSettingsService::class);
 
         /**
          * Replace Inertia's own view finder.

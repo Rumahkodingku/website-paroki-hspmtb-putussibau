@@ -17,6 +17,7 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\Location;
 use App\Services\AuditLogger;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -251,10 +252,16 @@ class EventController extends Controller
             return null;
         }
 
-        return Carbon::createFromFormat(
-            'Y-m-d',
-            $value.'-01',
-            config('app.display_timezone'),
-        )->startOfMonth();
+        try {
+            $month = Carbon::createFromFormat(
+                'Y-m-d',
+                $value.'-01',
+                config('app.display_timezone'),
+            )->startOfMonth();
+        } catch (InvalidFormatException) {
+            return null;
+        }
+
+        return $month->format('Y-m') === $value ? $month : null;
     }
 }

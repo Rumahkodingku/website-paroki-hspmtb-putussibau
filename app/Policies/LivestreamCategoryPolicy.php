@@ -2,28 +2,14 @@
 
 namespace App\Policies;
 
-use App\Models\LivestreamCategory;
-use App\Models\User;
+use App\Policies\Concerns\ChecksModulePermission;
 
 class LivestreamCategoryPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->can('livestreamcategories.view');
-    }
+    use ChecksModulePermission;
 
-    public function create(User $user): bool
+    protected function permissionPrefix(): string
     {
-        return $user->can('livestreamcategories.create');
-    }
-
-    public function update(User $user, LivestreamCategory $model): bool
-    {
-        return $user->can('livestreamcategories.update');
-    }
-
-    public function delete(User $user, LivestreamCategory $model): bool
-    {
-        return $user->can('livestreamcategories.delete');
+        return 'livestreamcategories';
     }
 }

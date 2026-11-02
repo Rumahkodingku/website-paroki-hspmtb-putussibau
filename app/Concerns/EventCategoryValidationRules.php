@@ -27,6 +27,7 @@ use Illuminate\Validation\Rule;
 trait EventCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @param  EventCategory|null  $ignore  the record being updated, so it keeps its own slug

@@ -2,8 +2,17 @@
 
 use App\Enums\MediaStatus;
 use App\Jobs\GenerateImageVariants;
+use App\Models\Area;
+use App\Models\Community;
+use App\Models\Event;
+use App\Models\GalleryPhoto;
 use App\Models\Media;
 use App\Models\MediaVariant;
+use App\Models\ParishBoardMember;
+use App\Models\ParishProfile;
+use App\Models\Pastor;
+use App\Models\Post;
+use App\Models\Service;
 use App\Models\User;
 use App\Services\ImageProcessor;
 use App\Services\SiteSettingsService;
@@ -519,6 +528,56 @@ test('the status endpoint needs media.view', function () {
         ->getJson(route('media.show', $media))
         ->assertForbidden();
 });
+
+dataset('media references', [
+    'post media_id' => [fn (Media $media) => Post::factory()->create(['media_id' => $media->getKey()])],
+    'post featured_image' => [fn (Media $media) => Post::factory()->create([
+        'featured_image' => trim((string) config('media.paths.variants'), '/').'/'.$media->getKey().'/large.webp',
+    ])],
+    'post trashed' => [function (Media $media): void {
+        Post::factory()->create(['media_id' => $media->getKey()])->delete();
+    }],
+    'event media_id' => [fn (Media $media) => Event::factory()->create(['media_id' => $media->getKey()])],
+    'event poster_path' => [fn (Media $media) => Event::factory()->create([
+        'poster_path' => trim((string) config('media.paths.variants'), '/').'/'.$media->getKey().'/large.webp',
+    ])],
+    'event trashed' => [function (Media $media): void {
+        Event::factory()->create(['media_id' => $media->getKey()])->delete();
+    }],
+    'service thumbnail_media_id' => [fn (Media $media) => Service::factory()->create(['thumbnail_media_id' => $media->getKey()])],
+    'service trashed' => [function (Media $media): void {
+        Service::factory()->create(['thumbnail_media_id' => $media->getKey()])->delete();
+    }],
+    'community logo_media_id' => [fn (Media $media) => Community::factory()->create(['logo_media_id' => $media->getKey()])],
+    'community thumbnail_media_id' => [fn (Media $media) => Community::factory()->create(['thumbnail_media_id' => $media->getKey()])],
+    'community trashed' => [function (Media $media): void {
+        Community::factory()->create(['logo_media_id' => $media->getKey()])->delete();
+    }],
+    'area photo_media_id' => [fn (Media $media) => Area::factory()->create(['photo_media_id' => $media->getKey()])],
+    'area trashed' => [function (Media $media): void {
+        Area::factory()->create(['photo_media_id' => $media->getKey()])->delete();
+    }],
+    'pastor photo_media_id' => [fn (Media $media) => Pastor::factory()->create(['photo_media_id' => $media->getKey()])],
+    'board member photo_media_id' => [fn (Media $media) => ParishBoardMember::factory()->create(['photo_media_id' => $media->getKey()])],
+    'parish profile cover_media_id' => [fn (Media $media) => ParishProfile::factory()->create(['cover_media_id' => $media->getKey()])],
+    'gallery photo media_id' => [fn (Media $media) => GalleryPhoto::factory()->create(['media_id' => $media->getKey()])],
+    'setting logo' => [fn (Media $media) => app(SiteSettingsService::class)->set('logo', $media->getKey())],
+]);
+
+test('refuses to delete media that content still references', function (Closure $reference): void {
+    $media = Media::factory()->create();
+
+    $reference($media);
+
+    expect($media->isReferencedByContent())->toBeTrue();
+
+    $this->actingAs(superAdmin())
+        ->delete(route('media.destroy', $media))
+        ->assertRedirect()
+        ->assertSessionHasErrors('media');
+
+    expect(Media::query()->whereKey($media->getKey())->exists())->toBeTrue();
+})->with('media references');
 
 test('deleting an upload removes its files and its row', function () {
     $media = storeMedia(jpegUpload());

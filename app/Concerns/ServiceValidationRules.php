@@ -9,7 +9,6 @@ use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Rules\GoogleFormUrl;
 use App\Rules\PhoneNumberRule;
-use App\Services\HtmlSanitizer;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -40,6 +39,8 @@ use Illuminate\Validation\Validator;
 trait ServiceValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
+    use SanitizesHtmlFields;
 
     /**
      * The closure on contact_phone is a rule too: Laravel accepts a closure as a
@@ -276,26 +277,5 @@ trait ServiceValidationRules
                 }
             }
         };
-    }
-
-    /**
-     * Sanitize each named HTML field in place (PRD D-14, XC-S1).
-     *
-     * @param  list<string>  $fields
-     */
-    protected function sanitizeHtmlFields(array $fields): void
-    {
-        $sanitizer = app(HtmlSanitizer::class);
-        $merge = [];
-
-        foreach ($fields as $field) {
-            $clean = $sanitizer->clean(
-                is_string($this->input($field)) ? $this->input($field) : null,
-            );
-
-            $merge[$field] = $clean === '' ? null : $clean;
-        }
-
-        $this->merge($merge);
     }
 }

@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import { Text } from '@/components/text';
 import { formatWibDateTime } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
@@ -38,31 +37,18 @@ export function RecentContentRow({
                     {contentTypeLabel(item.type)}
                 </Text>
 
-                <span className="flex min-w-0 items-center gap-2">
-                    <Text
-                        as="span"
-                        variant="label"
-                        lineClamp={2}
-                        className={cn(
-                            'min-w-0 flex-1 font-medium',
-                            'leading-snug text-foreground',
-                            'transition-colors group-hover:text-primary',
-                        )}
-                    >
-                        {item.title}
-                    </Text>
-
-                    <ArrowRight
-                        className={cn(
-                            'hidden size-4 shrink-0',
-                            'text-muted-foreground/50',
-                            'transition-all group-hover:translate-x-0.5',
-                            'group-hover:text-primary',
-                            'lg:block',
-                        )}
-                        aria-hidden="true"
-                    />
-                </span>
+                <Text
+                    as="span"
+                    variant="label"
+                    lineClamp={2}
+                    className={cn(
+                        'min-w-0 font-medium',
+                        'leading-snug text-foreground',
+                        'transition-colors group-hover:text-primary',
+                    )}
+                >
+                    {item.title}
+                </Text>
 
                 <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 lg:contents">
                     <span className="justify-self-start">

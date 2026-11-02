@@ -197,6 +197,12 @@ class MediaController extends Controller
             403,
         );
 
+        if ($media->isReferencedByContent()) {
+            return back()->withErrors([
+                'media' => __('Gambar ini masih dipakai konten lain. Lepaskan referensinya terlebih dahulu.'),
+            ]);
+        }
+
         $variants = $media->variants()->get(['path']);
         $variantDisk = Storage::disk((string) config('media.variant_disk'));
         $originalDisk = $media->disk;

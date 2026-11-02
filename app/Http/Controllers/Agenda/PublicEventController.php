@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Agenda;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\MassSchedule\ResolvesNestedResources;
 use App\Http\Resources\Public\Agenda\PublicEventCategoryResource;
 use App\Http\Resources\Public\Agenda\PublicEventDetailResource;
 use App\Http\Resources\Public\Agenda\PublicEventResource;
 use App\Models\Event;
 use App\Models\EventCategory;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,8 +34,6 @@ use Inertia\Response;
  */
 class PublicEventController extends Controller
 {
-    use ResolvesNestedResources;
-
     /**
      * How many activities the upcoming list asks for.
      */
@@ -208,14 +206,18 @@ class PublicEventController extends Controller
     private function filteredMonth(string $value): Carbon
     {
         $timezone = (string) config('app.display_timezone');
+        $current = Carbon::now()->setTimezone($timezone)->startOfMonth();
 
-        if (preg_match('/^\d{4}-\d{2}$/', $value) === 1) {
-            // The regex has already reduced this to `YYYY-MM-01`, so parse
-            // cannot fail and createFromFormat's false branch would be dead
-            // code that still has to be handled.
-            return Carbon::parse($value.'-01', $timezone)->startOfMonth();
+        if (preg_match('/^\d{4}-\d{2}$/', $value) !== 1) {
+            return $current;
         }
 
-        return Carbon::now()->setTimezone($timezone)->startOfMonth();
+        try {
+            $month = Carbon::parse($value.'-01', $timezone)->startOfMonth();
+        } catch (InvalidFormatException) {
+            return $current;
+        }
+
+        return $month->format('Y-m') === $value ? $month : $current;
     }
 }

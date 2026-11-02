@@ -47,10 +47,12 @@ final class BackupCreator
         ])->save();
 
         try {
-            $this->assertDiskSpace();
+            $source = $backup->type === BackupType::Full ? $this->sourceBytes() : 0;
+            $this->assertDiskSpace($source);
 
             $dumpPath = $temp.'/database.sql';
             $dump = $this->dumper->dump($dumpPath);
+            $this->assertDiskSpace($source, $dump['size']);
             $databaseChecksum = (string) hash_file('sha256', $dumpPath);
             $createdAt = $backup->created_at ?? now();
 
@@ -240,7 +242,7 @@ final class BackupCreator
         ];
     }
 
-    private function assertDiskSpace(): void
+    private function assertDiskSpace(int $sourceBytes, int $dumpBytes = 0): void
     {
         $free = $this->storage->freeBytes();
 
@@ -250,9 +252,77 @@ final class BackupCreator
 
         $threshold = (int) $this->settings->values()['low_disk_threshold_megabytes'] * 1024 * 1024;
 
-        if ($free < $threshold) {
+        if ($free < self::requiredBytes($sourceBytes, $threshold, $dumpBytes)) {
             throw BackupException::because('disk_full');
         }
+    }
+
+    /**
+     * Free space a backup needs beyond what the source files already occupy.
+     *
+     * A full backup copies every file to temp and then writes the ZIP; the
+     * database dump is another input that is copied into the ZIP. The peak is
+     * roughly twice the inputs. The threshold stays as the floor.
+     *
+     * shortcut: this assumes the ZIP is no larger than its inputs and that the
+     * backup disk is the temp disk; a separate backup disk needs its own check.
+     */
+    public static function requiredBytes(int $sourceBytes, int $thresholdBytes, int $dumpBytes = 0): int
+    {
+        return ($sourceBytes + $dumpBytes) * 2 + $thresholdBytes;
+    }
+
+    /**
+     * @return iterable<int, array{disk: string, path: string}>
+     */
+    private function scopedFiles(): iterable
+    {
+        $seen = [];
+
+        foreach ($this->scopes() as $scope) {
+            if ($scope['path'] === '') {
+                continue;
+            }
+
+            foreach (Storage::disk($scope['disk'])->allFiles($scope['path']) as $relative) {
+                $relative = trim((string) $relative, '/');
+
+                if ($relative === '' || str_starts_with(basename($relative), '.')) {
+                    continue;
+                }
+
+                $key = $scope['disk'].'/'.$relative;
+
+                if (isset($seen[$key])) {
+                    continue;
+                }
+
+                $seen[$key] = true;
+
+                yield ['disk' => $scope['disk'], 'path' => $relative];
+            }
+        }
+    }
+
+    /**
+     * The size of the files a full backup will copy, best effort.
+     *
+     * Public so the disk-space test can assert the sum directly; the service is
+     * final and has no interface.
+     */
+    public function sourceBytes(): int
+    {
+        $total = 0;
+
+        foreach ($this->scopedFiles() as $file) {
+            try {
+                $total += (int) Storage::disk($file['disk'])->size($file['path']);
+            } catch (Throwable) {
+                // Best effort: collectFiles() reports the real storage error.
+            }
+        }
+
+        return $total;
     }
 
     /**
@@ -347,81 +417,63 @@ final class BackupCreator
     {
         $manifest = [];
         $entries = [];
-        $seen = [];
         $index = 0;
 
-        foreach ($this->scopes() as $scope) {
-            if ($scope['path'] === '') {
+        foreach ($this->scopedFiles() as $file) {
+            $adapter = Storage::disk($file['disk']);
+            $relative = $file['path'];
+
+            $this->paths->assertSafeRelative($relative);
+
+            try {
+                $absolute = $adapter->path($relative);
+            } catch (Throwable) {
+                $absolute = null;
+            }
+
+            if ($absolute !== null && is_link($absolute)) {
                 continue;
             }
 
-            $adapter = Storage::disk($scope['disk']);
+            $entry = 'files/'.$file['disk'].'/'.$relative;
 
-            foreach ($adapter->allFiles($scope['path']) as $relative) {
-                $relative = trim((string) $relative, '/');
+            $stream = $adapter->readStream($relative);
 
-                if ($relative === '' || str_starts_with(basename($relative), '.')) {
-                    continue;
-                }
+            if (! is_resource($stream)) {
+                throw BackupException::because('storage_unavailable');
+            }
 
-                $this->paths->assertSafeRelative($relative);
+            $local = $temp.'/file-'.(++$index);
 
-                try {
-                    $absolute = $adapter->path($relative);
-                } catch (Throwable) {
-                    $absolute = null;
-                }
+            try {
+                $target = fopen($local, 'wb');
 
-                if ($absolute !== null && is_link($absolute)) {
-                    continue;
-                }
-
-                $entry = 'files/'.$scope['disk'].'/'.$relative;
-
-                if (isset($seen[$entry])) {
-                    continue;
-                }
-
-                $seen[$entry] = true;
-
-                $stream = $adapter->readStream($relative);
-
-                if (! is_resource($stream)) {
+                if ($target === false) {
                     throw BackupException::because('storage_unavailable');
                 }
 
-                $local = $temp.'/file-'.(++$index);
-
                 try {
-                    $target = fopen($local, 'wb');
-
-                    if ($target === false) {
-                        throw BackupException::because('storage_unavailable');
-                    }
-
-                    try {
-                        stream_copy_to_stream($stream, $target);
-                    } finally {
-                        fclose($target);
-                    }
+                    stream_copy_to_stream($stream, $target);
                 } finally {
-                    fclose($stream);
+                    fclose($target);
                 }
-
-                $size = (int) filesize($local);
-
-                $manifest[] = [
-                    'disk' => $scope['disk'],
-                    'path' => $relative,
-                    'size' => $size,
-                    'sha256' => (string) hash_file('sha256', $local),
-                ];
-
-                $entries[] = [
-                    'entry' => $entry,
-                    'local' => $local,
-                ];
+            } finally {
+                fclose($stream);
             }
+
+            $size = (int) filesize($local);
+
+            $manifest[] = [
+                'disk' => $file['disk'],
+                'path' => $relative,
+                'size' => $size,
+                'sha256' => (string) hash_file('sha256', $local),
+            ];
+
+            $entries[] = [
+                'entry' => $entry,
+                'local' => $local,
+            ];
         }
 
         return ['manifest' => $manifest, 'entries' => $entries];

@@ -148,7 +148,7 @@ container to fall back to.
 composer dev
 ```
 
-This is `php artisan dev` (Laravel Pao), which starts **five** processes:
+This is Laravel's `php artisan dev`, which starts **five** processes:
 
 | Process | What it does |
 | --- | --- |
@@ -157,6 +157,9 @@ This is `php artisan dev` (Laravel Pao), which starts **five** processes:
 | logs | `php artisan pail` |
 | vite | `npm run dev` |
 | scheduler | `php artisan schedule:work` |
+
+`laravel/pao` does not start these processes. It only reformats console output
+when an AI agent is detected, and registers its Pest plugin.
 
 The scheduler process is here rather than in the cron file so that a scheduled
 task actually runs while you are developing. Production uses a cron line with
@@ -419,6 +422,7 @@ dimasukkan.
 ### 11.1 Prasyarat
 
 - MySQL 8 dan database target **kosong** (nol tabel).
+- Database target **dapat dihubungi** dengan `DB_*` di `.env`.
 - Dependensi PHP dan frontend sudah terpasang.
 - `.env` sudah berisi `DB_*`, `APP_KEY`, dan `APP_URL` yang benar.
 - `INSTALLER_ENABLED=true` hanya selama instalasi.
@@ -426,6 +430,10 @@ dimasukkan.
 Jangan memakai `composer setup` untuk instalasi baru: perintah itu menjalankan
 `php artisan migrate`, sehingga database tidak lagi kosong dan wizard akan
 menolaknya.
+
+Jika database aplikasi tidak dapat dihubungi, wizard menolak instalasi dengan
+`DATABASE_UNREACHABLE`. Perbaiki `DB_*`, pastikan database kosong dapat
+dihubungi, lalu hapus status `failed` sesuai §11.4 sebelum mengulang.
 
 Membuka `/` sebelum instalasi otomatis diarahkan ke `/install`; tidak perlu
 mengetik `/install` secara manual.
@@ -468,7 +476,7 @@ berbasis environment, dan seluruh seeder demo tidak dipanggil.
 Status: `storage/app/private/installation/status.json`. File ini tidak berisi
 secret. Jika instalasi gagal:
 
-1. Baca status dan kode error (`MIGRATION_FAILED`, `SEEDER_FAILED`, dst.).
+1. Baca status dan kode error (`MIGRATION_FAILED`, `SEEDER_FAILED`, `DATABASE_UNREACHABLE`, dst.).
 2. Periksa log server untuk detail exception.
 3. Periksa migrasi, role, user, kategori, dan setting yang sudah terbentuk.
 4. Pulihkan backup bila database perlu dikembalikan.

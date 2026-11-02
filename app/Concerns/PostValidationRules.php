@@ -40,6 +40,8 @@ use Illuminate\Validation\Validator;
  */
 trait PostValidationRules
 {
+    use ConvertsLocalDateTime;
+
     /**
      * @param  Post|null  $ignore  the record being updated, so it keeps its own slug and its own pin slot
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
@@ -135,18 +137,6 @@ trait PostValidationRules
     }
 
     /**
-     * An empty string is a cleared optional field, not the epoch.
-     */
-    protected function toUtc(mixed $value): mixed
-    {
-        if (! is_string($value) || trim($value) === '') {
-            return $value === '' ? null : $value;
-        }
-
-        return Carbon::parse($value, config('app.display_timezone'))->utc();
-    }
-
-    /**
      * POST-07: at most two published articles are pinned at a time.
      *
      * Counted over the rows rather than over the request, which is the whole
@@ -198,6 +188,12 @@ trait PostValidationRules
     {
         $validator->after(function (Validator $validator): void {
             if ($this->input('status') !== PostStatus::Scheduled->value) {
+                return;
+            }
+
+            // A malformed date is already a field error; parsing it again here
+            // would turn a 422 into a 500.
+            if ($validator->errors()->has('published_at')) {
                 return;
             }
 

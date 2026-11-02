@@ -30,6 +30,7 @@ use Illuminate\Validation\Validator;
 trait AreaValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @return array<string, array<int, Closure|ValidationRule|string>>

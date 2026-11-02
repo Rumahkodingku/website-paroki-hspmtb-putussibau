@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 trait LivestreamCategoryValidationRules
 {
     use GeneratesUniqueSlug;
+    use ResolvesRouteKey;
 
     /**
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>

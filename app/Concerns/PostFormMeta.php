@@ -21,6 +21,8 @@ use App\Enums\PostStatus;
  */
 trait PostFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * Everything the article forms need that is not a record.
      *
@@ -28,9 +30,7 @@ trait PostFormMeta
      */
     protected function postFormMeta(): array
     {
-        return [
-            'labels' => (array) __('news.labels'),
-            'hints' => (array) __('news.hints'),
+        return $this->buildFormMeta('news', [
             'statuses' => (array) __('news.post_statuses'),
             'postStatusChoices' => array_map(
                 static fn (PostStatus $status): array => [
@@ -39,6 +39,6 @@ trait PostFormMeta
                 ],
                 PostStatus::cases(),
             ),
-        ];
+        ], false);
     }
 }
