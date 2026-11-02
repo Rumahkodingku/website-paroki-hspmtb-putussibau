@@ -1,5 +1,4 @@
 import { Head, router } from '@inertiajs/react';
-import Heading from '@/components/heading';
 import { dashboard } from '@/routes';
 import { update as updateProfile } from '@/routes/parish-profile';
 import {
@@ -7,6 +6,7 @@ import {
     profileToFormData,
 } from '@/features/admin/profil/components/profile-form';
 import type { ParishProfileRow } from '@/features/admin/profil/types';
+import { ListHeader } from '@/components/list-parts';
 
 type Props = {
     profile: ParishProfileRow;
@@ -20,10 +20,9 @@ export default function InformasiProfil({ profile, labels, hints }: Props) {
             <Head title="Informasi Profil" />
 
             <div className="p-6">
-                <Heading
+                <ListHeader
                     title="Informasi Profil"
                     description="Konten profil paroki yang tampil pada halaman /profil."
-                    variant="default"
                 />
 
                 <ProfileForm

@@ -45,8 +45,9 @@ return [
         'logo_alt' => 'Teks alternatif logo',
         'cover_media_id' => 'Gambar sampul',
         'cover_alt' => 'Teks alternatif sampul',
-        'map_url' => 'Tautan peta',
         'video_url' => 'Tautan video',
+        'video_title' => 'Judul video',
+        'video_description' => 'Deskripsi singkat video',
         'is_published' => 'Terbitkan',
 
         // Linimasa sejarah.
@@ -60,7 +61,6 @@ return [
         // Wilayah pelayanan.
         'content' => 'Narasi wilayah pelayanan',
         'map_media_id' => 'Peta',
-        'map_url' => 'Tautan peta',
 
         // Pastor.
         'pastor_name' => 'Nama pastor',
@@ -87,6 +87,8 @@ return [
         'cover_media_id' => 'Gambar utama halaman /profil. Rasio yang disarankan 16:9.',
         'cover_alt' => 'Wajib diisi saat gambar sampul dipilih. Jelaskan gambar secara singkat untuk pembaca layar.',
         'video_url' => 'Hanya tautan YouTube yang diterima; video akan ditanam di halaman /profil.',
+        'video_title' => 'Judul yang ditampilkan di atas video. Kosongkan untuk memakai judul bawaan.',
+        'video_description' => 'Satu atau dua kalimat yang ditampilkan di bawah judul video.',
         'history_description' => 'Narasi utama sejarah. Linimasa peristiwa dikelola pada daftar di bawahnya.',
         'established_year' => 'Isi hanya bila tahun berdiri memang diketahui.',
         'is_published' => 'Konten yang belum disetujui jangan diterbitkan.',
@@ -95,7 +97,7 @@ return [
         'sort_order' => 'Angka kecil ditampilkan lebih dulu.',
         'is_current' => 'Hanya satu pastor yang boleh berstatus sedang bertugas.',
         'is_active' => 'Menetapkan periode ini aktif otomatis mengarsipkan periode sebelumnya.',
-        'map_url' => 'Tautan peta opsional. Hanya URL http/https yang diterima.',
+
         'member_position' => 'Contoh: Ketua, Sekretaris, Bendahara.',
     ],
 

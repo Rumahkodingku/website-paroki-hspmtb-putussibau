@@ -1,11 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    ArrowRight,
-    CheckCircle2,
-    Database as DatabaseIcon,
-    Info,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Info } from 'lucide-react';
 import { useState } from 'react';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
@@ -78,7 +72,7 @@ export default function DatabaseStep({
             <Head title="Konfigurasi Database" />
 
             <StepShell
-                eyebrow="Langkah 3 dari 7"
+                eyebrow="Langkah 3 dari 8"
                 title="Koneksi database"
                 description="Isi kredensial database target. Wizard menguji koneksi dan memastikan database masih kosong sebelum melanjutkan."
                 footer={
@@ -97,13 +91,12 @@ export default function DatabaseStep({
                                 className="text-sm"
                                 size="lg"
                             >
+                                Uji Koneksi dan Lanjutkan
                                 {processing ? (
                                     <Spinner aria-hidden="true" />
                                 ) : (
-                                    <DatabaseIcon aria-hidden="true" />
+                                    <ArrowRight aria-hidden="true" />
                                 )}
-                                Uji Koneksi dan Lanjutkan
-                                <ArrowRight aria-hidden="true" />
                             </Button>
                         </form>
                     </>

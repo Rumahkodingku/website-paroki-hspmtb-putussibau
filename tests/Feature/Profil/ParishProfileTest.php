@@ -53,6 +53,41 @@ it('stores the profile and sanitizes the description', function () {
         ->and($profile->video_url)->toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
 });
 
+it('stores an emptied description as null', function () {
+    $this->actingAs(superAdmin())
+        ->put(route('parish-profile.update'), [
+            'description' => '<p></p>',
+            'established_year' => 1956,
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect(ParishProfile::current()->description)->toBeNull();
+});
+
+it('stores the video title and short description', function () {
+    $this->actingAs(superAdmin())
+        ->put(route('parish-profile.update'), [
+            'video_title' => 'Proses Pembangunan Gereja',
+            'video_description' => 'Saksikan dokumentasi pembangunan gereja.',
+            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ])
+        ->assertSessionHasNoErrors();
+
+    $profile = ParishProfile::current();
+
+    expect($profile->video_title)->toBe('Proses Pembangunan Gereja')
+        ->and($profile->video_description)->toBe('Saksikan dokumentasi pembangunan gereja.');
+});
+
+it('rejects a video title or description that is too long', function () {
+    $this->actingAs(superAdmin())
+        ->put(route('parish-profile.update'), [
+            'video_title' => str_repeat('a', 151),
+            'video_description' => str_repeat('b', 301),
+        ])
+        ->assertSessionHasErrors(['video_title', 'video_description']);
+});
+
 it('accepts only a YouTube video link', function () {
     $this->actingAs(superAdmin())
         ->put(route('parish-profile.update'), [

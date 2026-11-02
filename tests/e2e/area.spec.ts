@@ -99,14 +99,14 @@ test.describe('sidebar Area', () => {
 
         await expect(
             sidebar.getByRole('link', {
-                name: 'Area',
+                name: 'Area Paroki',
                 exact: true,
             }),
         ).toHaveAttribute('href', '/admin/area');
 
         await expect(
             sidebar.getByRole('link', {
-                name: 'Area',
+                name: 'Area Paroki',
                 exact: true,
             }),
         ).toHaveCount(1);
@@ -230,23 +230,25 @@ test.describe('direktori publik', () => {
         // The card's whole area is one link, so its accessible name carries the
         // type label and the name together.
         const card = page.getByRole('link', {
-            name: 'Lihat detail Lingkungan Angrep Cari E2E',
+            name: 'Lihat profil Lingkungan Angrep Cari E2E',
         });
 
         await expect(card).toBeVisible();
 
-        await page.getByRole('searchbox', { name: 'Cari area' }).fill('zzz');
+        await page
+            .getByRole('searchbox', { name: 'Cari nama stasi atau lingkungan' })
+            .fill('zzz');
 
-        await expect(
-            page.getByText('Tidak ada area yang cocok dengan pencarian.'),
-        ).toBeVisible();
+        await expect(page.getByText('Tidak ada area yang cocok.')).toBeVisible();
         await expect(card).toHaveCount(0);
 
-        await page.getByRole('button', { name: 'Reset pencarian' }).click();
+        await page.getByRole('button', { name: 'Tampilkan semua area' }).click();
 
         await expect(card).toBeVisible();
         await expect(
-            page.getByRole('searchbox', { name: 'Cari area' }),
+            page.getByRole('searchbox', {
+                name: 'Cari nama stasi atau lingkungan',
+            }),
         ).toHaveValue('');
     });
 
@@ -260,9 +262,12 @@ test.describe('direktori publik', () => {
             'stasi-peta-e2e',
             undefined,
             async (form) => {
-                // The location block is a titled group of its own in the form,
-                // below the two switches - and it has to be filled in here,
-                // because the helper saves and lands on the list page after.
+                // The location block lives on the second tab, and it has to be
+                // filled in here because the helper saves and lands on the list
+                // page after.
+                await form
+                    .getByRole('tab', { name: 'Lokasi dan Peta' })
+                    .click();
                 await form
                     .locator('#area-address')
                     .fill('Gereja Stasi Peta E2E, Jalan Peta No. 2');

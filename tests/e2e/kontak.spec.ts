@@ -102,9 +102,7 @@ test.describe('kontak publik', () => {
         ).toHaveCount(0);
     });
 
-    test('footer memakai data yang sama dan menuju halaman kontak', async ({
-        page,
-    }) => {
+    test('footer memakai data kontak yang sama', async ({ page }) => {
         seedContactDetails();
         await page.goto('/');
 
@@ -114,13 +112,6 @@ test.describe('kontak publik', () => {
         await expect(
             footer.getByRole('link', { name: /Telepon: 0812-3456-7890/ }),
         ).toHaveAttribute('href', 'tel:+6281234567890');
-
-        await footer.getByRole('link', { name: 'Halaman kontak' }).click();
-
-        await expect(page).toHaveURL(/\/kontak$/);
-        await expect(
-            page.getByRole('heading', { name: 'Kami siap membantu Anda' }),
-        ).toBeVisible();
     });
 
     test('home_show_contact hanya mengatur blok beranda', async ({ page }) => {
@@ -170,7 +161,7 @@ test.describe('kontak publik', () => {
                     response.url().includes('/admin/pengaturan') &&
                     response.request().method() === 'PUT',
             ),
-            page.getByTestId('save-settings-button').click(),
+            page.getByRole('button', { name: 'Simpan pengaturan' }).click(),
         ]);
 
         await page.goto('/kontak');

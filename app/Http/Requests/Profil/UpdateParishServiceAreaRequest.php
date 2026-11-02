@@ -34,7 +34,6 @@ class UpdateParishServiceAreaRequest extends FormRequest
         return [
             'content' => ['nullable', 'string', 'max:500000'],
             'map_media_id' => ['nullable', 'integer', $this->readyMediaRule()],
-            'map_url' => ['nullable', 'url', 'max:500'],
             'is_published' => ['required', 'boolean'],
         ];
     }
@@ -47,7 +46,6 @@ class UpdateParishServiceAreaRequest extends FormRequest
         return [
             'content.max' => 'Narasi wilayah terlalu panjang untuk disimpan.',
             'map_media_id.exists' => $this->mediaReadyMessage(),
-            'map_url.url' => 'Tautan peta tidak valid.',
             'is_published.required' => 'Tentukan apakah narasi wilayah diterbitkan.',
         ];
     }

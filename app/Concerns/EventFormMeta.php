@@ -15,14 +15,14 @@ use App\Enums\EventStatus;
  */
 trait EventFormMeta
 {
+    use BuildsFormMeta;
+
     /**
      * @return array<string, mixed>
      */
     protected function eventFormMeta(): array
     {
-        return [
-            'labels' => (array) __('agenda.labels'),
-            'hints' => (array) __('agenda.hints'),
+        return $this->buildFormMeta('agenda', [
             'statuses' => (array) __('agenda.statuses'),
             'eventStatusChoices' => array_map(
                 static fn (EventStatus $status): array => [
@@ -31,6 +31,6 @@ trait EventFormMeta
                 ],
                 EventStatus::cases(),
             ),
-        ];
+        ], false);
     }
 }

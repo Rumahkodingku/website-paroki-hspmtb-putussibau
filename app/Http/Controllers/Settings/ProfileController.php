@@ -34,7 +34,9 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        DB::transaction(function () use ($request, $user): void {
+        $emailChanged = false;
+
+        DB::transaction(function () use ($request, $user, &$emailChanged): void {
             $before = $this->audit->snapshot($user, 'users');
             $emailChanged = $user->email !== $request->validated('email');
 
@@ -46,6 +48,10 @@ class ProfileController extends Controller
 
             $user->save();
 
+            if ($emailChanged && $user instanceof MustVerifyEmail) {
+                $user->sendEmailVerificationNotification();
+            }
+
             $this->audit->updated(
                 'users',
                 $user,
@@ -53,6 +59,10 @@ class ProfileController extends Controller
                 $emailChanged ? 'email_changed' : 'profile_updated',
             );
         });
+
+        if ($emailChanged) {
+            $request->session()->put('status', 'verification-link-sent');
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 

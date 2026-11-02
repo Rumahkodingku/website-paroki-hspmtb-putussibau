@@ -22,13 +22,12 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string|null $content
  * @property int|null $map_media_id
- * @property string|null $map_url
  * @property bool $is_published
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Media|null $mapMedia
  */
-#[Fillable(['content', 'map_media_id', 'map_url', 'is_published'])]
+#[Fillable(['content', 'map_media_id', 'is_published'])]
 class ParishServiceArea extends Model
 {
     /** @use HasFactory<ParishServiceAreaFactory> */

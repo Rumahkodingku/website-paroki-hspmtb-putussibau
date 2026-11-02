@@ -1,4 +1,5 @@
 import { SectionHeading } from '@/components/section-heading';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import type { PublicPastorAssignment } from '../types';
 import { formatPastorName, formatServicePeriod } from './pastor-formatters';
@@ -67,7 +68,7 @@ export function PastorHistorySection({
                             {/* Detail riwayat */}
                             <article className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
                                 {assignment.photo ? (
-                                    <img
+                                    <Image
                                         src={assignment.photo}
                                         alt={
                                             assignment.photo_alt ??
@@ -75,7 +76,10 @@ export function PastorHistorySection({
                                         }
                                         loading="lazy"
                                         decoding="async"
-                                        className="aspect-4/5 w-24 shrink-0 rounded-lg object-cover object-top sm:w-28"
+                                        aspectRatio="4 / 5"
+                                        fit="cover"
+                                        objectPosition="top"
+                                        className="w-24 shrink-0 rounded-lg sm:w-28"
                                     />
                                 ) : (
                                     <div

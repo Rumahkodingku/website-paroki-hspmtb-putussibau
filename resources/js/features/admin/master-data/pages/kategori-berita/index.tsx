@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type DataColumn } from '@/components/data-table';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { RowActions } from '@/components/row-actions';
+import { Text } from '@/components/text';
 import { ListPagination } from '@/components/list-pagination';
 import {
     ListEmpty,
@@ -68,25 +69,30 @@ export default function Index({ postCategories, filters }: Props) {
         {
             id: 'name',
             accessorKey: 'name',
-            header: 'Nama kategori',
+            header: 'Nama Kategori',
             sortKey: 'name',
+            cell: ({ row }) => (
+                <div className="space-y-0.5">
+                    <Text as="p" variant="label">
+                        {row.original.name}
+                    </Text>
+                    <Text as="p" variant="body-sm" color="muted">
+                        {row.original.slug}
+                    </Text>
+                </div>
+            ),
         },
         {
-            id: 'slug',
-            accessorKey: 'slug',
-            header: 'Slug',
-            sortKey: 'slug',
+            id: 'posts_count',
+            accessorKey: 'posts_count',
+            header: 'Jumlah Artikel',
+            cell: ({ row }) => row.original.posts_count ?? '—',
         },
         {
             id: 'sort_order',
             accessorKey: 'sort_order',
             header: 'Urutan',
             sortKey: 'sort_order',
-        },
-        {
-            id: 'posts_count',
-            accessorKey: 'posts_count',
-            header: 'Artikel',
         },
         {
             id: 'actions',

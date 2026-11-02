@@ -29,7 +29,7 @@ test.describe('autentikasi admin', () => {
     }) => {
         await page.goto('/admin');
 
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
 
         // The redirect must land on a real page, not on an error. Checking the
         // URL alone would pass even if the login screen threw while rendering.
@@ -37,7 +37,7 @@ test.describe('autentikasi admin', () => {
     });
 
     test('halaman masuk menampilkan email dan kata sandi', async ({ page }) => {
-        await page.goto('/admin/login');
+        await page.goto('/auth/login');
 
         await expect(emailField(page)).toBeVisible();
         await expect(passwordField(page)).toHaveAttribute('type', 'password');
@@ -59,7 +59,7 @@ test.describe('autentikasi admin', () => {
     test('masalah dengan kata sandi ditolak dan tidak memberi sesi', async ({
         page,
     }) => {
-        await page.goto('/admin/login');
+        await page.goto('/auth/login');
 
         await emailField(page).fill(admin.email);
         await passwordField(page).fill('kata-sandi-yang-salah');
@@ -78,17 +78,17 @@ test.describe('autentikasi admin', () => {
             'Periksa kembali email dan password Anda, lalu coba lagi.',
         );
 
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
 
         // And the session really is absent, rather than merely unredirected.
         await page.goto('/admin');
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 
     test('percobaan masuk berulang menampilkan toast batas', async ({
         page,
     }) => {
-        await page.goto('/admin/login');
+        await page.goto('/auth/login');
 
         for (let attempt = 0; attempt < 6; attempt += 1) {
             await emailField(page).fill(admin.email);
@@ -113,7 +113,7 @@ test.describe('autentikasi admin', () => {
 
         // Returning false from onHttpException keeps Inertia on the login
         // page instead of swapping in its error-response modal.
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 
     test('keluar menutup sesi dan mengunci lagi halaman admin', async ({
@@ -137,6 +137,6 @@ test.describe('autentikasi admin', () => {
         // The session is what actually matters, so check that rather than
         // trusting the landing page: an admin URL must now bounce to login.
         await page.goto('/admin');
-        await expect(page).toHaveURL(/\/admin\/login$/);
+        await expect(page).toHaveURL(/\/auth\/login$/);
     });
 });

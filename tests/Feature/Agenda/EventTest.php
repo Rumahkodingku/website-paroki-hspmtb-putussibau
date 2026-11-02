@@ -108,6 +108,12 @@ it('requires a start time', function () {
         ->assertSessionHasErrors('start_at');
 });
 
+it('rejects malformed activity dates instead of failing', function () {
+    $this->actingAs($this->admin)
+        ->post(route('events.store'), validEvent(['start_at' => 'garbage']))
+        ->assertSessionHasErrors('start_at');
+});
+
 it('refuses an end time before the start', function () {
     // EVT-01. An activity that ends before it starts is the single most
     // obviously wrong thing this table can hold.
@@ -227,6 +233,28 @@ it('keeps the start time on an all-day activity', function () {
                 ->setTimezone(config('app.display_timezone'))
                 ->format('Y-m-d')
         )->toBe('2026-12-24');
+});
+
+it('reports the all-day date error alongside an unrelated field error', function () {
+    $this->actingAs($this->admin)
+        ->post(route('events.store'), validEvent([
+            'title' => '',
+            'start_at' => '2026-12-24T00:00',
+            'end_at' => '2026-12-25T00:00',
+            'is_all_day' => '1',
+        ]))
+        ->assertSessionHasErrors(['title', 'end_at']);
+});
+
+it('does not parse a malformed all-day date when another field has an error', function () {
+    $this->actingAs($this->admin)
+        ->post(route('events.store'), validEvent([
+            'title' => '',
+            'start_at' => 'garbage',
+            'end_at' => '',
+            'is_all_day' => '1',
+        ]))
+        ->assertSessionHasErrors(['title', 'start_at']);
 });
 
 /*

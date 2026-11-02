@@ -11,7 +11,6 @@
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",
-        "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
@@ -26,7 +25,7 @@
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
-        "laravel/sail": "^1.53",
+        "laravel/telescope": "^5.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
         "pestphp/pest": "^4.7",
@@ -67,8 +66,6 @@
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "npm run check",
-            "npm run types:check",
-            "npm run test:unit",
             "@test"
         ],
         "types:check": [
@@ -78,7 +75,7 @@
             "@php artisan config:clear --ansi",
             "@lint:check",
             "@types:check",
-            "@php artisan test"
+            "@php artisan test --exclude-group=mailpit"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

@@ -47,7 +47,6 @@ class PublicEventResource extends JsonResource
                 'id' => $this->category->getKey(),
                 'name' => $this->category->name,
                 'slug' => $this->category->slug,
-                'color_value' => $this->category->colorValue(),
             ]),
         ];
     }

@@ -1,8 +1,6 @@
-import { Link } from '@inertiajs/react';
 import { Mail, MessageCircle, Phone } from 'lucide-react';
 import { Text } from '@/components/text';
 import type { ContactDetails } from '@/types';
-import { index as kontak } from '@/routes/kontak';
 import { FooterSocial } from './footer-social';
 
 type FooterContactProps = {
@@ -81,28 +79,6 @@ export function FooterContact({ contact }: FooterContactProps) {
             ) : null}
 
             <FooterSocial contact={contact} />
-            <ul className="mt-4 space-y-2">
-                <li>
-                    <Link
-                        href={kontak()}
-                        className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-                    >
-                        Halaman kontak
-                    </Link>
-                </li>
-                {contact?.mapsLink ? (
-                    <li>
-                        <a
-                            href={contact.mapsLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex min-h-8 items-center text-fine-print text-muted-foreground transition-colors hover:text-primary-on-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-                        >
-                            Petunjuk arah
-                        </a>
-                    </li>
-                ) : null}
-            </ul>
         </section>
     );
 }

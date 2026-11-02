@@ -2,6 +2,8 @@
 
 use App\Enums\AreaType;
 use App\Models\Area;
+use App\Models\Media;
+use App\Models\MediaVariant;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,13 +45,47 @@ it('lists areas for a super admin', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('admin/area')
-            // A non-paginated list is a plain array, not {data: [...]} (D-39).
-            ->has('areas', 2)
-            ->missing('areas.data')
+            // A paginated list carries its envelope (D-39).
+            ->has('areas.data', 2)
+            ->has('areas.meta')
+            ->missing('areas.data.data')
             // The table is sortable, so the header state has to arrive even
             // when nothing was sorted: DataTable reads '' as "no sort".
             ->where('filters.sort', '')
             ->where('filters.direction', ''));
+});
+
+it('renders an area with a photo without lazy loading its variants', function () {
+    $media = Media::factory()->ready()->create();
+    MediaVariant::factory()->for($media)->create(['name' => 'medium']);
+
+    Area::factory()->create(['photo_media_id' => $media->getKey()]);
+
+    $this->actingAs(superAdmin())
+        ->get(route('areas.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('areas.data.0.photo_url', fn (?string $url): bool => $url !== null)
+        );
+});
+
+it('paginates the area list', function () {
+    Area::factory()->count(12)->create();
+
+    $this->actingAs(superAdmin())
+        ->get(route('areas.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('areas.data', 10)
+            ->where('areas.meta.last_page', 2)
+            ->where('areas.meta.current_page', 1));
+
+    $this->actingAs(superAdmin())
+        ->get(route('areas.index', ['page' => 2]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('areas.data', 2)
+            ->where('areas.meta.current_page', 2));
 });
 
 it('creates a wilayah without a parent', function () {
@@ -302,11 +338,11 @@ it('builds a map link from the coordinates when no url was stored', function () 
 it('prefers a stored maps url over the coordinates', function () {
     $this->actingAs(superAdmin())
         ->post(route('areas.store'), areaPayload([
-            'maps_url' => 'https://maps.app.goo.gl/contoh',
+            'maps_url' => 'https://www.google.com/maps/search/?api=1&query=-0.4312900,111.4935200',
             'latitude' => '-0.4312900',
             'longitude' => '111.4935200',
         ]))
         ->assertSessionHasNoErrors();
 
-    expect(Area::query()->sole()->mapsUrl())->toBe('https://maps.app.goo.gl/contoh');
+    expect(Area::query()->sole()->mapsUrl())->toBe('https://www.google.com/maps/search/?api=1&query=-0.4312900,111.4935200');
 });

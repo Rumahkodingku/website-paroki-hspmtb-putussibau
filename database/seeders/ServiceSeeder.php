@@ -16,12 +16,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ServiceSeeder extends Seeder
 {
-    private const IMAGE = 'images.jpg';
-
     /**
      * @var list<array{
      *     slug: string,
      *     title: string,
+     *     thumbnail: string,
      *     category: string,
      *     summary: string,
      *     introduction: string,
@@ -42,17 +41,17 @@ class ServiceSeeder extends Seeder
     private const SERVICES = [
         [
             'slug' => 'baptis',
-            'title' => 'Sakramen Baptis',
+            'title' => 'Sakramen Baptis Bayi',
+            'thumbnail' => 'sakramen-baptis-bayi.webp',
             'category' => 'inisiasi-kristiani',
-            'summary' => 'Sakramen pintu masuk ke dalam Gereja Katolik, yang menghapus dosa asal dan dosa pribadi, menganugerahkan hidup baru dalam Kristus, serta menjadikan seseorang anggota Gereja.',
+            'summary' => 'Sakramen pintu masuk ke dalam Gereja Katolik bagi bayi dan anak kecil dari keluarga Katolik, yang menghapus dosa asal dan menganugerahkan hidup baru dalam Kristus.',
             'introduction' => '<p>Sakramen Baptis adalah fondasi seluruh kehidupan Kristiani. Melalui air dan firman, '
-                .'seseorang dibersihkan dari dosa, dilahirkan kembali dari air dan Roh Kudus, serta diterima '
-                .'sebagai anggota Gereja Katolik. Sakramen ini dapat diterima oleh bayi, anak-anak, maupun '
-                .'orang dewasa yang mempersiapkan diri melalui katekumenat.</p>'
-                .'<p>Paroki melayani baptis bagi bayi dan anak kecil dari keluarga Katolik, serta baptis '
-                .'dewasa bagi mereka yang baru memilih menjadi Katolik. Orang tua, wali baptis, dan calon '
-                .'baptis didampingi melalui pembekalan agar memahami makna dan tanggung jawab yang diemban.</p>',
-            'schedule_info' => 'Pelaksanaan baptis disepakati bersama pastor dan sekretariat paroki. Pembekalan orang tua dan wali baptis mengikuti jadwal katekese paroki, sedangkan calon baptis dewasa mengikuti masa katekumenat sesuai jadwal pendampingan.',
+                .'seorang dibersihkan dari dosa, dilahirkan kembali dari air dan Roh Kudus, serta diterima '
+                .'sebagai anggota Gereja Katolik.</p>'
+                .'<p>Paroki melayani baptis bagi bayi dan anak kecil dari keluarga Katolik. Orang tua dan '
+                .'wali baptis didampingi melalui pembekalan agar memahami makna dan tanggung jawab yang '
+                .'diemban dalam membesarkan anak dalam iman.</p>',
+            'schedule_info' => 'Pelaksanaan baptis disepakati bersama pastor dan sekretariat paroki. Pembekalan orang tua dan wali baptis mengikuti jadwal katekese paroki.',
             'fee_info' => null,
             'contact_name' => 'Sekretariat Paroki',
             'contact_phone' => '628110000001',
@@ -85,8 +84,47 @@ class ServiceSeeder extends Seeder
             ],
         ],
         [
+            'slug' => 'baptis-dewasa',
+            'title' => 'Sakramen Baptis Dewasa',
+            'thumbnail' => 'sakramen-baptis-dewasa.webp',
+            'category' => 'inisiasi-kristiani',
+            'summary' => 'Sakramen pintu masuk ke dalam Gereja Katolik bagi calon baptis dewasa yang mempersiapkan diri melalui katekumenat.',
+            'introduction' => '<p>Sakramen Baptis bagi orang dewasa merupakan bagian dari inisiasi Katolik melalui katekumenat. Calon baptis dewasa mempersiapkan diri melalui pembekalan iman, pendalaman Kitab Suci, dan pengakuan dosa sebelum perayaan baptis yang dipimpin pastor. Sakramen ini menghapus dosa asal dan dosa pribadi, menganugerahkan hidup baru dalam Kristus, serta menjadikan seseorang anggota Gereja Katolik.</p>'
+                .'<p>Paroki mendampingi calon baptis dewasa melalui masa katekumenat yang disesuaikan dengan jadwal pendampingan. Wali baptis dan calon didampingi agar memahami makna dan tanggung jawab yang diemban.</p>',
+            'schedule_info' => 'Pelaksanaan baptis dewasa mengikuti jadwal katekumenat paroki dan kesepakatan dengan pastor. Pembekalan dilaksanakan secara berkala sebelum perayaan.',
+            'fee_info' => null,
+            'contact_name' => 'Sekretariat Paroki',
+            'contact_phone' => '628110000002',
+            'form_url' => 'https://docs.google.com/forms/d/e/1FAIpQLSfCONTOHbaptisdewasa/viewform',
+            'is_form_open' => true,
+            'form_closed_message' => null,
+            'is_emergency' => false,
+            'sort_order' => 2,
+            'requirements' => [
+                ['text' => 'Surat permohonan menjadi Katolik'],
+                ['text' => 'Fotokopi Kartu Keluarga'],
+                ['text' => 'Surat keterangan dari ketua lingkungan/wilayah'],
+                ['text' => 'Data wali baptis beserta surat baptis dan krisma wali', 'note' => 'Wali baptis beragama Katolik, telah menerima Komuni dan Krisma, serta bersedia mendampingi pertumbuhan iman.'],
+                ['text' => 'Surat keterangan pernah/belum dibaptis', 'note' => 'Bila diperlukan.'],
+            ],
+            'steps' => [
+                ['title' => 'Membaca syarat dan menyiapkan berkas', 'description' => 'Calon membaca syarat, mengisi pendaftaran, dan menyiapkan dokumen yang diperlukan.'],
+                ['title' => 'Mengikuti masa katekumenat', 'description' => 'Calon baptis dewasa mengikuti masa katekumenat sesuai jadwal pendampingan.'],
+                ['title' => 'Menentukan jadwal pelaksanaan bersama pastor/sekretariat'],
+                ['title' => 'Pelaksanaan sakramen baptis'],
+                ['title' => 'Pencatatan dan pengambilan surat baptis', 'description' => 'Setelah pencatatan di buku baptis paroki.'],
+            ],
+            'faqs' => [
+                ['question' => 'Siapa yang dapat menerima baptis dewasa?', 'answer' => 'Orang dewasa yang mempersiapkan diri melalui katekumenat dan memilih menjadi Katolik.'],
+                ['question' => 'Apakah perlu wali baptis?', 'answer' => 'Ya, calon menyiapkan data wali baptis sesuai ketentuan paroki.'],
+                ['question' => 'Apakah ada biaya?', 'answer' => 'Persembahan bersifat sukarela. Silakan menghubungi sekretariat untuk informasi lebih lanjut.'],
+                ['question' => 'Berapa lama prosesnya?', 'answer' => 'Waktu bergantung pada masa katekumenat dan kesepakatan pelaksanaan bersama pastor/sekretariat.'],
+            ],
+        ],
+        [
             'slug' => 'penguatan-krisma',
             'title' => 'Sakramen Penguatan (Krisma)',
+            'thumbnail' => 'sakramen-krisma.webp',
             'category' => 'inisiasi-kristiani',
             'summary' => 'Sakramen yang menyempurnakan anugerah Baptis, dengan dicurahkannya Roh Kudus yang memberi kekuatan untuk hidup sebagai saksi Kristus.',
             'introduction' => '<p>Sakramen Penguatan, atau Krisma, merupakan bagian dari inisiasi Katolik. '
@@ -103,7 +141,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => false,
             'form_closed_message' => 'Pendaftaran Krisma untuk periode ini sudah ditutup. Hubungi sekretariat untuk informasi periode berikutnya.',
             'is_emergency' => false,
-            'sort_order' => 2,
+            'sort_order' => 3,
             'requirements' => [
                 ['text' => 'Fotokopi surat baptis dan bukti Komuni Pertama'],
                 ['text' => 'Fotokopi Kartu Keluarga'],
@@ -127,6 +165,7 @@ class ServiceSeeder extends Seeder
         [
             'slug' => 'ekaristi',
             'title' => 'Sakramen Ekaristi',
+            'thumbnail' => 'sakramen-ekaristi.webp',
             'category' => 'inisiasi-kristiani',
             'summary' => 'Sakramen sumber dan puncak kehidupan Kristiani, di mana Kristus hadir nyata dalam roti dan anggur yang dikuduskan, memelihara umat dalam perjalanan iman.',
             'introduction' => '<p>Sakramen Ekaristi adalah sumber dan puncak seluruh kehidupan Kristiani. '
@@ -145,7 +184,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => false,
             'form_closed_message' => null,
             'is_emergency' => false,
-            'sort_order' => 3,
+            'sort_order' => 4,
             'requirements' => [
                 ['text' => 'Fotokopi surat baptis'],
                 ['text' => 'Fotokopi Kartu Keluarga'],
@@ -169,6 +208,7 @@ class ServiceSeeder extends Seeder
         [
             'slug' => 'tobat-rekonsiliasi',
             'title' => 'Sakramen Tobat dan Rekonsiliasi',
+            'thumbnail' => 'sakramen-tobat.webp',
             'category' => 'penyembuhan',
             'summary' => 'Sakramen pengampunan dosa, yang mendamaikan umat dengan Tuhan dan Gereja melalui pertobatan tulus dan pengampunan sakramental.',
             'introduction' => '<p>Sakramen Tobat dan Rekonsiliasi adalah sakramen penyembuhan yang '
@@ -186,7 +226,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => false,
             'form_closed_message' => null,
             'is_emergency' => false,
-            'sort_order' => 4,
+            'sort_order' => 5,
             'requirements' => [
                 ['text' => 'Tidak ada syarat dokumen khusus'],
                 ['text' => 'Kesiapan hati untuk mengakui dosa dan bertobat'],
@@ -208,6 +248,7 @@ class ServiceSeeder extends Seeder
         [
             'slug' => 'pengurapan-orang-sakit',
             'title' => 'Sakramen Pengurapan Orang Sakit',
+            'thumbnail' => 'sakramen-pengurapan-orang-sakit.webp',
             'category' => 'penyembuhan',
             'summary' => 'Sakramen bagi umat yang sakit berat atau lanjut usia, yang memberikan penghiburan, pengampunan, dan pengudusan dalam penderitaan.',
             'introduction' => '<p>Sakramen Pengurapan Orang Sakit diberikan kepada umat Katolik yang sakit '
@@ -225,7 +266,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => false,
             'form_closed_message' => null,
             'is_emergency' => true,
-            'sort_order' => 5,
+            'sort_order' => 6,
             'requirements' => [
                 ['text' => 'Tidak ada syarat dokumen', 'note' => 'Informasi dasar yang dibutuhkan: nama, usia, alamat/lokasi (rumah atau rumah sakit), kondisi singkat, dan nomor yang dapat dihubungi.'],
             ],
@@ -245,6 +286,7 @@ class ServiceSeeder extends Seeder
         [
             'slug' => 'tahbisan-suci',
             'title' => 'Sakramen Tahbisan Suci',
+            'thumbnail' => 'sakramen-imamat.webp',
             'category' => 'pelayanan-persekutuan',
             'summary' => 'Sakramen yang menahbiskan pria untuk melayani Gereja sebagai uskup, imam, atau diakon, demi kepentingan persekutuan umat.',
             'introduction' => '<p>Sakramen Tahbisan Suci adalah sakramen yang menahbiskan pria untuk melayani '
@@ -263,7 +305,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => false,
             'form_closed_message' => null,
             'is_emergency' => false,
-            'sort_order' => 6,
+            'sort_order' => 7,
             'requirements' => [
                 ['text' => 'Surat permohonan dan rekomendasi dari pastor paroki'],
                 ['text' => 'Dokumen administrasi sesuai ketentuan keuskupan'],
@@ -286,6 +328,7 @@ class ServiceSeeder extends Seeder
         [
             'slug' => 'perkawinan',
             'title' => 'Sakramen Perkawinan',
+            'thumbnail' => 'sakramen-perkawinan.webp',
             'category' => 'pelayanan-persekutuan',
             'summary' => 'Sakramen yang menguduskan ikatan cinta kasih suami-istri, menjadikan keluarga sebagai gereja kecil yang hidup dalam iman.',
             'introduction' => '<p>Pasangan yang hendak menikah secara Katolik didampingi sejak jauh hari, '
@@ -302,7 +345,7 @@ class ServiceSeeder extends Seeder
             'is_form_open' => true,
             'form_closed_message' => null,
             'is_emergency' => false,
-            'sort_order' => 7,
+            'sort_order' => 8,
             'requirements' => [
                 ['text' => 'Surat baptis terbaru kedua calon'],
                 ['text' => 'Surat keterangan belum menikah/status', 'note' => 'Dari lingkungan atau instansi terkait.'],
@@ -331,10 +374,9 @@ class ServiceSeeder extends Seeder
 
     public function run(): void
     {
-        $media = $this->dummyMedia();
-
         foreach (self::SERVICES as $service) {
             $category = $this->categoryFor($service['category']);
+            $media = $this->mediaFor($service['thumbnail']);
 
             $model = Service::withTrashed()->firstOrCreate(
                 ['slug' => $service['slug']],
@@ -363,6 +405,12 @@ class ServiceSeeder extends Seeder
                 ],
             );
 
+            // Set thumbnail on every run so existing rows receive the new image.
+            $model->update([
+                'thumbnail_media_id' => $media->getKey(),
+                'thumbnail_alt' => 'Ilustrasi layanan '.$service['title'].'.',
+            ]);
+
             if ($model->wasRecentlyCreated) {
                 $this->replaceServiceChildren(
                     $model,
@@ -374,16 +422,16 @@ class ServiceSeeder extends Seeder
         }
     }
 
-    private function dummyMedia(): Media
+    private function mediaFor(string $filename): Media
     {
-        $source = public_path(self::IMAGE);
+        $source = public_path('illustrations/pelayanan/'.$filename);
 
         if (! File::exists($source)) {
-            throw new \RuntimeException('Berkas '.self::IMAGE.' tidak ditemukan di folder public/.');
+            throw new \RuntimeException('Berkas '.$filename.' tidak ditemukan di folder public/illustrations/pelayanan/.');
         }
 
         $disk = (string) config('media.original_disk');
-        $path = 'media/originals/dummy-paroki.jpg';
+        $path = 'media/originals/'.$filename;
 
         Storage::disk($disk)->makeDirectory(dirname($path));
         Storage::disk($disk)->put($path, (string) File::get($source));
@@ -392,12 +440,12 @@ class ServiceSeeder extends Seeder
             ['path' => $path],
             [
                 'disk' => $disk,
-                'original_name' => 'dummy-paroki.jpg',
-                'mime_type' => 'image/jpeg',
+                'original_name' => $filename,
+                'mime_type' => (string) (mime_content_type($source) ?: 'image/webp'),
                 'file_size' => File::size($source),
                 'width' => null,
                 'height' => null,
-                'alt_text' => 'Gambar contoh untuk pratinjau antarmuka.',
+                'alt_text' => 'Ilustrasi layanan',
                 'status' => MediaStatus::Pending,
                 'uploader_id' => null,
                 'error_message' => null,
@@ -479,8 +527,12 @@ class ServiceSeeder extends Seeder
     {
         return match ($slug) {
             'baptis' => [
-                'audience_info' => 'Bayi dan anak kecil dari keluarga Katolik, serta calon baptis dewasa yang mempersiapkan diri melalui katekumenat; juga orang tua dan wali baptis.',
-                'preparation_info' => 'Orang tua dan wali baptis mengikuti pembekalan; calon baptis dewasa mengikuti masa katekumenat. Siapkan dokumen yang diminta dan tentukan jadwal bersama pastor/sekretariat.',
+                'audience_info' => 'Bayi dan anak kecil dari keluarga Katolik, beserta orang tua dan wali baptis.',
+                'preparation_info' => 'Orang tua dan wali baptis mengikuti pembekalan. Siapkan dokumen yang diminta dan tentukan jadwal bersama pastor/sekretariat.',
+            ],
+            'baptis-dewasa' => [
+                'audience_info' => 'Calon baptis dewasa yang mempersiapkan diri melalui katekumenat.',
+                'preparation_info' => 'Mengikuti masa katekumenat, pembekalan, dan pengakuan dosa sebelum perayaan. Siapkan dokumen yang diminta dan tentukan jadwal bersama pastor/sekretariat.',
             ],
             'penguatan-krisma' => [
                 'audience_info' => 'Umat yang telah dibaptis dan mempersiapkan diri sesuai ketentuan paroki, beserta wali krisma.',

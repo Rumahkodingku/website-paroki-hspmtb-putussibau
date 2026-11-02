@@ -88,7 +88,7 @@ export function RequirementsProcedureSection({
                 ) : null}
 
                 {service.schedule_info || service.fee_info ? (
-                    <details className="group overflow-hidden rounded-xl border border-border bg-background">
+                    <details className="group overflow-hidden">
                         <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset [&::-webkit-details-marker]:hidden">
                             <span className="flex items-center gap-3">
                                 <CalendarDays

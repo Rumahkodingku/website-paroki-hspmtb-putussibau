@@ -20,6 +20,11 @@ use Illuminate\Support\Str;
  */
 final class BackupStorage
 {
+    /**
+     * @param  int|null  $freeBytesOverride  Fixed free space for deterministic tests.
+     */
+    public function __construct(private readonly ?int $freeBytesOverride = null) {}
+
     public function disk(): Filesystem
     {
         return Storage::disk((string) config('backups.disk'));
@@ -36,14 +41,6 @@ final class BackupStorage
         File::ensureDirectoryExists($directory, 0700, true);
 
         return $name === '' ? $directory : $directory.'/'.$name;
-    }
-
-    public function stagingPath(string $uuid): string
-    {
-        $directory = $this->tempPath($uuid).'/staging';
-        File::ensureDirectoryExists($directory, 0700, true);
-
-        return $directory;
     }
 
     public function archivePath(string $uuid, string $filename): string
@@ -118,21 +115,6 @@ final class BackupStorage
         }
     }
 
-    public function checksum(string $relativePath): string
-    {
-        $stream = $this->disk()->readStream($relativePath);
-
-        if (! is_resource($stream)) {
-            throw BackupException::because('storage_unavailable');
-        }
-
-        try {
-            return $this->hashStream($stream);
-        } finally {
-            fclose($stream);
-        }
-    }
-
     /**
      * Copy a final artifact to a local file for validation or staging.
      */
@@ -161,6 +143,10 @@ final class BackupStorage
 
     public function freeBytes(): ?int
     {
+        if ($this->freeBytesOverride !== null) {
+            return $this->freeBytesOverride;
+        }
+
         $root = $this->tempRoot();
         File::ensureDirectoryExists($root);
 
@@ -195,16 +181,5 @@ final class BackupStorage
         $name = trim($name);
 
         return $name === '' ? $fallback : Str::limit($name, 150, '');
-    }
-
-    /**
-     * @param  resource  $stream
-     */
-    public function hashStream($stream): string
-    {
-        $context = hash_init('sha256');
-        hash_update_stream($context, $stream);
-
-        return hash_final($context);
     }
 }

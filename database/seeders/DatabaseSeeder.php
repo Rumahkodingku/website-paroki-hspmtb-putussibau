@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Demo\DemoContentSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -25,13 +26,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PermissionSeeder::class,
-            SiteSettingsSeeder::class,
             PostCategorySeeder::class,
             EventCategorySeeder::class,
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
             DocumentCategorySeeder::class,
             CommunityCategorySeeder::class,
+            LivestreamCategorySeeder::class,
             SuperAdminSeeder::class,
             // Sample content for looking at the screens. Guarded by
             // config('demo.enabled'), which app:e2e:prepare turns off so the

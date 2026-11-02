@@ -20,7 +20,7 @@ export function DateTimePicker({
 
     return (
         <div className={cn('flex gap-2', className)}>
-            <div className="flex-1">
+            <div className="w-full">
                 <DatePicker
                     id={id}
                     value={datePart ?? ''}
@@ -35,7 +35,7 @@ export function DateTimePicker({
                     }}
                 />
             </div>
-            <div className="w-28">
+            <div className="w-full">
                 <TimePicker
                     value={time}
                     disabled={disabled || !datePart}

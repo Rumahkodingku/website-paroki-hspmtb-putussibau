@@ -26,8 +26,10 @@ import {
     preview as previewDocument,
 } from '@/routes/documents';
 import { DocumentStatusBadge } from '../components/document-status-badge';
+import { DownloadSummary } from '../components/download-summary';
 import type {
     DocumentCategoryOption,
+    DocumentDownloadSummary,
     DocumentFilters,
     DocumentFormMeta,
     DocumentRow,
@@ -38,12 +40,14 @@ type Props = {
     documents: Paginated<DocumentRow>;
     categories: DocumentCategoryOption[];
     filters: DocumentFilters;
+    downloadSummary: DocumentDownloadSummary;
 } & DocumentFormMeta;
 
 export default function Index({
     documents,
     categories,
     filters,
+    downloadSummary,
     copy,
     empty,
 }: Props) {
@@ -203,6 +207,8 @@ export default function Index({
                         </Button>
                     }
                 />
+
+                <DownloadSummary summary={downloadSummary} />
 
                 <ListToolbar
                     search={filters.search}

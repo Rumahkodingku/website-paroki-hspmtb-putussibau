@@ -12,9 +12,13 @@ import { describe, expect, it } from 'vitest';
 import {
     DISPLAY_TIMEZONE,
     formatDayName,
+    formatWibClockValue,
     formatWibDate,
     formatWibDateTime,
+    formatWibDayParts,
+    formatWibLongDate,
     formatWibTime,
+    formatWibWeekdayYear,
     toDateTimeLocalValue,
     toIsoWithOffset,
 } from '@/lib/datetime';
@@ -113,6 +117,42 @@ describe('toDateTimeLocalValue', () => {
 
     it('returns an empty string for an unreadable value', () => {
         expect(toDateTimeLocalValue('bukan tanggal')).toBe('');
+    });
+});
+
+describe('shared date parts', () => {
+    // 02:30 UTC is 09:30 in WIB on 14 November 2026, a Saturday.
+    const iso = '2026-11-14T02:30:00+00:00';
+
+    it('formats a short day badge in Indonesian', () => {
+        expect(formatWibDayParts(iso)).toEqual({
+            day: '14',
+            month: 'Nov',
+            weekday: 'Sab',
+        });
+    });
+
+    it('formats a long date without a weekday', () => {
+        expect(formatWibLongDate(iso)).toBe('14 November 2026');
+    });
+
+    it('keeps the event card weekday and year pair', () => {
+        expect(formatWibWeekdayYear(iso)).toBe('2026 Sabtu');
+    });
+
+    it('formats a clock without a suffix for ranges', () => {
+        expect(formatWibClockValue(iso)).toBe('09.30');
+    });
+
+    it('returns empty values rather than Invalid Date', () => {
+        expect(formatWibDayParts('bukan tanggal')).toEqual({
+            day: '',
+            month: '',
+            weekday: '',
+        });
+        expect(formatWibLongDate('bukan tanggal')).toBe('');
+        expect(formatWibWeekdayYear('bukan tanggal')).toBe('');
+        expect(formatWibClockValue('bukan tanggal')).toBe('');
     });
 });
 

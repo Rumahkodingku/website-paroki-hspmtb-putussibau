@@ -63,14 +63,14 @@ test.describe('sidebar Pelayanan', () => {
         });
 
         await expect(
-            sidebar.getByRole('link', { name: 'Pelayanan', exact: true }),
+            sidebar.getByRole('link', { name: 'Layanan Paroki', exact: true }),
         ).toHaveAttribute('href', '/admin/pelayanan');
     });
 
     test('klik Pelayanan membuka Daftar Pelayanan', async ({ page }) => {
         await page
             .getByRole('navigation', { name: 'Navigasi utama' })
-            .getByRole('link', { name: 'Pelayanan', exact: true })
+            .getByRole('link', { name: 'Layanan Paroki', exact: true })
             .click();
 
         await expect(page).toHaveURL(/\/admin\/pelayanan$/);

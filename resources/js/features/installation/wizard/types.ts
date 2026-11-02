@@ -47,11 +47,32 @@ export type ApplicationValues = {
     parish_short_name: string | null;
     tagline: string | null;
     short_description: string | null;
+    motto_verse: string | null;
     patron_saint: string | null;
+    contact_address: string | null;
+    contact_phone: string | null;
+    contact_whatsapp: string | null;
+    contact_email: string | null;
+    maps_link: string | null;
+    social_facebook: string | null;
+    social_instagram: string | null;
+    social_youtube: string | null;
+    social_whatsapp_channel: string | null;
+};
+
+export type EmailValues = {
+    mailer: string | null;
+    host: string | null;
+    port: number | null;
+    username: string | null;
+    password: string | null;
+    from_address: string | null;
+    from_name: string | null;
 };
 
 export type ReviewSummary = {
     database: DatabaseInfo;
+    email: EmailValues;
     admin: { name: string; email: string };
     application: ApplicationValues;
     meta: ApplicationMeta;

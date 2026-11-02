@@ -2,7 +2,9 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Clock3, MapPin } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
+import { formatWibClockValue, formatWibDate } from '@/lib/datetime';
 import { show as eventShow } from '@/routes/agenda';
 import type { PublicEvent } from '../types';
 
@@ -17,22 +19,16 @@ export function AgendaSelectedDayPanel({
     displayTimezone: string;
     events: PublicEvent[];
 }) {
-    const selectedDateLabel = new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: displayTimezone,
-    }).format(new Date(`${selectedDate}T12:00:00Z`));
+    const selectedDateLabel = formatWibDate(
+        `${selectedDate}T12:00:00Z`,
+        displayTimezone,
+    );
 
-    const formatEventTime = (value: string) =>
-        new Intl.DateTimeFormat('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: displayTimezone,
-        })
-            .format(new Date(value))
-            .replace('.', ':') + ' WIB';
+    const formatEventTime = (value: string) => {
+        const time = formatWibClockValue(value, displayTimezone);
+
+        return time === '' ? '' : `${time.replace('.', ':')} WIB`;
+    };
 
     const formatEventRange = (event: PublicEvent) => {
         if (event.is_all_day) {
@@ -86,14 +82,16 @@ export function AgendaSelectedDayPanel({
                             className="flex gap-3 py-4 first:pt-0 last:pb-0"
                         >
                             {event.poster ? (
-                                <img
+                                <Image
                                     src={event.poster}
                                     alt={
                                         event.poster_alt ||
                                         `Poster ${event.title}`
                                     }
                                     loading="lazy"
-                                    className="size-18 shrink-0 rounded-lg object-cover sm:size-20"
+                                    aspectRatio="1 / 1"
+                                    fit="cover"
+                                    className="size-18 shrink-0 rounded-lg sm:size-20"
                                 />
                             ) : (
                                 <div className="flex size-18 shrink-0 items-center justify-center rounded-lg bg-muted sm:size-20">
@@ -110,11 +108,6 @@ export function AgendaSelectedDayPanel({
                                         <Badge
                                             variant="outline"
                                             className="gap-1 rounded-full border-transparent px-2 py-0.5 text-[10px] sm:text-xs"
-                                            style={{
-                                                color: event.category
-                                                    .color_value,
-                                                backgroundColor: `${event.category.color_value}14`,
-                                            }}
                                         >
                                             {event.category.name}
                                         </Badge>

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Agenda;
 
+use App\Concerns\GeneratesUniqueSlug;
 use App\Enums\EventStatus;
 use App\Enums\MediaStatus;
 use App\Models\Event;
@@ -22,6 +23,8 @@ use Illuminate\Support\Str;
  */
 class SaveEventAction
 {
+    use GeneratesUniqueSlug;
+
     public function __construct(private readonly AuditLogger $audit) {}
 
     /**
@@ -37,7 +40,7 @@ class SaveEventAction
 
             $event->fill([
                 ...$attributes,
-                'slug' => $this->resolveSlug($event, $attributes),
+                'slug' => $this->resolveSlug($attributes),
                 'poster_path' => $this->resolvePosterPath($event, $attributes),
             ]);
 
@@ -89,7 +92,7 @@ class SaveEventAction
      * calendar. See DuplicateEventAction.
      */
     /** @param  array<string, mixed>  $attributes */
-    private function resolveSlug(Event $event, array $attributes): string
+    private function resolveSlug(array $attributes): string
     {
         $given = $attributes['slug'] ?? null;
 
@@ -98,21 +101,12 @@ class SaveEventAction
         }
 
         $base = Str::slug($attributes['title'] ?? '');
-        $slug = $base;
-        $suffix = 2;
 
-        while (Event::query()->withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$suffix;
-            $suffix++;
-
-            if ($suffix > 100) {
-                $slug = $base.'-'.Str::random(6);
-
-                break;
-            }
+        if ($base === '') {
+            return (string) Str::uuid();
         }
 
-        return $slug === '' ? (string) Str::uuid() : $slug;
+        return $this->resolveUniqueSlug(Event::class, null, $base, null, true);
     }
 
     /**
@@ -136,30 +130,6 @@ class SaveEventAction
             return $event->poster_path;
         }
 
-        return $media->variantPath($this->largestVariantName());
-    }
-
-    /**
-     * @see SavePostAction::largestVariantName()
-     */
-    private function largestVariantName(): ?string
-    {
-        $variants = (array) config('media.variants');
-
-        if ($variants === []) {
-            return null;
-        }
-
-        $name = null;
-        $widest = -1;
-
-        foreach ($variants as $candidate => $width) {
-            if ((int) $width > $widest) {
-                $widest = (int) $width;
-                $name = (string) $candidate;
-            }
-        }
-
-        return $name;
+        return $media->largestVariantPath();
     }
 }

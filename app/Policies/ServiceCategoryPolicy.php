@@ -2,8 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\ServiceCategory;
-use App\Models\User;
+use App\Policies\Concerns\ChecksModulePermission;
 
 /**
  * Who may manage ServiceCategory rows.
@@ -19,23 +18,10 @@ use App\Models\User;
  */
 class ServiceCategoryPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->can('servicecategories.view');
-    }
+    use ChecksModulePermission;
 
-    public function create(User $user): bool
+    protected function permissionPrefix(): string
     {
-        return $user->can('servicecategories.create');
-    }
-
-    public function update(User $user, ServiceCategory $model): bool
-    {
-        return $user->can('servicecategories.update');
-    }
-
-    public function delete(User $user, ServiceCategory $model): bool
-    {
-        return $user->can('servicecategories.delete');
+        return 'servicecategories';
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Agenda;
 
+use App\Concerns\GeneratesUniqueSlug;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Services\AuditLogger;
@@ -40,6 +41,8 @@ use Illuminate\Support\Str;
  */
 class DuplicateEventAction
 {
+    use GeneratesUniqueSlug;
+
     public function __construct(private readonly AuditLogger $audit) {}
 
     /**
@@ -50,7 +53,7 @@ class DuplicateEventAction
         return DB::transaction(function () use ($source, $overrides): Event {
             $copy = $source->replicate(['deleted_at']);
 
-            $copy->slug = $this->uniqueSlug($source->title, $source->getKey());
+            $copy->slug = $this->uniqueSlug($source->title);
             $copy->status = EventStatus::Scheduled;
             $copy->is_published = false;
 
@@ -83,18 +86,17 @@ class DuplicateEventAction
      * duplicates twice should be able to predict the third URL, and a UUID would
      * make the address bar unreadable and unshareable.
      */
-    private function uniqueSlug(string $title, int $sourceKey): string
+    private function uniqueSlug(string $title): string
     {
         $base = Str::slug($title) !== '' ? Str::slug($title) : 'kegiatan';
-        $slug = $base.'-copy';
-        $suffix = 2;
 
-        while (Event::query()->withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $base.'-copy-'.$suffix;
-            $suffix++;
-        }
-
-        return $slug;
+        return $this->resolveUniqueSlug(
+            Event::class,
+            null,
+            $base.'-copy',
+            null,
+            true,
+        );
     }
 
     /**

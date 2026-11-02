@@ -99,7 +99,7 @@ export default function Review({ status, progress, error, summary }: Props) {
                 <Head title="Instalasi Berhasil" />
 
                 <StepShell
-                    eyebrow="Langkah 6 dari 7"
+                    eyebrow="Langkah 6 dari 8"
                     title="Instalasi berhasil"
                     description="Hasil instalasi sedang disimpan. Anda akan dialihkan sebentar lagi."
                 >
@@ -124,7 +124,7 @@ export default function Review({ status, progress, error, summary }: Props) {
                 <Head title="Instalasi Berjalan" />
 
                 <StepShell
-                    eyebrow="Langkah 6 dari 7"
+                    eyebrow="Langkah 6 dari 8"
                     title="Instalasi sedang berjalan"
                     description="Jangan tutup halaman ini. Status di bawah berasal dari backend, bukan perkiraan dari browser."
                     footer={
@@ -165,7 +165,7 @@ export default function Review({ status, progress, error, summary }: Props) {
                 <Head title="Instalasi Gagal" />
 
                 <StepShell
-                    eyebrow="Langkah 6 dari 7"
+                    eyebrow="Langkah 6 dari 8"
                     title="Instalasi tidak selesai"
                     description="Tidak ada data yang dihapus otomatis. Ikuti instruksi di bawah sebelum mencoba lagi."
                 >
@@ -190,7 +190,7 @@ export default function Review({ status, progress, error, summary }: Props) {
                 <Head title="Konfirmasi Instalasi" />
 
                 <StepShell
-                    eyebrow="Langkah 6 dari 7"
+                    eyebrow="Langkah 6 dari 8"
                     title="Data instalasi belum lengkap"
                     description="Kembali ke langkah sebelumnya dan lengkapi data yang diminta."
                     footer={
@@ -218,7 +218,7 @@ export default function Review({ status, progress, error, summary }: Props) {
             <Head title="Konfirmasi Instalasi" />
 
             <StepShell
-                eyebrow="Langkah 6 dari 7"
+                eyebrow="Langkah 6 dari 8"
                 title="Periksa dan konfirmasi"
                 description="Setelah tombol di bawah ditekan, wizard membuat tabel, menjalankan seeder produksi, membuat akun Super Admin, dan menyimpan identitas paroki."
                 footer={

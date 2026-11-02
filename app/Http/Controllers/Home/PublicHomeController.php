@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Home;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Public\Agenda\PublicEventResource;
 use App\Http\Resources\Public\Galeri\PublicGalleryTeaserResource;
+use App\Http\Resources\Public\Livestream\PublicLivestreamResource;
 use App\Http\Resources\Public\MassSchedule\NextMassResource;
 use App\Http\Resources\Public\News\PublicPostResource;
 use App\Http\Resources\Public\Pelayanan\PublicServiceCardResource;
 use App\Models\Event;
 use App\Models\GalleryPhoto;
+use App\Models\Livestream;
 use App\Models\Media;
 use App\Models\Post;
 use App\Models\Service;
@@ -50,8 +52,8 @@ class PublicHomeController extends Controller
 
     public function __invoke(): Response
     {
-        $newsLimit = $this->intSetting('home_news_limit', 3);
-        $eventsLimit = $this->intSetting('home_events_limit', 3);
+        $newsLimit = $this->intSetting('home_news_limit', 4);
+        $eventsLimit = $this->intSetting('home_events_limit', 4);
         $galleryLimit = $this->intSetting('home_gallery_limit', 6);
 
         $showDevotion = $this->boolSetting('home_show_devotion');
@@ -60,6 +62,7 @@ class PublicHomeController extends Controller
 
         $nextMass = $this->resolver->resolve();
         $galleryPhotos = $showGallery ? $this->gallery($galleryLimit) : [];
+        $liveStream = Livestream::currentLive();
 
         return Inertia::render('public/beranda', [
             'nextMass' => $nextMass === null
@@ -73,11 +76,15 @@ class PublicHomeController extends Controller
             'galleryIllustrations' => $showGallery
                 ? $this->galleryIllustrations($galleryPhotos)
                 : [],
+            'liveStream' => $liveStream === null
+                ? null
+                : PublicLivestreamResource::make($liveStream)->resolve(),
             'hero' => $this->hero(),
             'sections' => [
                 'devotion' => $showDevotion,
                 'services' => $showServices,
                 'gallery' => $showGallery,
+                'livestreaming' => $liveStream !== null,
             ],
         ]);
     }

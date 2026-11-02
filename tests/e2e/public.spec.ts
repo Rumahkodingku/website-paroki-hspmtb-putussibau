@@ -207,16 +207,15 @@ test.describe('situs publik', () => {
     });
 
     /**
-     * Roadmap section 17, second critical flow, and the one Phase 01 could not
-     * run: Kontak did not exist as a route, so the footer's Kontak entry was a
-     * placeholder rather than a link.
+     * Roadmap section 17, second critical flow: the header carries the Kontak
+     * entry that leads to the contact page.
      */
-    test('footer menavigasi ke halaman kontak', async ({ page }) => {
+    test('navigasi utama menuju halaman kontak', async ({ page }) => {
         await page.goto('/');
 
         await page
-            .getByRole('contentinfo')
-            .getByRole('link', { name: 'Halaman kontak' })
+            .getByRole('banner')
+            .getByRole('link', { name: 'Kontak' })
             .click();
 
         await expect(page).toHaveURL(/\/kontak$/);
@@ -242,7 +241,7 @@ test.describe('situs publik', () => {
             'Pastor',
             'Struktur Kepengurusan',
             'Jadwal Misa',
-            'Berita & Artikel',
+            'Berita',
             'Agenda',
             'Pelayanan',
             'Komunitas',
@@ -260,9 +259,10 @@ test.describe('situs publik', () => {
         const drawer = page.getByRole('dialog');
         await expect(drawer).toBeVisible();
 
-        // Profil and Pelayanan are disclosure groups in the drawer, so their
-        // children only exist once the group is opened.
+        // Profil, Ibadah, and Pelayanan are disclosure groups in the drawer, so
+        // their children only exist once the group is opened.
         await drawer.getByRole('button', { name: 'Profil' }).click();
+        await drawer.getByRole('button', { name: 'Ibadah' }).click();
         await drawer.getByRole('button', { name: 'Pelayanan' }).click();
 
         for (const label of menu) {
@@ -309,7 +309,6 @@ test.describe('situs publik', () => {
             '/profil/sejarah',
             '/jadwal-misa',
             '/kontak',
-            '/design-system',
         ]) {
             await page.goto(url);
 
@@ -333,7 +332,7 @@ test.describe('situs publik', () => {
      * somebody who has not signed in, on the one page whose job is to be simple.
      */
     test('halaman masuk tidak memakai navigasi publik', async ({ page }) => {
-        await page.goto('/admin/login');
+        await page.goto('/auth/login');
 
         await expect(loginButton(page)).toBeVisible();
         await expect(
@@ -400,8 +399,8 @@ test.describe('tema publik', () => {
         await toggle(page).click();
 
         await page
-            .getByRole('contentinfo')
-            .getByRole('link', { name: 'Halaman kontak' })
+            .getByRole('banner')
+            .getByRole('link', { name: 'Kontak' })
             .click();
         await expect(page).toHaveURL(/\/kontak$/);
         await expect(page.locator('html')).toHaveClass(/dark/);
@@ -438,7 +437,6 @@ test.describe('tema publik', () => {
             '/',
             '/profil/sejarah',
             '/kontak',
-            '/design-system',
         ]) {
             await page.goto(url);
             await toggle(page).click();

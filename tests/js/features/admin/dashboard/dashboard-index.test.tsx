@@ -30,6 +30,7 @@ const EMPTY_PROPS: DashboardProps = {
     recentPosts: [],
     attentionItems: [],
     recentContent: [],
+    nextLivestream: null,
 };
 
 describe('Dashboard', () => {
@@ -74,6 +75,38 @@ describe('Dashboard', () => {
         expect(
             screen.getAllByRole('link', { name: /Tambah Agenda/ })[0],
         ).toHaveAttribute('href', '/admin/agenda/tambah');
+    });
+
+    it('renders a livestream and a system alert', () => {
+        renderWithInertia(
+            <Dashboard
+                {...EMPTY_PROPS}
+                nextLivestream={{
+                    id: 9,
+                    title: 'Misa Live',
+                    is_live: true,
+                    broadcast_status_label: 'Sedang Live',
+                    scheduled_at: null,
+                }}
+                attentionItems={[
+                    {
+                        key: 'backup_health',
+                        tone: 'danger',
+                        count: 1,
+                        items: [],
+                        href: '/admin/backup',
+                        details: ['Backup terakhir gagal.'],
+                    },
+                ]}
+            />,
+        );
+
+        expect(screen.getByText('Misa Live')).toBeInTheDocument();
+        expect(screen.getByText('Perlu tindakan')).toBeInTheDocument();
+        expect(screen.getByText('Backup terakhir gagal.')).toBeInTheDocument();
+        expect(
+            screen.getByRole('link', { name: /Buka Backup/ }),
+        ).toHaveAttribute('href', '/admin/backup');
     });
 
     it('renders a recent article and an upcoming activity', () => {

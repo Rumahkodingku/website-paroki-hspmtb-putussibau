@@ -25,17 +25,26 @@ import { renderWithInertia } from '../support/inertia';
 /** Every destination, as the flat mobile drawer lists them. */
 const DRAWER_MENU = [
     'Beranda',
+    'Ringkasan',
+    'Sejarah',
+    'Wilayah Pelayanan',
+    'Area',
+    'Pastor',
+    'Struktur Kepengurusan',
     'Jadwal Misa',
-    'Berita & Artikel',
     'Agenda',
+    'Livestreaming',
+    'Pelayanan',
+    'Komunitas',
+    'Galeri',
+    'Dokumen',
+    'Berita',
     'Kontak',
 ];
 
 const DESKTOP_LINKS = [
     { label: 'Beranda', href: '/' },
-    { label: 'Jadwal Misa', href: '/jadwal-misa' },
     { label: 'Berita & Artikel', href: '/berita' },
-    { label: 'Agenda', href: '/agenda' },
     { label: 'Kontak', href: '/kontak' },
 ];
 
@@ -47,6 +56,11 @@ const DESKTOP_GROUPS: Record<string, { label: string; href: string }[]> = {
         { label: 'Area', href: '/profil/area' },
         { label: 'Pastor', href: '/profil/pastor' },
         { label: 'Struktur Kepengurusan', href: '/profil/struktur' },
+    ],
+    Ibadah: [
+        { label: 'Jadwal Misa', href: '/jadwal-misa' },
+        { label: 'Agenda', href: '/agenda' },
+        { label: 'Livestreaming', href: '/livestreaming' },
     ],
     Pelayanan: [
         { label: 'Pelayanan', href: '/pelayanan' },
@@ -181,8 +195,14 @@ describe('ParishNavbar', () => {
             ).toBeInTheDocument();
         });
 
-        it('exposes the Jadwal Misa shortcut PRD 5.3 asks for', () => {
+        it('exposes the Jadwal Misa shortcut PRD 5.3 asks for', async () => {
+            const user = userEvent.setup();
+
             renderWithInertia(<ParishNavbar />);
+
+            await user.click(
+                within(desktopBar()).getByRole('button', { name: 'Ibadah' }),
+            );
 
             expect(
                 within(desktopBar())
@@ -242,6 +262,12 @@ describe('ParishNavbar', () => {
                 { name: 'Navigasi utama' },
             );
 
+            for (const group of ['Profil', 'Ibadah', 'Pelayanan']) {
+                await user.click(
+                    within(drawer).getByRole('button', { name: group }),
+                );
+            }
+
             expect(
                 within(drawer)
                     .getAllByRole('link')
@@ -264,7 +290,7 @@ describe('ParishNavbar', () => {
             );
 
             const drawer = within(screen.getByRole('dialog'));
-            await user.click(drawer.getByRole('link', { name: 'Jadwal Misa' }));
+            await user.click(drawer.getByRole('link', { name: 'Berita' }));
 
             expect(screen.queryByRole('dialog')).toBeNull();
         });

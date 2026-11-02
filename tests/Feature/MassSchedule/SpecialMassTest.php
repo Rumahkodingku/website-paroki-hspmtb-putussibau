@@ -81,6 +81,18 @@ it('creates a special mass, storing the posted local time as UTC', function () {
         ->toBe('09:00');
 });
 
+it('rejects a malformed mass date instead of failing', function () {
+    $this->actingAs(superAdmin())
+        ->post(route('special-masses.store'), [
+            'location_id' => $this->location->getKey(),
+            'title' => 'Misa Natal',
+            'start_at' => 'garbage',
+            'end_at' => '',
+            'is_active' => true,
+        ])
+        ->assertSessionHasErrors('start_at');
+});
+
 it('accepts a mass with no end time', function () {
     $this->actingAs(superAdmin())
         ->post(route('special-masses.store'), [

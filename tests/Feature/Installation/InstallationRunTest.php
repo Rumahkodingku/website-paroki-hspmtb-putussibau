@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\InstallationError;
 use App\Models\CommunityCategory;
 use App\Models\DocumentCategory;
 use App\Models\Event;
@@ -80,6 +81,22 @@ test('a fresh database is installed, seeded, verified, and locked', function () 
         ->toBeNull();
 });
 
+test('a run is refused when the application database cannot be reached', function () {
+    app()->instance(
+        DatabaseReadinessChecker::class,
+        fakeDatabaseReadiness(false, InstallationError::DatabaseUnreachable->value),
+    );
+
+    $this->postJson('/install/run', ['confirmed' => true])
+        ->assertOk()
+        ->assertJson([
+            'status' => 'failed',
+            'error_code' => 'DATABASE_UNREACHABLE',
+        ]);
+
+    expect(app(InstallationState::class)->status())->toBe(InstallationState::FAILED);
+});
+
 test('the status file holds no credentials', function () {
     $this->postJson('/install/run', ['confirmed' => true])->assertOk();
 
@@ -109,7 +126,7 @@ test('the success page is refresh-safe inside the session and closed to a new on
 test('the created super admin can log in', function () {
     $this->postJson('/install/run', ['confirmed' => true])->assertOk();
 
-    $this->post('/admin/login', [
+    $this->post('/auth/login', [
         'email' => 'installer-admin@example.test',
         'password' => 'Installer-2026!',
     ])->assertRedirect('/admin');

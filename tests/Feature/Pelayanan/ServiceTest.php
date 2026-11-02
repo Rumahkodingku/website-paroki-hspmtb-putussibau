@@ -96,6 +96,18 @@ it('sanitizes the introduction on the way in', function () {
 |--------------------------------------------------------------------------
 */
 
+it('stores an emptied introduction as null', function () {
+    $category = ServiceCategory::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('services.store'), servicePayload($category, [
+            'introduction' => '<p></p>',
+        ]))
+        ->assertSessionHasNoErrors();
+
+    expect(Service::query()->sole()->introduction)->toBeNull();
+});
+
 it('accepts a service with no Google Form', function () {
     $category = ServiceCategory::factory()->create();
 
@@ -150,6 +162,16 @@ it('closes registration when there is no form URL', function () {
 | Emergency (AC-SVC-9, SVC-06)
 |--------------------------------------------------------------------------
 */
+
+it('rejects a phone that is not a phone number', function () {
+    $category = ServiceCategory::factory()->create();
+
+    $this->actingAs(superAdmin())
+        ->post(route('services.store'), servicePayload($category, [
+            'contact_phone' => 'bukan-nomor',
+        ]))
+        ->assertSessionHasErrors('contact_phone');
+});
 
 it('refuses to activate an emergency service without a contact phone', function () {
     $category = ServiceCategory::factory()->create();

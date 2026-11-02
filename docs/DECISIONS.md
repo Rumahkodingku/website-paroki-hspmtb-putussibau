@@ -1498,9 +1498,11 @@ dan CI memakai `coverage: none`. **Level PHPStan tetap 7** — tidak ada satu pu
 dokumen yang menyebut level, jadi mengubahnya jadi keputusan tanpa dokumen.
 **Plugin `profanity`** tidak dipakai: kosmetik.
 
-Satu catatan pengamatan, bukan pekerjaan P13: `laravel/sail` masih ada di
-`require-dev` padahal D-15 menghapus Docker. Itu milik butir P01 "remove
-starter artifacts"
+`laravel/sail` sudah dihapus dari `require-dev` pada refactoring audit
+November 2026 (Fase 7), bersama `laravel/chisel`. `pnpm-workspace.yaml` dan
+`.codex/config.toml` juga sudah dibersihkan sebagai starter artifact.
+`laravel/pao` dipertahankan karena auto-register provider dan Pest plugin-nya.
+
 ---
 
 ## D-28 — Git workflow: husky, commitlint, dan gate penuh saat commit
@@ -2145,8 +2147,7 @@ dirender sebagai teks, dan `Breadcrumbs` memperlakukan href yang hilang sebagai
 ### 11. Kebutuhan variant Button sudah terpenuhi
 
 `ui/button.tsx` sudah memetakan `primary / secondary / navy / gold / icon /
-utility`. Tidak ada primitive baru. `ParishCta` membungkus slot sekundernya dalam
-outline Button sehingga secara struktural tidak mungkin menjadi primary kedua.
+utility`. Tidak ada primitive baru.
 
 ### 12. Arch test bersifat tekstual, termasuk untuk prosa
 
@@ -5203,7 +5204,6 @@ permukaan tertentu; ini tidak mengubah token `primary`.
 | `OrganizationChart`    | `features/public/profil/components/organization-chart.tsx`      |
 | `ServiceAreaMap`       | `components/contact-map.tsx` + `features/public/area/*`         |
 | `ParishGallery`        | `features/public/galeri/components/photo-grid.tsx` (+ lightbox) |
-| `ParishCTA`            | `components/parish-cta.tsx`                                     |
 | `ParishFooter`         | `layouts/public/components/parish-footer.tsx`                   |
 
 ### 4. Tabrakan `text-body`
@@ -5669,14 +5669,19 @@ diklaim lulus.
 @see `docs/plan-implementation/plan-backup-recovery.md`
 @see `docs/backup-recovery.md`
 
-## D-90 — Installation Wizard: konfigurasi environment dikelola deployment
+## D-90 — Installation Wizard: konfigurasi environment dikelola wizard
 
-Wizard tidak menulis `.env`. Operator menyiapkan `DB_*`, `APP_KEY`, `APP_URL`,
-dan `INSTALLER_ENABLED` sebelum membuka `/install`; Step 3 hanya menampilkan
-nilai koneksi (tanpa password), menguji koneksi, dan memeriksa kelayakan
-database. Ini menghindari masalah permission, escaping, dan config cache basi
-yang muncul bila aplikasi web menulis file environment. Konsekuensi: Step 3
-bukan form input, dan Step 5 tidak mengubah URL/timezone/nama aplikasi.
+Wizard menulis kunci `.env` yang dipilih melalui `EnvironmentWriter` (atomik,
+dengan backup `.env.pre-install`): `DB_*`, `MAIL_*`, `APP_NAME`, `APP_URL`,
+`APP_DISPLAY_TIMEZONE`, `APP_LOCALE`, `APP_ENV`, `APP_DEBUG`, dan
+`TELESCOPE_ENABLED`. `APP_KEY` dan `INSTALLER_ENABLED` tetap disiapkan operator
+sebelum membuka `/install`; wizard tidak membuat application key.
+
+Karena wizard dapat diarahkan ke database lain, `InstallationRunner` memeriksa
+koneksi aplikasi yang sedang dikonfigurasi lebih dulu dan menolak instalasi bila
+database itu sudah berisi tabel (`DATABASE_NOT_FRESH`) atau tidak dapat
+dihubungi (`DATABASE_UNREACHABLE`). Ini menutup skenario status file hilang
+yang membuka kembali `/install` saat database aplikasi sedang down.
 
 `INSTALLER_ENABLED=false` adalah default. Flag ini hanya untuk deployment yang
 memang sedang memasang instalasi baru.
@@ -5763,3 +5768,108 @@ Tanpa file status, request diteruskan normal. Setelah `completed`, situs
 berjalan normal dan tidak ada redirect.
 
 @see `docs/plan-implementation/plan-installation-redirect.md`
+
+## D-97 — Agenda multi-hari tampil sampai `end_at`
+
+`Event::scopeUpcomingFromToday()` menampilkan kegiatan selama `end_at` belum
+lewat; kegiatan tanpa `end_at` tetap mengikuti awal hari di `Asia/Pontianak`.
+Daftar bulanan memakai irisan rentang, sehingga kegiatan lintas bulan muncul di
+setiap bulan yang dilewatinya. Konsekuensinya, kegiatan satu hari dengan
+`end_at` yang sudah lewat hilang lebih cepat dari daftar.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.2 K1
+
+## D-98 — Notice bertarget tampil saat targetnya ada di halaman
+
+Notice dengan `mass_schedule_id` atau `special_mass_id` ditampilkan bila jadwal
+atau misa khusus itu ada di daftar yang sedang tampil setelah filter lokasi/hari.
+Target yang terfilter, nonaktif, atau terhapus tetap tidak menampilkan notice.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.2 K2
+
+## D-99 — `/design-system` dihapus
+
+Route dan halaman referensi dihapus setelah shell publik stabil, sesuai D-31.
+Komponen yang dipamerkan tetap dipakai halaman lain. Wayfinder menghapus modul
+route/action yang dihasilkan.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.1
+
+## D-100 — Unduhan dokumen dibatasi 30 request per menit
+
+Route `dokumen.unduh` memakai `throttle:30,1`. `download_count` tetap naik pada
+setiap unduhan sesuai PRD DL-06/AC-DL-2; tidak ada dedup per sesi.
+
+@see `docs/plan-implementation/plan-refactoring-audit-codebase.md` §2.3
+
+## D-101 — Modul Livestreaming: YouTube manual, satu live, dan arsip replay
+
+**Status:** Accepted · branch `refactor/refactor-code`
+
+Fitur Livestreaming menambahkan satu pengalaman untuk siaran langsung di
+beranda, halaman arsip `/livestreaming`, dan pengelolaan tautan siaran dari
+CMS. Spesifikasi produk ada di `docs/specifications/spec-livestreaming.md`;
+urutan implementasinya di `docs/plan-implementation/plan-livestreaming.md`.
+Tujuh keputusan produk dikonfirmasi pemilik proyek sebelum implementasi.
+
+**Keputusan yang mengikat.**
+
+1. **YouTube adalah pemutar, aplikasi adalah sumber metadata.** Tidak ada
+   YouTube Data API, OAuth, upload video, transcoding, atau penyimpanan file
+   video. Admin mengisi URL YouTube; `App\Support\YoutubeEmbed` mengekstrak
+   `youtube_video_id` di server dan membentuk embed `youtube-nocookie.com`.
+   `youtube_video_id` tidak pernah diterima dari browser.
+2. **Dua status yang terpisah.** `status` editorial (`draft`, `published`,
+   `archived`) dan `broadcast_status` operasional (`scheduled`, `live`,
+   `ended`, `unavailable`). `live` adalah label manual admin, bukan verifikasi
+   YouTube. Editorial `published` + broadcast `ended` + replay tersedia adalah
+   satu-satunya definisi rekaman publik (`Livestream::scopeArchiveReady()`).
+3. **Satu siaran aktif.** `livestreams.live_slot` adalah kolom nullable dengan
+   unique index; nilainya `1` hanya pada record `published + live`. MySQL
+   mengizinkan banyak `NULL`, sehingga index ini menolak live kedua bahkan saat
+   dua request mulai dari kondisi kosong. Aksi mulai/akhiri tetap memakai
+   transaksi dan `lockForUpdate()`; duplicate-key diterjemahkan menjadi
+   validation error, bukan 500.
+4. **Tidak ada halaman detail dan tidak ada slug.** Kartu arsip membuka modal
+   berisi iframe `youtube-nocookie`; live aktif tampil inline di atas grid.
+   Embed tidak dimuat untuk seluruh grid, dan tidak ada autoplay bersuara.
+5. **Thumbnail dari YouTube.** URL dibentuk dari `youtube_video_id`
+   (`hqdefault.jpg`); tidak ada upload thumbnail kustom, `thumbnail_media_id`,
+   atau cache gambar lokal. Komponen `Image` menangani gagal muat.
+6. **Kategori adalah enum empat nilai.** `liturgi`, `hari_raya`, `devosi`,
+   `kegiatan`. Tidak ada master data kategori; chip dan filter membaca label
+   dari `lang/id/livestreaming.php`.
+7. **Publikasi adalah field form.** Tidak ada permission atau endpoint
+   `livestreams.publish`. Empat permission CRUD (`livestreams.view/create/
+   update/delete`) dan `LivestreamPolicy`; mulai, akhiri, dan tandai tidak
+   tersedia memakai `livestreams.update`. Mengubah status editorial saat live
+   ditolak sampai siaran diakhiri.
+8. **Replay ditandai di form edit.** Aksi akhiri hanya mengisi `ended_at` dan
+   default `recorded_at`; `is_recording_available` tetap `false` sampai admin
+   memastikan replay YouTube ada dan mencentangnya. `recorded_at` menjadi
+   urutan dan filter tahun arsip.
+9. **Tidak ada cache query live.** Beranda menjalankan satu query terindeks per
+   request. Ini deviasi sadar dari §15 spesifikasi: cache 30–60 detik berisiko
+   menampilkan live yang sudah diakhiri, dan invalidasi manual lebih besar
+   daripada biaya query.
+10. **`location` menjadi referensi master data.** Spesifikasi UI meminta
+    lokasi di panel live; kolom teks bebas diganti `location_id` nullable yang
+    menunjuk `locations`. Form admin memakai select aktif saja, lokasi tetap
+    opsional, dan `LocationController` menolak menghapus lokasi yang masih
+    dipakai livestreaming (`restrictOnDelete` sebagai backstop). Resource publik
+    tetap mengirim `location` berupa nama string.
+11. **`scheduled` tidak tampil di publik.** Homepage hanya menampilkan live;
+    arsip hanya menampilkan `ended` dengan replay. Jadwal mendatang adalah
+    fitur lanjutan.
+
+**Batasan yang diketahui.** Status live bisa terlambat diperbarui bila admin
+lupa mengakhiri. Replay tidak otomatis dianggap ada. Video private/deleted dapat
+ditandai `unavailable` atau diarsipkan; setelah `ended`, record tidak bisa
+kembali live dan harus dibuat record baru. Thumbnail remote bergantung pada
+YouTube. Navbar publik bertambah satu item; pada 1024px empat item terakhir
+terpotong, sehingga breakpoint desktop dinaikkan dari `lg` ke `xl` (tablet
+memakai drawer).
+
+@see `docs/specifications/spec-livestreaming.md`
+@see `docs/plan-implementation/plan-livestreaming.md`
+@see `docs/RBAC.md`

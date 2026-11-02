@@ -81,7 +81,7 @@ test('an unverified account shares a null verified timestamp', function () {
     $this->actingAs($user)
         ->get(route('verification.notice'))
         ->assertInertia(fn (Assert $page) => $page
-            ->component('public/auth/verify-email')
+            ->component('shared/auth/verify-email')
             ->where('auth.user.email_verified_at', null)
         );
 });

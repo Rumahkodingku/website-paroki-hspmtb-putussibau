@@ -30,6 +30,7 @@ describe('Kategori Dokumen index', () => {
                 categories={EMPTY}
                 filters={{
                     search: '',
+                    status: '',
                     sort: '',
                     direction: '',
                 }}
@@ -48,5 +49,22 @@ describe('Kategori Dokumen index', () => {
                 'Kategori tidak dapat dihapus karena masih memiliki 2 dokumen.',
             ),
         ).toBeInTheDocument();
+    });
+
+    it('renders the status filter', () => {
+        renderWithInertia(
+            <Index
+                categories={EMPTY}
+                filters={{
+                    search: '',
+                    status: '',
+                    sort: '',
+                    direction: '',
+                }}
+                copy={COPY}
+            />,
+        );
+
+        expect(screen.getByLabelText('Filter status')).toBeInTheDocument();
     });
 });

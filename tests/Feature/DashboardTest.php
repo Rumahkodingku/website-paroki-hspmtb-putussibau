@@ -1,14 +1,24 @@
 <?php
 
+use App\Enums\LivestreamBroadcastStatus;
+use App\Models\Backup;
+use App\Models\Community;
 use App\Models\Document;
 use App\Models\Event;
+use App\Models\GalleryAlbum;
+use App\Models\GalleryPhoto;
+use App\Models\Livestream;
 use App\Models\MassSchedule;
 use App\Models\Media;
+use App\Models\Pastor;
 use App\Models\Post;
 use App\Models\ScheduleNotice;
 use App\Models\Service;
 use App\Models\SpecialMass;
 use App\Models\User;
+use App\Services\Backup\BackupHealth;
+use App\Services\SiteSettingsService;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -236,6 +246,181 @@ test('expired documents are reported as an attention item with links', function 
             ->where('attentionItems.0.count', 2)
             ->has('attentionItems.0.items', 2)
             ->where('attentionItems.0.items.0.type', 'document')
+        );
+});
+
+test('scheduled articles due within a week are reported', function () {
+    $user = superAdmin();
+    $soon = Post::factory()->scheduled(now()->addDays(3))->create(['title' => 'Segera']);
+    Post::factory()->scheduled(now()->addDays(10))->create(['title' => 'Nanti']);
+    Post::factory()->scheduled(now()->subDay())->create(['title' => 'Lewat']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'scheduled_posts')
+            ->where('attentionItems.0.tone', 'info')
+            ->where('attentionItems.0.count', 1)
+            ->where('attentionItems.0.items.0.id', $soon->getKey())
+        );
+});
+
+test('drafts untouched for two weeks are reported', function () {
+    $user = superAdmin();
+
+    $this->travel(-20)->days();
+    Post::factory()->draft()->create(['title' => 'Draf Berita']);
+    Event::factory()->unpublished()->create(['title' => 'Draf Agenda']);
+    Document::factory()->create(['title' => 'Draf Dokumen']);
+    $this->travelBack();
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'stale_drafts')
+            ->where('attentionItems.0.count', 3)
+            ->has('attentionItems.0.items', 3)
+        );
+});
+
+test('unpublished galleries are reported', function () {
+    $user = superAdmin();
+
+    GalleryAlbum::factory()->count(2)->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'unpublished_galleries')
+            ->where('attentionItems.0.tone', 'info')
+            ->where('attentionItems.0.count', 2)
+            ->has('attentionItems.0.items', 2)
+        );
+});
+
+test('missing core site identity settings are reported', function () {
+    $user = superAdmin();
+
+    app(SiteSettingsService::class)->set('parish_name', 'Paroki Uji');
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'site_identity')
+            ->where('attentionItems.0.count', 4)
+            ->where('attentionItems.0.details.0', 'Logo paroki')
+            ->where('attentionItems.0.href', route('settings.edit'))
+        );
+});
+
+test('alt text gaps in communities, pastors and galleries are reported', function () {
+    $user = superAdmin();
+    $media = Media::factory()->ready()->create();
+
+    Community::factory()->published()->create([
+        'logo_media_id' => $media->getKey(),
+        'logo_alt' => null,
+    ]);
+    Pastor::factory()->create([
+        'photo_media_id' => $media->getKey(),
+        'photo_alt' => null,
+    ]);
+    $album = GalleryAlbum::factory()->published()->create();
+    GalleryPhoto::factory()->create([
+        'gallery_album_id' => $album->getKey(),
+        'media_id' => $media->getKey(),
+        'alt_text' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'media_alt_text')
+            ->where('attentionItems.0.count', 3)
+            ->has('attentionItems.0.items', 3)
+            ->where('attentionItems.0.items.0.type', 'community')
+            ->where('attentionItems.0.items.1.type', 'pastor')
+            ->where('attentionItems.0.items.2.type', 'gallery')
+        );
+});
+
+test('backup problems are reported to users who can view backups', function () {
+    $user = superAdmin();
+
+    Cache::put(BackupHealth::WORKER_HEARTBEAT, now()->toIso8601String(), 86400);
+    Cache::put(BackupHealth::SCHEDULER_HEARTBEAT, now()->toIso8601String(), 86400);
+    Backup::factory()->failed()->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('attentionItems.0.key', 'backup_health')
+            ->where('attentionItems.0.tone', 'danger')
+            ->where('attentionItems.0.details.0', 'Backup terakhir gagal.')
+            ->where('attentionItems.0.href', route('backups.index'))
+        );
+});
+
+test('backup problems are hidden without backups.view', function () {
+    seedRolesAndPermissions();
+    $user = User::factory()->create();
+    $user->givePermissionTo('admin.access');
+
+    Backup::factory()->failed()->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->has('attentionItems', 0));
+});
+
+test('the next livestream is reported', function () {
+    $user = superAdmin();
+    $scheduled = Livestream::factory()->published()->create([
+        'title' => 'Siaran Besok',
+        'broadcast_status' => LivestreamBroadcastStatus::Scheduled,
+        'scheduled_at' => now()->addDay(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('nextLivestream.id', $scheduled->getKey())
+            ->where('nextLivestream.title', 'Siaran Besok')
+            ->where('nextLivestream.is_live', false)
+        );
+});
+
+test('a live stream takes precedence over the next scheduled one', function () {
+    $user = superAdmin();
+
+    Livestream::factory()->published()->create([
+        'broadcast_status' => LivestreamBroadcastStatus::Scheduled,
+        'scheduled_at' => now()->addDay(),
+    ]);
+    $live = Livestream::factory()->live()->create(['title' => 'Sedang Live']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('nextLivestream.id', $live->getKey())
+            ->where('nextLivestream.is_live', true)
+        );
+});
+
+test('recent content includes galleries and livestreams', function () {
+    $user = superAdmin();
+
+    $this->travel(-1)->minute();
+    GalleryAlbum::factory()->create(['title' => 'Album Baru']);
+    $this->travelBack();
+    Livestream::factory()->published()->create(['title' => 'Siaran Baru']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('recentContent', 2)
+            ->where('recentContent.0.type', 'livestream')
+            ->where('recentContent.1.type', 'gallery')
         );
 });
 

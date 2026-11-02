@@ -40,6 +40,8 @@ use Illuminate\Validation\Validator;
  */
 trait EventValidationRules
 {
+    use ConvertsLocalDateTime;
+
     /**
      * @param  Event|null  $ignore  the record being updated, so it keeps its own slug
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
@@ -124,18 +126,6 @@ trait EventValidationRules
     }
 
     /**
-     * An empty string is a cleared optional field, not the epoch.
-     */
-    protected function toUtc(mixed $value): mixed
-    {
-        if (! is_string($value) || trim($value) === '') {
-            return $value === '' ? null : $value;
-        }
-
-        return Carbon::parse($value, config('app.display_timezone'))->utc();
-    }
-
-    /**
      * An all-day activity needs a date, not a clock.
      *
      * Roadmap 8.1 says the admin is not forced to invent a time of day. The
@@ -152,6 +142,12 @@ trait EventValidationRules
             // one-argument form takes a KEY, and passing the value reads a
             // field that does not exist, so the check would never fail.
             if (! $this->boolean('is_all_day')) {
+                return;
+            }
+
+            // A malformed date is already a field error; parsing it again here
+            // would turn a 422 into a 500.
+            if ($validator->errors()->has('start_at') || $validator->errors()->has('end_at')) {
                 return;
             }
 

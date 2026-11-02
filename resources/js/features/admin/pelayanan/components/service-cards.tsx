@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Image as ImageIcon, Pencil } from 'lucide-react';
 import { StatusBadge } from '@/components/list-parts';
+import Image from '@/components/image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { edit as editService } from '@/routes/services';
@@ -28,10 +29,12 @@ export function ServiceCards({
                 >
                     <div className="flex items-start gap-3">
                         {service.thumbnail ? (
-                            <img
+                            <Image
                                 src={service.thumbnail}
                                 alt={service.thumbnail_alt ?? ''}
-                                className="size-11 shrink-0 rounded-md border border-border object-cover"
+                                aspectRatio="1 / 1"
+                                fit="cover"
+                                className="size-11 shrink-0 rounded-md border border-border"
                             />
                         ) : (
                             <span className="flex size-11 shrink-0 items-center justify-center rounded-md border border-border bg-canvas-subtle text-muted-foreground">
