@@ -58,7 +58,9 @@ test.describe('livestreaming', () => {
         // The homepage section appears only while the record is live.
         await page.goto('/');
         await expect(
-            page.getByRole('heading', { name: 'Ikuti Misa Secara Online' }),
+            page.getByRole('heading', {
+                name: 'Ikuti Kegiatan Paroki Secara Online',
+            }),
         ).toBeVisible();
         await expect(page.getByText('SEDANG LIVE')).toBeVisible();
         await expect(
@@ -92,7 +94,9 @@ test.describe('livestreaming', () => {
         // The homepage goes back to its no-live state, with no placeholder.
         await page.goto('/');
         await expect(
-            page.getByRole('heading', { name: 'Ikuti Misa Secara Online' }),
+            page.getByRole('heading', {
+                name: 'Ikuti Kegiatan Paroki Secara Online',
+            }),
         ).toHaveCount(0);
 
         // A replay is not assumed; the admin marks it after the fact.
