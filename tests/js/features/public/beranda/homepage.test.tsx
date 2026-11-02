@@ -444,7 +444,7 @@ describe('Beranda', () => {
         // (desktop), so the step-down is in the token rather than a
         // breakpoint-specific override.
         expect(screen.getByRole('heading', { level: 1 }).className).toContain(
-            'text-4xl',
+            'text-6xl',
         );
     });
 });

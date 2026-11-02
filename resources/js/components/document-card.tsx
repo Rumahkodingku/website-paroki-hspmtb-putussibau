@@ -1,4 +1,4 @@
-import { Download, Eye, FileText } from 'lucide-react';
+import { Download, Eye } from 'lucide-react';
 import { formatBytes } from '@uploadcn/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,13 +20,6 @@ export function DocumentCard({
     return (
         <article className="flex h-full flex-col rounded-lg border border-border bg-card p-6">
             <div className="flex items-start gap-4">
-                <span
-                    aria-hidden="true"
-                    className="flex size-11 shrink-0 items-center justify-center rounded-md bg-canvas-subtle text-primary-on-surface"
-                >
-                    <FileText className="size-5" />
-                </span>
-
                 <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                         {document.category ? (
@@ -40,7 +33,7 @@ export function DocumentCard({
                         ) : null}
                     </div>
 
-                    <Text as="h3" variant="h3" className="break-words">
+                    <Text as="h3" variant="h3" className="wrap-break-word">
                         {document.title}
                     </Text>
                 </div>
@@ -51,7 +44,7 @@ export function DocumentCard({
                     as="p"
                     variant="body"
                     color="muted"
-                    className="mt-4 line-clamp-3"
+                    className="mt-4 line-clamp-3 text-sm"
                 >
                     {document.description}
                 </Text>
@@ -62,7 +55,7 @@ export function DocumentCard({
                     <dt className="sr-only">Format dan ukuran</dt>
                     <dd>
                         <Text as="p" variant="body-sm" color="muted">
-                            {document.extension.toUpperCase()} ·{' '}
+                            {document.extension.toUpperCase()} -{' '}
                             {formatBytes(document.file_size)}
                         </Text>
                     </dd>
@@ -82,7 +75,7 @@ export function DocumentCard({
             </dl>
 
             <div className="mt-6 flex flex-wrap gap-3">
-                <Button asChild>
+                <Button asChild className="text-sm">
                     <a
                         href={downloadUrl}
                         aria-label={`Unduh dokumen ${document.title}`}
@@ -93,7 +86,7 @@ export function DocumentCard({
                 </Button>
 
                 {document.is_pdf ? (
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild className="text-sm">
                         <a
                             href={previewUrl}
                             target="_blank"

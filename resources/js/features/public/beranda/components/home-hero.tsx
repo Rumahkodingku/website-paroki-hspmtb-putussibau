@@ -81,11 +81,6 @@ export function HomeHero({
                         <div className="w-full max-w-3xl space-y-5 md:space-y-6">
                             {eyebrow && (
                                 <div className="flex items-center gap-4">
-                                    <span
-                                        aria-hidden="true"
-                                        className="h-0.5 w-8 shrink-0 bg-gold"
-                                    />
-
                                     <Text
                                         as="p"
                                         variant="label"
@@ -100,7 +95,7 @@ export function HomeHero({
                             <Text
                                 as="h1"
                                 variant="hero"
-                                className="max-w-3xl text-4xl leading-[1.08] font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+                                className="max-w-3xl text-6xl leading-[1.08] font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
                             >
                                 {titlePrefix}
                                 {accentWord && (
