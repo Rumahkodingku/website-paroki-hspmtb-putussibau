@@ -10,7 +10,7 @@ it('serves a crawl policy that points at the configured sitemap', function () {
         ->toContain('Allow: /')
         ->toContain('Disallow: /admin')
         ->toContain('Disallow: /install')
-        ->toContain('Sitemap: http://localhost/sitemap.xml');
+        ->toContain('Sitemap: '.url('/sitemap.xml'));
 });
 
 it('stays reachable while the installer is pending', function () {
