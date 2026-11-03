@@ -28,8 +28,8 @@ it('renders the article title and description in the initial HTML', function () 
     expect($html)
         ->toContain('<title>Judul SEO | HSPMTB Putussibau</title>')
         ->toContain('name="description" content="Deskripsi SEO berita."')
-        ->toContain('rel="canonical" href="http://localhost/berita/berita-seo"')
-        ->toContain('property="og:url" content="http://localhost/berita/berita-seo"')
+        ->toContain('rel="canonical" href="'.url('/berita/berita-seo').'"')
+        ->toContain('property="og:url" content="'.url('/berita/berita-seo').'"')
         ->toContain('property="og:type" content="article"');
 
     expect(substr_count($html, '<title'))->toBe(1)
@@ -50,7 +50,7 @@ it('renders the event title and plain description in the initial HTML', function
     expect($html)
         ->toContain('<title>Kegiatan SEO | HSPMTB Putussibau</title>')
         ->toContain('name="description" content="Deskripsi agenda SEO."')
-        ->toContain('rel="canonical" href="http://localhost/agenda/agenda-seo"');
+        ->toContain('rel="canonical" href="'.url('/agenda/agenda-seo').'"');
 });
 
 it('uses a page_seo row before the configured default', function () {
@@ -78,19 +78,19 @@ it('drops search and filter parameters from the canonical URL', function () {
     $filter = $this->get('/berita?kategori=renungan')->assertOk()->getContent();
 
     expect($search)
-        ->toContain('rel="canonical" href="http://localhost/berita"')
+        ->toContain('rel="canonical" href="'.url('/berita').'"')
         ->toContain('name="robots" content="noindex, follow"')
-        ->not->toContain('canonical" href="http://localhost/berita?q=misa"');
+        ->not->toContain('canonical" href="'.url('/berita').'?q=misa"');
 
     expect($filter)
-        ->toContain('rel="canonical" href="http://localhost/berita"')
-        ->not->toContain('canonical" href="http://localhost/berita?kategori=renungan"');
+        ->toContain('rel="canonical" href="'.url('/berita').'"')
+        ->not->toContain('canonical" href="'.url('/berita').'?kategori=renungan"');
 });
 
 it('keeps pagination in the canonical URL', function () {
     $html = $this->get('/berita?page=2')->assertOk()->getContent();
 
-    expect($html)->toContain('rel="canonical" href="http://localhost/berita?page=2"');
+    expect($html)->toContain('rel="canonical" href="'.url('/berita').'?page=2"');
 });
 
 it('marks the admin preview as noindex in the initial HTML', function () {
@@ -126,7 +126,7 @@ it('includes the expected page data in the shared seo prop', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('seo.page.title', 'Berita & Artikel')
-            ->where('seo.page.canonical', 'http://localhost/berita')
+            ->where('seo.page.canonical', url('/berita'))
             ->where('seo.page.robots', 'index, follow')
             ->where('seo.page.ogType', 'website')
         );
