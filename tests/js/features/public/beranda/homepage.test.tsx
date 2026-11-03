@@ -144,9 +144,18 @@ function renderHome(
             seo: {
                 appUrl: 'http://localhost',
                 siteName: IDENTITY.name,
+                parishName: IDENTITY.name,
                 title: null,
                 description: null,
                 ogImage: null,
+                page: {
+                    title: 'Beranda',
+                    description: null,
+                    canonical: 'http://localhost',
+                    ogImage: null,
+                    ogType: 'website',
+                    robots: 'index, follow',
+                },
             },
             ...shared,
         },

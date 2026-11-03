@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Fragment } from 'react';
+import { BreadcrumbJsonLd } from '@/components/breadcrumb-json-ld';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,43 +14,49 @@ import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 export function Breadcrumbs({
     breadcrumbs,
     className,
+    withJsonLd = false,
 }: {
     breadcrumbs: BreadcrumbItemType[];
     className?: string;
+    withJsonLd?: boolean;
 }) {
     if (breadcrumbs.length === 0) {
         return null;
     }
 
     return (
-        <Breadcrumb aria-label="Navigasi breadcrumb" className={className}>
-            <BreadcrumbList className="min-w-0">
-                {breadcrumbs.map((item, index) => {
-                    const isLast = index === breadcrumbs.length - 1;
+        <>
+            <Breadcrumb aria-label="Navigasi breadcrumb" className={className}>
+                <BreadcrumbList className="min-w-0">
+                    {breadcrumbs.map((item, index) => {
+                        const isLast = index === breadcrumbs.length - 1;
 
-                    return (
-                        <Fragment key={`${item.title}-${index}`}>
-                            <BreadcrumbItem className="min-w-0 italic">
-                                {isLast || !item.href ? (
-                                    <BreadcrumbPage className="min-w-0 truncate font-semibold text-primary">
-                                        {item.title}
-                                    </BreadcrumbPage>
-                                ) : (
-                                    <BreadcrumbLink
-                                        asChild
-                                        className="shrink-0"
-                                    >
-                                        <Link href={item.href}>
+                        return (
+                            <Fragment key={`${item.title}-${index}`}>
+                                <BreadcrumbItem className="min-w-0 italic">
+                                    {isLast || !item.href ? (
+                                        <BreadcrumbPage className="min-w-0 truncate font-semibold text-primary">
                                             {item.title}
-                                        </Link>
-                                    </BreadcrumbLink>
-                                )}
-                            </BreadcrumbItem>
-                            {!isLast && <BreadcrumbSeparator />}
-                        </Fragment>
-                    );
-                })}
-            </BreadcrumbList>
-        </Breadcrumb>
+                                        </BreadcrumbPage>
+                                    ) : (
+                                        <BreadcrumbLink
+                                            asChild
+                                            className="shrink-0"
+                                        >
+                                            <Link href={item.href}>
+                                                {item.title}
+                                            </Link>
+                                        </BreadcrumbLink>
+                                    )}
+                                </BreadcrumbItem>
+                                {!isLast && <BreadcrumbSeparator />}
+                            </Fragment>
+                        );
+                    })}
+                </BreadcrumbList>
+            </Breadcrumb>
+
+            {withJsonLd ? <BreadcrumbJsonLd items={breadcrumbs} /> : null}
+        </>
     );
 }

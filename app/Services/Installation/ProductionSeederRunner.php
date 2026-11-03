@@ -26,6 +26,11 @@ final class ProductionSeederRunner
         $this->runGroup('categories');
     }
 
+    public function runSeo(): void
+    {
+        $this->runGroup('seo');
+    }
+
     private function runGroup(string $group): void
     {
         $seeders = (array) config("installer.seeders.{$group}", []);

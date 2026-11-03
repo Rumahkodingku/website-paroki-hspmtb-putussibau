@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { ExternalLink } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { Seo } from '@/components/seo';
@@ -19,13 +19,7 @@ type Props = {
 export default function Wilayah({ area }: Props) {
     return (
         <>
-            <Seo
-                title="Wilayah Pelayanan"
-                description="Cakupan wilayah pelayanan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Wilayah Pelayanan" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="PROFIL PAROKI"
                 title="Wilayah Pelayanan"

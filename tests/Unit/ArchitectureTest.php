@@ -647,7 +647,7 @@ test('html is sanitized in the request layer', function () {
     expect('App\Http\Requests')->toUse(['App\Services\HtmlSanitizer']);
 });
 
-test('only two files inject raw html on the frontend, and each for its own reason', function () {
+test('only the approved files inject raw html on the frontend', function () {
     // The frontend counterpart of the rule above: React must not inject raw
     // HTML anywhere else, because the only thing making it safe is the
     // sanitizer having run on the way into storage.
@@ -670,6 +670,7 @@ test('only two files inject raw html on the frontend, and each for its own reaso
     // @see docs/DECISIONS.md D-46
     $allowed = [
         'resources/js/components/rich-text.tsx',
+        'resources/js/components/json-ld.tsx',
         'resources/js/features/public/agenda/components/event-json-ld.tsx',
     ];
 

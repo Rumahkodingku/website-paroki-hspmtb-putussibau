@@ -330,6 +330,24 @@ test('the configured key list matches PRD Lampiran B', function () {
         ->and($keys)->not->toContain('maps_embed_url');
 });
 
+test('the default Open Graph image accepts an http URL or a rooted path', function (string $value) {
+    $this->actingAs(superAdmin())->put(route('settings.update'), [
+        'settings' => ['seo_default_og_image' => $value],
+    ])->assertRedirect(route('settings.edit'));
+
+    expect(SiteSetting::query()->where('key', 'seo_default_og_image')->value('value'))
+        ->toBe($value);
+})->with([
+    'https://paroki.example.test/og.webp',
+    '/storage/media/variants/og.webp',
+]);
+
+test('the default Open Graph image rejects free text', function () {
+    $this->actingAs(superAdmin())->put(route('settings.update'), [
+        'settings' => ['seo_default_og_image' => 'og image'],
+    ])->assertSessionHasErrors('settings.seo_default_og_image');
+});
+
 /*
 |--------------------------------------------------------------------------
 | The privacy policy, which is the first field in the application to store HTML

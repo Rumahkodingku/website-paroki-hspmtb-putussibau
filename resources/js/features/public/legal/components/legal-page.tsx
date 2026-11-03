@@ -1,12 +1,9 @@
-import { Head } from '@inertiajs/react';
 import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { RichText } from '@/components/rich-text';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { PublicContainer } from '@/components/public-container';
 import { home } from '@/routes';
-import type { SharedProps } from '@/types';
-import { usePage } from '@inertiajs/react';
 
 type LegalPageProps = {
     title: string;
@@ -21,17 +18,9 @@ export function LegalPage({
     description,
     content,
 }: LegalPageProps) {
-    const { seo } = usePage<SharedProps>().props;
-
     return (
         <>
-            <Seo
-                title={title}
-                description={description ?? seo.description ?? undefined}
-            />
-
-            <Head title={title} />
-
+            <Seo />
             <main>
                 <PublicHeroBanner
                     eyebrow={eyebrow}

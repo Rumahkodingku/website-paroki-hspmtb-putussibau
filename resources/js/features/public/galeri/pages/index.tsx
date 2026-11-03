@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
@@ -37,13 +37,7 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
 
     return (
         <>
-            <Seo
-                title="Galeri"
-                description="Dokumentasi foto kegiatan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Galeri" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Galeri"
                 title="Galeri Kegiatan"

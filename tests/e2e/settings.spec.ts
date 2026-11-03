@@ -39,7 +39,7 @@ test.describe('pengaturan situs', () => {
             'Identitas Paroki',
             'Kontak',
             'Media Sosial',
-            'SEO Dasar',
+            'SEO Global',
             'Beranda',
             'Privasi',
         ]) {

@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
@@ -10,6 +10,7 @@ import { home } from '@/routes';
 import { index as beritaIndex, show as postArticle } from '@/routes/berita';
 import type { PublicPost, PublicPostDetail } from '../types';
 import { ShareActions } from '../components/share-actions';
+import { ArticleJsonLd } from '../components/article-json-ld';
 import { RelatedArticleItem } from '../components/related-article-card';
 import { Badge } from '@/components/ui/badge';
 
@@ -28,19 +29,13 @@ export default function Show({ post, related, adjacent }: Props) {
 
     return (
         <>
-            <Seo
-                title={post.seo.title}
-                description={post.seo.description}
-                ogType="article"
-                ogImage={post.image}
-                canonical={url || undefined}
-            />
-
-            <Head title={post.title} />
+            <Seo />
+            <ArticleJsonLd post={post} />
 
             <PublicSection>
                 <div className="mx-auto max-w-7xl">
                     <Breadcrumbs
+                        withJsonLd
                         className="mb-8"
                         breadcrumbs={[
                             { title: 'Beranda', href: home() },

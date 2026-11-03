@@ -48,6 +48,9 @@ class PermissionSeeder extends Seeder
         'settings.view',
         'settings.update',
 
+        'seo.view',
+        'seo.update',
+
         'media.view',
         'media.create',
         'media.delete',

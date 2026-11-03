@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     ArrowLeft,
     ArrowUpRight,
@@ -76,17 +76,12 @@ export default function Show({ area }: Props) {
 
     return (
         <>
-            <Seo
-                title={area.name}
-                description={area.description ?? undefined}
-            />
-
-            <Head title={area.name} />
-
+            <Seo />
             {/* Breadcrumb */}
             <PublicSection>
                 <div className="pt-2">
                     <Breadcrumbs
+                        withJsonLd
                         breadcrumbs={[
                             { title: 'Beranda', href: home() },
                             { title: 'Profil', href: areaIndex() },

@@ -142,7 +142,11 @@ test('the seeder creates no fabricated parish or admin data', function () {
         ->and(User::query()->where('name', 'Test User')->exists())->toBeFalse();
 
     // Site identity is written by the installation wizard, not the seeder. The
-    // only settings a fresh migration may insert are the two legal pages.
+    // remaining settings are the two legal pages and the OG fallback.
     expect(DB::table('site_settings')->pluck('key')->sort()->values()->all())
-        ->toBe(['privacy_policy_content', 'terms_and_conditions_content']);
+        ->toBe([
+            'privacy_policy_content',
+            'seo_default_og_image',
+            'terms_and_conditions_content',
+        ]);
 });

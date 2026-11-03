@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingsController from '@/actions/App/Http/Controllers/Settings/SettingsController';
 import type { SettingsProps } from '@/features/admin/pengaturan/types';
+import { SeoGlobalNotice } from '../components/seo-global-notice';
 import { SettingField } from '../components/setting-field';
 import { useSettingsForm } from '../hooks/use-settings-form';
 import { ListHeader } from '@/components/list-parts';
@@ -24,7 +25,7 @@ export default function Settings({ groups, meta }: SettingsProps) {
             <div className="space-y-6 p-6">
                 <ListHeader
                     title="Pengaturan Situs"
-                    description="Identitas paroki, kontak, media sosial, SEO dasar, beranda, dan kebijakan privasi"
+                    description="Identitas paroki, kontak, media sosial, SEO global, beranda, dan kebijakan privasi"
                 />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -50,6 +51,8 @@ export default function Settings({ groups, meta }: SettingsProps) {
                                 value={group}
                                 className="grid gap-6"
                             >
+                                {group === 'seo' ? <SeoGlobalNotice /> : null}
+
                                 {Object.entries(groups[group]).map(([key]) => (
                                     <SettingField
                                         key={key}

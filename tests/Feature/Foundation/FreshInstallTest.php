@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PageSeo;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Providers\AppServiceProvider;
@@ -140,15 +141,20 @@ test('the full chain produces the documented permission set', function () {
         );
 });
 
-test('the full chain writes only the two seeded site settings', function () {
+test('the full chain writes the legal pages and the SEO fallback', function () {
     configureAdmin();
 
     $this->seed(DatabaseSeeder::class);
 
     // Site identity is written by the installation wizard, not the seeder. The
-    // only settings a fresh migration may insert are the two legal pages.
+    // remaining settings are the two legal pages and the seeded OG fallback.
     expect(SiteSetting::query()->pluck('key')->sort()->values()->all())
-        ->toBe(['privacy_policy_content', 'terms_and_conditions_content']);
+        ->toBe([
+            'privacy_policy_content',
+            'seo_default_og_image',
+            'terms_and_conditions_content',
+        ])
+        ->and(PageSeo::query()->count())->toBe(18);
 });
 
 test('seeding the full chain twice does not duplicate anything', function () {
@@ -166,7 +172,8 @@ test('seeding the full chain twice does not duplicate anything', function () {
         // this. The names themselves are pinned in RbacFoundationTest.
         ->and(Permission::query()->count())
         ->toBe(app(PermissionSeeder::class)->expectedCount())
-        ->and(SiteSetting::query()->count())->toBe(2);
+        ->and(SiteSetting::query()->count())->toBe(3)
+        ->and(PageSeo::query()->count())->toBe(18);
 });
 
 /*
@@ -192,7 +199,8 @@ test('the full chain succeeds with no admin credentials configured', function ()
         // this. The names themselves are pinned in RbacFoundationTest.
         ->and(Permission::query()->count())
         ->toBe(app(PermissionSeeder::class)->expectedCount())
-        ->and(SiteSetting::query()->count())->toBe(2);
+        ->and(SiteSetting::query()->count())->toBe(3)
+        ->and(PageSeo::query()->count())->toBe(18);
 });
 
 test('a blank admin credential counts as absent', function () {

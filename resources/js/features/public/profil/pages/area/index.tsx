@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Head } from '@inertiajs/react';
 import {
     ArrowRight,
     Church,
@@ -88,13 +87,7 @@ export default function Index({ sections, hasAreas }: Props) {
 
     return (
         <>
-            <Seo
-                title="Area"
-                description="Kenali stasi dan lingkungan yang menjadi bagian dari kehidupan Gereja Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Area" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="PROFIL PAROKI"
                 title="Area"

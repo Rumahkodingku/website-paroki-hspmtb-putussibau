@@ -38,9 +38,18 @@ import type {
 const EMPTY_SEO = {
     appUrl: 'http://localhost',
     siteName: null,
+    parishName: null,
     title: null,
     description: null,
     ogImage: null,
+    page: {
+        title: 'Halaman',
+        description: null,
+        canonical: 'http://localhost',
+        ogImage: null,
+        ogType: 'website',
+        robots: 'index, follow',
+    },
 } as const;
 
 /**

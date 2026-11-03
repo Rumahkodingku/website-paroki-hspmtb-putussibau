@@ -235,6 +235,33 @@ class UpdateSettingsRequest extends FormRequest
         }
 
         /*
+         * The default Open Graph image is a path or an absolute URL, not free
+         * text. A typo here is invisible until a link preview is blank, so the
+         * value is checked before it is stored.
+         */
+        $rules['settings.seo_default_og_image'] = [
+            'nullable',
+            'string',
+            'max:2048',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if ($value === null || ! is_string($value) || trim($value) === '') {
+                    return;
+                }
+
+                if (str_starts_with(trim($value), '/')) {
+                    return;
+                }
+
+                if (filter_var($value, FILTER_VALIDATE_URL) !== false
+                    && preg_match('#^https?://#i', $value) === 1) {
+                    return;
+                }
+
+                $fail('Gambar Open Graph harus berupa URL http(s) atau path yang diawali "/".');
+            },
+        ];
+
+        /*
          * The map link rule is an object, and config/site-settings.php only
          * holds string rules that explode on "|". It is attached here rather
          * than declared there so the allowlist stays in the configuration while

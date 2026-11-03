@@ -178,9 +178,18 @@ describe('ParishFooter', () => {
                 seo: {
                     appUrl: 'http://localhost',
                     siteName: 'Paroki Hati Santa Perawan Maria Tak Bernoda',
+                    parishName: 'Paroki Hati Santa Perawan Maria Tak Bernoda',
                     title: null,
                     description: null,
                     ogImage: null,
+                    page: {
+                        title: 'Halaman',
+                        description: null,
+                        canonical: 'http://localhost',
+                        ogImage: null,
+                        ogType: 'website',
+                        robots: 'index, follow',
+                    },
                 },
             },
         });
