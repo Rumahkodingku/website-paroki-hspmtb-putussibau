@@ -42,6 +42,7 @@ return [
         'service_steps',
         'service_faqs',
         'settings',
+        'page_seo',
         'users',
         'media',
         'documents',
@@ -285,6 +286,7 @@ return [
 
     'metadata' => [
         'settings' => ['setting_keys_changed', 'summarized_fields', 'truncated_fields'],
+        'page_seo' => ['page_key', 'meta_title', 'meta_description', 'og_media_id'],
         'media' => ['media_id', 'original_name', 'mime_type', 'file_size', 'job_name', 'error_class', 'variants', 'reason_code'],
         'documents' => ['file_replaced', 'file_mime_type', 'file_size', 'reason_code'],
         'news' => ['duplicated_from', 'count', 'post_ids'],

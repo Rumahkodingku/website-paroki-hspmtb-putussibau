@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import {
     ArrowDown,
     Clock3,
@@ -41,14 +40,10 @@ export function HeroSection({ service }: Props) {
 
     return (
         <>
-            <Seo
-                title={service.seo.title || service.title}
-                description={service.seo.description || service.summary}
-            />
-            <Head title={service.seo.title || service.title} />
-
+            <Seo />
             <PublicSection className="py-7 sm:py-9 lg:py-12">
                 <Breadcrumbs
+                    withJsonLd
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },
                         { title: 'Pelayanan', href: pelayananIndex() },

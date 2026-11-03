@@ -25,21 +25,11 @@ export default function Beranda({
     hero,
     sections,
 }: HomepageProps) {
-    const { contact, displayTimezone, identity, seo } =
-        usePage<SharedProps>().props;
+    const { contact, displayTimezone, identity } = usePage<SharedProps>().props;
 
     return (
         <>
-            <Seo
-                title={seo.title ?? identity.shortName ?? 'Beranda'}
-                description={
-                    seo.description ??
-                    hero.description ??
-                    identity.shortDescription
-                }
-                ogImage={seo.ogImage ?? hero.ogImage}
-                ogType="website"
-            />
+            <Seo />
 
             <HomeHero hero={hero} identity={identity} />
 

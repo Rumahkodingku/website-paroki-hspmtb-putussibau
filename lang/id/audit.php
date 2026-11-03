@@ -32,6 +32,7 @@ return [
         'service_steps' => 'Prosedur Pelayanan',
         'service_faqs' => 'FAQ Pelayanan',
         'settings' => 'Pengaturan Situs',
+        'page_seo' => 'SEO Halaman',
         'users' => 'Akun',
         'media' => 'Media',
         'documents' => 'Dokumen',

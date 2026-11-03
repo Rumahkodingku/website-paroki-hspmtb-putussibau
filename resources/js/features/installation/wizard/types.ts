@@ -79,7 +79,7 @@ export type ReviewSummary = {
 };
 
 /**
- * The eight steps the backend records while it runs. The seven-step navigation
+ * The nine steps the backend records while it runs. The seven-step navigation
  * is coarser than this on purpose: step 6 is one screen for the person, but
  * several recorded operations for the server.
  */
@@ -90,6 +90,7 @@ export const PROGRESS_STEPS: ReadonlyArray<{ key: string; label: string }> = [
     { key: 'seed_categories', label: 'Menyiapkan kategori awal' },
     { key: 'create_admin', label: 'Membuat akun Super Admin' },
     { key: 'save_settings', label: 'Menyimpan identitas paroki' },
+    { key: 'seed_seo', label: 'Menyiapkan SEO awal' },
     { key: 'verify', label: 'Memverifikasi instalasi' },
     { key: 'lock', label: 'Mengunci installer' },
 ];

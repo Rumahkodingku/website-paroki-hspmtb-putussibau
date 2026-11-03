@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { home } from '@/routes';
 import { PublicSection } from '@/components/public-section';
 import PublicHeroBanner from '@/components/public-hero-banner';
@@ -18,13 +17,7 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
 
     return (
         <>
-            <Seo
-                title="Pelayanan"
-                description="Informasi syarat, prosedur, dan cara mendaftar pelayanan sakramen dan pastoral di Paroki HSPMTB Putussibau."
-            />
-
-            <Head title="Pelayanan" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Pelayanan"
                 title="Pelayanan Sakramen & Pastoral"

@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { SectionHeading } from '@/components/section-heading';
 import { Text } from '@/components/text';
 import { Seo } from '@/components/seo';
@@ -24,13 +23,7 @@ export default function Struktur({ periods }: Props) {
 
     return (
         <>
-            <Seo
-                title="Struktur Kepengurusan"
-                description="Susunan kepengurusan Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau per periode."
-            />
-
-            <Head title="Struktur Kepengurusan" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="PROFIL PAROKI"
                 title="Struktur Kepengurusan"

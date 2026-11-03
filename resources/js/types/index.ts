@@ -23,14 +23,28 @@ import type { Auth } from './auth';
  * An empty meta description is worse than none: crawlers and link previews
  * both treat it as a description.
  */
+export type SeoPage = {
+    title: string;
+    description: string | null;
+    canonical: string;
+    ogImage: string | null;
+    ogType: 'website' | 'article';
+    robots: string;
+};
+
 export type SeoDefaults = {
     /** From APP_URL. Lets Seo absolutise paths without touching `window`. */
     appUrl: string;
+    /** Short name used as the document-title suffix. */
     siteName: string | null;
+    /** Full parish name used in Open Graph and schema. */
+    parishName: string | null;
     title: string | null;
     description: string | null;
     /** Relative or absolute path; Seo makes it absolute. */
     ogImage: string | null;
+    /** Values resolved server-side for the current request. */
+    page: SeoPage;
 };
 
 /**

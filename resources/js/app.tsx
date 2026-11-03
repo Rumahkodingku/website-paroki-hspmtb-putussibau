@@ -9,10 +9,8 @@ import InstallationLayout from '@/layouts/installation';
 import PublicLayout from '@/layouts/public';
 import SettingsLayout from '@/layouts/settings/layout';
 import { pageName } from '@/lib/page-name';
+import { formatSeoTitle } from '@/lib/seo-title';
 import { UploadConfig } from '@/components/upload/upload-config';
-
-const appName =
-    (import.meta.env.VITE_APP_NAME as string | undefined) || 'Laravel';
 
 /**
  * Pages live at `features/<audience>/<feature>/pages/`, and the Inertia name is
@@ -60,7 +58,13 @@ void createInertiaApp({
 
         return load().then((module) => module.default);
     },
-    title: (title: string) => (title ? `${title} - ${appName}` : appName),
+    title: (title: string, page) => {
+        const seo = page.props.seo as { siteName?: string | null } | undefined;
+        const siteName =
+            seo?.siteName ?? (page.props.name as string | undefined) ?? null;
+
+        return formatSeoTitle(title, siteName);
+    },
     layout: (name) => {
         switch (true) {
             case name === 'public/error':

@@ -1,7 +1,6 @@
-import { Head, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { CalendarDays } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import type { SeoDefaults } from '@/types';
 import { PublicSection } from '@/components/public-section';
 import { RichText } from '@/components/rich-text';
 import { Seo } from '@/components/seo';
@@ -16,25 +15,18 @@ import { EventCalendarActions } from '../components/event-calendar-actions';
 
 export default function Show({ event }: AgendaShowProps) {
     const { displayTimezone } = usePage().props;
-    const { seo } = usePage<{ seo: SeoDefaults }>().props;
     const url = typeof window === 'undefined' ? '' : window.location.href;
 
     const hasDescription = Boolean(event.description?.trim());
 
     return (
         <>
-            <Seo
-                title={`${event.title} — Agenda`}
-                description={event.plain_description ?? undefined}
-                ogType="article"
-                ogImage={event.poster}
-                canonical={url || undefined}
-            />
-            <Head title={event.title} />
-            <EventJsonLd event={event} url={url} parishName={seo.siteName} />
+            <Seo />
+            <EventJsonLd event={event} />
 
             <PublicSection>
                 <Breadcrumbs
+                    withJsonLd
                     className="mb-8"
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },

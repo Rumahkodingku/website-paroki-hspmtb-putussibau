@@ -333,7 +333,9 @@ test('the baseline description and image appear when configured', function () {
     expect($html)->toContain('content="Deskripsi contoh."')
         // Relative in the setting, absolute in the document. A link unfurler
         // ignores a relative og:image and shows a preview with no picture.
-        ->toContain('content="'.rtrim((string) config('app.url'), '/').'/storage/media/variants/contoh.webp"');
+        // The resolver falls back to the request root when APP_URL is blank,
+        // which is the test environment's case.
+        ->toContain('content="'.rtrim(url('/'), '/').'/storage/media/variants/contoh.webp"');
 });
 
 test('an unconfigured description produces no meta description at all', function () {

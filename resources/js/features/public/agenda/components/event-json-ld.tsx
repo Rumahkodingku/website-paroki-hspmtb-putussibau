@@ -1,25 +1,13 @@
-import { Head } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import { JsonLd } from '@/components/json-ld';
 import type { PublicEventDetail } from '../types';
+import type { SeoDefaults } from '@/types';
+import { absoluteJsonLdUrl } from '@/lib/json-ld';
 
-/**
- * Serialize JSON-LD so no value can close the script element.
- *
- * A title of `</script><img onerror=...>` is valid plain text and reaches this
- * component unchanged. The `<` escape keeps it inside the script as data.
- */
-export function serializeJsonLd(data: Record<string, unknown>): string {
-    return JSON.stringify(data).replace(/</g, '\\u003c');
-}
+export function EventJsonLd({ event }: { event: PublicEventDetail }) {
+    const { seo } = usePage<{ seo: SeoDefaults }>().props;
+    const canonical = seo.page.canonical;
 
-export function EventJsonLd({
-    event,
-    url,
-    parishName,
-}: {
-    event: PublicEventDetail;
-    url: string;
-    parishName: string | null;
-}) {
     const eventStatus =
         event.status === 'cancelled'
             ? 'https://schema.org/EventCancelled'
@@ -44,12 +32,11 @@ export function EventJsonLd({
         startDate,
         eventStatus,
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-        url,
+        url: canonical,
         organization: {
             '@type': 'Organization',
-            name:
-                parishName ??
-                'Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau',
+            name: seo.siteName ?? 'Paroki HSPMTB Putussibau',
+            url: seo.appUrl,
         },
     };
 
@@ -61,8 +48,10 @@ export function EventJsonLd({
         data.description = event.plain_description;
     }
 
-    if (event.poster !== null) {
-        data.image = event.poster;
+    const image = absoluteJsonLdUrl(event.poster, seo.appUrl);
+
+    if (image !== null) {
+        data.image = image;
     }
 
     if (event.category !== null) {
@@ -79,15 +68,5 @@ export function EventJsonLd({
         };
     }
 
-    return (
-        <Head>
-            <script
-                type="application/ld+json"
-                data-head-key="event-json-ld"
-                dangerouslySetInnerHTML={{
-                    __html: serializeJsonLd(data),
-                }}
-            />
-        </Head>
-    );
+    return <JsonLd data={data} headKey="event-json-ld" />;
 }

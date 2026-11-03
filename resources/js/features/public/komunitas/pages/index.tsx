@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
@@ -29,13 +28,7 @@ export default function KomunitasIndex({
 
     return (
         <>
-            <Seo
-                title="Komunitas"
-                description="Direktori komunitas dan kelompok kategorial Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Komunitas" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Komunitas"
                 title="Komunitas Paroki"

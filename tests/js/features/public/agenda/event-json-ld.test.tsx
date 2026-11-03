@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { serializeJsonLd } from '@/features/public/agenda/components/event-json-ld';
+import { serializeJsonLd } from '@/lib/json-ld';
 
 describe('serializeJsonLd', () => {
     it('cannot close the script element from a value', () => {

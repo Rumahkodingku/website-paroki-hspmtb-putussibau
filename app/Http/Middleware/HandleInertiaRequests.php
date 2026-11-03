@@ -7,6 +7,7 @@ use App\Services\SiteSettingsService;
 use App\Support\MapsUrl;
 use App\Support\OfficeHours;
 use App\Support\PhoneNumber;
+use App\Support\Seo\SeoMetadataResolver;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,7 +49,8 @@ class HandleInertiaRequests extends Middleware
      *   locale: string
      *   displayTimezone: string
      *   sidebarOpen: bool
-     *   seo: array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
+     *   abilities: array<string, bool>
+     *   seo: array{appUrl: string, siteName: string|null, parishName: string|null, title: string|null, description: string|null, ogImage: string|null, page: array{title: string, description: string|null, canonical: string, ogImage: string|null, ogType: 'website'|'article', robots: string}}
      *   identity: array{name: string|null, shortName: string|null, tagline: string|null, shortDescription: string|null, logoUrl: string|null, logoAlt: string|null}
      *   media: array{mimeTypes: list<string>, maxUploadKilobytes: int, maxWidth: int, maxHeight: int}
      *   documentUploads: array{mimeTypes: list<string>, extensions: list<string>, maxUploadKilobytes: int}
@@ -120,9 +122,11 @@ class HandleInertiaRequests extends Middleware
                 'backups.settings' => (bool) $request->user()?->can('backups.settings'),
                 'livestreams.view' => (bool) $request->user()?->can('livestreams.view'),
                 'livestreamcategories.view' => (bool) $request->user()?->can('livestreamcategories.view'),
+                'seo.view' => (bool) $request->user()?->can('seo.view'),
+                'seo.update' => (bool) $request->user()?->can('seo.update'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'seo' => fn (): array => $this->seoDefaults(),
+            'seo' => fn (): array => $this->seoDefaults($request),
             'identity' => fn (): array => $this->identityDetails(),
             'media' => fn (): array => $this->mediaLimits(),
             'documentUploads' => fn (): array => $this->documentUploadLimits(),
@@ -145,9 +149,24 @@ class HandleInertiaRequests extends Middleware
      * unsafe to server-render later, which is exactly the change SSR would
      * require.
      *
-     * @return array{appUrl: string, siteName: string|null, title: string|null, description: string|null, ogImage: string|null}
+     * @return array{
+     *     appUrl: string,
+     *     siteName: string|null,
+     *     parishName: string|null,
+     *     title: string|null,
+     *     description: string|null,
+     *     ogImage: string|null,
+     *     page: array{
+     *         title: string,
+     *         description: string|null,
+     *         canonical: string,
+     *         ogImage: string|null,
+     *         ogType: 'website'|'article',
+     *         robots: string
+     *     }
+     * }
      */
-    private function seoDefaults(): array
+    private function seoDefaults(Request $request): array
     {
         $settings = app(SiteSettingsService::class);
 
@@ -159,10 +178,12 @@ class HandleInertiaRequests extends Middleware
 
         return [
             'appUrl' => rtrim((string) config('app.url'), '/'),
-            'siteName' => $read('parish_name'),
+            'siteName' => $read('parish_short_name') ?? $read('parish_name'),
+            'parishName' => $read('parish_name'),
             'title' => $read('seo_default_title'),
             'description' => $read('seo_default_description'),
             'ogImage' => $read('seo_default_og_image'),
+            'page' => app(SeoMetadataResolver::class)->resolve($request),
         ];
     }
 

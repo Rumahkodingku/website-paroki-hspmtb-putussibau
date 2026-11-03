@@ -12,6 +12,7 @@ import {
     Images,
     Map,
     MapPin,
+    Search,
     Settings,
     Tag,
     User,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { edit as editSettings } from '@/routes/settings';
+import { edit as editSeo } from '@/routes/seo';
 import { list as massSchedulesList } from '@/routes/mass-schedules';
 import { index as locationsIndex } from '@/routes/locations';
 import { index as specialMassesIndex } from '@/routes/special-masses';
@@ -152,5 +154,11 @@ export const ADMINISTRATION_ENTRIES: Entry[] = [
         title: 'Pengaturan Situs',
         href: editSettings(),
         icon: Settings,
+    },
+    {
+        title: 'SEO Halaman',
+        href: editSeo(),
+        icon: Search,
+        ability: 'seo.view',
     },
 ];
