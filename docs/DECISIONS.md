@@ -5873,3 +5873,69 @@ memakai drawer).
 @see `docs/specifications/spec-livestreaming.md`
 @see `docs/plan-implementation/plan-livestreaming.md`
 @see `docs/RBAC.md`
+
+## D-102 — Metadata SEO dirender server-side tanpa SSR
+
+**Konteks.** PRD NFR-SEO meminta title, description, canonical, robots, dan Open
+Graph tersedia pada respons HTML awal. Inertia SSR dimatikan (D-26), sehingga
+komponen React baru menulis head setelah hidrasi.
+
+**Keputusan.** Metadata dihitung satu resolver server-side
+(`App\Support\Seo\SeoMetadataResolver`) dan dibagikan sebagai `seo.page` di
+Inertia props. Blade merender nilai yang sama ke HTML awal; React membaca nilai
+yang sama setelah hidrasi. SSR tetap off.
+
+**Konsekuensi.** Title, description, canonical, robots, dan OG image konsisten
+antara respons awal dan browser. Aturan judul ada di dua bahasa (PHP dan
+TypeScript) tetapi memakai formatter yang sama secara perilaku dan diuji di
+keduanya.
+
+@see `docs/specifications/spec-seo.md`
+@see `docs/plan-implementation/plan-seo.md`
+
+## D-103 — Sitemap tanpa dependency Spatie
+
+**Konteks.** Spesifikasi menyarankan `spatie/laravel-sitemap`. Verifikasi
+Composer menunjukkan versi 8.2.0 membutuhkan PHP 8.4, sedangkan proyek memakai
+PHP 8.3. Versi 8.0.0 dapat dipasang dengan `-W`, tetapi menurunkan Guzzle dan
+mengubah 31 package.
+
+**Keputusan.** Sitemap dibuat oleh `App\Http\Controllers\Public\SitemapController`
+dan view XML biasa. URL berasal dari allowlist halaman statis dan scope publik
+model, bukan crawling. `robots.txt` dilayani route dinamis dari `APP_URL`.
+
+**Konsekuensi.** Tidak ada dependency baru. Sitemap dinamis tanpa cache pada
+fase ini; cache dapat ditambahkan bila volume URL meningkat. File
+`public/robots.txt` dihapus agar route dipakai.
+
+## D-104 — SEO halaman statis disimpan di tabel `page_seo`
+
+**Konteks.** Halaman statis tidak punya tempat metadata sendiri, sedangkan
+`site_settings` hanya cocok untuk pengaturan global.
+
+**Keputusan.** Tabel `page_seo` menyimpan satu baris opsional per `page_key`
+allowlist di `config/seo.php`. Admin memakai permission `seo.view` dan
+`seo.update`; perubahan dicatat melalui `AuditLogger`. Kolom `robots` tidak
+dibuat karena nilai robots ditentukan sistem.
+
+**Konsekuensi.** Tidak ada kontrol `noindex` per halaman yang mudah salah
+klik. Baris yang seluruh field-nya kosong dihapus. Detail konten tetap memakai
+metadata dari model masing-masing.
+
+## D-105 — Seeder SEO awal dan hero OG fallback
+
+**Konteks.** Instalasi baru sebelumnya tidak memiliki row `page_seo` maupun
+gambar Open Graph default. Halaman statis baru memakai fallback global, dan
+fresh seed tidak menyiapkan SEO awal.
+
+**Keputusan.** `Database\Seeders\SeoSeeder` membuat 18 row `page_seo` dari
+`config/seo.php` dan mengisi `seo_default_og_image` dengan
+`/hero-section.png`. Beranda memakai `parish_name` (fallback
+`parish_short_name`) dan `short_description` bila sudah tersedia. Seeder berjalan
+dari `DatabaseSeeder` dan dari step `seed_seo` pada installation wizard setelah
+`save_settings`.
+
+**Konsekuensi.** `public/hero-section.png` menjadi fallback Open Graph, bukan
+row Media. `page_seo.og_media_id` tetap null sampai editor memilih gambar per
+halaman. Seeder idempotent: row dan setting yang sudah ada tidak ditimpa, dan
+field null boleh diisi dari default.

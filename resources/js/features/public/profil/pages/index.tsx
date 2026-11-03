@@ -1,5 +1,5 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     ArrowRight,
     Church,
@@ -70,12 +70,7 @@ export default function Profil({ profile }: Props) {
 
     return (
         <>
-            <Seo
-                title="Profil Paroki"
-                description="Mengenal Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau: sejarah, wilayah pelayanan, pastor, dan struktur kepengurusan."
-            />
-            <Head title="Profil Paroki" />
-
+            <Seo />
             <main>
                 <PublicHeroBanner
                     eyebrow="PROFIL PAROKI"

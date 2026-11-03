@@ -38,6 +38,10 @@ class DatabaseSeeder extends Seeder
             // config('demo.enabled'), which app:e2e:prepare turns off so the
             // Playwright database stays bare. See D-53.
             DemoContentSeeder::class,
+            // Runs after the demo identity so a demo install has a homepage
+            // title and description to seed. On a bare install it leaves the
+            // homepage null and the resolver falls back to the parish name.
+            SeoSeeder::class,
         ]);
     }
 }

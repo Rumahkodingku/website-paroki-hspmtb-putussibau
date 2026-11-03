@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import { Seo } from '@/components/seo';
 import type { PublicPastor, PublicPastorAssignment } from '../types';
@@ -16,13 +15,7 @@ type Props = {
 export default function Pastor({ current, history }: Props) {
     return (
         <>
-            <Seo
-                title="Pastor Paroki"
-                description="Pastor yang bertugas di Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau beserta riwayat penugasannya."
-            />
-
-            <Head title="Pastor Paroki" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="PROFIL PAROKI"
                 title="Pastor Paroki"

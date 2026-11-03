@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     ArrowLeft,
     CalendarDays,
@@ -118,15 +118,10 @@ export default function KomunitasShow({ community }: Props) {
 
     return (
         <>
-            <Seo
-                title={community.name}
-                description={community.description ?? undefined}
-                ogImage={community.thumbnail_url ?? undefined}
-            />
-            <Head title={community.name} />
-
+            <Seo />
             <PublicSection className="pt-5 pb-5 md:pt-6 md:pb-7 lg:pt-7 lg:pb-8">
                 <Breadcrumbs
+                    withJsonLd
                     className="mb-4"
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },

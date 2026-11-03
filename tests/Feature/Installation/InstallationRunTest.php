@@ -5,6 +5,7 @@ use App\Models\CommunityCategory;
 use App\Models\DocumentCategory;
 use App\Models\Event;
 use App\Models\EventCategory;
+use App\Models\PageSeo;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\Service;
@@ -60,7 +61,9 @@ test('a fresh database is installed, seeded, verified, and locked', function () 
         ->and($admin->hasRole(AppServiceProvider::SUPER_ADMIN))->toBeTrue();
 
     expect(app(SiteSettingsService::class)->get('parish_name'))->toBe('Paroki Uji')
-        ->and(app(SiteSettingsService::class)->get('parish_short_name'))->toBe('PU');
+        ->and(app(SiteSettingsService::class)->get('parish_short_name'))->toBe('PU')
+        ->and(app(SiteSettingsService::class)->get('seo_default_og_image'))->toBe('/hero-section.png')
+        ->and(PageSeo::query()->count())->toBe(18);
 
     expect(SiteSetting::query()
         ->whereIn('key', ['parish_name', 'parish_short_name', 'tagline', 'short_description', 'patron_saint'])

@@ -53,6 +53,9 @@ use App\Http\Controllers\Profil\PastorAssignmentController;
 use App\Http\Controllers\Profil\PastorController;
 use App\Http\Controllers\Profil\PublicParishProfileController;
 use App\Http\Controllers\Public\PublicLegalController;
+use App\Http\Controllers\Public\RobotsController;
+use App\Http\Controllers\Public\SitemapController;
+use App\Http\Controllers\Seo\PageSeoController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\SettingsController;
@@ -190,6 +193,9 @@ Route::inertia('/kontak', 'public/kontak')->name('kontak.index');
 Route::get('/kebijakan-privasi', [PublicLegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/syarat-ketentuan', [PublicLegalController::class, 'terms'])->name('legal.terms');
 
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
+
 /*
 |--------------------------------------------------------------------------
 | Admin
@@ -265,6 +271,14 @@ Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdmin
          */
         Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
+
+        /*
+         * ------------------------------------------------------------------
+         * SEO Halaman
+         * ------------------------------------------------------------------
+         */
+        Route::get('/seo', [PageSeoController::class, 'edit'])->name('seo.edit');
+        Route::put('/seo', [PageSeoController::class, 'update'])->name('seo.update');
 
         /*
          * ------------------------------------------------------------------

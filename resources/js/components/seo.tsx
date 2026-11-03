@@ -3,9 +3,9 @@ import type { SeoDefaults } from '@/types';
 
 type SeoProps = {
     /** Page-specific. The site name is appended by app.tsx. */
-    title: string;
+    title?: string;
     description?: string | null;
-    /** Absolute URL. Falls back to the current page's own URL. */
+    /** Absolute URL. Falls back to the canonical the server resolved. */
     canonical?: string | null;
     ogImage?: string | null;
     /** article for a news post or event detail, website for everything else. */
@@ -18,24 +18,31 @@ export function Seo({
     description,
     canonical,
     ogImage,
-    ogType = 'website',
+    ogType,
     noIndex = false,
 }: SeoProps) {
     const page = usePage<{ seo: SeoDefaults }>();
     const { seo } = page.props;
+    const resolved = seo.page;
 
-    const resolvedDescription = description ?? seo.description;
-    const resolvedImage = ogImage ?? seo.ogImage;
-    const pageUrl = canonical ?? page.url;
+    const resolvedTitle = title ?? resolved.title;
+    const resolvedDescription =
+        description ?? resolved.description ?? seo.description;
+    const resolvedImage = absolute(
+        ogImage ?? resolved.ogImage ?? seo.ogImage,
+        seo.appUrl,
+    );
+    const resolvedCanonical = absolute(
+        canonical ?? resolved.canonical,
+        seo.appUrl,
+    );
+    const resolvedOgType = ogType ?? resolved.ogType;
+    const resolvedRobots = noIndex ? 'noindex, follow' : resolved.robots;
 
     return (
         <Head>
-            <title>{title}</title>
-            <meta
-                head-key="robots"
-                name="robots"
-                content={noIndex ? 'noindex, follow' : 'index, follow'}
-            />
+            <title>{resolvedTitle}</title>
+            <meta head-key="robots" name="robots" content={resolvedRobots} />
 
             <meta head-key="og-locale" property="og:locale" content="id_ID" />
 
@@ -59,16 +66,24 @@ export function Seo({
                 </>
             ) : null}
 
-            {seo.siteName ? (
+            {(seo.parishName ?? seo.siteName) ? (
                 <meta
                     head-key="og-site-name"
                     property="og:site_name"
-                    content={seo.siteName}
+                    content={seo.parishName ?? seo.siteName ?? ''}
                 />
             ) : null}
 
-            <meta head-key="og-title" property="og:title" content={title} />
-            <meta head-key="og-type" property="og:type" content={ogType} />
+            <meta
+                head-key="og-title"
+                property="og:title"
+                content={resolvedTitle}
+            />
+            <meta
+                head-key="og-type"
+                property="og:type"
+                content={resolvedOgType}
+            />
             <meta
                 head-key="twitter-card"
                 name="twitter:card"
@@ -80,26 +95,35 @@ export function Seo({
                     <meta
                         head-key="og-image"
                         property="og:image"
-                        content={absolute(resolvedImage, seo.appUrl)}
+                        content={resolvedImage}
                     />
                     <meta
                         head-key="twitter-image"
                         name="twitter:image"
-                        content={absolute(resolvedImage, seo.appUrl)}
+                        content={resolvedImage}
                     />
                 </>
             ) : null}
+
             <meta
                 head-key="og-url"
                 property="og:url"
-                content={absolute(pageUrl, seo.appUrl)}
+                content={resolvedCanonical}
             />
-            <link head-key="canonical" rel="canonical" href={pageUrl} />
+            <link
+                head-key="canonical"
+                rel="canonical"
+                href={resolvedCanonical}
+            />
         </Head>
     );
 }
 
-function absolute(value: string, appUrl: string): string {
+function absolute(value: string | null | undefined, appUrl: string): string {
+    if (value === null || value === undefined || value.trim() === '') {
+        return '';
+    }
+
     if (/^https?:\/\//i.test(value) || value.startsWith('//')) {
         return value;
     }

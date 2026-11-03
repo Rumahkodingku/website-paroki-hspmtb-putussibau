@@ -67,6 +67,8 @@ test('the foundation permissions are seeded with resource.action names', functio
         'auditlogs.view',
         'settings.view',
         'settings.update',
+        'seo.view',
+        'seo.update',
         'media.view',
         'media.create',
         'media.delete',

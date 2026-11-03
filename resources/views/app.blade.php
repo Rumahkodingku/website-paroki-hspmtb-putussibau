@@ -127,6 +127,7 @@
                     return is_string($value) && trim($value) !== '' ? $value : null;
                 };
                 $seoSiteName = $seoRead('parish_name');
+                $seoTitleName = $seoRead('parish_short_name') ?? $seoSiteName;
                 $isHome = request()->routeIs('home');
 
                 /*
@@ -164,8 +165,30 @@
             }
         @endphp
 
+        @php
+            /*
+             * The page-specific values the resolver produced for this request.
+             * Blade and React render the same array; a null means "not set", and
+             * the global defaults below are used only when there is no page value.
+             */
+            $seoPage = $page['props']['seo']['page'] ?? null;
+            $seoPageDescription = $seoPage['description'] ?? $seoDescription;
+            $seoPageTitle = $seoPage['title'] ?? $seoTitle;
+            $seoPageOgImage = $seoPage['ogImage'] ?? $seoOgImage;
+            $seoPageOgType = $seoPage['ogType'] ?? 'website';
+            $seoPageRobots = $seoPage['robots'] ?? 'index, follow';
+
+            // The exception handler renders the error page outside the normal
+            // route resolution, so its noindex answer is decided here.
+            if (str_starts_with((string) ($page['component'] ?? ''), 'public/error')) {
+                $seoPageRobots = 'noindex, follow';
+            }
+
+            $seoPageCanonical = $seoPage['canonical'] ?? url()->current();
+        @endphp
+
         <x-inertia::head>
-            <title>{{ $seoTitle ?? config('app.name', 'Laravel') }}</title>
+            <title>{{ \App\Support\SeoTitle::format($seoPageTitle ?? config('app.name', 'Laravel'), $seoTitleName ?? $seoSiteName) }}</title>
 
             {{--
                 Counterpart of the two tags Seo adds in Phase 03. They have to
@@ -174,47 +197,116 @@
                 tag whose key has no server counterpart does not replace anything:
                 Inertia matches on data-inertia, so the two end up side by side
                 and the crawler sees the indexable default.
-
-                index,follow is the right server-side default because the majority
-                of pages are real pages; a placeholder page that renders <Seo
-                noIndex> replaces this by the same key.
             --}}
-            <meta data-inertia="robots" name="robots" content="index, follow">
+            <meta data-inertia="robots" name="robots" content="{{ $seoPageRobots }}">
             <meta data-inertia="og-locale" property="og:locale" content="id_ID">
 
             @if($seoSiteName)
                 <meta data-inertia="og-site-name" property="og:site_name" content="{{ $seoSiteName }}">
             @endif
 
-            @if($seoTitle)
-                <meta data-inertia="og-title" property="og:title" content="{{ $seoTitle }}">
+            @if($seoPageTitle)
+                <meta data-inertia="og-title" property="og:title" content="{{ $seoPageTitle }}">
             @endif
 
-            @if($seoDescription)
-                <meta data-inertia="description" name="description" content="{{ $seoDescription }}">
-                <meta data-inertia="og-description" property="og:description" content="{{ $seoDescription }}">
-                <meta data-inertia="twitter-description" name="twitter:description" content="{{ $seoDescription }}">
+            @if($seoPageDescription)
+                <meta data-inertia="description" name="description" content="{{ $seoPageDescription }}">
+                <meta data-inertia="og-description" property="og:description" content="{{ $seoPageDescription }}">
+                <meta data-inertia="twitter-description" name="twitter:description" content="{{ $seoPageDescription }}">
             @endif
 
-            <meta data-inertia="og-type" property="og:type" content="website">
+            <meta data-inertia="og-type" property="og:type" content="{{ $seoPageOgType }}">
 
-            {{--
-                og:url and canonical are rendered here as well as in the Seo
-                component, for the same reason: an unfurler reads og:url as the
-                identity of the link and a relative value is routinely discarded.
-                request()->url() is the path without the query string, which is
-                what a canonical URL should be.
-            --}}
-            <meta data-inertia="og-url" property="og:url" content="{{ rtrim(config('app.url'), '/') }}{{ request()->getRequestUri() }}">
-            <link data-inertia="canonical" rel="canonical" href="{{ rtrim(config('app.url'), '/') }}{{ request()->getRequestUri() }}">
+            <meta data-inertia="og-url" property="og:url" content="{{ $seoPageCanonical }}">
+            <link data-inertia="canonical" rel="canonical" href="{{ $seoPageCanonical }}">
 
-            @if($seoOgImage)
-                <meta data-inertia="og-image" property="og:image" content="{{ $seoOgImage }}">
-                <meta data-inertia="twitter-image" name="twitter:image" content="{{ $seoOgImage }}">
+            @if($seoPageOgImage)
+                <meta data-inertia="og-image" property="og:image" content="{{ $seoPageOgImage }}">
+                <meta data-inertia="twitter-image" name="twitter:image" content="{{ $seoPageOgImage }}">
             @endif
 
             <meta data-inertia="twitter-card" name="twitter:card" content="summary_large_image">
         </x-inertia::head>
+
+        @unless($isInstaller)
+            @php
+                /*
+                 * Site-wide identity schema. It is deliberately outside the
+                 * Inertia head slot: it never changes between pages, so it
+                 * should survive a soft navigation instead of being replaced.
+                 *
+                 * JSON_HEX_TAG keeps a value such as </script> from closing the
+                 * element, which is the same reason the React serializer escapes
+                 * its angle brackets.
+                 */
+                $seoAbsolute = static function (?string $value): ?string {
+                    if ($value === null || trim($value) === '') {
+                        return null;
+                    }
+
+                    if (preg_match('#^https?://#i', $value) === 1 || str_starts_with($value, '//')) {
+                        return $value;
+                    }
+
+                    $base = rtrim((string) config('app.url'), '/');
+
+                    if ($base === '') {
+                        $base = rtrim(url('/'), '/');
+                    }
+
+                    return $base.'/'.ltrim($value, '/');
+                };
+
+                $seoOrganizationUrl = rtrim((string) config('app.url'), '/');
+
+                if ($seoOrganizationUrl === '') {
+                    $seoOrganizationUrl = rtrim(url('/'), '/');
+                }
+
+                $seoLogoId = $seo->get('logo');
+                $seoLogoUrl = is_string($seoLogoId) && $seoLogoId !== ''
+                    ? \App\Models\Media::query()->with('variants')->find((int) $seoLogoId)?->url('medium')
+                    : null;
+
+                $seoSameAs = array_values(array_filter([
+                    $seoRead('social_facebook'),
+                    $seoRead('social_instagram'),
+                    $seoRead('social_youtube'),
+                    $seoRead('social_whatsapp_channel'),
+                ], static fn (?string $url): bool => $url !== null && preg_match('#^https?://#i', $url) === 1));
+
+                $seoOrganization = array_filter([
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Organization',
+                    'name' => $seoSiteName,
+                    'url' => $seoOrganizationUrl,
+                    'logo' => $seoAbsolute($seoLogoUrl),
+                    'sameAs' => $seoSameAs === [] ? null : $seoSameAs,
+                    'address' => $seoRead('contact_address'),
+                    'telephone' => $seoRead('contact_phone'),
+                    'email' => $seoRead('contact_email'),
+                ], static fn (mixed $value): bool => $value !== null && $value !== '');
+
+                $seoWebsite = array_filter([
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebSite',
+                    'name' => $seoSiteName ?? config('app.name'),
+                    'url' => $seoOrganizationUrl,
+                    'inLanguage' => 'id-ID',
+                ], static fn (mixed $value): bool => $value !== null && $value !== '');
+
+                $seoOrganizationJson = json_encode($seoOrganization, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+                $seoWebsiteJson = json_encode($seoWebsite, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+            @endphp
+
+            @if(is_string($seoOrganizationJson))
+                <script type="application/ld+json">{!! $seoOrganizationJson !!}</script>
+            @endif
+
+            @if(is_string($seoWebsiteJson))
+                <script type="application/ld+json">{!! $seoWebsiteJson !!}</script>
+            @endif
+        @endunless
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />

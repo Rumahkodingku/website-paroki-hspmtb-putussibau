@@ -148,7 +148,9 @@ it('renders the Open Graph and Twitter tags in the initial HTML, not only after 
 it('omits an Open Graph tag rather than emitting it empty', function () {
     app(SiteSettingsService::class)->set('parish_name', 'Paroki HSPMTB Putussibau');
 
-    $html = $this->get('/berita')->assertOk()->getContent();
+    // A page whose configured default description is null. /berita now has
+    // editorial copy of its own, so it would be the wrong fixture here.
+    $html = $this->get('/kebijakan-privasi')->assertOk()->getContent();
 
     expect($html)
         ->not->toContain('name="description"')

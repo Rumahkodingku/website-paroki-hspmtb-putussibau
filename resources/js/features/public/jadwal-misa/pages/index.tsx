@@ -75,10 +75,7 @@ export default function JadwalMisa({
 
     return (
         <>
-            <Seo
-                title="Jadwal Misa"
-                description="Jadwal misa rutin, misa khusus, dan pemberitahuan perubahan jadwal di Paroki HSPMTB Putussibau."
-            />
+            <Seo />
 
             <PublicHeroBanner
                 eyebrow="Ibadah"

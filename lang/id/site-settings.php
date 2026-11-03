@@ -18,7 +18,7 @@ return [
         'identitas' => 'Identitas Paroki',
         'kontak' => 'Kontak',
         'sosial' => 'Media Sosial',
-        'seo' => 'SEO Dasar',
+        'seo' => 'SEO Global',
         'beranda' => 'Beranda',
         'privasi' => 'Kebijakan Privasi',
         'syarat' => 'Syarat & Ketentuan',
@@ -49,9 +49,9 @@ return [
         'social_youtube' => 'YouTube',
         'social_whatsapp_channel' => 'Kanal WhatsApp',
 
-        'seo_default_title' => 'Judul default',
-        'seo_default_description' => 'Deskripsi default',
-        'seo_default_og_image' => 'Gambar OG default',
+        'seo_default_title' => 'Judul fallback situs',
+        'seo_default_description' => 'Deskripsi fallback situs',
+        'seo_default_og_image' => 'Gambar OG fallback',
 
         'home_hero_title' => 'Judul hero beranda',
         'home_hero_description' => 'Deskripsi hero beranda',
@@ -108,6 +108,9 @@ return [
         'home_hero_image' => 'Gambar utama beranda. Bila kosong, situs memakai foto gereja bawaan. Rasio yang disarankan 16:9.',
         'home_hero_image_alt' => 'Wajib diisi saat gambar hero dipilih. Jelaskan gambar secara singkat untuk pembaca layar.',
         'website' => 'Situs resmi paroki, bila ada. Bukan situs komunitas.',
+        'seo_default_title' => 'Dipakai hanya jika halaman tidak punya judul SEO sendiri.',
+        'seo_default_description' => 'Dipakai hanya jika halaman tidak punya deskripsi SEO sendiri.',
+        'seo_default_og_image' => 'Dipakai hanya jika halaman tidak punya gambar OG sendiri. Isi URL http(s) atau path yang diawali "/".',
     ],
 
     /*
