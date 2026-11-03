@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
@@ -26,13 +26,7 @@ export default function Index({
 
     return (
         <>
-            <Seo
-                title="Agenda Kegiatan"
-                description="Agenda synodal, rapat, dan kegiatan lainnya di Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Agenda Kegiatan" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Agenda"
                 title="Agenda Kegiatan"

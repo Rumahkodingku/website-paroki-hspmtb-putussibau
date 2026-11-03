@@ -138,6 +138,10 @@ final class InstallationRunner
             $this->state->step($step);
             $this->settings->setMany(array_intersect_key($application, array_flip(self::SETTING_KEYS)));
 
+            $step = 'seed_seo';
+            $this->state->step($step);
+            $this->seeders->runSeo();
+
             $step = 'verify';
             $this->state->step($step);
 
@@ -262,7 +266,7 @@ final class InstallationRunner
     {
         return match ($step) {
             'migrate' => InstallationError::MigrationFailed,
-            'seed_permissions', 'seed_categories' => InstallationError::SeederFailed,
+            'seed_permissions', 'seed_categories', 'seed_seo' => InstallationError::SeederFailed,
             'create_admin' => InstallationError::AdminCreateFailed,
             'save_settings' => InstallationError::SettingsFailed,
             'save_environment' => InstallationError::EnvironmentWriteFailed,

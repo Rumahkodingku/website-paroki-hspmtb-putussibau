@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { CalendarDays, MapPin, Youtube } from 'lucide-react';
 import { ListPagination } from '@/components/list-pagination';
 import {
@@ -81,14 +81,7 @@ export default function LivestreamingIndex({
 
     return (
         <>
-            <Seo
-                title="Livestreaming"
-                description="Saksikan siaran langsung dan rekaman kegiatan Paroki HSPMTB Putussibau melalui YouTube."
-                ogImage={activeStream?.thumbnail_url ?? null}
-            />
-
-            <Head title="Livestreaming" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="LIVESTREAMING"
                 title="Arsip Livestreaming"

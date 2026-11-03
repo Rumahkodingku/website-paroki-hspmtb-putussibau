@@ -1,6 +1,7 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Home, RefreshCw } from 'lucide-react';
 import Image from '@/components/image';
+import { Seo } from '@/components/seo';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { home, login } from '@/routes';
@@ -59,7 +60,11 @@ export default function ErrorPage({ status }: Props) {
 
     return (
         <>
-            <Head title={`${copy.title} (${status})`} />
+            <Seo
+                title={`${copy.title} (${status})`}
+                description={copy.description}
+                noIndex
+            />
 
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-16 md:py-24">
                 {COPY[status] ? (

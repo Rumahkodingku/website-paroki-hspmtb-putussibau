@@ -7,6 +7,7 @@ use Database\Seeders\EventCategorySeeder;
 use Database\Seeders\LivestreamCategorySeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\PostCategorySeeder;
+use Database\Seeders\SeoSeeder;
 use Database\Seeders\ServiceCategorySeeder;
 
 /*
@@ -126,6 +127,9 @@ return [
             DocumentCategorySeeder::class,
             CommunityCategorySeeder::class,
             LivestreamCategorySeeder::class,
+        ],
+        'seo' => [
+            SeoSeeder::class,
         ],
     ],
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { PublicSection } from '@/components/public-section';
@@ -25,16 +25,10 @@ export default function GaleriShow({ album }: Props) {
 
     return (
         <>
-            <Seo
-                title={album.title}
-                description={album.description ?? undefined}
-                ogImage={album.cover_url ?? undefined}
-            />
-
-            <Head title={album.title} />
-
+            <Seo />
             <PublicSection>
                 <Breadcrumbs
+                    withJsonLd
                     breadcrumbs={[
                         { title: 'Beranda', href: home() },
                         { title: 'Galeri', href: galeriIndex() },

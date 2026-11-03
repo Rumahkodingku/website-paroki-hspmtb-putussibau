@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { Seo } from '@/components/seo';
 import { RichText } from '@/components/rich-text';
 import { Text } from '@/components/text';
@@ -17,13 +16,7 @@ type Props = {
 export default function Sejarah({ narrative, items }: Props) {
     return (
         <>
-            <Seo
-                title="Sejarah Paroki"
-                description="Narasi dan linimasa sejarah Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Sejarah Paroki" />
-
+            <Seo />
             <main>
                 <PublicHeroBanner
                     eyebrow="PROFIL PAROKI"

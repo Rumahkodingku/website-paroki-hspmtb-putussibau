@@ -127,10 +127,7 @@ export default function Kontak() {
 
     return (
         <>
-            <Seo
-                title="Hubungi Kami"
-                description="Alamat, telepon, WhatsApp, surel, jam layanan, dan peta lokasi Paroki HSPMTB Putussibau."
-            />
+            <Seo />
 
             <PublicHeroBanner
                 eyebrow="Kontak Paroki"

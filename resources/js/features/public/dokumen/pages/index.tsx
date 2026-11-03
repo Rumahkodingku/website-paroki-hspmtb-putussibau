@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { ListPagination } from '@/components/list-pagination';
 import { PublicSection } from '@/components/public-section';
@@ -48,13 +48,7 @@ export default function DokumenIndex({
 
     return (
         <>
-            <Seo
-                title="Dokumen Paroki"
-                description="Dokumen resmi, formulir, pedoman, dan informasi yang dibagikan Paroki HSPMTB Putussibau."
-            />
-
-            <Head title="Dokumen" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Dokumen"
                 title="Dokumen Paroki"

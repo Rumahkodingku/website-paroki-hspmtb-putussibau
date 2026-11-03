@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { PublicSection } from '@/components/public-section';
 import PublicHeroBanner from '@/components/public-hero-banner';
 import { Seo } from '@/components/seo';
@@ -25,13 +25,7 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
 
     return (
         <>
-            <Seo
-                title="Berita & Artikel"
-                description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
-            />
-
-            <Head title="Berita & Artikel" />
-
+            <Seo />
             <PublicHeroBanner
                 eyebrow="Berita & Artikel"
                 title="Berita & Artikel"
