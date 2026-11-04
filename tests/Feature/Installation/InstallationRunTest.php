@@ -45,6 +45,22 @@ afterEach(function () {
     resetInstallerStatusFile();
 });
 
+test('installation skips the .env write when the environment owns configuration', function () {
+    config(['installer.write_env' => false]);
+
+    app()->instance(EnvironmentWriter::class, new class extends EnvironmentWriter
+    {
+        public function write(array $values): bool
+        {
+            return false;
+        }
+    });
+
+    $this->postJson('/install/run', ['confirmed' => true])
+        ->assertOk()
+        ->assertJson(['status' => InstallationState::COMPLETED]);
+});
+
 test('a fresh database is installed, seeded, verified, and locked', function () {
     $this->postJson('/install/run', ['confirmed' => true])
         ->assertOk()
