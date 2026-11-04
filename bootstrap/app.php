@@ -34,13 +34,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         /**
-         * Before StartSession: send traffic to /install until the wizard has
-         * finished, then let the installer runtime switch the drivers.
+         * UseInstallerRuntime must run before StartSession; RedirectToInstaller
+         * must run after TrustProxies so its absolute redirect uses the
+         * proxy-aware scheme. Both still run before the web group.
          *
-         * @see docs/DECISIONS.md D-96
+         * @see docs/DECISIONS.md D-96, D-107
          */
         $middleware->prepend(UseInstallerRuntime::class);
-        $middleware->prepend(RedirectToInstaller::class);
+        $middleware->append(RedirectToInstaller::class);
 
         $middleware->web(append: [
             HandleAppearance::class,

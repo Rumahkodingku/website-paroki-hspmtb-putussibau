@@ -41,6 +41,26 @@ test('a successful test and a fresh database advance to the next step', function
         ->assertSessionHas('installation.database');
 });
 
+test('a successful database test redirects over https behind a trusted proxy', function () {
+    app()->instance(DatabaseReadinessChecker::class, fakeDatabaseReadiness());
+
+    $response = $this->withHeaders([
+        'X-Forwarded-Proto' => 'https',
+        'X-Forwarded-Host' => 'paroki.test',
+        'X-Forwarded-Port' => '443',
+    ])->post('/install/database/test', [
+        'driver' => 'mysql',
+        'host' => (string) config('database.connections.mysql.host'),
+        'port' => (int) config('database.connections.mysql.port'),
+        'database' => (string) config('database.connections.mysql.database'),
+        'username' => (string) config('database.connections.mysql.username'),
+        'password' => (string) config('database.connections.mysql.password'),
+    ]);
+
+    expect($response->headers->get('Location'))
+        ->toStartWith('https://paroki.test/install/email');
+});
+
 test('a database that already has tables is refused', function () {
     app()->instance(
         DatabaseReadinessChecker::class,
