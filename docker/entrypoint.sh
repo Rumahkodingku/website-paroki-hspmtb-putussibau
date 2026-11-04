@@ -22,6 +22,11 @@ if [ ! -f storage/.docker-initialized ] || [ "$(stat -c '%u' storage)" != "33" ]
     chown www-data:www-data storage/.docker-initialized
 fi
 
+# Older volumes can contain root-owned cache files from queue workers that
+# used to run as root. Normalize the small framework trees on every start.
+chown -R www-data:www-data storage/framework storage/logs
+chmod -R ug+rwX storage/framework storage/logs
+
 if [ ! -e public/storage ] && [ ! -L public/storage ]; then
     ln -s ../storage/app/public public/storage
 fi
