@@ -184,7 +184,7 @@ final class InstallationRunner
                 $envValues['MAIL_FROM_NAME'] = (string) Arr::get($email, 'from_name', config('app.name'));
             }
 
-            if (! $this->environment->write($envValues)) {
+            if (config('installer.write_env') && ! $this->environment->write($envValues)) {
                 throw new InstallationFailure(InstallationError::EnvironmentWriteFailed);
             }
 
@@ -244,7 +244,7 @@ final class InstallationRunner
             'username' => (string) ($database['username'] ?? ''),
             'password' => $database['password'] ?? null,
             'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
+            'collation' => (string) config('database.connections.mysql.collation', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'strict' => true,
             'engine' => null,

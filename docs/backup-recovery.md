@@ -67,13 +67,20 @@ Backup dan restore memakai koneksi antrean `backups` agar `retry_after` lebih
 panjang dari timeout job.
 
 ```bash
-php artisan queue:work --queue=backups,default --tries=1 --timeout=7200
+php artisan queue:work backups --queue=backups --tries=1 --timeout=7200
 ```
 
-Jalankan di bawah Supervisor/systemd. Jangan memakai `--tries` lebih dari 1
-untuk job restore.
+Nama koneksi `backups` penting: `retry_after` koneksi itu 7300 detik, lebih
+panjang dari timeout job. Jalankan di bawah Supervisor/systemd. Jangan memakai
+`--tries` lebih dari 1 untuk job restore.
 
 ### 3.3 Scheduler
+
+Di deployment Docker/Coolify, scheduler berjalan sebagai proses
+`php artisan schedule:work` di dalam container. Jangan menambahkan cron
+`schedule:run` pada environment yang sama karena scheduler akan berjalan ganda.
+
+Untuk deployment native tanpa container, gunakan cron:
 
 ```cron
 * * * * * cd /path/ke/aplikasi && php artisan schedule:run >> /dev/null 2>&1
@@ -105,6 +112,9 @@ memory_limit = 512M
 Sesuaikan juga batas body/timeout reverse proxy. Nilai lokal pengembangan saat
 ini lebih kecil (2M/8M), jadi upload besar akan ditolak PHP sebelum Laravel.
 Ubah `php.ini` lokal sebelum menguji upload besar.
+
+Di container Coolify, nilai ini sudah diset di `docker/php/production.ini` dan
+Nginx `client_max_body_size`; lihat `docs/deployment/docker-coolify.md`.
 
 ### 3.5 Permission database
 
