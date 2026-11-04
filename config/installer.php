@@ -41,6 +41,19 @@ return [
 
     'enabled' => (bool) env('INSTALLER_ENABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Environment file
+    |--------------------------------------------------------------------------
+    |
+    | Container deployments inject every value through the platform, and the
+    | application directory is not writable by the web user. Disable the write
+    | step there so the wizard does not fail after migrations have run.
+    |
+    */
+
+    'write_env' => (bool) env('INSTALLER_WRITE_ENV', true),
+
     'status_path' => storage_path('app/private/installation/status.json'),
 
     'lock_key' => 'installation.run',

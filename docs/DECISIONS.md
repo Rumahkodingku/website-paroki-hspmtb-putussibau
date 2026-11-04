@@ -5939,3 +5939,51 @@ dari `DatabaseSeeder` dan dari step `seed_seo` pada installation wizard setelah
 row Media. `page_seo.og_media_id` tetap null sampai editor memilih gambar per
 halaman. Seeder idempotent: row dan setting yang sudah ada tidak ditimpa, dan
 field null boleh diisi dari default.
+
+## D-106 — Docker deployment untuk Coolify
+
+**Status:** Accepted · Deployment
+
+**Konteks.** PRD §17.3 Q6 meminta panduan deploy generik VPS + Nginx +
+PHP-FPM + MySQL. D-15 membatalkan Docker untuk local development dan CI, bukan
+untuk deployment. Coolify menyediakan database, volume, health check, dan
+reverse proxy, tetapi aplikasi ini menulis media dan backup ke `storage/` dari
+worker yang harus berbagi filesystem dengan web.
+
+**Keputusan.**
+
+1. Root `Dockerfile` hanya untuk staging dan production. Local development tetap
+   native dengan `composer dev`.
+2. Satu container menjalankan `supervisord` dengan Nginx, PHP-FPM, queue default,
+   queue backup, dan satu `schedule:work`. Volume `storage/` dipasang di
+   `/var/www/html/storage`.
+3. Nginx hanya mengeksekusi `/index.php`; PHP-FPM listen di loopback dan
+   `clear_env = no` agar environment Coolify sampai ke proses.
+4. MySQL 8 tetap database tunggal. Runtime memakai `mysql-community-client` 8.4
+   karena `DatabaseDumper` mengirim `--set-gtid-purged=OFF`, opsi yang tidak
+   didukung `mysqldump` MariaDB.
+5. `INSTALLER_WRITE_ENV=false` di container. Installer tidak menulis `.env`;
+   seluruh konfigurasi berasal dari environment Coolify. Default native tetap
+   menulis `.env`.
+6. `TelescopeServiceProvider` dan schedule `telescope:prune` didaftarkan hanya
+   jika package tersedia, karena `laravel/telescope` ada di `require-dev` dan
+   image produksi dibangun dengan `--no-dev`.
+7. Collation koneksi installer mengikuti `database.connections.mysql.collation`.
+   Deployment mengeset `DB_COLLATION=utf8mb4_0900_ai_ci`.
+8. Staging memakai `APP_ENV=production` agar guard produksi (`isProduction()`)
+   berlaku sama. Environment dibedakan lewat resource, domain, database, dan
+   secret Coolify.
+
+**Konsekuensi.**
+
+- Web, queue, dan scheduler restart bersamaan. Jangan menaikkan replica count.
+- `/up` hanya liveness; status queue/scheduler dilihat di `/admin/backup`.
+- Worker image processing memakai 1 GB; container sebaiknya minimal 2 GB.
+- Restore dapat berjalan sampai 7200 detik, sedangkan stop grace Coolify
+  maksimum 3600 detik; jangan deploy saat backup/restore berjalan.
+- Build membutuhkan jaringan untuk Composer, npm, Bunny Fonts, dan repository
+  MySQL.
+- Backup lokal di volume bukan disaster recovery; salinan offsite tetap wajib.
+
+**Batasan D-15.** D-15 tetap berlaku untuk local development dan CI. Dockerfile
+bukan environment developer wajib dan tidak mengubah strategi test.

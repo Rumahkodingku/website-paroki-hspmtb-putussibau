@@ -17,12 +17,13 @@ file is only about getting work done.
 | Composer | 2.x | |
 | Node | 22.18+, 24.11+ or 26+ | Required by Vite; CI uses 22 |
 | npm | 11+ | This project uses npm, not pnpm or yarn |
-| MySQL | 8 | Native install. **There is no Docker**, see D-15 |
+| MySQL | 8 | Native install for development. Docker is deployment-only; see D-15 and D-106 |
 
-MySQL 8 runs natively on purpose. Docker was considered at P04 and cancelled:
-the MySQL service image plus a health check costs more wall-clock time per CI run
-than it saves, and the collation this project needs
-(`utf8mb4_0900_ai_ci`) is MySQL-specific anyway.
+MySQL 8 runs natively for development on purpose. Docker was considered at P04
+and cancelled for local development/CI: the MySQL service image plus a health
+check costs more wall-clock time per CI run than it saves, and the collation this
+project needs (`utf8mb4_0900_ai_ci`) is MySQL-specific anyway. The root
+`Dockerfile` is only for staging/production deployment.
 
 Check the extensions before anything else, because a missing `gd` fails much
 later and much less legibly:
@@ -130,17 +131,20 @@ php artisan db:seed --class=PermissionSeeder
 
 ### 3.3 Docker
 
-**There is no Docker in this project.** Do not add it, and do not look for a
-`docker-compose.yml`: there is none.
+Local development remains native. **There is still no Docker-based development
+environment and no `docker-compose.yml` to start the site.**
 
-It was considered as workstream 04 and cancelled (D-15). The MySQL service image
-plus a health check cost more wall-clock time per CI run than they saved, and
-the collation this project needs, `utf8mb4_0900_ai_ci`, is MySQL-specific — so
-running anything other than MySQL 8 would not have been testing what production
-runs anyway.
+Docker was considered as workstream 04 and cancelled for local development and
+CI (D-15). The MySQL service image plus a health check cost more wall-clock time
+per CI run than they saved, and the collation this project needs,
+`utf8mb4_0900_ai_ci`, is MySQL-specific — so running anything other than MySQL 8
+would not have been testing what production runs anyway.
 
-MySQL runs natively. If it is not installed, install MySQL 8; there is no
-container to fall back to.
+A root `Dockerfile` now exists for **staging and production deployment via
+Coolify**. It is not required for developers and does not replace `composer dev`.
+See `docs/deployment/docker-coolify.md`.
+
+MySQL runs natively for development. If it is not installed, install MySQL 8.
 
 ## 4. Running the site
 
@@ -162,8 +166,10 @@ This is Laravel's `php artisan dev`, which starts **five** processes:
 when an AI agent is detected, and registers its Pest plugin.
 
 The scheduler process is here rather than in the cron file so that a scheduled
-task actually runs while you are developing. Production uses a cron line with
-`schedule:run` instead — see the deployment notes in `docs/DECISIONS.md` D-12.
+task actually runs while you are developing. Native production may use a cron
+line with `schedule:run`; the Coolify container runs `schedule:work` as a
+supervised process. Do not run both in one environment. See
+`docs/deployment/docker-coolify.md`.
 
 Frontend only, without the PHP processes: `npm run dev`.
 
@@ -177,14 +183,15 @@ one worker from `composer dev`, but it listens to the default queue. To exercise
 backup jobs while developing, run a second worker:
 
 ```bash
-php artisan queue:work --queue=backups,default --tries=1 --timeout=7200
+php artisan queue:work backups --queue=backups,default --tries=1 --timeout=7200
 ```
 
 E2E runs the job inline with `BACKUPS_QUEUE_CONNECTION=sync`; no separate worker
 is needed for the Playwright suite. The settings page and the backup list show
 scheduler/worker heartbeats, so "not detected" is visible rather than assumed.
 
-Production also needs the cron line from `docs/backup-recovery.md`:
+Native production needs the cron line from `docs/backup-recovery.md`. The
+Coolify container runs `schedule:work` as a supervised process instead:
 
 ```cron
 * * * * * cd /path/ke/aplikasi && php artisan schedule:run >> /dev/null 2>&1

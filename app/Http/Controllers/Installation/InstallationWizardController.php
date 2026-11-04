@@ -479,7 +479,7 @@ final class InstallationWizardController extends Controller
             'username' => (string) $input['username'],
             'password' => $input['password'] ?? null,
             'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
+            'collation' => (string) config('database.connections.mysql.collation', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'strict' => true,
             'engine' => null,
