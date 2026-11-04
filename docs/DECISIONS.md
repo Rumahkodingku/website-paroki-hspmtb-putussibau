@@ -5987,3 +5987,37 @@ worker yang harus berbagi filesystem dengan web.
 
 **Batasan D-15.** D-15 tetap berlaku untuk local development dan CI. Dockerfile
 bukan environment developer wajib dan tidak mengubah strategi test.
+
+## D-107 — Redirect installer mengikuti skema trusted proxy
+
+**Konteks.** Di deployment Coolify di belakang Cloudflare Tunnel dan Traefik,
+container menerima HTTP. `RedirectToInstaller` sebelumnya di-`prepend` sebelum
+`TrustProxies`, sehingga redirect `/` dan `/admin` menghasilkan `Location:
+http://...` meskipun proxy mengirim `X-Forwarded-Proto: https`. Browser
+memblokir redirect itu sebagai mixed content.
+
+**Keputusan.**
+
+1. `UseInstallerRuntime` tetap di-`prepend` karena harus berjalan sebelum
+   `StartSession`.
+2. `RedirectToInstaller` di-`append` agar berjalan setelah `TrustProxies`,
+   tetapi tetap sebelum route `web` group.
+3. Redirect installer tetap absolut dan mengikuti skema request yang sudah
+   dipercaya.
+4. `URL::forceScheme('https')` tidak dipakai sebagai solusi utama karena
+   menutupi masalah header proxy dan tidak memperbaiki `request()->isSecure()`.
+5. `APP_URL` HTTPS tetap wajib untuk canonical, sitemap, dan SEO, tetapi bukan
+   penyebab maupun perbaikan redirect `route()`.
+
+**Konsekuensi.**
+
+- `/` dan `/admin` menghasilkan HTTPS jika `X-Forwarded-Proto: https` sampai ke
+  aplikasi.
+- Redirect controller installer, termasuk database ke email, sudah berjalan
+  setelah `TrustProxies`; jika masih HTTP, header proxy yang salah, bukan urutan
+  middleware.
+- Deployment harus memastikan `X-Forwarded-Proto` dan `X-Forwarded-Host` sampai
+  ke container.
+- Regression test mengunci perilaku HTTPS dan HTTP.
+
+@see docs/deployment/docker-coolify.md §12.6

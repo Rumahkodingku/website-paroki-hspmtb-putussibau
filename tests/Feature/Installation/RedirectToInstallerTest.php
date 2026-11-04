@@ -23,6 +23,29 @@ test('other pages are redirected too', function () {
         ->assertRedirect(route('install.show'));
 });
 
+test('forwarded https requests redirect to the installer over https', function () {
+    $headers = [
+        'X-Forwarded-Proto' => 'https',
+        'X-Forwarded-Host' => 'paroki.test',
+        'X-Forwarded-Port' => '443',
+    ];
+
+    $response = $this->withHeaders($headers)->get('/');
+    expect($response->headers->get('Location'))
+        ->toStartWith('https://paroki.test/install');
+
+    $response = $this->withHeaders($headers)->get('/admin');
+    expect($response->headers->get('Location'))
+        ->toStartWith('https://paroki.test/install');
+});
+
+test('requests without forwarded https keep the http scheme', function () {
+    $response = $this->get('/');
+
+    expect($response->headers->get('Location'))
+        ->toStartWith('http://');
+});
+
 test('the installer, health check, and assets are not redirected', function () {
     $this->get('/install')
         ->assertOk()

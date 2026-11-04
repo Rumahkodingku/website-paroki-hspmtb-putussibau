@@ -15,7 +15,10 @@ use Symfony\Component\HttpFoundation\Response;
  * temporary 302 and disappears once the status file says completed; it is
  * gated on the deployment flag so an installed site is never redirected.
  *
- * @see docs/DECISIONS.md D-96
+ * Registered after TrustProxies, so route() uses the forwarded scheme instead
+ * of the raw container HTTP scheme.
+ *
+ * @see docs/DECISIONS.md D-96, D-107
  */
 final class RedirectToInstaller
 {

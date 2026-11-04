@@ -353,6 +353,41 @@ Semua proses menulis ke stdout/stderr:
 3. Cek koneksi database.
 4. Cek heartbeat di `/admin/backup`.
 
+### 12.6 Mixed content di installer
+
+Gejala:
+
+```text
+Mixed Content: The page at 'https://.../install/database' was loaded over HTTPS,
+but requested an insecure XMLHttpRequest endpoint 'http://.../install/email'.
+```
+
+Periksa redirect dari dalam container:
+
+```bash
+docker exec <container> curl -sSI \
+  -H 'X-Forwarded-Proto: https' \
+  -H 'X-Forwarded-Host: domain-staging' \
+  -H 'X-Forwarded-Port: 443' \
+  http://127.0.0.1/admin | grep -i location
+```
+
+Harus menghasilkan `https://.../install`.
+
+Jika masih `http://`:
+
+1. Pastikan `X-Forwarded-Proto: https` sampai ke container.
+2. Pastikan `X-Forwarded-Host` juga sampai; tanpa header ini URL absolut bisa
+   malformed.
+3. Periksa Cloudflare Tunnel dan Coolify/Traefik, bukan Nginx.
+4. `APP_URL=https://...` tidak memperbaiki redirect; itu hanya canonical/SEO.
+
+`RedirectToInstaller` berjalan setelah `TrustProxies` (D-107). Redirect database
+di controller juga sudah berjalan setelah `TrustProxies`; jika masih HTTP,
+sumbernya header proxy.
+
+Jangan menambahkan `URL::forceScheme('https')` sebagai solusi utama.
+
 ---
 
 ## 13. Keamanan
