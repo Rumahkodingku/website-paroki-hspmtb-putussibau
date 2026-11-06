@@ -3,9 +3,10 @@ import { e2eEnvironment } from './environment';
 
 /*
  * Plants one published document and one active service for the integration
- * spec. The document file is written to the private disk directly because this
- * spec is about the service link, not about the upload form (the main document
- * spec already exercises the upload).
+ * spec, with the document already attached to the service. The document file
+ * is written to the private disk directly because this spec is about the
+ * service link, not about the upload form (the main document spec already
+ * exercises the upload).
  */
 
 const SCRIPT = String.raw`
@@ -36,7 +37,7 @@ $document = \App\Models\Document::factory()->published()->create([
 \App\Models\Service::factory()->active()->create([
     'title' => 'Layanan E2E Dokumen',
     'slug' => 'layanan-e2e-dokumen',
-]);
+])->documents()->attach($document->getKey());
 `;
 
 export function seedDocumentServiceLink(): void {
