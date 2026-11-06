@@ -22,7 +22,7 @@ export default function Complete({ siteName, admin, links }: Props) {
         <>
             <Head title="Instalasi Berhasil" />
 
-            <Card className="shadow-sm">
+            <Card className="border-none bg-transparent shadow-none">
                 <CardContent className="px-6 py-2 sm:px-8">
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col items-start gap-3">
@@ -87,10 +87,10 @@ export default function Complete({ siteName, admin, links }: Props) {
                         </dl>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
-                            <Button asChild size="lg">
+                            <Button asChild size="lg" className="text-sm">
                                 <Link href={links.login}>
-                                    <LogIn aria-hidden="true" />
                                     Ke Halaman Login Admin
+                                    <LogIn aria-hidden="true" />
                                 </Link>
                             </Button>
 

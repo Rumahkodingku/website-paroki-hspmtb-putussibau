@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { formatWibDateTime } from '@/lib/datetime';
+import { MapPin } from 'lucide-react';
 
 /**
  * The resolved "next mass" shape. It lives with the component because the
@@ -137,6 +138,7 @@ export function NextMassCard({
  * pair — Location::mapsUrl() decides that server-side and the address is never
  * used, because a partial address produces a link to the wrong building.
  */
+
 export function LocationLink({ location }: { location: NextMassLocation }) {
     if (location.mapsUrl === null) {
         return null;
@@ -148,9 +150,11 @@ export function LocationLink({ location }: { location: NextMassLocation }) {
             target="_blank"
             rel="noopener noreferrer"
             data-test="maps-link"
-            className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm hover:border-primary-on-surface focus-visible:border-primary focus-visible:ring-2 focus-visible:outline-none"
+            aria-label="Buka lokasi di Google Maps"
+            title="Buka di Google Maps"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
         >
-            Buka di Google Maps
+            <MapPin size={18} strokeWidth={1.8} />
         </a>
     );
 }
