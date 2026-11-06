@@ -38,6 +38,7 @@ return [
     'requirement_conditions' => [
         'required' => 'Wajib',
         'conditional' => 'Jika berlaku',
+        'not_applicable' => 'Tidak Berlaku',
         'upon_request' => 'Bila diminta',
     ],
 
@@ -163,8 +164,8 @@ return [
         'tab_faq' => 'FAQ',
 
         // Persyaratan.
-        'requirement_title' => 'Persyaratan Dokumen',
-        'requirement_description' => 'Daftar dokumen yang perlu disiapkan umat sebelum mendaftar.',
+        'requirement_title' => 'Persyaratan',
+        'requirement_description' => 'Daftar persyaratan yang perlu disiapkan umat sebelum mendaftar.',
         'requirement_dialog_description' => 'Satu baris untuk satu dokumen.',
         'add_requirement' => 'Tambah Persyaratan',
         'edit_requirement' => 'Ubah Persyaratan',
