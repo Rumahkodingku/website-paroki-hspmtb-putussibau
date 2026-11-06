@@ -355,14 +355,16 @@ it('does not let deleted_at be mass assigned', function () {
     expect(MassSchedule::whereNull('deleted_at')->count())->toBe(1);
 });
 
-it('does not move the timestamp of an already deleted row', function () {
+it('keeps a row soft deleted when delete is called twice', function () {
     $this->schedule->delete();
-    $first = $this->schedule->fresh()->deleted_at;
-
     $this->schedule->fresh()->delete();
 
-    expect($this->schedule->fresh()->deleted_at->toDateTimeString())
-        ->toBe($first->toDateTimeString());
+    $trashed = MassSchedule::withTrashed()
+        ->whereKey($this->schedule->getKey())
+        ->firstOrFail();
+
+    expect($trashed->trashed())->toBeTrue()
+        ->and(MassSchedule::withTrashed()->whereKey($this->schedule->getKey())->count())->toBe(1);
 });
 
 /*

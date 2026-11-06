@@ -5,7 +5,6 @@ import { ServiceForm } from '../components/service-form';
 import type {
     ServiceCategoryOption,
     ServiceDetail,
-    ServiceDocumentOption,
     ServiceFaqRow,
     ServiceFormMeta,
     ServiceRequirementRow,
@@ -18,7 +17,6 @@ type Props = {
     steps: ServiceStepRow[];
     faqs: ServiceFaqRow[];
     categories: ServiceCategoryOption[];
-    documents: ServiceDocumentOption[];
 } & ServiceFormMeta;
 
 export default function Ubah({
@@ -27,7 +25,6 @@ export default function Ubah({
     steps,
     faqs,
     categories,
-    documents,
     labels,
     hints,
     methods,
@@ -46,7 +43,6 @@ export default function Ubah({
                 steps={steps}
                 faqs={faqs}
                 categories={categories}
-                documents={documents}
                 labels={labels}
                 hints={hints}
                 methods={methods}

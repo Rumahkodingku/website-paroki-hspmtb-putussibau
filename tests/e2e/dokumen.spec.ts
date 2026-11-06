@@ -109,9 +109,7 @@ test.describe('Dokumen', () => {
         await expect(row).toHaveCount(0);
     });
 
-    test('menautkan dokumen ke layanan dan menampilkannya di publik', async ({
-        page,
-    }) => {
+    test('menampilkan dokumen terkait tanpa tab admin', async ({ page }) => {
         seedDocumentServiceLink();
 
         await page.goto('/admin/pelayanan');
@@ -120,11 +118,9 @@ test.describe('Dokumen', () => {
         });
         await row.getByRole('link', { name: 'Ubah' }).click();
 
-        await page.getByRole('tab', { name: 'Dokumen Terkait' }).click();
-        await page
-            .getByRole('checkbox', { name: 'Dokumen E2E Layanan' })
-            .check();
-        await page.getByRole('button', { name: 'Simpan Perubahan' }).click();
+        await expect(
+            page.getByRole('tab', { name: 'Dokumen Terkait' }),
+        ).toHaveCount(0);
 
         await page.goto('/pelayanan/layanan-e2e-dokumen');
         await expect(
