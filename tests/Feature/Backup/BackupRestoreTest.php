@@ -114,11 +114,11 @@ test('a concurrent restore is refused', function (): void {
 });
 
 test('a full restore replaces files present in the archive and preserves others', function (): void {
-    Storage::disk('local')->put('media/originals/existing.txt', 'lama');
+    $file = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=');
+    Storage::disk('local')->put('media/originals/existing.jpg', $file);
 
     $database = "CREATE TABLE contoh (id int);\n";
-    $file = 'baru';
-    $relative = 'media/originals/new.txt';
+    $relative = 'media/originals/new.jpg';
     $uuid = (string) Str::uuid();
     $manifest = app(BackupManifest::class)->build(
         BackupType::Full,
@@ -176,6 +176,6 @@ test('a full restore replaces files present in the archive and preserves others'
 
     expect($restore->status)->toBe(BackupRestoreStatus::Success)
         ->and($restore->files_result->value)->toBe('success')
-        ->and(Storage::disk('local')->get($relative))->toBe('baru')
-        ->and(Storage::disk('local')->get('media/originals/existing.txt'))->toBe('lama');
+        ->and(Storage::disk('local')->get($relative))->toBe($file)
+        ->and(Storage::disk('local')->get('media/originals/existing.jpg'))->toBe($file);
 });

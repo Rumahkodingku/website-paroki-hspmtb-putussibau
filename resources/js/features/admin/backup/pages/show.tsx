@@ -187,6 +187,15 @@ export default function Show({ backup }: BackupShowProps) {
                                     label="Sumber"
                                     value={backup.source_label}
                                 />
+                                {backup.source === 'uploaded' ? (
+                                    <>
+                                        <Separator />
+                                        <DetailRow
+                                            label="Verifikasi asal"
+                                            value="Tidak terverifikasi (arsip unggahan)"
+                                        />
+                                    </>
+                                ) : null}
                                 <Separator />
                                 <DetailRow
                                     label="Ukuran"

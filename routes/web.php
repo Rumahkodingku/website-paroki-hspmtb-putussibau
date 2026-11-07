@@ -207,7 +207,7 @@ Route::get('/robots.txt', RobotsController::class)->name('robots');
 |
 */
 
-Route::middleware(['auth', 'verified', EnsureAccountIsActive::class, EnsureAdminAccess::class])
+Route::middleware(['auth', 'auth.session', 'verified', EnsureAccountIsActive::class, EnsureAdminAccess::class])
     ->prefix('admin')
     ->group(function () {
         /*
