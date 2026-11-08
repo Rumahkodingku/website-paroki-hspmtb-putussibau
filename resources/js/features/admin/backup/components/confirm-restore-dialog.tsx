@@ -101,6 +101,8 @@ export function ConfirmRestoreDialog({
                             database tidak memulihkan file upload. Full restore
                             mengganti file yang ada di arsip dan mempertahankan
                             file lain. Layanan dapat terganggu sementara.
+                            Restore akan mengakhiri seluruh sesi login aktif;
+                            semua pengguna harus login ulang.
                         </AlertDescription>
                     </Alert>
 

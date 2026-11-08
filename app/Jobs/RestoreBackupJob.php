@@ -328,6 +328,12 @@ class RestoreBackupJob implements ShouldQueue
                         throw BackupException::because('checksum_mismatch');
                     }
 
+                    $detectedMime = $this->detectedMime($staged, $disk, $relative);
+
+                    if (! $this->isAllowedMimeForScope($disk, $relative, $detectedMime)) {
+                        throw BackupException::because('path_unsafe');
+                    }
+
                     $target = Storage::disk($disk);
                     $source = fopen($staged, 'rb');
 
@@ -413,10 +419,62 @@ class RestoreBackupJob implements ShouldQueue
         return $checks;
     }
 
+    private function detectedMime(string $path, string $disk, string $relative): string
+    {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+        if ($finfo === false) {
+            return '';
+        }
+
+        $mime = finfo_file($finfo, $path);
+        finfo_close($finfo);
+
+        return is_string($mime) ? $mime : '';
+    }
+
+    private function isAllowedMimeForScope(string $disk, string $relative, string $mime): bool
+    {
+        if ($mime === '') {
+            return false;
+        }
+
+        $variantDisk = (string) config('media.variant_disk');
+        $variantPath = trim((string) config('media.paths.variants'), '/');
+
+        if ($disk === $variantDisk && str_starts_with($relative, $variantPath.'/')) {
+            return $mime === 'image/webp';
+        }
+
+        $originalDisk = (string) config('media.original_disk');
+        $originalPath = trim((string) config('media.paths.original'), '/');
+
+        if ($disk === $originalDisk && str_starts_with($relative, $originalPath.'/')) {
+            return in_array($mime, ['image/jpeg', 'image/png'], true);
+        }
+
+        $documentDisk = (string) config('documents.disk');
+        $documentPath = trim((string) config('documents.path'), '/');
+
+        if ($disk === $documentDisk && str_starts_with($relative, $documentPath.'/')) {
+            $allowed = array_values(array_unique((array) config('documents.mime_types', [])));
+
+            return in_array($mime, $allowed, true);
+        }
+
+        return false;
+    }
+
     private function forgetCaches(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         app(SiteSettingsService::class)->forget();
+
+        $sessionTable = (string) config('session.table', 'sessions');
+
+        if (Schema::hasTable($sessionTable)) {
+            DB::table($sessionTable)->delete();
+        }
     }
 
     /**

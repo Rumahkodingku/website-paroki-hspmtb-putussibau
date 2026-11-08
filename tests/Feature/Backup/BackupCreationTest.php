@@ -117,7 +117,7 @@ test('it refuses after the dump when the dump leaves too little space', function
 });
 
 test('it creates a full backup with the configured file scopes', function (): void {
-    Storage::disk('local')->put('media/originals/contoh.txt', 'media-asli');
+    Storage::disk('local')->put('media/originals/contoh.jpg', 'media-asli');
     Storage::disk('public')->put('media/variants/contoh.webp', 'varian');
     Storage::disk('local')->put('documents/contoh.pdf', 'dokumen');
     Storage::disk('local')->put('media/originals/.gitkeep', '');
@@ -145,7 +145,7 @@ test('it creates a full backup with the configured file scopes', function (): vo
 
     expect($zip->locateName('manifest.json'))->not->toBeFalse()
         ->and($zip->locateName('database/database.sql'))->not->toBeFalse()
-        ->and($zip->locateName('files/local/media/originals/contoh.txt'))->not->toBeFalse()
+        ->and($zip->locateName('files/local/media/originals/contoh.jpg'))->not->toBeFalse()
         ->and($zip->locateName('files/public/media/variants/contoh.webp'))->not->toBeFalse()
         ->and($zip->locateName('files/local/documents/contoh.pdf'))->not->toBeFalse()
         ->and($zip->locateName('files/local/media/originals/.gitkeep'))->toBeFalse();

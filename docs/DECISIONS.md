@@ -4108,11 +4108,13 @@ tidak diedit di tengah fase.
    `website`, dan dua nama untuk satu makna adalah cara pasti mengisi kolom yang
    salah lalu mengira yang lain sudah terisi.
 
-2. **Validasi `url` biasa, maks 255** — meniru `parish_profiles.website`, dengan
-   pesan Indonesia per kolom. Bukan kunci host per platform: `facebook.com`
-   bukan satu-satunya alamat Facebook yang dipakai paroki, dan `fb.me` atau
-   `youtu.be` justru tautan yang benar-benar ditempel orang. Tidak ada permintaan
-   HTTP keluar dari form admin.
+2. **Validasi skema `http`/`https`, maks 255** — meniru `parish_profiles.website`,
+   dengan pesan Indonesia per kolom. Host tetap bebas: `facebook.com` bukan
+   satu-satunya alamat Facebook yang dipakai paroki, dan `fb.me` atau `youtu.be`
+   justru tautan yang benar-benar ditempel orang. Tidak ada permintaan HTTP keluar
+   dari form admin. URL dengan kredensial `user:pass@` juga ditolak. Perubahan ini
+   menggantikan validasi `url` biasa dari keputusan awal (security audit finding
+   `community-social-links-unsafe-url-schemes`).
 
 3. **Tidak ada switch izin terpisah.** Mengisi tautan adalah bentuk persetujuan
    publik, sama seperti mengisi deskripsi. `show_contact` tetap governs kontak

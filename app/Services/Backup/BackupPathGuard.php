@@ -52,16 +52,53 @@ final class BackupPathGuard
     public function assertAllowedScope(string $disk, string $path, array $scopes): string
     {
         $path = $this->assertSafeRelative($path);
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
         foreach ($scopes as $scope) {
             $prefix = trim($scope['path'], '/');
 
             if ($scope['disk'] === $disk && $this->isWithin($prefix, $path)) {
+                if (! $this->hasAllowedExtensionForScope($disk, $prefix, $extension)) {
+                    throw BackupException::because('path_unsafe');
+                }
+
                 return $path;
             }
         }
 
         throw BackupException::because('path_unsafe');
+    }
+
+    private function hasAllowedExtensionForScope(string $disk, string $prefix, string $extension): bool
+    {
+        if ($extension === '') {
+            return false;
+        }
+
+        $variantDisk = (string) config('media.variant_disk');
+        $variantPath = trim((string) config('media.paths.variants'), '/');
+
+        if ($disk === $variantDisk && $prefix === $variantPath) {
+            return $extension === 'webp';
+        }
+
+        $originalDisk = (string) config('media.original_disk');
+        $originalPath = trim((string) config('media.paths.original'), '/');
+
+        if ($disk === $originalDisk && $prefix === $originalPath) {
+            return in_array($extension, ['jpg', 'jpeg', 'png'], true);
+        }
+
+        $documentDisk = (string) config('documents.disk');
+        $documentPath = trim((string) config('documents.path'), '/');
+
+        if ($disk === $documentDisk && $prefix === $documentPath) {
+            $allowed = array_values(array_unique((array) config('documents.extensions', [])));
+
+            return in_array($extension, $allowed, true);
+        }
+
+        return false;
     }
 
     public function assertInsideRoot(string $root, string $path): string
