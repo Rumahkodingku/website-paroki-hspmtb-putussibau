@@ -97,14 +97,38 @@ class PublicCommunityDetailResource extends JsonResource
         $filled = [];
 
         foreach ($links as $label => $url) {
-            $url = $url === null ? '' : trim($url);
+            $safeUrl = $this->httpUrl($url);
 
-            if ($url !== '') {
-                $filled[] = ['label' => $label, 'url' => $url];
+            if ($safeUrl !== null) {
+                $filled[] = ['label' => $label, 'url' => $safeUrl];
             }
         }
 
         return $filled;
+    }
+
+    private function httpUrl(?string $value): ?string
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        $value = trim($value);
+        $parts = parse_url($value);
+
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        if (! in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
+        return $value;
     }
 
     /**

@@ -38,11 +38,12 @@ class EnvironmentWriter
 
         foreach ($values as $key => $value) {
             $line = $key.'='.$this->formatValue((string) $value);
+            $pattern = '/^'.preg_quote($key, '/').'=.*/m';
 
-            if (preg_match('/^'.preg_quote($key, '/').'=.*/m', $contents)) {
-                $contents = (string) preg_replace(
-                    '/^'.preg_quote($key, '/').'=.*/m',
-                    $line,
+            if (preg_match($pattern, $contents)) {
+                $contents = (string) preg_replace_callback(
+                    $pattern,
+                    static fn (): string => $line,
                     $contents,
                 );
             } else {
@@ -67,8 +68,12 @@ class EnvironmentWriter
 
     private function formatValue(string $value): string
     {
-        if ($value === '' || preg_match('/\s|#|=/', $value)) {
-            return '"'.addslashes($value).'"';
+        $value = str_replace(["\r", "\n", "\0"], '', $value);
+
+        if ($value === '' || preg_match('/[\s#="\'\\\\$]/', $value)) {
+            $escaped = str_replace(['\\', '"', '$'], ['\\\\', '\\"', '\\$'], $value);
+
+            return '"'.$escaped.'"';
         }
 
         return $value;

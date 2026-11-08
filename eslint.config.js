@@ -20,6 +20,8 @@ export default tseslint.config(
             'playwright-report/**',
             'test-results/**',
             'resources/views/mail/**',
+            '.agents/**',
+            '.security-audit/**',
         ],
     },
     js.configs.recommended,

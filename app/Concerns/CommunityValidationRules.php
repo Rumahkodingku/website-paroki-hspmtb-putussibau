@@ -87,11 +87,11 @@ trait CommunityValidationRules
              * uses, and fb.me or youtu.be are the links people actually paste.
              * Same rule the parish profile's website field uses.
              */
-            'facebook' => ['nullable', 'url', 'max:255'],
-            'instagram' => ['nullable', 'url', 'max:255'],
-            'tiktok' => ['nullable', 'url', 'max:255'],
-            'youtube' => ['nullable', 'url', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'facebook' => ['nullable', 'url:http,https', 'max:255'],
+            'instagram' => ['nullable', 'url:http,https', 'max:255'],
+            'tiktok' => ['nullable', 'url:http,https', 'max:255'],
+            'youtube' => ['nullable', 'url:http,https', 'max:255'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
             'status' => ['required', Rule::enum(CommunityStatus::class)],
             'is_published' => ['required', 'boolean'],
         ];

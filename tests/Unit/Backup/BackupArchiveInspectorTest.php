@@ -88,7 +88,7 @@ test('it rejects a database gzip whose checksum does not match', function (): vo
 test('it validates a full zip and rejects an extra entry', function (): void {
     $database = "CREATE TABLE example (id int);\n";
     $file = 'contoh';
-    $relative = 'media/originals/contoh.txt';
+    $relative = 'media/originals/contoh.jpg';
     $manifest = $this->manifest->build(
         BackupType::Full,
         '0199c1f4-7e2a-7f3b-9a11-4b4f2f3c1a2b',

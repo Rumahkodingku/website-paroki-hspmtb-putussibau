@@ -3,6 +3,7 @@
 namespace App\Services\Installation;
 
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
@@ -39,7 +40,11 @@ final class MailConnectionTester
 
             return ['ok' => true, 'message' => 'Email uji berhasil dikirim.'];
         } catch (Throwable $exception) {
-            return ['ok' => false, 'message' => 'Gagal mengirim email: '.$exception->getMessage()];
+            Log::warning('installation.mail_test_failed', [
+                'exception' => $exception::class,
+            ]);
+
+            return ['ok' => false, 'message' => 'Gagal mengirim email uji. Periksa kembali konfigurasi host, port, dan kredensial SMTP.'];
         }
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -36,6 +37,8 @@ class SecurityController extends Controller
             $user->update([
                 'password' => $request->password,
             ]);
+
+            Auth::logoutOtherDevices($request->password);
 
             $this->audit->passwordChanged($user);
         });

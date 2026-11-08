@@ -106,8 +106,10 @@ jobs:
         # conforming history can still squash into a non-conforming commit. This
         # step keeps that from being the way a subject enters main.
         if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: >-
-          echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint
+          printf '%s\n' "$PR_TITLE" | npx --no-install commitlint
 
   # Playwright is a separate job for the same reason as commitlint: `ci` is the
   # code gate, and this needs a browser, a rebuilt database and a web server.
