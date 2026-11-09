@@ -171,27 +171,25 @@ export function PostForm({
                     />
                 </Field>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Field
+                <Field
+                    id="post-category"
+                    label={labels.post_category_id ?? 'Kategori'}
+                    error={form.errors.post_category_id}
+                    required
+                >
+                    <ChoiceSelect
                         id="post-category"
-                        label={labels.post_category_id ?? 'Kategori'}
-                        error={form.errors.post_category_id}
-                        required
-                    >
-                        <ChoiceSelect
-                            id="post-category"
-                            value={categoryValue}
-                            onChange={(value) =>
-                                form.setData(
-                                    'post_category_id',
-                                    value === '' ? null : Number(value),
-                                )
-                            }
-                            options={categoryOptions}
-                            placeholder="Pilih kategori"
-                        />
-                    </Field>
-                </div>
+                        value={categoryValue}
+                        onChange={(value) =>
+                            form.setData(
+                                'post_category_id',
+                                value === '' ? null : Number(value),
+                            )
+                        }
+                        options={categoryOptions}
+                        placeholder="Pilih kategori"
+                    />
+                </Field>
 
                 <Field
                     id="post-author"
