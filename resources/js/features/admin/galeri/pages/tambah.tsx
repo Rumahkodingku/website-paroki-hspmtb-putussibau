@@ -7,13 +7,16 @@ import {
 } from '@/routes/galleries';
 import { GalleryForm, emptyGalleryFormData } from '../components/gallery-form';
 
+import type { LocationOption } from '@/types/location';
+
 type Props = {
     labels: Record<string, string>;
     hints: Record<string, string>;
     copy: Record<string, string>;
+    locations: LocationOption[];
 };
 
-export default function Create({ labels, hints, copy }: Props) {
+export default function Create({ labels, hints, copy, locations }: Props) {
     return (
         <>
             <Head title="Tambah Album" />
@@ -29,6 +32,7 @@ export default function Create({ labels, hints, copy }: Props) {
                     labels={labels}
                     hints={hints}
                     copy={copy}
+                    locations={locations}
                     submitLabel="Simpan album"
                     onSubmit={(form) => form.submit(storeAlbum())}
                     onCancel={() => router.visit(galleriesIndex())}

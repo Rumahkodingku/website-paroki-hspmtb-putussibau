@@ -28,7 +28,6 @@ export function TabLogoThumbnail({
                     variant="logo"
                     label={labels.logo ?? 'Logo'}
                     hint={hints.logo}
-                    name={form.data.name}
                     altValue={form.data.logo_alt}
                     onAltChange={(value) => form.setData('logo_alt', value)}
                     altLabel={labels.logo_alt ?? 'Teks alternatif logo'}
@@ -45,10 +44,10 @@ export function TabLogoThumbnail({
 
                 <MediaUploadField
                     id="community-thumbnail"
-                    variant="logo"
+                    variant="image"
                     label={labels.thumbnail ?? 'Thumbnail'}
                     hint={hints.thumbnail}
-                    name={form.data.name}
+
                     altValue={form.data.thumbnail_alt}
                     onAltChange={(value) =>
                         form.setData('thumbnail_alt', value)

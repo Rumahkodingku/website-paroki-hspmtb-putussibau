@@ -10,7 +10,9 @@ use App\Http\Requests\Galeri\StoreGalleryAlbumRequest;
 use App\Http\Requests\Galeri\UpdateGalleryAlbumRequest;
 use App\Http\Resources\Galeri\GalleryAlbumListResource;
 use App\Http\Resources\Galeri\GalleryAlbumResource;
+use App\Http\Resources\MassSchedule\LocationOptionResource;
 use App\Models\GalleryAlbum;
+use App\Models\Location;
 use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -95,6 +97,11 @@ class GalleryController extends Controller
 
         return Inertia::render('admin/galeri/tambah', [
             ...$this->galleryFormMeta(),
+            'locations' => array_values(
+                LocationOptionResource::collection(
+                    Location::query()->orderBy('name')->get(),
+                )->resolve(),
+            ),
         ]);
     }
 
@@ -121,6 +128,11 @@ class GalleryController extends Controller
         return Inertia::render('admin/galeri/ubah', [
             'album' => GalleryAlbumResource::make($gallery)->resolve(),
             ...$this->galleryFormMeta(),
+            'locations' => array_values(
+                LocationOptionResource::collection(
+                    Location::query()->orderBy('name')->get(),
+                )->resolve(),
+            ),
         ]);
     }
 

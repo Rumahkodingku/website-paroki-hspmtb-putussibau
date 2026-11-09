@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
 import {
     ActiveSwitch,
+    ChoiceSelect,
     Field,
     FormActions,
     FormInput,
@@ -8,6 +10,7 @@ import {
 } from '@/components/form-fields';
 import { DatePicker } from '@/components/date-picker';
 import { Text } from '@/components/text';
+import type { LocationOption } from '@/types/location';
 import type { GalleryAlbumFormData } from '../types';
 import type { GalleryAlbumFormInstance } from './gallery-form-instance';
 
@@ -28,6 +31,7 @@ type Props = {
     hints: Record<string, string>;
     copy: Record<string, string>;
     submitLabel: string;
+    locations?: LocationOption[];
     onSubmit: (form: GalleryAlbumFormInstance) => void;
     onCancel: () => void;
 };
@@ -38,10 +42,20 @@ export function GalleryForm({
     hints,
     copy,
     submitLabel,
+    locations = [],
     onSubmit,
     onCancel,
 }: Props) {
     const form = useForm<GalleryAlbumFormData>(initial);
+
+    const locationOptions = useMemo(
+        () =>
+            locations.map((location) => ({
+                value: location.name,
+                label: location.name,
+            })),
+        [locations],
+    );
 
     return (
         <form
@@ -52,22 +66,22 @@ export function GalleryForm({
             }}
             className="space-y-8"
         >
-            <div className="grid gap-6 md:grid-cols-2">
-                <Field
+            <Field
+                id="gallery-title"
+                label={labels.title ?? 'Judul Album'}
+                error={form.errors.title}
+                required
+            >
+                <FormInput
                     id="gallery-title"
-                    label={labels.title ?? 'Judul Album'}
-                    error={form.errors.title}
+                    value={form.data.title}
+                    onChange={(value) => form.setData('title', value)}
                     required
-                >
-                    <FormInput
-                        id="gallery-title"
-                        value={form.data.title}
-                        onChange={(value) => form.setData('title', value)}
-                        required
-                        placeholder="Contoh: Album Paskah 2026"
-                    />
-                </Field>
+                    placeholder="Contoh: Album Paskah 2026"
+                />
+            </Field>
 
+            <div className="grid gap-6 md:grid-cols-2">
                 <div className="md:col-span-2">
                     <Field
                         id="gallery-description"
@@ -106,11 +120,12 @@ export function GalleryForm({
                     hint={hints.location}
                     error={form.errors.location}
                 >
-                    <FormInput
+                    <ChoiceSelect
                         id="gallery-location"
                         value={form.data.location}
                         onChange={(value) => form.setData('location', value)}
-                        placeholder="Contoh: Gereja paroki"
+                        options={locationOptions}
+                        placeholder="Pilih lokasi"
                     />
                 </Field>
             </div>

@@ -11,15 +11,17 @@ import {
 import { GalleryForm } from '../components/gallery-form';
 import type { GalleryAlbumFormInstance } from '../components/gallery-form-instance';
 import type { GalleryAlbumDetail, GalleryAlbumFormData } from '../types';
+import type { LocationOption } from '@/types/location';
 
 type Props = {
     album: GalleryAlbumDetail;
     labels: Record<string, string>;
     hints: Record<string, string>;
     copy: Record<string, string>;
+    locations: LocationOption[];
 };
 
-export default function Edit({ album, labels, hints, copy }: Props) {
+export default function Edit({ album, labels, hints, copy, locations }: Props) {
     const initial: GalleryAlbumFormData = {
         title: album.title,
         slug: album.slug,
@@ -57,6 +59,7 @@ export default function Edit({ album, labels, hints, copy }: Props) {
                     labels={labels}
                     hints={hints}
                     copy={copy}
+                    locations={locations}
                     submitLabel="Simpan perubahan"
                     onSubmit={submit}
                     onCancel={() => router.visit(galleriesIndex())}

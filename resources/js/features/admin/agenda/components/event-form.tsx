@@ -199,27 +199,25 @@ export function EventForm({
                     />
                 </Field>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Field
+                <Field
+                    id="event-category"
+                    label={labels.event_category_id ?? 'Kategori'}
+                    error={form.errors.event_category_id}
+                    required
+                >
+                    <ChoiceSelect
                         id="event-category"
-                        label={labels.event_category_id ?? 'Kategori'}
-                        error={form.errors.event_category_id}
-                        required
-                    >
-                        <ChoiceSelect
-                            id="event-category"
-                            value={categoryValue}
-                            onChange={(value) =>
-                                form.setData(
-                                    'event_category_id',
-                                    value === '' ? null : Number(value),
-                                )
-                            }
-                            options={categoryOptions}
-                            placeholder="Pilih kategori"
-                        />
-                    </Field>
-                </div>
+                        value={categoryValue}
+                        onChange={(value) =>
+                            form.setData(
+                                'event_category_id',
+                                value === '' ? null : Number(value),
+                            )
+                        }
+                        options={categoryOptions}
+                        placeholder="Pilih kategori"
+                    />
+                </Field>
 
                 <Field
                     id="event-description"
