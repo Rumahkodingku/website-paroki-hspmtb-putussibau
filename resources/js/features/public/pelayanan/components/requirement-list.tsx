@@ -40,7 +40,7 @@ export function RequirementList({
                                             ? 'bg-primary/10 text-primary'
                                             : requirement.requirement_condition ===
                                                 'conditional'
-                                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'
+                                              ? 'bg-warning-soft text-warning'
                                               : 'bg-muted text-muted-foreground',
                                     ].join(' ')}
                                 >

@@ -42,7 +42,6 @@ export function NextMassSection({
                 {nextMass ? (
                     <article className="overflow-hidden">
                         <div className="grid grid-cols-1 divide-y divide-border/70 md:grid-cols-[1.1fr_1fr_1fr] md:divide-x md:divide-y-0">
-                            {/* Mass name */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <CalendarDays
                                     aria-hidden="true"
@@ -79,7 +78,6 @@ export function NextMassSection({
                                 </div>
                             </div>
 
-                            {/* Date and time */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <CalendarClock
                                     aria-hidden="true"
@@ -129,7 +127,6 @@ export function NextMassSection({
                                 </div>
                             </div>
 
-                            {/* Location */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <MapPin
                                     aria-hidden="true"

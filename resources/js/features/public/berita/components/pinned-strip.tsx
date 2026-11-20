@@ -38,7 +38,6 @@ export function PinnedStrip({
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(17rem,0.8fr)]">
-                {/* Lead story */}
                 <article className="group relative isolate flex min-h-88 overflow-hidden rounded-xl bg-navy md:min-h-100">
                     {leadArticle.image ? (
                         <Image
@@ -115,7 +114,6 @@ export function PinnedStrip({
                     />
                 </article>
 
-                {/* Secondary story */}
                 {secondaryArticle ? (
                     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border transition-shadow">
                         {secondaryArticle.image ? (

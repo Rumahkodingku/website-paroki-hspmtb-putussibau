@@ -13,7 +13,6 @@ export function AreaCard({ area }: { area: PublicAreaCardData }) {
 
     return (
         <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300">
-            {/* Photo */}
             <div className="relative aspect-video overflow-hidden bg-muted">
                 {area.photoUrl ? (
                     <ParishImage
@@ -41,7 +40,6 @@ export function AreaCard({ area }: { area: PublicAreaCardData }) {
                 )}
             </div>
 
-            {/* Content */}
             <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
                 <div>
                     <Badge

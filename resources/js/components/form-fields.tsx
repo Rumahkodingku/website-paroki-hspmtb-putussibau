@@ -46,7 +46,9 @@ export function FormLabel({
                 className={`${disabled ? 'opacity-50' : undefined} font-semibold`}
             >
                 {children}{' '}
-                {isRequired ? <span className="text-red-600">*</span> : null}
+                {isRequired ? (
+                    <span className="text-destructive">*</span>
+                ) : null}
             </Label>
 
             {hint ? (

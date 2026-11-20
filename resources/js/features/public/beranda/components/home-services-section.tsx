@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
 import { Text } from '@/components/text';
@@ -74,22 +74,16 @@ export function HomeServicesSection({
         <PublicSection>
             <div className="space-y-8">
                 <SectionHeading
-                    eyebrow="Pelayanan Sakramen"
+                    eyebrow="Sakramen & Pendampingan"
                     title="Pelayanan Sakramen"
                     description="Informasi pelayanan dan sakramen yang dapat dihubungi atau didaftarkan melalui paroki."
                     action={
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                            <Link href={pelayanan()}>
-                                Semua Pelayanan
-                                <ArrowRight
-                                    aria-hidden="true"
-                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                />
-                            </Link>
+                            <Link href={pelayanan()}>Semua Pelayanan</Link>
                         </Button>
                     }
                 />

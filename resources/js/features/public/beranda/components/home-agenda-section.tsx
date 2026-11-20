@@ -72,27 +72,20 @@ export function HomeAgendaSection({
         <PublicSection surface="default">
             <div className="space-y-7 sm:space-y-8">
                 <SectionHeading
-                    eyebrow="Agenda Paroki"
+                    eyebrow="Kegiatan Umat"
                     title="Agenda Mendatang"
                     description="Kegiatan yang akan datang, terdekat lebih dahulu."
                     action={
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                            <Link href={agenda()}>
-                                Semua Agenda
-                                <ArrowRight
-                                    aria-hidden="true"
-                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                />
-                            </Link>
+                            <Link href={agenda()}>Semua Agenda</Link>
                         </Button>
                     }
                 />
 
-                {/* Event grid */}
                 {filteredEvents.length > 0 ? (
                     <div className="grid gap-x-4 gap-y-4 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-2">
                         {filteredEvents.map((event) => {
@@ -120,7 +113,6 @@ export function HomeAgendaSection({
                                     key={event.id}
                                     className="group flex min-w-0 gap-3 pb-5 sm:gap-4 sm:p-4"
                                 >
-                                    {/* Poster thumbnail */}
                                     {event.poster ? (
                                         <Link
                                             href={`/agenda/${event.slug}`}
@@ -147,7 +139,6 @@ export function HomeAgendaSection({
                                         </div>
                                     )}
 
-                                    {/* Date badge */}
                                     <div className="flex w-11 shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-2 sm:w-13.5">
                                         <Text
                                             variant="label"
@@ -155,7 +146,7 @@ export function HomeAgendaSection({
                                             transform="uppercase"
                                             className="text-[10px] sm:text-xs"
                                         >
-                                            {dateParts?.month ?? '—'}
+                                            {dateParts?.month ?? '-'}
                                         </Text>
 
                                         <Text
@@ -164,7 +155,7 @@ export function HomeAgendaSection({
                                             color="foreground"
                                             className="text-2xl leading-tight sm:text-3xl"
                                         >
-                                            {dateParts?.day ?? '—'}
+                                            {dateParts?.day ?? '-'}
                                         </Text>
 
                                         <Text
@@ -176,7 +167,6 @@ export function HomeAgendaSection({
                                         </Text>
                                     </div>
 
-                                    {/* Event information */}
                                     <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
                                         <div className="flex w-full flex-wrap items-center gap-2">
                                             {event.category && (
@@ -196,7 +186,7 @@ export function HomeAgendaSection({
                                                         'rounded-full px-2.5 py-1',
                                                         cancelled
                                                             ? 'bg-destructive/10 text-destructive'
-                                                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+                                                            : 'bg-warning-soft text-warning',
                                                     )}
                                                 >
                                                     {cancelled

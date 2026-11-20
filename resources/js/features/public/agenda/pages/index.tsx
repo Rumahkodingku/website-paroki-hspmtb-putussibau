@@ -28,7 +28,7 @@ export default function Index({
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Agenda"
+                eyebrow="Kegiatan Umat"
                 title="Agenda Kegiatan"
                 description="Agenda synodal, rapat, dan kegiatan lainnya di paroki."
                 breadcrumbs={[

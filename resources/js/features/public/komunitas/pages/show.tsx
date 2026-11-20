@@ -195,7 +195,6 @@ export default function KomunitasShow({ community }: Props) {
             <PublicSection className="py-5 md:py-7 lg:py-8">
                 <div className="grid gap-6 lg:gap-8">
                     <div className="min-w-0 space-y-7 sm:space-y-8">
-                        {/* Visi & Misi Section */}
                         {hasVisionMission ? (
                             <section aria-labelledby="tentang-komunitas-heading">
                                 <SectionHeading

@@ -57,7 +57,6 @@ export default function Show({ post, related, adjacent }: Props) {
                     />
 
                     <div className="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
-                        {/* Main article */}
                         <article className="min-w-0 space-y-8 lg:col-span-8">
                             <header className="space-y-4">
                                 {post.category ? (
@@ -170,7 +169,6 @@ export default function Show({ post, related, adjacent }: Props) {
                                 <RichText html={post.content} />
                             </div>
 
-                            {/* Previous and next articles */}
                             {adjacent.previous || adjacent.next ? (
                                 <nav
                                     aria-label="Navigasi artikel"
@@ -231,7 +229,6 @@ export default function Show({ post, related, adjacent }: Props) {
                             ) : null}
                         </article>
 
-                        {/* Editorial sidebar */}
                         <aside className="min-w-0 space-y-6 lg:col-span-4">
                             {related.length > 0 ? (
                                 <section aria-labelledby="berita-terkait">

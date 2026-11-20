@@ -78,7 +78,7 @@ export default function JadwalMisa({
             <Seo />
 
             <PublicHeroBanner
-                eyebrow="Ibadah"
+                eyebrow="Jadwal Liturgi"
                 title="Jadwal Misa"
                 description="Jadwal misa rutin setiap minggu, misa khusus pada tanggal tertentu, dan pemberitahuan perubahan jadwal."
                 breadcrumbs={[

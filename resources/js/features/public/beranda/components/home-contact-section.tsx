@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import {
-    ArrowRight,
     Clock,
     ExternalLink,
     Mail,
@@ -180,20 +179,13 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                            <Link href={kontak()}>
-                                Halaman Kontak
-                                <ArrowRight
-                                    aria-hidden="true"
-                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                />
-                            </Link>
+                            <Link href={kontak()}>Halaman Kontak</Link>
                         </Button>
                     }
                 />
 
-                {/* Contact items */}
                 {items.length > 0 ? (
                     <ul className="grid grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2 lg:gap-x-16 lg:gap-y-9">
                         {items.map((item) => (
@@ -202,7 +194,6 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
                     </ul>
                 ) : null}
 
-                {/* Office hours */}
                 {hasOfficeHours ? (
                     <div className="border-t border-border pt-6">
                         <div className="flex items-start gap-4">
@@ -235,7 +226,6 @@ export function HomeContactSection({ contact }: { contact: ContactDetails }) {
                     </div>
                 ) : null}
 
-                {/* Church location */}
                 {hasMap ? (
                     <section
                         aria-labelledby="home-contact-map-heading"

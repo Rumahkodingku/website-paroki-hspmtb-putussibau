@@ -74,7 +74,7 @@ export function ParishNavbar() {
                 <div className="flex flex-row items-center gap-6">
                     <DesktopNav transparent={isTransparent} />
                     <div className="flex items-center gap-2">
-                        <div className="mr-2 hidden h-10 border-l border-gray-400 sm:block" />
+                        <div className="mr-2 hidden h-10 border-l border-border sm:block" />
                         <AppearanceToggle />
 
                         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>

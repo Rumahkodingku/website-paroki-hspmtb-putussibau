@@ -50,7 +50,7 @@ export default function DokumenIndex({
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Dokumen"
+                eyebrow="Unduhan Paroki"
                 title="Dokumen Paroki"
                 description="Formulir, pedoman, pengumuman resmi, dan dokumen pelayanan yang dapat diunduh."
                 breadcrumbs={[

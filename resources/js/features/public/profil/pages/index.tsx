@@ -73,7 +73,7 @@ export default function Profil({ profile }: Props) {
             <Seo />
             <main>
                 <PublicHeroBanner
-                    eyebrow="PROFIL PAROKI"
+                    eyebrow="Mengenal Paroki"
                     title="Profil Paroki"
                     description="Mengenal perjalanan iman umat dan arah pelayanan Paroki HSPMTB Putussibau."
                     breadcrumbs={[

@@ -30,7 +30,7 @@ export default function KomunitasIndex({
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Komunitas"
+                eyebrow="Kehidupan Umat"
                 title="Komunitas Paroki"
                 description="Temukan kelompok dan kategorial di paroki."
                 breadcrumbs={[

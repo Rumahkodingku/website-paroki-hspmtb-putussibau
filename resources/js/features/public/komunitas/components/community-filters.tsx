@@ -95,7 +95,6 @@ export function CommunityFilters({
             aria-label="Pencarian dan filter komunitas"
             className="space-y-5"
         >
-            {/* Search */}
             <div className="relative">
                 <label htmlFor="komunitas-search" className="sr-only">
                     Cari komunitas
@@ -128,7 +127,6 @@ export function CommunityFilters({
                 ) : null}
             </div>
 
-            {/* Category chips */}
             <div
                 className="-mx-1 scrollbar-thin flex scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
                 aria-label="Kategori komunitas"
@@ -187,7 +185,6 @@ export function CommunityFilters({
                 })}
             </div>
 
-            {/* Results summary */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-4">
                 <div className="flex items-baseline gap-2">
                     <Text as="p" variant="h3">

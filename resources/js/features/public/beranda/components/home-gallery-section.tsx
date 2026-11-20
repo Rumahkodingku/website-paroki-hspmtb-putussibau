@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
 import {
     MasonryGrid,
     MasonryItem,
@@ -41,7 +40,7 @@ export function HomeGallerySection({
         <PublicSection surface="default">
             <div className="space-y-8">
                 <SectionHeading
-                    eyebrow="Galeri Paroki"
+                    eyebrow="Dokumentasi Paroki"
                     title={hasPhotos ? 'Galeri Kegiatan' : 'Ilustrasi'}
                     description={
                         hasPhotos
@@ -52,15 +51,9 @@ export function HomeGallerySection({
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                            <Link href={galeri()}>
-                                Semua Galeri
-                                <ArrowRight
-                                    aria-hidden="true"
-                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                />
-                            </Link>
+                            <Link href={galeri()}>Semua Galeri</Link>
                         </Button>
                     }
                 />

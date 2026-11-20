@@ -16,7 +16,7 @@ export function PublicServiceCard({ service }: Props) {
     return (
         <Link
             href={show({ service: service.slug })}
-            aria-label={`${service.title} — lihat persyaratan dan informasi layanan`}
+            aria-label={`${service.title}, lihat persyaratan dan informasi layanan`}
             className={[
                 'group relative flex min-w-0 items-center gap-4',
                 'rounded-lg border-b border-border/70',
@@ -28,7 +28,6 @@ export function PublicServiceCard({ service }: Props) {
                 isEmergency ? 'bg-destructive/5' : 'hover:bg-muted/40',
             ].join(' ')}
         >
-            {/* Service thumbnail */}
             <div
                 className={[
                     'relative aspect-4/3 w-24 shrink-0',
@@ -68,7 +67,6 @@ export function PublicServiceCard({ service }: Props) {
                 )}
             </div>
 
-            {/* Service information */}
             <div className="flex min-w-0 flex-1 flex-col items-start">
                 {isEmergency ? (
                     <Badge

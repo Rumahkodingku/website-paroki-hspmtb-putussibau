@@ -29,7 +29,6 @@ export function SpecialMassScheduleCard({ mass, displayTimezone }: Props) {
             <div className="py-0 transition-all duration-200">
                 <div className="pt-6">
                     <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-5">
-                        {/* Date block */}
                         <div className="flex w-28 shrink-0 items-center justify-center gap-3 rounded-xl bg-primary/5 p-3 sm:flex-col sm:gap-1 sm:p-4">
                             <div className="flex min-w-0 flex-col items-center gap-3 sm:justify-center sm:gap-1">
                                 <Text
@@ -57,7 +56,6 @@ export function SpecialMassScheduleCard({ mass, displayTimezone }: Props) {
                             </div>
                         </div>
 
-                        {/* Event details */}
                         <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
                             <Text
                                 as="h3"
@@ -111,7 +109,6 @@ export function SpecialMassScheduleCard({ mass, displayTimezone }: Props) {
                             ) : null}
                         </div>
 
-                        {/* Decorative direction indicator */}
                         {mass.location.mapsUrl ? (
                             <div className="hidden shrink-0 items-center sm:flex">
                                 <a

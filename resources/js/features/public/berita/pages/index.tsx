@@ -27,7 +27,7 @@ export default function Index({ pinned, posts, categories, filters }: Props) {
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Berita & Artikel"
+                eyebrow="Kabar Paroki"
                 title="Berita & Artikel"
                 description="Berita kegiatan, laporan acara, renungan, dan pengumuman resmi paroki."
                 breadcrumbs={[

@@ -50,7 +50,6 @@ export function PastorCurrentSection({ current }: { current: PublicPastor[] }) {
                                 key={pastor.id}
                                 className="grid min-w-0 grid-cols-1 gap-5 lg:items-center lg:gap-6 xl:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)]"
                             >
-                                {/* Foto pastor */}
                                 <div className="min-w-0">
                                     {pastor.photo ? (
                                         <Image
@@ -77,7 +76,6 @@ export function PastorCurrentSection({ current }: { current: PublicPastor[] }) {
                                     )}
                                 </div>
 
-                                {/* Identitas dan biografi */}
                                 <div className="flex min-w-0 flex-col gap-3">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-primary">
