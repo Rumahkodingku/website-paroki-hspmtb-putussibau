@@ -144,8 +144,8 @@ class HandleInertiaRequests extends Middleware
      *
      * appUrl is here so the Seo component never has to read window.location.
      * An Open Graph image has to be an absolute URL or link previews silently
-     * show nothing, and seo_default_og_image is a path because the upload widget
-     * for it does not exist yet (D-24). Reading window would make the component
+     * show nothing, and seo_default_og_image may now be an uploaded media id or
+     * a legacy path/URL (D-24). Reading window would make the component
      * unsafe to server-render later, which is exactly the change SSR would
      * require.
      *
@@ -176,13 +176,28 @@ class HandleInertiaRequests extends Middleware
             return is_string($value) && trim($value) !== '' ? $value : null;
         };
 
+        $ogImage = $settings->get('seo_default_og_image');
+
+        if (is_string($ogImage) && trim($ogImage) !== '') {
+            $ogImage = trim($ogImage);
+
+            if (ctype_digit($ogImage)) {
+                $ogImage = Media::query()
+                    ->with('variants')
+                    ->find((int) $ogImage)
+                    ?->url('medium');
+            }
+        } else {
+            $ogImage = null;
+        }
+
         return [
             'appUrl' => rtrim((string) config('app.url'), '/'),
             'siteName' => $read('parish_short_name') ?? $read('parish_name'),
             'parishName' => $read('parish_name'),
             'title' => $read('seo_default_title'),
             'description' => $read('seo_default_description'),
-            'ogImage' => $read('seo_default_og_image'),
+            'ogImage' => $ogImage,
             'page' => app(SeoMetadataResolver::class)->resolve($request),
         ];
     }

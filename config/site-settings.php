@@ -131,6 +131,7 @@ return [
         'logo' => 'media',
         'favicon' => 'media',
         'home_hero_image' => 'media',
+        'seo_default_og_image' => 'media',
         'home_news_limit' => 'integer',
         'home_events_limit' => 'integer',
         'home_gallery_limit' => 'integer',
