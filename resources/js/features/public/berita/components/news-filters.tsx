@@ -64,7 +64,6 @@ export function NewsFilters({
 
     return (
         <section aria-label="Pencarian dan filter berita" className="space-y-4">
-            {/* Search */}
             <form
                 role="search"
                 onSubmit={handleSearch}
@@ -97,7 +96,6 @@ export function NewsFilters({
                 </Button>
             </form>
 
-            {/* Category filters */}
             <div
                 role="group"
                 aria-label="Kategori berita"
@@ -133,7 +131,6 @@ export function NewsFilters({
                 })}
             </div>
 
-            {/* Result summary */}
             <Separator />
 
             <div className="flex min-h-8 flex-wrap items-center justify-between gap-3">

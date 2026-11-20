@@ -89,7 +89,7 @@ export default function Index({ sections, hasAreas }: Props) {
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="PROFIL PAROKI"
+                eyebrow="Wilayah Pelayanan"
                 title="Area"
                 description="Mengenal lebih dekat komunitas umat yang menjadi bagian dari kehidupan Gereja Paroki Hati Santa Perawan Maria Tak Bernoda Putussibau."
                 breadcrumbs={[
@@ -101,7 +101,6 @@ export default function Index({ sections, hasAreas }: Props) {
 
             <PublicSection>
                 <div className="space-y-10 pb-8">
-                    {/* Search and filters */}
                     {hasAreas && (
                         <section
                             aria-label="Cari dan filter area"
@@ -188,7 +187,6 @@ export default function Index({ sections, hasAreas }: Props) {
                         </section>
                     )}
 
-                    {/* Empty states */}
                     {!hasAreas ? (
                         <EmptyState
                             icon={MapPin}

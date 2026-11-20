@@ -1,11 +1,5 @@
 import { Link } from '@inertiajs/react';
-import {
-    ArrowRight,
-    CalendarClock,
-    CalendarDays,
-    Clock3,
-    MapPin,
-} from 'lucide-react';
+import { CalendarClock, CalendarDays, Clock3, MapPin } from 'lucide-react';
 import { PublicSection } from '@/components/public-section';
 import { SectionHeading } from '@/components/section-heading';
 import { Text } from '@/components/text';
@@ -51,15 +45,9 @@ export function HomeNextMassSection({
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                            <Link href={jadwalMisa()}>
-                                Semua Jadwal
-                                <ArrowRight
-                                    aria-hidden="true"
-                                    className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                />
-                            </Link>
+                            <Link href={jadwalMisa()}>Semua Jadwal</Link>
                         </Button>
                     }
                 />
@@ -67,7 +55,6 @@ export function HomeNextMassSection({
                 {nextMass ? (
                     <article className="overflow-hidden">
                         <div className="grid grid-cols-1 divide-y divide-border/70 md:grid-cols-[1.1fr_1fr_1fr] md:divide-x md:divide-y-0">
-                            {/* Mass name */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <CalendarDays
                                     aria-hidden="true"
@@ -104,7 +91,6 @@ export function HomeNextMassSection({
                                 </div>
                             </div>
 
-                            {/* Date and time */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <CalendarClock
                                     aria-hidden="true"
@@ -154,7 +140,6 @@ export function HomeNextMassSection({
                                 </div>
                             </div>
 
-                            {/* Location */}
                             <div className="flex min-w-0 items-center gap-4 p-5 sm:p-6 lg:p-7">
                                 <MapPin
                                     aria-hidden="true"

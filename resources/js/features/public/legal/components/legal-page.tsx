@@ -14,7 +14,7 @@ type LegalPageProps = {
 
 export function LegalPage({
     title,
-    eyebrow = 'INFORMASI PAROKI',
+    eyebrow = 'Informasi Hukum',
     description,
     content,
 }: LegalPageProps) {

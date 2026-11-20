@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Settings;
 
 use App\Enums\MediaStatus;
+use App\Models\Media;
 use App\Rules\GoogleMapsLink;
 use App\Services\HtmlSanitizer;
 use App\Support\MapsUrl;
@@ -235,9 +236,9 @@ class UpdateSettingsRequest extends FormRequest
         }
 
         /*
-         * The default Open Graph image is a path or an absolute URL, not free
-         * text. A typo here is invisible until a link preview is blank, so the
-         * value is checked before it is stored.
+         * The default Open Graph image is either an uploaded media row or a
+         * legacy rooted path / http(s) URL. Media ids are checked against a
+         * row that finished processing; anything else has to be a path or URL.
          */
         $rules['settings.seo_default_og_image'] = [
             'nullable',
@@ -248,7 +249,22 @@ class UpdateSettingsRequest extends FormRequest
                     return;
                 }
 
-                if (str_starts_with(trim($value), '/')) {
+                $value = trim($value);
+
+                if (ctype_digit($value)) {
+                    $exists = Media::query()
+                        ->whereKey((int) $value)
+                        ->where('status', MediaStatus::Ready->value)
+                        ->exists();
+
+                    if (! $exists) {
+                        $fail('Gambar yang dipilih belum selesai diproses. Tunggu sebentar lalu coba lagi.');
+                    }
+
+                    return;
+                }
+
+                if (str_starts_with($value, '/')) {
                     return;
                 }
 
@@ -257,7 +273,7 @@ class UpdateSettingsRequest extends FormRequest
                     return;
                 }
 
-                $fail('Gambar Open Graph harus berupa URL http(s) atau path yang diawali "/".');
+                $fail('Gambar Open Graph harus berupa unggahan, URL http(s), atau path yang diawali "/".');
             },
         ];
 

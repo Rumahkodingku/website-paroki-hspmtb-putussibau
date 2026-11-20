@@ -45,7 +45,6 @@ export function EventCard({
                 'sm:grid-cols-[minmax(0,225px)_minmax(0,1fr)_52px]',
             )}
         >
-            {/* Poster and date */}
             <div className="grid grid-cols-[minmax(0,1fr)_84px] gap-2 sm:grid-cols-[minmax(0,1fr)_92px]">
                 <div className="relative min-h-29 overflow-hidden sm:min-h-33">
                     {event.poster ? (
@@ -93,7 +92,6 @@ export function EventCard({
                 </div>
             </div>
 
-            {/* Event information */}
             <div className="flex min-w-0 flex-col justify-center gap-2.5 p-4 sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                     {event.category && (
@@ -205,7 +203,6 @@ export function EventCard({
                 )}
             </div>
 
-            {/* Detail action */}
             <div className="flex items-center justify-end border-t border-border px-4 py-3 sm:justify-center sm:border-t-0 sm:px-1 sm:py-0">
                 <Button
                     variant="outline"

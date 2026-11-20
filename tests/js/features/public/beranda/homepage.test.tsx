@@ -452,8 +452,9 @@ describe('Beranda', () => {
         // DESIGN-v2 display-xl is a clamp() between 36px (mobile) and 52px
         // (desktop), so the step-down is in the token rather than a
         // breakpoint-specific override.
-        expect(screen.getByRole('heading', { level: 1 }).className).toContain(
-            'text-6xl',
-        );
+        const heading = screen.getByRole('heading', { level: 1 });
+
+        expect(heading.className).toContain('text-display-xl');
+        expect(heading.className).not.toContain('text-6xl');
     });
 });

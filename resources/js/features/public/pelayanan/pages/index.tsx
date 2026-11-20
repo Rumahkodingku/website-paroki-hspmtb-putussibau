@@ -19,7 +19,7 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Pelayanan"
+                eyebrow="Sakramen & Pendampingan"
                 title="Pelayanan Sakramen & Pastoral"
                 description="Informasi syarat, prosedur, dan cara mendaftar untuk pelayanan sakramen dan pastoral di paroki."
                 breadcrumbs={[
@@ -48,7 +48,6 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
                                     aria-labelledby={`group-${group.id}`}
                                     className="scroll-mt-24"
                                 >
-                                    {/* Category heading */}
                                     <div className="flex items-start gap-4 sm:gap-5">
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -83,7 +82,6 @@ export default function PelayananIndex({ groups, hasServices }: Props) {
                                         </div>
                                     </div>
 
-                                    {/* Editorial service list */}
                                     <div
                                         className={[
                                             'mt-5 border-t border-border/70',

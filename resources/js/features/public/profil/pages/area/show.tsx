@@ -77,7 +77,6 @@ export default function Show({ area }: Props) {
     return (
         <>
             <Seo />
-            {/* Breadcrumb */}
             <PublicSection>
                 <div className="pt-2">
                     <Breadcrumbs
@@ -92,7 +91,6 @@ export default function Show({ area }: Props) {
                 </div>
             </PublicSection>
 
-            {/* Community hero */}
             <PublicContainer>
                 <section
                     aria-labelledby="area-title"
@@ -130,7 +128,6 @@ export default function Show({ area }: Props) {
                             className="absolute inset-0 bg-linear-to-t from-black/85 via-black/40 to-black/10"
                         />
 
-                        {/* Hero content */}
                         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-4 p-5 sm:p-8 lg:max-w-3xl lg:p-10">
                             <Badge
                                 variant="secondary"
@@ -154,10 +151,8 @@ export default function Show({ area }: Props) {
                 </section>
             </PublicContainer>
 
-            {/* Main profile and contact sidebar */}
             <PublicContainer>
                 <div className="grid items-start gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10 lg:py-10 xl:grid-cols-[minmax(0,1fr)_360px]">
-                    {/* Main content */}
                     <div className="min-w-0">
                         <section aria-labelledby="about-area-title">
                             <div className="mb-5 flex items-center gap-3">
@@ -210,7 +205,6 @@ export default function Show({ area }: Props) {
                             )}
                         </section>
 
-                        {/* Parent area */}
                         {area.parent ? (
                             <section
                                 aria-labelledby="parent-area-title"
@@ -251,7 +245,6 @@ export default function Show({ area }: Props) {
                             </section>
                         ) : null}
 
-                        {/* Location */}
                         {hasLocation ? (
                             <section aria-labelledby="area-location-title">
                                 <div className="mb-4 flex items-center gap-3">
@@ -302,7 +295,6 @@ export default function Show({ area }: Props) {
                             </section>
                         ) : null}
 
-                        {/* Related areas */}
                         {hasChildren ? (
                             <section aria-labelledby="related-areas-title">
                                 <div className="mb-5 flex items-center gap-3">
@@ -351,7 +343,6 @@ export default function Show({ area }: Props) {
                         ) : null}
                     </div>
 
-                    {/* Contact sidebar */}
                     {hasContact ? (
                         <aside className="min-w-0 lg:sticky">
                             <section
@@ -369,7 +360,6 @@ export default function Show({ area }: Props) {
                                 </div>
 
                                 <div className="space-y-0 px-5 sm:px-6">
-                                    {/* Leader */}
                                     {area.leader_name ? (
                                         <div className="flex items-center gap-3 border-b border-border/70 py-4">
                                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
@@ -391,7 +381,6 @@ export default function Show({ area }: Props) {
                                         </div>
                                     ) : null}
 
-                                    {/* Phone */}
                                     {hasPhone ? (
                                         <div className="flex items-center gap-3 border-b border-border/70 py-4">
                                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
@@ -416,7 +405,6 @@ export default function Show({ area }: Props) {
                                         </div>
                                     ) : null}
 
-                                    {/* Email */}
                                     {hasEmail ? (
                                         <div className="mt-4 flex items-center gap-3">
                                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
@@ -441,7 +429,6 @@ export default function Show({ area }: Props) {
                                         </div>
                                     ) : null}
 
-                                    {/* WhatsApp */}
                                     {hasWhatsapp && normalizedWhatsapp ? (
                                         <a
                                             href={whatsappUrl!}
@@ -461,7 +448,6 @@ export default function Show({ area }: Props) {
                                         </a>
                                     ) : null}
 
-                                    {/* Phone action when phone exists */}
                                     {hasPhone ? (
                                         <a
                                             href={`tel:${formatPhoneHref(phone)}`}
@@ -483,7 +469,6 @@ export default function Show({ area }: Props) {
                 </div>
             </PublicContainer>
 
-            {/* Back navigation */}
             <PublicContainer>
                 <div className="border-t border-border/70 py-6">
                     <Button asChild variant="ghost">

@@ -158,6 +158,12 @@
      */
     --color-primary-on-surface: var(--primary-on-surface);
 
+    /* Status colors, added in D-108. Not brand colors. */
+    --color-success: var(--success);
+    --color-success-soft: var(--success-soft);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+
     /* Charts are not specified in DESIGN-v2; they reuse documented hues. */
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
@@ -229,6 +235,11 @@
     --primary-soft-dark: #35191d;
     --primary-on-surface: #ab020e;
 
+    --success: #166534;
+    --success-soft: #dcfce7;
+    --warning: #92400e;
+    --warning-soft: #fef3c7;
+
     --chart-1: #01266d; /* navy */
     --chart-2: #ab020e; /* primary */
     --chart-3: #fcb027; /* gold */
@@ -288,6 +299,11 @@
 
     --primary-soft: #35191d; /* primary-soft-dark */
     --primary-on-surface: #f06a73; /* lighter accessible red tint */
+
+    --success: #86efac;
+    --success-soft: #052e16;
+    --warning: #fcd34d;
+    --warning-soft: #451a03;
 
     --chart-1: #f3f4f6;
     --chart-2: #f06a73;

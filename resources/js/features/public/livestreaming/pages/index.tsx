@@ -83,7 +83,7 @@ export default function LivestreamingIndex({
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="LIVESTREAMING"
+                eyebrow="Siaran Langsung"
                 title="Arsip Livestreaming"
                 description="Saksikan kembali perayaan Ekaristi dan kegiatan rohani Paroki HSPMTB Putussibau."
                 breadcrumbs={[

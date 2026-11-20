@@ -178,7 +178,6 @@ function FeaturedArticle({
 
     return (
         <article className="group mb-5 grid min-w-0 overflow-hidden rounded-2xl lg:grid-cols-[1.2fr_1fr]">
-            {/* Featured image */}
             <Link
                 href={`/berita/${article.slug}`}
                 aria-label={`Baca berita: ${article.title}`}
@@ -207,7 +206,6 @@ function FeaturedArticle({
                 </div>
             </Link>
 
-            {/* Featured content */}
             <div className="flex min-w-0 flex-col justify-center p-5 sm:p-7 lg:p-8 xl:p-10">
                 <ArticleMeta
                     article={article}
@@ -265,7 +263,6 @@ function SecondaryArticleCard({
 
     return (
         <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl">
-            {/* Card image */}
             <Link
                 href={`/berita/${article.slug}`}
                 aria-label={`Baca berita: ${article.title}`}
@@ -277,7 +274,6 @@ function SecondaryArticleCard({
                 />
             </Link>
 
-            {/* Card content */}
             <div className="flex flex-1 flex-col p-4 sm:p-5">
                 <ArticleMeta
                     article={article}
@@ -342,7 +338,6 @@ export function HomeNewsSection({
                 className="relative isolate"
             >
                 <div className="space-y-8 md:space-y-10">
-                    {/* Section heading */}
                     <SectionHeading
                         eyebrow="Kabar Paroki"
                         title="Berita & Artikel"
@@ -351,26 +346,18 @@ export function HomeNewsSection({
                             <Button
                                 asChild
                                 variant="outline"
-                                className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                                className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                             >
-                                <Link href={berita()}>
-                                    Semua Berita
-                                    <ArrowRight
-                                        aria-hidden="true"
-                                        className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
-                                    />
-                                </Link>
+                                <Link href={berita()}>Semua Berita</Link>
                             </Button>
                         }
                     />
 
-                    {/* Featured story */}
                     <FeaturedArticle
                         article={featured}
                         displayTimezone={displayTimezone}
                     />
 
-                    {/* Supporting news grid */}
                     {secondaryArticles.length > 0 && (
                         <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
                             {secondaryArticles.map((article) => (

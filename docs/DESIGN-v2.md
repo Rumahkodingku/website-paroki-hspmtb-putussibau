@@ -110,6 +110,10 @@ Components must use semantic tokens rather than individual hard-coded colors.
 | Quiet divider            | `border-subtle`             | `dark-border-subtle`                         |
 | Primary action           | `primary`                   | `primary`                                    |
 | Selected state           | `primary-soft`              | `primary-soft-dark`                          |
+| Success                  | `success` (`#166534`)       | `success` (`#86EFAC`)                        |
+| Success surface          | `success-soft` (`#DCFCE7`)  | `success-soft` (`#052E16`)                   |
+| Warning                  | `warning` (`#92400E`)       | `warning` (`#FCD34D`)                        |
+| Warning surface          | `warning-soft` (`#FEF3C7`)  | `warning-soft` (`#451A03`)                   |
 | Focus ring               | `primary`                   | `#F06A73` when required for visible contrast |
 
 ### Color usage rules
@@ -118,6 +122,8 @@ Components must use semantic tokens rather than individual hard-coded colors.
 - Do not make every icon, heading, border, and badge red.
 - Navy is a supporting brand color. Use it in limited editorial sections, map/identity accents, and selected highlights.
 - Gold is decorative and ceremonial; do not use it for large panels or routine actions.
+- Success and warning are status colors, not brand colors. Use them for real completion, availability, pending, or attention states only. Never use them for ordinary prose or decoration.
+- Status text sits on its matching soft surface (`text-success` on `bg-success-soft`, `text-warning` on `bg-warning-soft`). Both pairs pass WCAG AA in light and dark themes.
 - Keep body text neutral. Do not color entire paragraphs navy or red.
 - Do not use a full-page navy background in either theme.
 - Do not use opacity as the only way to indicate muted text.
@@ -165,6 +171,7 @@ For every route, check:
 - title, breadcrumb, and lead paragraph;
 - cards and feature panels;
 - inputs, selects, tabs, badges, and pagination;
+- success and warning badges, including their soft surfaces;
 - list separators and selected states;
 - image captions and overlays;
 - map containers;

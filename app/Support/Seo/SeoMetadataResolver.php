@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Community;
 use App\Models\Event;
 use App\Models\GalleryAlbum;
+use App\Models\Media;
 use App\Models\PageSeo;
 use App\Models\Post;
 use App\Models\Service;
@@ -339,6 +340,21 @@ final class SeoMetadataResolver
 
     private function globalOgImage(): ?string
     {
-        return $this->absolute($this->setting('seo_default_og_image'));
+        $value = $this->setting('seo_default_og_image');
+
+        if ($value === null) {
+            return null;
+        }
+
+        if (ctype_digit($value)) {
+            $media = Media::query()->with('variants')->find((int) $value);
+            $value = $media?->url('medium');
+
+            if ($value === null) {
+                return null;
+            }
+        }
+
+        return $this->absolute($value);
     }
 }

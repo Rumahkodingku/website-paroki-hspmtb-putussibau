@@ -66,9 +66,7 @@ export function AgendaCalendar({
             aria-label="Kalender agenda paroki"
             className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.95fr)] lg:gap-5"
         >
-            {/* Monthly calendar */}
             <div className="min-w-0 rounded-xl p-3 sm:p-4 lg:p-5">
-                {/* Month navigation */}
                 <div className="mb-4 flex items-center justify-between gap-2 sm:mb-5">
                     <Button
                         type="button"
@@ -166,7 +164,6 @@ export function AgendaCalendar({
                         </div>
                     )}
 
-                {/* Calendar grid */}
                 <AgendaCalendarGrid
                     grid={grid}
                     byDate={byDate}
@@ -176,7 +173,6 @@ export function AgendaCalendar({
                 />
             </div>
 
-            {/* Selected-day agenda panel */}
             <AgendaSelectedDayPanel
                 selectedDate={selectedDate}
                 selectedEvents={selectedEvents}

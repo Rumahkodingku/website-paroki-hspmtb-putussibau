@@ -49,7 +49,6 @@ export function PastorHistorySection({
                             key={assignment.id}
                             className="grid grid-cols-1 gap-3 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8"
                         >
-                            {/* Periode dan jabatan */}
                             <div className="flex flex-col gap-1 sm:pt-5">
                                 <Text
                                     as="p"
@@ -65,7 +64,6 @@ export function PastorHistorySection({
                                 </Text>
                             </div>
 
-                            {/* Detail riwayat */}
                             <article className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
                                 {assignment.photo ? (
                                     <Image

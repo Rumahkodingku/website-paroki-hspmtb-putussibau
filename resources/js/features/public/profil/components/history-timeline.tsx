@@ -27,14 +27,12 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                         key={item.id}
                         className="relative pb-10 last:pb-0 sm:pb-12 lg:pb-16"
                     >
-                        {/* Titik timeline */}
                         <span
                             aria-hidden="true"
                             className="absolute top-1.5 left-0 z-10 size-2.75 rounded-full border-2 border-primary bg-background lg:top-5 lg:left-1/2 lg:-translate-x-1/2"
                         />
 
                         <article className="grid grid-cols-1 gap-4 pl-7 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] lg:items-start lg:gap-0 lg:pl-0">
-                            {/* Gambar */}
                             <div
                                 className={[
                                     'min-w-0',
@@ -67,7 +65,6 @@ export function HistoryTimeline({ items }: { items: PublicHistoryItem[] }) {
                                 )}
                             </div>
 
-                            {/* Konten */}
                             <div
                                 className={[
                                     'min-w-0',

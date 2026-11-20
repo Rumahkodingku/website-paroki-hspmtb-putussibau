@@ -39,7 +39,7 @@ export default function GaleriIndex({ albums, years, filters }: Props) {
         <>
             <Seo />
             <PublicHeroBanner
-                eyebrow="Galeri"
+                eyebrow="Dokumentasi Paroki"
                 title="Galeri Kegiatan"
                 description="Dokumentasi foto kegiatan paroki."
                 breadcrumbs={[

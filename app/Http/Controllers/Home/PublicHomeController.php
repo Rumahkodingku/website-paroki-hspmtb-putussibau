@@ -118,14 +118,21 @@ class PublicHomeController extends Controller
             $height = $media->height ?? 941;
         }
 
+        $ogImageSetting = $this->stringSetting('seo_default_og_image');
+
+        $ogImage = $ogImageSetting === null
+            ? null
+            : (ctype_digit($ogImageSetting)
+                ? Media::query()->with('variants')->find((int) $ogImageSetting)?->url('medium')
+                : $ogImageSetting);
+
         return [
             'title' => $this->stringSetting('parish_name'),
             'description' => $this->stringSetting('short_description'),
             'image' => $mediaUrl ?? (string) config('homepage.fallback_hero_image'),
             'imageAlt' => $this->stringSetting('home_hero_image_alt')
                 ?? (string) config('homepage.fallback_hero_image_alt'),
-            'ogImage' => $this->stringSetting('seo_default_og_image')
-                ?? (string) config('homepage.fallback_hero_og_image'),
+            'ogImage' => $ogImage ?? (string) config('homepage.fallback_hero_og_image'),
             'width' => $width,
             'height' => $height,
             'motto' => $this->stringSetting('motto_verse'),

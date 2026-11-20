@@ -39,14 +39,14 @@ export function HomeLivestreamSection({ stream, enabled }: Props) {
                 className="space-y-8 md:space-y-10"
             >
                 <SectionHeading
-                    eyebrow="SIARAN LANGSUNG"
+                    eyebrow="Siaran Langsung"
                     title="Ikuti Kegiatan Paroki Secara Online"
                     description="Saksikan perayaan Ekaristi dan kegiatan rohani Paroki HSPMTB Putussibau melalui siaran langsung YouTube."
                     action={
                         <Button
                             asChild
                             variant="outline"
-                            className="group h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="h-11 rounded-full border-primary/70 bg-transparent px-5 text-sm text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
                             <Link href={livestreamingIndex()}>Lihat Arsip</Link>
                         </Button>

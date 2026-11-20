@@ -58,7 +58,6 @@ export function AgendaControls({
             aria-label="Filter dan navigasi agenda"
             className="mb-12 space-y-4"
         >
-            {/* View selector */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-2">
                     <Text
@@ -130,7 +129,6 @@ export function AgendaControls({
 
             <Separator />
 
-            {/* Category filters */}
             <div className="space-y-2.5">
                 <Text
                     as="p"
@@ -192,7 +190,6 @@ export function AgendaControls({
                 </div>
             </div>
 
-            {/* Calendar month navigation */}
             {mode === 'kalender' && (
                 <>
                     <Separator />

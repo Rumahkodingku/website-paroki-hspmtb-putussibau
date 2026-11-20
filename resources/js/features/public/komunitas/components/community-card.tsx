@@ -14,7 +14,6 @@ export function CommunityCard({
 }) {
     return (
         <article className="group relative flex h-full flex-col overflow-hidden">
-            {/* Thumbnail */}
             <div className="relative aspect-16/10 w-full shrink-0">
                 {community.thumbnail_url ? (
                     <Image
@@ -43,7 +42,6 @@ export function CommunityCard({
                 ) : null}
             </div>
 
-            {/* Card content */}
             <div
                 className={`flex flex-1 flex-col items-start gap-3 p-3 ${
                     community.logo_url ? 'pt-11' : 'pt-5'

@@ -40,7 +40,6 @@ export function HomeHero({
 
     return (
         <section className="relative isolate overflow-hidden bg-navy text-white">
-            {/* Hero background image */}
             {!imageFailed && hero.image && (
                 <Image
                     src={hero.image}
@@ -76,7 +75,6 @@ export function HomeHero({
 
             <PublicContainer className="relative">
                 <div className="flex min-h-190 flex-col pt-28 pb-16 sm:min-h-200 sm:pt-32 md:min-h-212.5 md:pt-36 lg:min-h-[min(900px,100svh)]">
-                    {/* Hero content */}
                     <div className="flex flex-1 items-center py-10 md:py-12">
                         <div className="w-full max-w-3xl space-y-5 md:space-y-6">
                             {eyebrow && (
@@ -95,7 +93,7 @@ export function HomeHero({
                             <Text
                                 as="h1"
                                 variant="hero"
-                                className="max-w-3xl text-6xl leading-[1.08] font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+                                className="max-w-3xl text-white"
                             >
                                 {titlePrefix}
                                 {accentWord && (
@@ -130,12 +128,11 @@ export function HomeHero({
                                 </blockquote>
                             )}
 
-                            {/* Primary and secondary actions */}
                             <div className="flex flex-wrap items-center gap-3 pt-2">
                                 <Button
                                     asChild
                                     size="lg"
-                                    className="h-12 rounded-full bg-red-700 px-6 text-white shadow-lg shadow-black/15 hover:bg-red-800 sm:h-14 sm:px-7"
+                                    className="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary-hover sm:h-14 sm:px-7"
                                 >
                                     <Link href={jadwalMisa()}>
                                         <CalendarDays
@@ -177,11 +174,6 @@ export function HomeHero({
                                         >
                                             Kenali Paroki
                                         </Text>
-
-                                        <ArrowRight
-                                            aria-hidden="true"
-                                            className="size-4"
-                                        />
                                     </Link>
                                 </Button>
                             </div>

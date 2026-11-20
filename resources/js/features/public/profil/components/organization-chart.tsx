@@ -117,7 +117,6 @@ export function OrganizationChart({
 
     return (
         <div className="space-y-5">
-            {/* Ketua sebagai profil unggulan */}
             {chairperson && (
                 <article className="relative overflow-hidden">
                     <div
@@ -163,7 +162,6 @@ export function OrganizationChart({
                 </article>
             )}
 
-            {/* Pengurus lainnya */}
             {otherMembers.length > 0 && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {otherMembers.map((member) => (

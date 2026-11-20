@@ -51,7 +51,7 @@ export function ContactQuickInfo({
                             href={contact.whatsapp}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-emerald-600/30 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                             <MessageCircle
                                 className="size-3.5"

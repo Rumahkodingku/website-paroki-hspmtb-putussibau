@@ -45,14 +45,13 @@ export default function Sejarah({ narrative, items }: Props) {
                     </section>
                 ) : null}
 
-                {/* Timeline */}
                 <section
                     aria-labelledby="history-timeline-title"
                     className="bg-background py-14 sm:py-16 lg:py-20"
                 >
                     <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
                         <SectionHeading
-                            eyebrow="Linimasa"
+                            eyebrow="Perjalanan Paroki"
                             title="Linimasa sejarah paroki"
                         />
 

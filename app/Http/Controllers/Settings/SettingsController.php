@@ -184,11 +184,19 @@ class SettingsController extends Controller
         $urls = [];
 
         foreach ($this->keysOfType('media') as $key) {
-            $id = $this->settings->get($key);
+            $value = $this->settings->get($key);
 
-            $urls[$key] = is_string($id) && $id !== ''
-                ? Media::query()->with('variants')->find((int) $id)?->url('medium')
-                : null;
+            if (! is_string($value) || trim($value) === '') {
+                $urls[$key] = null;
+
+                continue;
+            }
+
+            $value = trim($value);
+
+            $urls[$key] = ctype_digit($value)
+                ? Media::query()->with('variants')->find((int) $value)?->url('medium')
+                : $value;
         }
 
         return $urls;

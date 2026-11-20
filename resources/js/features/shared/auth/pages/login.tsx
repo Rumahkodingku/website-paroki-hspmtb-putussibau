@@ -61,7 +61,6 @@ export default function Login({ status, canResetPassword }: Props) {
             >
                 {({ processing, errors }) => (
                     <div className="grid gap-5">
-                        {/* Email */}
                         <div className="grid gap-2">
                             <FormLabel htmlFor="email" isRequired>
                                 Email
@@ -97,7 +96,6 @@ export default function Login({ status, canResetPassword }: Props) {
                             )}
                         </div>
 
-                        {/* Password */}
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-3">
                                 <FormLabel htmlFor="password" isRequired>
@@ -145,7 +143,6 @@ export default function Login({ status, canResetPassword }: Props) {
                             )}
                         </div>
 
-                        {/* Remember me */}
                         <div className="flex items-center gap-3 pt-1">
                             <Checkbox
                                 id="remember"
@@ -164,7 +161,6 @@ export default function Login({ status, canResetPassword }: Props) {
                             </Text>
                         </div>
 
-                        {/* Submit button */}
                         <Button
                             type="submit"
                             className="mt-2 h-12 w-full cursor-pointer bg-primary text-sm font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -194,11 +190,10 @@ export default function Login({ status, canResetPassword }: Props) {
                             )}
                         </Button>
 
-                        {/* Status message */}
                         {status && (
                             <div
                                 role="status"
-                                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
+                                className="rounded-xl border border-success/30 bg-success-soft px-4 py-3"
                             >
                                 <Text
                                     as="p"

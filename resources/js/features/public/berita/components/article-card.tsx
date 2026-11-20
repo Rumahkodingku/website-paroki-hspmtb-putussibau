@@ -18,9 +18,8 @@ export function ArticleCard({
 }) {
     return (
         <div className="group relative h-full min-w-0 overflow-hidden py-0">
-            {/* Article image */}
             {article.image ? (
-                <div className="relative shrink-0 overflow-hidden rounded-xl bg-muted">
+                <div className="relative shrink-0 overflow-hidden rounded-lg bg-muted">
                     <Image
                         src={article.image}
                         alt={article.image_alt ?? ''}
@@ -33,9 +32,8 @@ export function ArticleCard({
                         fit="cover"
                         loading="lazy"
                         imageClassName="transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
-                        className="w-full"
+                        className="w-full rounded-lg"
                     />
-
                     {article.image_is_illustration ? (
                         <Badge
                             variant="secondary"
@@ -54,8 +52,7 @@ export function ArticleCard({
                 </div>
             )}
 
-            {/* Article content */}
-            <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+            <div className="flex flex-1 flex-col gap-3 px-1 py-4">
                 <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
                     {article.category ? (
                         <Badge

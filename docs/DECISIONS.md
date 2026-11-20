@@ -6023,3 +6023,29 @@ memblokir redirect itu sebagai mixed content.
 - Regression test mengunci perilaku HTTPS dan HTTP.
 
 @see docs/deployment/docker-coolify.md §12.6
+
+## D-108 — Token success dan warning untuk status
+
+**Konteks.** UI publik memakai warna status ad hoc (`emerald`, `amber`, `slate`)
+yang tidak ada di DESIGN-v2. Palette melewati batas 2-3 warna inti + 1 aksen,
+dan status bergantung pada warna saja.
+
+**Keputusan.** Tambah empat token semantik:
+
+| Token          | Light     | Dark      |
+| -------------- | --------- | --------- |
+| `success`      | `#166534` | `#86EFAC` |
+| `success-soft` | `#DCFCE7` | `#052E16` |
+| `warning`      | `#92400E` | `#FCD34D` |
+| `warning-soft` | `#FEF3C7` | `#451A03` |
+
+Setiap pasangan teks (`success` di atas `success-soft`, `warning` di atas
+`warning-soft`) sudah dihitung memenuhi WCAG AA di kedua tema.
+
+**Konsekuensi.**
+
+- Success dan warning adalah warna status, bukan warna merek.
+- Warna hanya dipakai bersama label teks, tidak sebagai satu-satunya sinyal.
+- Komponen publik dan shared memakai token ini; komponen admin dimigrasikan
+  saat disentuh.
+- DESIGN-v2 §2 mencatat token dan aturan pemakaiannya.

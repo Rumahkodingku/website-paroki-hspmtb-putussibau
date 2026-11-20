@@ -32,7 +32,7 @@ export function ScheduleAndFee({ service }: { service: PublicServiceDetail }) {
 
             {service.fee_info ? (
                 <div className="flex items-start gap-3 p-4 sm:p-5">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warning-soft text-warning">
                         <Wallet className="size-5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
